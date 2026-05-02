@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Manrope:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#690005",
+                    "secondary": "#4edea3",
+                    "on-primary-fixed": "#001a42",
+                    "on-primary-fixed-variant": "#004395",
+                    "secondary-fixed": "#6ffbbe",
+                    "surface-bright": "#2c3951",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary-container": "#00311f",
+                    "surface-variant": "#27354c",
+                    "outline": "#8c909f",
+                    "surface-container-low": "#0d1c32",
+                    "surface-container": "#112036",
+                    "surface-container-high": "#1c2a41",
+                    "on-tertiary-fixed": "#40000d",
+                    "tertiary-fixed": "#ffdadb",
+                    "primary": "#adc6ff",
+                    "surface-container-highest": "#27354c",
+                    "on-tertiary-container": "#5b0017",
+                    "on-surface-variant": "#c2c6d6",
+                    "inverse-primary": "#005ac2",
+                    "surface-dim": "#041329",
+                    "on-secondary-fixed-variant": "#005236",
+                    "tertiary": "#ffb2b7",
+                    "inverse-on-surface": "#233148",
+                    "on-tertiary": "#67001b",
+                    "primary-container": "#4d8eff",
+                    "on-surface": "#d6e3ff",
+                    "on-primary": "#002e6a",
+                    "tertiary-container": "#ff516a",
+                    "outline-variant": "#424754",
+                    "surface-tint": "#adc6ff",
+                    "background": "#041329",
+                    "primary-fixed": "#d8e2ff",
+                    "tertiary-fixed-dim": "#ffb2b7",
+                    "surface": "#041329",
+                    "inverse-surface": "#d6e3ff",
+                    "on-primary-container": "#00285d",
+                    "surface-container-lowest": "#010e24",
+                    "on-secondary-fixed": "#002113",
+                    "error": "#ffb4ab",
+                    "secondary-container": "#00a572",
+                    "on-secondary": "#003824",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-background": "#d6e3ff",
+                    "on-tertiary-fixed-variant": "#92002a",
+                    "error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack_md": "1rem",
+                    "container_margin": "1.25rem",
+                    "section_gap": "2.5rem",
+                    "stack_sm": "0.5rem",
+                    "gutter": "1rem",
+                    "stack_lg": "1.5rem"
+            },
+            "fontFamily": {
+                    "h1": ["Inter"],
+                    "label-caps": ["Manrope"],
+                    "h2": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "data-mono": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "h2": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "data-mono": ["16px", {"lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(17, 34, 64, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #233554;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input:focus {
+            box-shadow: 0 0 0 1px #adc6ff;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #041329;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #233554;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-lg custom-scrollbar">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0A192F]/80 backdrop-blur-lg border-b border-[#233554] shadow-2xl shadow-blue-950/20 flex items-center justify-between px-5 h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-500 text-2xl">account_balance</span>
+<h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent font-inter tracking-tight">FinVault</h1>
+</div>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-blue-500/30">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a modern executive with a friendly expression, set against a blurred corporate office background. The lighting is soft and cinematic with cool blue tones and high-end photographic clarity, perfectly matching a premium financial application aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNII4Cvp4kLUa7aRTwnWjun0G0-GRHmGN4dt5eqeGioxDMNXg4QeIrW8AT_G2N0i7-3EjUwnuiJLocjqFvgDvcDMgZOwbwCXTnmgdyLNOpJCwuCfkVASnbdx_OoENhJ8UgnE7UgzHRDr0doqY2ynOuHopnit_6grFIfMLx9Jas7sb5GXSbvKCp110sKw-1b--ZTXhoBdKcn2ThtKry7uL1AQtUZy-TM4ouJyyiUEjXPAQ1ziWm46fxOmD90ORrjlY0-efcfyINELM4"/>
+</div>
+</header>
+<main class="pt-24 pb-12 px-container_margin max-w-lg mx-auto">
+<!-- Hero Header -->
+<div class="mb-section_gap">
+<h2 class="font-h1 text-h1 text-on-surface mb-stack_sm">New Investment</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Define your financial growth strategy by entering the asset details below.</p>
+</div>
+<form class="space-y-stack_lg">
+<!-- Asset Name Section -->
+<div class="glass-panel p-stack_md rounded-xl">
+<label class="font-label-caps text-label-caps text-primary block mb-2" for="asset-name">Asset Name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none focus:border-primary transition-colors placeholder:text-slate-600" id="asset-name" placeholder="e.g. Corporate Bond A" type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-3 text-slate-500">label</span>
+</div>
+</div>
+<!-- Principal & Interest Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack_md">
+<div class="glass-panel p-stack_md rounded-xl">
+<label class="font-label-caps text-label-caps text-primary block mb-2" for="principal">Principal Amount</label>
+<div class="relative">
+<span class="absolute left-4 top-3 text-on-surface-variant font-data-mono">$</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-8 pr-4 py-3 text-on-surface font-data-mono focus:outline-none focus:border-primary transition-colors" id="principal" placeholder="0.00" type="number"/>
+</div>
+</div>
+<div class="glass-panel p-stack_md rounded-xl">
+<label class="font-label-caps text-label-caps text-primary block mb-2" for="interest">Annual Interest Rate</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface font-data-mono focus:outline-none focus:border-primary transition-colors" id="interest" placeholder="5.5" type="number"/>
+<span class="absolute right-4 top-3 text-on-surface-variant font-data-mono">%</span>
+</div>
+</div>
+</div>
+<!-- Term & Duration -->
+<div class="glass-panel p-stack_md rounded-xl">
+<label class="font-label-caps text-label-caps text-primary block mb-2" for="term">Term Duration</label>
+<div class="flex gap-2">
+<input class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface font-data-mono focus:outline-none focus:border-primary transition-colors" id="term" placeholder="12" type="number"/>
+<select class="bg-surface-container-highest border border-outline-variant rounded-lg px-4 py-3 text-on-surface font-body-sm focus:outline-none focus:border-primary">
+<option>Months</option>
+<option>Days</option>
+<option>Years</option>
+</select>
+</div>
+</div>
+<!-- Payment Frequency -->
+<div class="glass-panel p-stack_md rounded-xl">
+<label class="font-label-caps text-label-caps text-primary block mb-4">Payment Frequency</label>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center gap-2 px-4 py-3 rounded-lg border border-primary bg-primary/10 text-primary transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-sm">event_repeat</span>
+<span class="font-body-sm font-semibold">Monthly</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-3 rounded-lg border border-outline-variant hover:bg-white/5 text-on-surface-variant transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-sm">update</span>
+<span class="font-body-sm">Weekly</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-3 rounded-lg border border-outline-variant hover:bg-white/5 text-on-surface-variant transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="font-body-sm">Daily</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-3 rounded-lg border border-outline-variant hover:bg-white/5 text-on-surface-variant transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-sm">verified</span>
+<span class="font-body-sm">At Maturity</span>
+</button>
+</div>
+</div>
+<!-- Visual Context Indicator -->
+<div class="relative overflow-hidden glass-panel rounded-2xl h-32 flex items-center justify-center">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="w-full h-full bg-gradient-to-t from-secondary/20 to-transparent"></div>
+<svg class="absolute bottom-0 w-full h-16" preserveaspectratio="none" viewbox="0 0 400 100">
+<path d="M0,80 Q100,20 200,60 T400,10" fill="none" stroke="#4edea3" stroke-width="2"></path>
+</svg>
+</div>
+<div class="text-center z-10">
+<span class="text-secondary font-h2 text-h2 block">+8.4%</span>
+<span class="text-on-surface-variant font-label-caps">Estimated Yield Growth</span>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-stack_lg">
+<button class="w-full h-14 bg-gradient-to-b from-primary-container to-on-primary-fixed-variant rounded-xl flex items-center justify-center gap-3 shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all hover:brightness-110" type="submit">
+<span class="material-symbols-outlined text-on-primary-container">add_circle</span>
+<span class="font-h2 text-h2 text-on-primary-container">Add Investment</span>
+</button>
+<p class="text-center mt-stack_md font-body-sm text-slate-500">
+                    By adding, you agree to our investment disclosure terms.
+                </p>
+</div>
+</form>
+</main>
+<!-- Contextual FAB Suppression: FAB is not rendered on transactional screens as per mandate -->
+</body></html>
