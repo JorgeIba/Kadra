@@ -28,25 +28,6 @@ This project is both:
 - For now, we are focusing on fixed-rate investments.
 - Taxes are intentionally out of scope for the current planning phase.
 
-## Current Investment Idea
-
-Current agreed user-input direction:
-
-- name
-- institution or counterparty
-- amount currently invested
-- rate
-- payment frequency
-- whether payouts are reinvested
-- currency
-- end date / finish date
-
-Likely derived values:
-
-- return at the end of a custom period
-- progress percentage
-- other computed metrics derived from the investment fields
-
 ## Working Principles
 
 - Explicit agreements should be written down.
@@ -60,11 +41,11 @@ The main living plan is:
 
 - [docs/project-plan.md](docs/project-plan.md)
 
-That file should track:
+That file is the single source of truth for:
 
 - explicit decisions
 - open questions
-- progress status
+- progress tracking
 - next recommended steps
 
 ## Recommended Behavior For Future Sessions

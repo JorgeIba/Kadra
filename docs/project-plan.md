@@ -14,9 +14,9 @@ This document is the shared source of truth for explicit product and architectur
 | Area | Status | Notes |
 | --- | --- | --- |
 | Product direction | In progress | Privacy-first, local-only PWA confirmed |
-| V1 domain model | In progress | Core fields and several semantics now agreed |
+| V1 domain model | Mostly complete | MVP schema contract accepted; implementation types still pending |
 | Financial rules | In progress | Fixed annual rate agreed for MVP; taxes deferred |
-| Screen contracts | Pending | To define after data model |
+| Screen contracts | Drafted | Initial contracts added from provided mockups |
 | Component tree | Pending | To define after screen contracts |
 | Persistence strategy | Pending | Likely `localStorage` first, but not locked |
 | PWA strategy | Pending | Installable iPhone standalone app remains a goal |
@@ -41,6 +41,7 @@ Build a privacy-first PWA for tracking fixed-income investments, primarily for M
 - An investment should be modeled generically enough to support things like institutions, personal loans, and other fixed-rate assets.
 - For now, we are focusing on fixed-rate investments.
 - For MVP, `rate` means annual rate.
+- For MVP, investments start when they are created in the app.
 - Taxes are out of scope for the current planning pass and should not drive the first data model.
 
 ### Core Investment Concept
@@ -53,51 +54,321 @@ An investment is an asset you own that has capital allocated to it and may produ
 
 - Name
 - Institution or counterparty
-- Amount currently invested
-- Rate
+- Original amount
+- Annual rate
 - Payment frequency
-- Whether payouts are reinvested
+- Reinvestment behavior
 - Currency
 - Start date
 - End date / finish date
-- Status
+
+### Investment Type Model
+
+- There is one generic `Investment` entity.
+- MVP supports two investment types:
+  - `fixed-term`
+  - `open-ended`
+- `fixed-term` and `open-ended` should be modeled as specialized variants of the same domain entity, not as unrelated entities.
+- `endDate` is required for `fixed-term`.
+- `endDate` is optional / absent for `open-ended`.
+- Progress percentage only applies to investments with `endDate`.
+
+### MVP Enum Decisions
+
+- `paymentFrequency` should support:
+  - `daily`
+  - `weekly`
+  - `monthly`
+  - `at-maturity`
+- `paymentFrequency = at-maturity` should only be valid for `fixed-term` investments.
+- `institutionName` is enough for MVP; no extra institution typing is required yet.
+- `reinvestmentBehavior` values for MVP:
+  - `automatic`
+  - `to-cash`
+
+### Derived Status Rules
+
+- `status` should be derived in MVP, not stored.
+- Derived status values for MVP:
+  - `active`
+  - `finished`
+- For `fixed-term`, `finished` is determined from `endDate` relative to the current date.
+- For `open-ended`, investments are treated as `active` in MVP.
+
+### Accepted MVP Investment Schema
+
+#### Stored Fields
+
+- `id`
+  Stable unique identifier, system-generated.
+- `name`
+  Required user-provided investment name.
+- `institutionName`
+  Required user-provided institution, platform, or counterparty name.
+- `type`
+  Required enum: `fixed-term | open-ended`.
+- `originalAmount`
+  Required numeric amount initially committed to the investment.
+- `annualRate`
+  Required numeric annual rate for MVP.
+- `currency`
+  Required enum, MVP value: `MXN`.
+- `paymentFrequency`
+  Required enum: `daily | weekly | monthly | at-maturity`.
+- `reinvestmentBehavior`
+  Required enum: `automatic | to-cash`.
+- `startDate`
+  Required date, system-generated at creation time in MVP.
+- `notes`
+  Optional free-form notes.
+- `createdAt`
+  Required system-generated record creation timestamp.
+- `updatedAt`
+  Required system-generated record update timestamp.
+- `endDate`
+  Required only for `fixed-term`; absent for `open-ended`.
+
+#### Derived Fields
+
+- `derivedStatus`
+  Enum: `active | finished`.
+- `daysActive`
+  Number of days since `startDate`.
+- `estimatedAccruedReturn`
+  Estimated accumulated return so far.
+- `estimatedCurrentValue`
+  Estimated current value, based on `originalAmount` plus accrued return.
+- `estimatedPeriodicReturn`
+  Estimated return aligned to `paymentFrequency`.
+- `projectedValueAtCustomDate`
+  Estimated value at an arbitrary future date.
+- `totalTermDays`
+  Fixed-term only.
+- `daysRemaining`
+  Fixed-term only.
+- `progressPercentage`
+  Fixed-term only, range `0..100`.
+- `projectedValueAtEndDate`
+  Fixed-term only.
+- `projectedTotalReturnAtEndDate`
+  Fixed-term only.
+
+#### Domain Invariants
+
+- `name` must not be empty.
+- `institutionName` must not be empty.
+- `originalAmount > 0`.
+- `annualRate >= 0`.
+- `startDate` is required.
+- `currency = MXN` in MVP.
+- `paymentFrequency = at-maturity` is only valid for `fixed-term`.
+- `fixed-term` investments require `endDate`.
+- `fixed-term` investments require `endDate > startDate`.
+- `open-ended` investments must not have `endDate`.
+- `open-ended` investments do not expose `progressPercentage`.
 
 ### Derived Data Currently Agreed
 
 - Return at the end of a custom period
-- Progress percentage
+- Progress percentage for fixed-term investments only
+- Estimated current value
 - Other computed metrics derived from user-provided investment fields
 
-## Recommended Domain Shape
+### Accepted Screen Contracts Draft
 
-This section is a proposal, not yet fully agreed.
+The screenshots imply four primary app screens:
 
-### Investment
+- `Dashboard`
+- `Assets`
+- `Invest`
+- `Trends`
 
-An `Investment` will likely need:
+Shared app shell:
 
-- `id`
+- Top app bar with app identity.
+- Bottom navigation with current route highlight.
+- Empty-state support when there are no investments.
+- PWA-safe layout for mobile-first use.
+
+#### Dashboard Screen
+
+Purpose:
+
+Give the user a fast portfolio health snapshot.
+
+Primary questions:
+
+- How much do I have invested?
+- How much am I earning now?
+- How is the portfolio evolving?
+- Which active investments deserve attention?
+
+Domain inputs:
+
+- Total original amount.
+- Estimated accrued return.
+- Estimated current value.
+- Estimated daily return.
+- Active investments preview.
+- Short projected or recent growth series.
+
+User actions:
+
+- Open full assets list.
+- Open add investment flow.
+- Open an investment detail later.
+- Navigate to another tab.
+
+States:
+
+- Empty portfolio.
+- Populated portfolio.
+- Offline-ready state later.
+
+Product note:
+
+Dashboard should stay a scan screen. It should show only a short active-assets preview, not become the full management list.
+
+#### Invest Screen
+
+Purpose:
+
+Create one investment record with enough information to compute projections immediately.
+
+Primary questions:
+
+- What kind of investment am I adding?
+- What are its return and payout rules?
+- What is the estimated outcome?
+
+User inputs:
+
 - `name`
 - `institutionName`
-- `principalAmount`
-- `currency`
-- `rate`
-- `rateType`
+- `type`
+- `originalAmount`
+- `annualRate`
 - `paymentFrequency`
-- `reinvestmentMode`
-- `startDate`
-- `endDate`
+- `reinvestmentBehavior`
+- `currency`
+- `endDate` for `fixed-term`
 - `notes`
+
+System-filled values:
+
+- `id`
+- `startDate`
 - `createdAt`
 - `updatedAt`
 
-### Things We Should Clarify Next
+Domain inputs:
 
-- Whether `amount currently invested` should be stored as current principal, original principal, or both
-- Whether reinvestment is only `true/false` or needs modes later
-- Whether payment frequency should be normalized as enum values
-- Whether we need support for open-ended investments with no fixed maturity
-- Whether status should be fully derived from dates or explicitly stored
+- Allowed enum values.
+- Domain validation rules.
+- Live preview calculator outputs.
+
+User actions:
+
+- Switch between `fixed-term` and `open-ended`.
+- Enter investment fields.
+- See live derived preview.
+- Save investment.
+- Cancel or go back.
+
+States:
+
+- Pristine.
+- Invalid with validation messages.
+- Valid with live preview.
+- Saved/submitting later.
+
+Product note:
+
+The form should adapt by investment type. `fixed-term` shows `endDate`; `open-ended` hides it and should not expose progress or maturity-only concepts.
+
+#### Assets Screen
+
+Purpose:
+
+Browse, filter, and inspect the portfolio as a collection of investment records.
+
+Primary questions:
+
+- What investments do I currently have?
+- Which ones are active or finished?
+- Which one should I review, edit, or manage?
+
+Domain inputs:
+
+- Full investment list.
+- Derived status per investment.
+- Active holdings summary.
+- Per-investment preview fields:
+  - name
+  - institution name
+  - type
+  - original amount
+  - annual rate
+  - payment frequency
+  - reinvestment behavior
+  - next relevant date when available
+  - derived status
+  - progress for fixed-term investments
+
+User actions:
+
+- Filter by `active` or `finished`.
+- Filter by `fixed-term` or `open-ended`.
+- Sort by amount, rate, end date, or newest.
+- Open investment detail later.
+- Edit investment later.
+- Finish/close an open-ended investment later.
+
+States:
+
+- Empty portfolio.
+- Active-only populated.
+- Mixed active and finished investments.
+- Filtered no-results.
+
+Product note:
+
+Assets is the operational list view. It should be more dense and scannable than Dashboard.
+
+#### Trends Screen
+
+Purpose:
+
+Show calculated performance views and forward-looking projections.
+
+Primary questions:
+
+- What might my portfolio be worth in the future?
+- What am I earning by period?
+- Which assumptions materially affect outcomes?
+
+Domain inputs:
+
+- Projection curve data.
+- Projected value at selected custom horizon.
+- Estimated daily, weekly, and monthly return aggregates.
+- Historical earnings series later, once the app has real history.
+
+User actions:
+
+- Change projection horizon.
+- Inspect projected value and return summaries.
+- Navigate to another tab.
+
+States:
+
+- No investments.
+- Projection-only data.
+- Historical and projection data later.
+
+Product note:
+
+For MVP, Trends should be projection-first. Historical earnings should wait until we have real stored history or event data.
 
 ## Proposed Build Order
 
@@ -118,18 +389,26 @@ This sequence is currently recommended and can be adjusted as we agree.
 
 - Should we use `docs/` only, or also add a separate `plans/` directory later for execution checklists?
 - Do we want a true marketing landing page, or just an internal app shell and dashboard empty state?
-- Is `rate` always annual in V1?
 - Do payouts happen into cash balance, or are they just conceptual unless reinvestment is enabled?
 - Do we need separate concepts for `principal`, `current balance`, and `accumulated unpaid returns`?
 - Should personal loans and institutional products share the exact same schema in V1?
-- Should V1 allow investments without a known end date?
+- Do we want `notes` in MVP or can it wait?
+- Should `estimatedPeriodicReturn` stay in the first calculator pass or wait until screen contracts make it necessary?
+- Should the MVP include an investment detail screen, or should details wait until after dashboard/form/list are working?
+- Should `Trends` be included in MVP, or should we start with the tab placeholder and build projections after core CRUD?
+
+## Future Nice-To-Haves
+
+- Manual adjustments such as top-ups and partial withdrawals
+- More detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
+- Support for investment transitions between `open-ended` and `fixed-term` over time
+- Richer lifecycle or configuration history for investments
 
 ## Next Recommended Step
 
-Define the V1 investment data model more precisely:
+Refine and accept the screen contracts:
 
-- required fields
-- optional fields
-- enum values
-- raw user inputs vs derived values
-- date and rate assumptions
+- confirm whether `Trends` is MVP or post-MVP
+- confirm whether an investment detail screen exists in MVP
+- define the component tree from the accepted screens
+- then scaffold the React/Vite project
