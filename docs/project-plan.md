@@ -2,6 +2,10 @@
 
 This document is the shared source of truth for explicit product and architecture decisions.
 
+Related docs:
+
+- [Engineering Guidelines](./engineering-guidelines.md)
+
 ## How We Use This File
 
 - Only agreed decisions go into the `Agreed Decisions` sections.
@@ -16,11 +20,11 @@ This document is the shared source of truth for explicit product and architectur
 | Product direction | In progress | Privacy-first, local-only PWA confirmed |
 | V1 domain model | Mostly complete | MVP schema contract accepted; implementation types still pending |
 | Financial rules | In progress | Fixed annual rate agreed for MVP; taxes deferred |
-| Screen contracts | Drafted | Initial contracts added from provided mockups |
-| Component tree | Pending | To define after screen contracts |
+| Screen contracts | Mostly complete | MVP screens confirmed; detail screen added; Trends removed |
+| Component tree | Mostly complete | MVP component responsibilities accepted |
 | Persistence strategy | Pending | Likely `localStorage` first, but not locked |
 | PWA strategy | Pending | Installable iPhone standalone app remains a goal |
-| Landing page / app shell | Pending | Need to decide whether we want a marketing page or only app shell |
+| App shell | Mostly complete | Top bar and bottom nav confirmed |
 
 ## Final Goal
 
@@ -176,19 +180,20 @@ An investment is an asset you own that has capital allocated to it and may produ
 
 ### Accepted Screen Contracts Draft
 
-The screenshots imply four primary app screens:
+The MVP app has four primary screens:
 
 - `Dashboard`
 - `Assets`
 - `Invest`
-- `Trends`
+- `InvestmentDetail`
 
 Shared app shell:
 
-- Top app bar with app identity.
+- Top app bar with app logo and name.
 - Bottom navigation with current route highlight.
 - Empty-state support when there are no investments.
 - PWA-safe layout for mobile-first use.
+- A future profile entry may live in the top bar.
 
 #### Dashboard Screen
 
@@ -205,18 +210,15 @@ Primary questions:
 
 Domain inputs:
 
-- Total original amount.
-- Estimated accrued return.
 - Estimated current value.
 - Estimated daily return.
-- Active investments preview.
-- Short projected or recent growth series.
+- Investment summaries for the list.
 
 User actions:
 
 - Open full assets list.
 - Open add investment flow.
-- Open an investment detail later.
+- Open investment detail.
 - Navigate to another tab.
 
 States:
@@ -227,7 +229,7 @@ States:
 
 Product note:
 
-Dashboard should stay a scan screen. It should show only a short active-assets preview, not become the full management list.
+Dashboard should show a summary card with total value and estimated daily cash flow, plus an investment list using investment summary cards.
 
 #### Invest Screen
 
@@ -335,40 +337,117 @@ Product note:
 
 Assets is the operational list view. It should be more dense and scannable than Dashboard.
 
+MVP decision:
+
+Assets starts as a clean full list without filters or sorting. Filters can be added later.
+
+#### Investment Detail Screen
+
+Purpose:
+
+Inspect one investment in detail.
+
+Primary questions:
+
+- What are the exact terms of this investment?
+- What has it accrued so far?
+- What is its expected outcome?
+- Is it active or finished?
+
+Domain inputs:
+
+- One investment by `id`.
+- Derived status.
+- Estimated current value.
+- Estimated accrued return.
+- Estimated periodic return.
+- Fixed-term values when applicable:
+  - total term days
+  - days remaining
+  - progress percentage
+  - projected value at end date
+  - projected total return at end date
+
+User actions:
+
+- Go back to the previous screen.
+- Edit investment later.
+- Delete investment later.
+- Finish/close an open-ended investment later.
+
+States:
+
+- Investment found.
+- Investment missing.
+
+Product note:
+
+MVP includes a dedicated detail screen, but destructive actions can wait until the core read/detail flow works.
+
+MVP decision:
+
+Investment detail is reachable by tapping an investment card, not through bottom navigation.
+
 #### Trends Screen
 
 Purpose:
 
-Show calculated performance views and forward-looking projections.
+Post-MVP analytics and projections.
 
-Primary questions:
+MVP decision:
 
-- What might my portfolio be worth in the future?
-- What am I earning by period?
-- Which assumptions materially affect outcomes?
+Trends is removed from MVP navigation for now. We can reintroduce it later once dashboard, CRUD, and detail flows are working.
 
-Domain inputs:
+### MVP Component Responsibilities
 
-- Projection curve data.
-- Projected value at selected custom horizon.
-- Estimated daily, weekly, and monthly return aggregates.
-- Historical earnings series later, once the app has real history.
+#### App Shell
 
-User actions:
+- `AppShell`
+  Owns the mobile-first layout and renders top bar, active screen, and bottom nav.
+- `TopBar`
+  Shows app logo and app name. May later include profile/settings.
+- `BottomNav`
+  Moves between `Dashboard`, `Assets`, and `Invest`.
 
-- Change projection horizon.
-- Inspect projected value and return summaries.
-- Navigate to another tab.
+#### Dashboard
 
-States:
+- `DashboardScreen`
+  Coordinates dashboard data and actions.
+- `PortfolioSummaryCard`
+  Shows total value and estimated daily cash flow.
+- `InvestmentList`
+  Renders a short preview of investment summary cards on Dashboard.
+- `InvestmentSummaryCard`
+  Shows one investment summary and opens detail.
 
-- No investments.
-- Projection-only data.
-- Historical and projection data later.
+#### Assets
 
-Product note:
+- `AssetsScreen`
+  Coordinates the full investment list and navigation to detail.
+- `InvestmentList`
+  Reused from dashboard, with full-list behavior on Assets.
+- `InvestmentSummaryCard`
+  Reused card for each investment. MVP fields are `name`, `institutionName`, `originalAmount`, `annualRate`, `type`, `estimatedCurrentValue`, and fixed-term `progressPercentage`.
 
-For MVP, Trends should be projection-first. Historical earnings should wait until we have real stored history or event data.
+#### Invest
+
+- `InvestScreen`
+  Hosts the new investment form.
+- `InvestmentForm`
+  Owns create-investment form fields and validation.
+- `ProjectionPreview`
+  Shows live calculated preview from the current form draft.
+
+#### Investment Detail
+
+- `InvestmentDetailScreen`
+  Shows full details for one investment.
+- `InvestmentMetrics`
+  Shows derived values for that investment.
+- `InvestmentTerms`
+  Shows raw stored fields in a readable way.
+- `FixedTermProgress`
+  Shows progress only for fixed-term investments.
 
 ## Proposed Build Order
 
@@ -383,7 +462,7 @@ This sequence is currently recommended and can be adjusted as we agree.
 7. Implement persistence.
 8. Implement dashboard and form.
 9. Add management flows.
-10. Revisit landing page if still needed.
+10. Revisit Trends and landing page if still needed.
 
 ## Open Questions
 
@@ -394,8 +473,6 @@ This sequence is currently recommended and can be adjusted as we agree.
 - Should personal loans and institutional products share the exact same schema in V1?
 - Do we want `notes` in MVP or can it wait?
 - Should `estimatedPeriodicReturn` stay in the first calculator pass or wait until screen contracts make it necessary?
-- Should the MVP include an investment detail screen, or should details wait until after dashboard/form/list are working?
-- Should `Trends` be included in MVP, or should we start with the tab placeholder and build projections after core CRUD?
 
 ## Future Nice-To-Haves
 
@@ -406,9 +483,8 @@ This sequence is currently recommended and can be adjusted as we agree.
 
 ## Next Recommended Step
 
-Refine and accept the screen contracts:
+Start implementation:
 
-- confirm whether `Trends` is MVP or post-MVP
-- confirm whether an investment detail screen exists in MVP
-- define the component tree from the accepted screens
-- then scaffold the React/Vite project
+- replace scaffold UI with the Trafin app shell
+- implement initial domain types and sample data
+- implement the first static screens before persistence
