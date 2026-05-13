@@ -10,7 +10,11 @@ export function getEstimatedAccruedReturn(
 ): number {
   const daysActive = getDaysActive(investment, asOfDate)
 
-  return getSimpleInterest(investment.originalAmount, investment.annualRate, daysActive)
+  return getSimpleInterest(
+    investment.originalAmount,
+    investment.annualRate,
+    daysActive,
+  )
 }
 
 export function getEstimatedPeriodicReturn(investment: Investment): number {

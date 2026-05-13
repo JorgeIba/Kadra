@@ -48,12 +48,21 @@ const openEndedInvestment = {
 
 describe("investment calculations", () => {
   it("derives fixed-term status from the end date", () => {
-    expect(getDerivedStatus(fixedInvestment, new Date("2026-01-30T12:00:00.000Z"))).toBe(DERIVED_STATUSES.active)
-    expect(getDerivedStatus(fixedInvestment, new Date("2026-01-31T12:00:00.000Z"))).toBe(DERIVED_STATUSES.finished)
+    expect(
+      getDerivedStatus(fixedInvestment, new Date("2026-01-30T12:00:00.000Z")),
+    ).toBe(DERIVED_STATUSES.active)
+    expect(
+      getDerivedStatus(fixedInvestment, new Date("2026-01-31T12:00:00.000Z")),
+    ).toBe(DERIVED_STATUSES.finished)
   })
 
   it("keeps open-ended investments active for MVP", () => {
-    expect(getDerivedStatus(openEndedInvestment, new Date("2027-01-01T12:00:00.000Z"))).toBe(DERIVED_STATUSES.active)
+    expect(
+      getDerivedStatus(
+        openEndedInvestment,
+        new Date("2027-01-01T12:00:00.000Z"),
+      ),
+    ).toBe(DERIVED_STATUSES.active)
   })
 
   it("calculates fixed-term progress and projected end value", () => {
@@ -64,12 +73,23 @@ describe("investment calculations", () => {
 
     expect(values.daysActive).toBe(15)
     expect(values.estimatedCurrentValue).toBe(36_650)
-    expect("progressPercentage" in values ? values.progressPercentage : undefined).toBe(50)
-    expect("projectedValueAtEndDate" in values ? values.projectedValueAtEndDate : undefined).toBe(36_800)
+    expect(
+      "progressPercentage" in values ? values.progressPercentage : undefined,
+    ).toBe(50)
+    expect(
+      "projectedValueAtEndDate" in values
+        ? values.projectedValueAtEndDate
+        : undefined,
+    ).toBe(36_800)
   })
 
   it("returns a compact investment summary for lists", () => {
-    expect(getInvestmentSummary(fixedInvestment, new Date("2026-01-16T12:00:00.000Z"))).toMatchObject({
+    expect(
+      getInvestmentSummary(
+        fixedInvestment,
+        new Date("2026-01-16T12:00:00.000Z"),
+      ),
+    ).toMatchObject({
       id: "investment-1",
       name: "Fixed test",
       estimatedCurrentValue: 36_650,
@@ -81,7 +101,12 @@ describe("investment calculations", () => {
   it("calculates portfolio-level estimates", () => {
     const investments = [fixedInvestment, openEndedInvestment]
 
-    expect(getPortfolioEstimatedCurrentValue(investments, new Date("2026-01-16T12:00:00.000Z"))).toBe(46_680)
+    expect(
+      getPortfolioEstimatedCurrentValue(
+        investments,
+        new Date("2026-01-16T12:00:00.000Z"),
+      ),
+    ).toBe(46_680)
     expect(getPortfolioEstimatedDailyReturn(investments)).toBe(12)
   })
 })

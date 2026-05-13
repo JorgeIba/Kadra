@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest"
-import { CURRENCIES, INVESTMENT_TYPES, PAYMENT_FREQUENCIES, REINVESTMENT_BEHAVIORS } from "@/domain/investments/constants"
-import { getDaysActive, getDaysBetween, isOnOrAfterDate } from "@/domain/investments/dates"
+import {
+  CURRENCIES,
+  INVESTMENT_TYPES,
+  PAYMENT_FREQUENCIES,
+  REINVESTMENT_BEHAVIORS,
+} from "@/domain/investments/constants"
+import {
+  getDaysActive,
+  getDaysBetween,
+  isOnOrAfterDate,
+} from "@/domain/investments/dates"
 import type { Investment } from "@/domain/investments/types"
 
 const fixedInvestment = {
@@ -29,11 +38,17 @@ describe("investment date helpers", () => {
   })
 
   it("calculates active days from an explicit as-of date", () => {
-    expect(getDaysActive(fixedInvestment, new Date("2026-01-16T12:00:00.000Z"))).toBe(15)
+    expect(
+      getDaysActive(fixedInvestment, new Date("2026-01-16T12:00:00.000Z")),
+    ).toBe(15)
   })
 
   it("checks whether an exact date is on or after a calendar date", () => {
-    expect(isOnOrAfterDate(new Date("2026-01-31T12:00:00.000Z"), "2026-01-31")).toBe(true)
-    expect(isOnOrAfterDate(new Date("2026-01-30T12:00:00.000Z"), "2026-01-31")).toBe(false)
+    expect(
+      isOnOrAfterDate(new Date("2026-01-31T12:00:00.000Z"), "2026-01-31"),
+    ).toBe(true)
+    expect(
+      isOnOrAfterDate(new Date("2026-01-30T12:00:00.000Z"), "2026-01-31"),
+    ).toBe(false)
   })
 })

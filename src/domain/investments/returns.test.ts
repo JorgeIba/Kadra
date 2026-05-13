@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { CURRENCIES, INVESTMENT_TYPES, PAYMENT_FREQUENCIES, REINVESTMENT_BEHAVIORS } from "@/domain/investments/constants"
+import {
+  CURRENCIES,
+  INVESTMENT_TYPES,
+  PAYMENT_FREQUENCIES,
+  REINVESTMENT_BEHAVIORS,
+} from "@/domain/investments/constants"
 import {
   getEstimatedAccruedReturn,
   getEstimatedPeriodicReturn,
@@ -30,7 +35,12 @@ describe("investment return helpers", () => {
   })
 
   it("calculates accrued return from active days", () => {
-    expect(getEstimatedAccruedReturn(fixedInvestment, new Date("2026-01-16T12:00:00.000Z"))).toBe(150)
+    expect(
+      getEstimatedAccruedReturn(
+        fixedInvestment,
+        new Date("2026-01-16T12:00:00.000Z"),
+      ),
+    ).toBe(150)
   })
 
   it("calculates periodic return from payment frequency", () => {

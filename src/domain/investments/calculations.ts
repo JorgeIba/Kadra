@@ -5,8 +5,15 @@ import type {
   InvestmentDerivedValues,
   InvestmentSummary,
 } from "@/domain/investments/types"
-import { DERIVED_STATUSES, INVESTMENT_TYPES } from "@/domain/investments/constants"
-import { getDaysActive, getDaysBetween, isOnOrAfterDate } from "@/domain/investments/dates"
+import {
+  DERIVED_STATUSES,
+  INVESTMENT_TYPES,
+} from "@/domain/investments/constants"
+import {
+  getDaysActive,
+  getDaysBetween,
+  isOnOrAfterDate,
+} from "@/domain/investments/dates"
 import {
   getEstimatedAccruedReturn,
   getEstimatedPeriodicReturn,
@@ -57,7 +64,9 @@ export function getInvestmentDerivedValues(
     totalTermDays,
     daysRemaining,
     progressPercentage:
-      totalTermDays === 0 ? 100 : Math.min(100, (elapsedTermDays / totalTermDays) * 100),
+      totalTermDays === 0
+        ? 100
+        : Math.min(100, (elapsedTermDays / totalTermDays) * 100),
     projectedTotalReturnAtEndDate,
     projectedValueAtEndDate:
       investment.originalAmount + projectedTotalReturnAtEndDate,
@@ -92,7 +101,10 @@ export function getPortfolioEstimatedCurrentValue(
   asOfDate = new Date(),
 ): number {
   return investments.reduce((total, investment) => {
-    return total + getInvestmentDerivedValues(investment, asOfDate).estimatedCurrentValue
+    return (
+      total +
+      getInvestmentDerivedValues(investment, asOfDate).estimatedCurrentValue
+    )
   }, 0)
 }
 
@@ -100,6 +112,9 @@ export function getPortfolioEstimatedDailyReturn(
   investments: Investment[],
 ): number {
   return investments.reduce((total, investment) => {
-    return total + getSimpleInterest(investment.originalAmount, investment.annualRate, 1)
+    return (
+      total +
+      getSimpleInterest(investment.originalAmount, investment.annualRate, 1)
+    )
   }, 0)
 }
