@@ -17,3 +17,18 @@ Current recommendation:
 
 - Use `date-fns` for MVP date parsing, formatting, and calendar-day differences.
 - Keep domain-facing helpers such as `getDaysBetween` and `getDaysActive` so the rest of the app does not depend directly on the date library.
+
+## Testing
+
+- Test behavior and domain contracts, not implementation details.
+- Prioritize domain tests for money, date, and status logic because mistakes there affect the whole app.
+- Keep date-sensitive tests deterministic by passing explicit dates instead of relying on the current day.
+- Use React Testing Library style for UI tests: query by visible text, labels, and user actions.
+- Avoid snapshot-heavy tests unless they protect a specific, stable output.
+- Keep mocks minimal; prefer pure functions and sample data where possible.
+
+Current recommendation:
+
+- Use `Vitest` for unit tests.
+- Use `@testing-library/react`, `@testing-library/user-event`, and `jsdom` once component tests are needed.
+- Add `Playwright` later for full browser flows after the core app paths are stable.
