@@ -73,25 +73,30 @@ describe("investment calculations", () => {
 
     expect(values.daysActive).toBe(15)
     expect(values.estimatedCurrentValue).toBe(36_650)
-    expect(
-      "progressPercentage" in values ? values.progressPercentage : undefined,
-    ).toBe(50)
-    expect(
-      "projectedValueAtEndDate" in values
-        ? values.projectedValueAtEndDate
-        : undefined,
-    ).toBe(36_800)
+    expect(values.type).toBe(INVESTMENT_TYPES.fixedTerm)
+
+    if (values.type !== INVESTMENT_TYPES.fixedTerm) {
+      throw new Error("Expected fixed-term derived values")
+    }
+
+    expect(values.progressPercentage).toBe(50)
+    expect(values.projectedValueAtEndDate).toBe(36_800)
   })
 
   it("returns a compact investment summary for lists", () => {
-    expect(
-      getInvestmentSummary(
-        fixedInvestment,
-        new Date("2026-01-16T12:00:00.000Z"),
-      ),
-    ).toMatchObject({
+    const summary = getInvestmentSummary(
+      fixedInvestment,
+      new Date("2026-01-16T12:00:00.000Z"),
+    )
+
+    if (summary.type !== INVESTMENT_TYPES.fixedTerm) {
+      throw new Error("Expected fixed-term investment summary")
+    }
+
+    expect(summary).toMatchObject({
       id: "investment-1",
       name: "Fixed test",
+      type: INVESTMENT_TYPES.fixedTerm,
       estimatedCurrentValue: 36_650,
       progressPercentage: 50,
       derivedStatus: DERIVED_STATUSES.active,

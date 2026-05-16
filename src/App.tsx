@@ -11,7 +11,7 @@ function App() {
   return (
     <AppShell
       activeSection={activeSection}
-      investmentCount={sampleInvestments.length}
+      investments={sampleInvestments}
       onSectionChange={setActiveSection}
     />
   )

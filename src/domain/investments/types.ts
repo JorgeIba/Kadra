@@ -72,7 +72,8 @@ export interface CommonInvestmentDerivedValues {
 /**
  * Extra derived values that only make sense for fixed-term investments.
  */
-export interface FixedTermDerivedValues extends CommonInvestmentDerivedValues {
+export interface FixedTermInvestmentDerivedValues extends CommonInvestmentDerivedValues {
+  type: typeof INVESTMENT_TYPES.fixedTerm
   totalTermDays: number
   daysRemaining: number
   progressPercentage: number
@@ -80,22 +81,37 @@ export interface FixedTermDerivedValues extends CommonInvestmentDerivedValues {
   projectedTotalReturnAtEndDate: number
 }
 
+export interface OpenEndedInvestmentDerivedValues extends CommonInvestmentDerivedValues {
+  type: typeof INVESTMENT_TYPES.openEnded
+}
+
 export type InvestmentDerivedValues =
-  | CommonInvestmentDerivedValues
-  | FixedTermDerivedValues
+  | FixedTermInvestmentDerivedValues
+  | OpenEndedInvestmentDerivedValues
 
 /**
  * Compact view-model shape for cards and lists.
  */
-export interface InvestmentSummary {
+export interface BaseInvestmentSummary {
   id: string
   name: string
   institutionName: string
-  type: InvestmentType
   originalAmount: number
   annualRate: number
   currency: Currency
   estimatedCurrentValue: number
-  progressPercentage?: number
   derivedStatus: DerivedStatus
 }
+
+export interface FixedTermInvestmentSummary extends BaseInvestmentSummary {
+  type: typeof INVESTMENT_TYPES.fixedTerm
+  progressPercentage: number
+}
+
+export interface OpenEndedInvestmentSummary extends BaseInvestmentSummary {
+  type: typeof INVESTMENT_TYPES.openEnded
+}
+
+export type InvestmentSummary =
+  | FixedTermInvestmentSummary
+  | OpenEndedInvestmentSummary

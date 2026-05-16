@@ -1,44 +1,24 @@
+import { DashboardScreen } from "@/app/screens/dashboard/DashboardScreen"
 import { APP_SECTIONS, type AppSection } from "@/app/navigation"
+import type { Investment } from "@/domain/investments"
 
 interface ScreenPlaceholderProps {
   activeSection: AppSection
-  investmentCount: number
+  investments: Investment[]
 }
 
 export function ScreenPlaceholder({
   activeSection,
-  investmentCount,
+  investments,
 }: ScreenPlaceholderProps) {
   switch (activeSection) {
     case APP_SECTIONS.dashboard:
-      return <DashboardPlaceholder investmentCount={investmentCount} />
+      return <DashboardScreen investments={investments} />
     case APP_SECTIONS.assets:
       return <AssetsPlaceholder />
     case APP_SECTIONS.invest:
       return <InvestPlaceholder />
   }
-}
-
-function DashboardPlaceholder({
-  investmentCount,
-}: {
-  investmentCount: number
-}) {
-  return (
-    <section className="space-y-3">
-      <p className="text-sm font-medium text-muted-foreground">Dashboard</p>
-      <h1 className="text-3xl font-semibold tracking-normal">
-        Portfolio snapshot
-      </h1>
-      <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-        Shell ready. Next we will add the total value card, daily cash flow, and
-        a short investment preview list.
-      </p>
-      <p className="rounded-lg border bg-card px-4 py-3 text-sm text-card-foreground">
-        Sample investments loaded: {investmentCount}
-      </p>
-    </section>
-  )
 }
 
 function AssetsPlaceholder() {

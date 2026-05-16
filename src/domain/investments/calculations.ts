@@ -1,6 +1,6 @@
 import type {
   DerivedStatus,
-  FixedTermDerivedValues,
+  FixedTermInvestmentDerivedValues,
   Investment,
   InvestmentDerivedValues,
   InvestmentSummary,
@@ -47,9 +47,13 @@ export function getInvestmentDerivedValues(
   }
 
   if (investment.type === INVESTMENT_TYPES.openEnded) {
-    return commonValues
+    return {
+      ...commonValues,
+      type: investment.type,
+    }
   }
 
+  // Fixed-Term specific calculations
   const totalTermDays = getDaysBetween(investment.startDate, investment.endDate)
   const elapsedTermDays = Math.min(commonValues.daysActive, totalTermDays)
   const daysRemaining = Math.max(0, totalTermDays - elapsedTermDays)
@@ -61,6 +65,7 @@ export function getInvestmentDerivedValues(
 
   return {
     ...commonValues,
+    type: investment.type,
     totalTermDays,
     daysRemaining,
     progressPercentage:
@@ -70,7 +75,7 @@ export function getInvestmentDerivedValues(
     projectedTotalReturnAtEndDate,
     projectedValueAtEndDate:
       investment.originalAmount + projectedTotalReturnAtEndDate,
-  } satisfies FixedTermDerivedValues
+  } satisfies FixedTermInvestmentDerivedValues
 }
 
 export function getInvestmentSummary(
@@ -79,20 +84,28 @@ export function getInvestmentSummary(
 ): InvestmentSummary {
   const derivedValues = getInvestmentDerivedValues(investment, asOfDate)
 
-  return {
+  const commonSummaryFields = {
     id: investment.id,
     name: investment.name,
     institutionName: investment.institutionName,
-    type: investment.type,
     originalAmount: investment.originalAmount,
     annualRate: investment.annualRate,
     currency: investment.currency,
     estimatedCurrentValue: derivedValues.estimatedCurrentValue,
-    progressPercentage:
-      "progressPercentage" in derivedValues
-        ? derivedValues.progressPercentage
-        : undefined,
     derivedStatus: derivedValues.derivedStatus,
+  }
+
+  if (derivedValues.type === INVESTMENT_TYPES.fixedTerm) {
+    return {
+      ...commonSummaryFields,
+      type: INVESTMENT_TYPES.fixedTerm,
+      progressPercentage: derivedValues.progressPercentage,
+    }
+  }
+
+  return {
+    ...commonSummaryFields,
+    type: INVESTMENT_TYPES.openEnded,
   }
 }
 

@@ -32,3 +32,15 @@ Current recommendation:
 - Use `Vitest` for unit tests.
 - Use `@testing-library/react`, `@testing-library/user-event`, and `jsdom` once component tests are needed.
 - Add `Playwright` later for full browser flows after the core app paths are stable.
+
+## Formatting And Checks
+
+- Use Prettier for code formatting.
+- Use ESLint for code-quality and React rules.
+- Keep formatting, linting, tests, and builds as explicit commands instead of background watchers.
+
+Current recommendation:
+
+- Run `pnpm format` to rewrite files with Prettier.
+- Run `pnpm format:check` to verify formatting without rewriting.
+- Run `pnpm check` before finishing a meaningful slice.
