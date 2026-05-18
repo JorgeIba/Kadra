@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
+    "stop": "sh scripts/stop-dev-server.sh",
     "test": "vitest run",
     "check": "pnpm format:check && pnpm lint && pnpm test && pnpm build"
   },
