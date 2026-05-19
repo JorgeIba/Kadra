@@ -5,13 +5,27 @@ import { formatMxn, formatPercentage } from "@/lib/formatters"
 
 interface FixedTermInvestmentCardProps {
   investment: FixedTermInvestmentSummary
+  onSelect?: (investmentId: string) => void
 }
 
 export function FixedTermInvestmentCard({
   investment,
+  onSelect,
 }: FixedTermInvestmentCardProps) {
   return (
-    <Card size="sm" className="rounded-lg">
+    <Card
+      size="sm"
+      className="rounded-lg transition-colors hover:bg-muted/40"
+      role={onSelect === undefined ? undefined : "button"}
+      tabIndex={onSelect === undefined ? undefined : 0}
+      onClick={() => onSelect?.(investment.id)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          onSelect?.(investment.id)
+        }
+      }}
+    >
       <CardContent className="flex items-center gap-3">
         <div className="grid size-10 place-items-center rounded-lg bg-secondary text-secondary-foreground">
           <Landmark className="size-5" aria-hidden="true" />

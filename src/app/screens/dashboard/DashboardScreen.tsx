@@ -9,11 +9,15 @@ import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCa
 
 interface DashboardScreenProps {
   investments: Investment[]
+  onInvestmentSelect: (investmentId: string) => void
 }
 
 const DASHBOARD_INVESTMENT_PREVIEW_LIMIT = 3
 
-export function DashboardScreen({ investments }: DashboardScreenProps) {
+export function DashboardScreen({
+  investments,
+  onInvestmentSelect,
+}: DashboardScreenProps) {
   const asOfDate = new Date()
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
   const dailyCashFlow = getPortfolioEstimatedDailyReturn(investments)
@@ -38,6 +42,7 @@ export function DashboardScreen({ investments }: DashboardScreenProps) {
       <InvestmentPreviewList
         investments={investmentSummaries}
         totalInvestmentCount={investments.length}
+        onInvestmentSelect={onInvestmentSelect}
       />
     </section>
   )

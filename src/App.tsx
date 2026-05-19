@@ -1,20 +1,7 @@
-import { useState } from "react"
-import { AppShell } from "@/app/AppShell"
-import { APP_SECTIONS, type AppSection } from "@/app/navigation"
-import { sampleInvestments } from "@/domain/investments"
+import { AppRouter } from "@/app/routing/router"
 
 function App() {
-  const [activeSection, setActiveSection] = useState<AppSection>(
-    APP_SECTIONS.dashboard,
-  )
-
-  return (
-    <AppShell
-      activeSection={activeSection}
-      investments={sampleInvestments}
-      onSectionChange={setActiveSection}
-    />
-  )
+  return <AppRouter />
 }
 
 export default App

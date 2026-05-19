@@ -4,12 +4,15 @@ import { OpenEndedInvestmentCard } from "@/app/components/investments/OpenEndedI
 
 interface InvestmentCardProps {
   investment: InvestmentSummary
+  onSelect?: (investmentId: string) => void
 }
 
-export function InvestmentCard({ investment }: InvestmentCardProps) {
+export function InvestmentCard({ investment, onSelect }: InvestmentCardProps) {
   if (investment.type === INVESTMENT_TYPES.fixedTerm) {
-    return <FixedTermInvestmentCard investment={investment} />
+    return (
+      <FixedTermInvestmentCard investment={investment} onSelect={onSelect} />
+    )
   }
 
-  return <OpenEndedInvestmentCard investment={investment} />
+  return <OpenEndedInvestmentCard investment={investment} onSelect={onSelect} />
 }

@@ -44,3 +44,8 @@ Current recommendation:
 - Run `pnpm format` to rewrite files with Prettier.
 - Run `pnpm format:check` to verify formatting without rewriting.
 - Run `pnpm check` before finishing a meaningful slice.
+
+## Accessibility
+
+- Add a short inline comment when code exists mainly for accessibility behavior.
+- Keep the comment focused on why the behavior exists, such as keyboard focus or screen-reader semantics.

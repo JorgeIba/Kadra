@@ -4,11 +4,13 @@ import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
 interface InvestmentPreviewListProps {
   investments: InvestmentSummary[]
   totalInvestmentCount: number
+  onInvestmentSelect: (investmentId: string) => void
 }
 
 export function InvestmentPreviewList({
   investments,
   totalInvestmentCount,
+  onInvestmentSelect,
 }: InvestmentPreviewListProps) {
   return (
     <div className="space-y-3">
@@ -21,7 +23,11 @@ export function InvestmentPreviewList({
 
       <div className="space-y-3">
         {investments.map((investment) => (
-          <InvestmentCard key={investment.id} investment={investment} />
+          <InvestmentCard
+            key={investment.id}
+            investment={investment}
+            onSelect={onInvestmentSelect}
+          />
         ))}
       </div>
     </div>

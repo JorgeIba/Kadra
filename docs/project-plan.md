@@ -481,6 +481,13 @@ This sequence is currently recommended and can be adjusted as we agree.
 - Support for investment transitions between `open-ended` and `fixed-term` over time
 - Richer lifecycle or configuration history for investments
 
+## Architecture Considerations
+
+- App routing files live under `src/app/routing/` to keep router, route-derived active-section logic, and bottom-nav route config together.
+- `routing/navigation.ts` may need a further split if route helpers and bottom-nav configuration keep growing.
+- Dashboard and Assets both render investment summary cards. Consider a shared investment list component if their list behavior stays similar.
+- Dashboard should remain a preview experience, while Assets should remain the full operational list.
+
 ## Next Recommended Step
 
 Start implementation:

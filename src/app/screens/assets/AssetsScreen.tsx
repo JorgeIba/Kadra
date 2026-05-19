@@ -8,9 +8,13 @@ import { formatMxn } from "@/lib/formatters"
 
 interface AssetsScreenProps {
   investments: Investment[]
+  onInvestmentSelect: (investmentId: string) => void
 }
 
-export function AssetsScreen({ investments }: AssetsScreenProps) {
+export function AssetsScreen({
+  investments,
+  onInvestmentSelect,
+}: AssetsScreenProps) {
   const asOfDate = new Date()
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
   const investmentSummaries = investments.map((investment) =>
@@ -41,7 +45,11 @@ export function AssetsScreen({ investments }: AssetsScreenProps) {
 
         <div className="space-y-3">
           {investmentSummaries.map((investment) => (
-            <InvestmentCard key={investment.id} investment={investment} />
+            <InvestmentCard
+              key={investment.id}
+              investment={investment}
+              onSelect={onInvestmentSelect}
+            />
           ))}
         </div>
       </div>
