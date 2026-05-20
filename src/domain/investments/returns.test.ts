@@ -7,7 +7,9 @@ import {
 } from "@/domain/investments/constants"
 import {
   getEstimatedAccruedReturn,
+  getEstimatedMonthlyReturn,
   getEstimatedPeriodicReturn,
+  getEstimatedYearlyReturn,
   getPaymentFrequencyDays,
   getSimpleInterest,
 } from "@/domain/investments/returns"
@@ -45,6 +47,14 @@ describe("investment return helpers", () => {
 
   it("calculates periodic return from payment frequency", () => {
     expect(getEstimatedPeriodicReturn(fixedInvestment)).toBe(300)
+  })
+
+  it("calculates estimated monthly return", () => {
+    expect(getEstimatedMonthlyReturn(fixedInvestment)).toBe(300)
+  })
+
+  it("calculates estimated yearly return", () => {
+    expect(getEstimatedYearlyReturn(fixedInvestment)).toBe(3_650)
   })
 
   it("maps at-maturity payments to zero periodic days for MVP", () => {

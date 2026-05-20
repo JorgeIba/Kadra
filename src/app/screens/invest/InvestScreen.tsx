@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { mapInvestmentFormToInvestment } from "@/app/screens/invest/adapters/investment-form-adapter"
+import { createInvestmentFromFormValues } from "@/app/screens/invest/adapters/investment-form-adapter"
 import { InvestmentForm } from "@/app/screens/invest/InvestmentForm"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
 import { Card, CardContent } from "@/components/ui/card"
-import { toDateString, type Investment } from "@/domain/investments"
+import type { Investment } from "@/domain/investments"
 
 export function InvestScreen() {
   const [createdInvestment, setCreatedInvestment] = useState<Investment | null>(
@@ -11,11 +11,9 @@ export function InvestScreen() {
   )
 
   function handleInvestmentSubmit(values: InvestmentFormValues) {
-    const now = new Date()
-    const investment = mapInvestmentFormToInvestment(values, {
+    const investment = createInvestmentFromFormValues(values, {
+      asOfDate: new Date(),
       id: crypto.randomUUID(),
-      now: now.toISOString(),
-      startDate: toDateString(now),
     })
 
     setCreatedInvestment(investment)
@@ -30,7 +28,7 @@ export function InvestScreen() {
         </h1>
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">
           Capture the investment terms first. For this pass, valid submissions
-          become a local draft with today's date as the start date.
+          become a local draft before database persistence exists.
         </p>
       </div>
 

@@ -5,7 +5,11 @@ import {
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments"
-import { mapInvestmentFormToInvestment } from "@/app/screens/invest/adapters/investment-form-adapter"
+import {
+  createInvestmentFromFormValues,
+  getInvestmentFormPreview,
+  mapInvestmentFormToInvestment,
+} from "@/app/screens/invest/adapters/investment-form-adapter"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
 
 const metadata = {
@@ -13,6 +17,8 @@ const metadata = {
   now: "2026-05-19T18:00:00.000Z",
   startDate: "2026-05-19",
 }
+
+const asOfDate = new Date(metadata.now)
 
 describe("investment form adapter", () => {
   it("maps a fixed-term form draft to a fixed-term investment", () => {
@@ -67,6 +73,43 @@ describe("investment form adapter", () => {
     )
 
     expect(investment.notes).toBe("Renewal expected.")
+  })
+
+  it("creates an investment using generated timestamp metadata", () => {
+    const investment = createInvestmentFromFormValues(
+      {
+        ...baseFormValues,
+        endDate: "2026-12-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+      },
+      { asOfDate, id: metadata.id },
+    )
+
+    expect(investment.createdAt).toBe(metadata.now)
+    expect(investment.updatedAt).toBe(metadata.now)
+    expect(investment.startDate).toBe(metadata.startDate)
+  })
+
+  it("returns an incomplete preview for invalid form drafts", () => {
+    const preview = getInvestmentFormPreview({}, { asOfDate })
+
+    expect(preview).toBeNull()
+  })
+
+  it("returns an investment preview for valid fixed-term form drafts", () => {
+    const preview = getInvestmentFormPreview(
+      {
+        ...baseFormValues,
+        endDate: "2026-12-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+      },
+      { asOfDate },
+    )
+
+    expect(preview).toMatchObject({
+      id: "investment-preview",
+      type: INVESTMENT_TYPES.fixedTerm,
+    })
   })
 })
 

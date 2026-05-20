@@ -3,6 +3,7 @@ import { getDaysActive } from "@/domain/investments/dates"
 import type { Investment, PaymentFrequency } from "@/domain/investments/types"
 
 const YEAR_DAYS = 365
+const MONTH_DAYS = 30
 
 export function getEstimatedAccruedReturn(
   investment: Investment,
@@ -22,6 +23,22 @@ export function getEstimatedPeriodicReturn(investment: Investment): number {
     investment.originalAmount,
     investment.annualRate,
     getPaymentFrequencyDays(investment.paymentFrequency),
+  )
+}
+
+export function getEstimatedMonthlyReturn(investment: Investment): number {
+  return getSimpleInterest(
+    investment.originalAmount,
+    investment.annualRate,
+    MONTH_DAYS,
+  )
+}
+
+export function getEstimatedYearlyReturn(investment: Investment): number {
+  return getSimpleInterest(
+    investment.originalAmount,
+    investment.annualRate,
+    YEAR_DAYS,
   )
 }
 

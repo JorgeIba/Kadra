@@ -1,4 +1,4 @@
-import type React from "react"
+import type { ReactNode } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -15,6 +15,7 @@ import {
   type PaymentFrequency,
   type ReinvestmentBehavior,
 } from "@/domain/investments"
+import { getInvestmentFormPreview } from "@/app/screens/invest/adapters/investment-form-adapter"
 import { InvestmentFormPreview } from "@/app/screens/invest/InvestmentFormPreview"
 import {
   investmentFormSchema,
@@ -102,6 +103,8 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
 
   const investmentType = useWatch({ control, name: "investmentType" })
   const paymentFrequency = useWatch({ control, name: "paymentFrequency" })
+  const previewValues = useWatch({ control })
+  const previewInvestment = getInvestmentFormPreview(previewValues)
   const paymentFrequencyOptions =
     investmentType === INVESTMENT_TYPES.openEnded
       ? PAYMENT_FREQUENCY_OPTIONS.filter((frequency) => {
@@ -434,7 +437,7 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
         </CardContent>
       </Card>
 
-      <InvestmentFormPreview isValid={isValid} />
+      <InvestmentFormPreview investment={previewInvestment} />
 
       <Button type="submit" className="w-full" disabled={!isValid}>
         Save investment
@@ -455,7 +458,7 @@ function Field({
   htmlFor,
   label,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   error?: string
   htmlFor: string
   label: string

@@ -477,6 +477,7 @@ This sequence is currently recommended and can be adjusted as we agree.
 ## Future Nice-To-Haves
 
 - Manual adjustments such as top-ups and partial withdrawals
+- User-editable investment start dates, including validation that fixed-term `endDate` is after `startDate`
 - More detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
 - Support for investment transitions between `open-ended` and `fixed-term` over time
 - Richer lifecycle or configuration history for investments
