@@ -1,22 +1,20 @@
-import { useState } from "react"
 import { createInvestmentFromFormValues } from "@/app/screens/invest/adapters/investment-form-adapter"
 import { InvestmentForm } from "@/app/screens/invest/InvestmentForm"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
-import { Card, CardContent } from "@/components/ui/card"
 import type { Investment } from "@/domain/investments"
 
-export function InvestScreen() {
-  const [createdInvestment, setCreatedInvestment] = useState<Investment | null>(
-    null,
-  )
+interface InvestScreenProps {
+  onInvestmentCreate: (investment: Investment) => void
+}
 
+export function InvestScreen({ onInvestmentCreate }: InvestScreenProps) {
   function handleInvestmentSubmit(values: InvestmentFormValues) {
     const investment = createInvestmentFromFormValues(values, {
       asOfDate: new Date(),
       id: crypto.randomUUID(),
     })
 
-    setCreatedInvestment(investment)
+    onInvestmentCreate(investment)
   }
 
   return (
@@ -33,18 +31,6 @@ export function InvestScreen() {
       </div>
 
       <InvestmentForm onSubmit={handleInvestmentSubmit} />
-
-      {createdInvestment === null ? null : (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="space-y-1">
-            <p className="text-sm font-medium">Local draft created</p>
-            <p className="text-sm leading-6 text-muted-foreground">
-              {createdInvestment.name} is now mapped into our Investment domain
-              shape. Database persistence comes later.
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </section>
   )
 }

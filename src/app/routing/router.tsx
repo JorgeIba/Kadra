@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   BrowserRouter,
   Navigate,
@@ -20,19 +21,35 @@ import { AssetsScreen } from "@/app/screens/assets/AssetsScreen"
 import { DashboardScreen } from "@/app/screens/dashboard/DashboardScreen"
 import { InvestScreen } from "@/app/screens/invest/InvestScreen"
 import { InvestmentDetailScreen } from "@/app/screens/investment-detail/InvestmentDetailScreen"
-import { sampleInvestments } from "@/domain/investments"
+import { sampleInvestments, type Investment } from "@/domain/investments"
 
 export function AppRouter() {
+  const [investments, setInvestments] = useState<Investment[]>(() => {
+    return sampleInvestments
+  })
+
+  function addInvestment(investment: Investment) {
+    setInvestments((currentInvestments) => {
+      return [investment, ...currentInvestments]
+    })
+  }
+
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<AppShell />}>
-          <Route index element={<DashboardRoute />} />
-          <Route path={APP_ROUTE_PATHS.assets} element={<AssetsRoute />} />
-          <Route path={APP_ROUTE_PATHS.invest} element={<InvestRoute />} />
+          <Route index element={<DashboardRoute investments={investments} />} />
+          <Route
+            path={APP_ROUTE_PATHS.assets}
+            element={<AssetsRoute investments={investments} />}
+          />
+          <Route
+            path={APP_ROUTE_PATHS.invest}
+            element={<InvestRoute addInvestment={addInvestment} />}
+          />
           <Route
             path={APP_ROUTE_PATHS.investmentDetail}
-            element={<InvestmentDetailRoute />}
+            element={<InvestmentDetailRoute investments={investments} />}
           />
           <Route path="*" element={<Navigate to={APP_PATHS.dashboard} />} />
         </Route>
@@ -41,7 +58,7 @@ export function AppRouter() {
   )
 }
 
-function DashboardRoute() {
+function DashboardRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
 
   function handleInvestmentSelect(investmentId: string) {
@@ -52,13 +69,13 @@ function DashboardRoute() {
 
   return (
     <DashboardScreen
-      investments={sampleInvestments}
+      investments={investments}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )
 }
 
-function AssetsRoute() {
+function AssetsRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
 
   function handleInvestmentSelect(investmentId: string) {
@@ -69,22 +86,35 @@ function AssetsRoute() {
 
   return (
     <AssetsScreen
-      investments={sampleInvestments}
+      investments={investments}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )
 }
 
-function InvestRoute() {
-  return <InvestScreen />
+function InvestRoute({
+  addInvestment,
+}: {
+  addInvestment: (investment: Investment) => void
+}) {
+  const navigate = useNavigate()
+
+  function handleInvestmentCreate(investment: Investment) {
+    addInvestment(investment)
+    navigate(getInvestmentDetailPath(investment.id), {
+      state: { fromSection: APP_SECTIONS.invest },
+    })
+  }
+
+  return <InvestScreen onInvestmentCreate={handleInvestmentCreate} />
 }
 
-function InvestmentDetailRoute() {
+function InvestmentDetailRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { investmentId } = useParams()
   const previousSection = getPreviousSectionFromLocation(location)
-  const selectedInvestment = sampleInvestments.find((investment) => {
+  const selectedInvestment = investments.find((investment) => {
     return investment.id === investmentId
   })
 
