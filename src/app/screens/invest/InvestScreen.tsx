@@ -1,6 +1,26 @@
+import { useState } from "react"
+import { mapInvestmentFormToInvestment } from "@/app/screens/invest/adapters/investment-form-adapter"
 import { InvestmentForm } from "@/app/screens/invest/InvestmentForm"
+import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
+import { Card, CardContent } from "@/components/ui/card"
+import { toDateString, type Investment } from "@/domain/investments"
 
 export function InvestScreen() {
+  const [createdInvestment, setCreatedInvestment] = useState<Investment | null>(
+    null,
+  )
+
+  function handleInvestmentSubmit(values: InvestmentFormValues) {
+    const now = new Date()
+    const investment = mapInvestmentFormToInvestment(values, {
+      id: crypto.randomUUID(),
+      now: now.toISOString(),
+      startDate: toDateString(now),
+    })
+
+    setCreatedInvestment(investment)
+  }
+
   return (
     <section className="space-y-5">
       <div className="space-y-1">
@@ -9,12 +29,24 @@ export function InvestScreen() {
           New investment
         </h1>
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-          Capture the investment terms first. We will wire validation, live
-          projections, and saving in the next pass.
+          Capture the investment terms first. For this pass, valid submissions
+          become a local draft with today's date as the start date.
         </p>
       </div>
 
-      <InvestmentForm />
+      <InvestmentForm onSubmit={handleInvestmentSubmit} />
+
+      {createdInvestment === null ? null : (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="space-y-1">
+            <p className="text-sm font-medium">Local draft created</p>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {createdInvestment.name} is now mapped into our Investment domain
+              shape. Database persistence comes later.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </section>
   )
 }

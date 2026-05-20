@@ -10,6 +10,7 @@ import {
   PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIORS,
   REINVESTMENT_BEHAVIOR_LABELS,
+  type Currency,
   type InvestmentType,
   type PaymentFrequency,
   type ReinvestmentBehavior,
@@ -71,7 +72,11 @@ const FORM_FIELD_IDS = {
   reinvestmentBehavior: "reinvestment",
 } as const
 
-export function InvestmentForm() {
+interface InvestmentFormProps {
+  onSubmit: (values: InvestmentFormValues) => void
+}
+
+export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
   const {
     control,
     formState: { errors, isSubmitSuccessful, isValid },
@@ -91,6 +96,10 @@ export function InvestmentForm() {
     shouldUnregister: true,
   })
 
+  function handleValidSubmit(values: InvestmentFormValues) {
+    onSubmit(values)
+  }
+
   const investmentType = useWatch({ control, name: "investmentType" })
   const paymentFrequency = useWatch({ control, name: "paymentFrequency" })
   const paymentFrequencyOptions =
@@ -99,10 +108,6 @@ export function InvestmentForm() {
           return frequency !== PAYMENT_FREQUENCIES.atMaturity
         })
       : PAYMENT_FREQUENCY_OPTIONS
-
-  function handleValidSubmit() {
-    // Persistence comes next; this submit currently proves the draft is valid.
-  }
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(handleValidSubmit)}>
@@ -195,7 +200,13 @@ export function InvestmentForm() {
                         errors.investmentType?.message,
                       )}
                     >
-                      <SelectValue />
+                      <SelectValue>
+                        {(value: InvestmentType | null) =>
+                          value === null
+                            ? "Select type"
+                            : INVESTMENT_TYPE_LABELS[value]
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {INVESTMENT_TYPE_OPTIONS.map((option) => (
@@ -231,7 +242,13 @@ export function InvestmentForm() {
                         errors.currency?.message,
                       )}
                     >
-                      <SelectValue />
+                      <SelectValue>
+                        {(value: Currency | null) =>
+                          value === null
+                            ? "Select currency"
+                            : CURRENCY_LABELS[value]
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {CURRENCY_OPTIONS.map((option) => (
@@ -340,7 +357,13 @@ export function InvestmentForm() {
                       errors.paymentFrequency?.message,
                     )}
                   >
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: PaymentFrequency | null) =>
+                        value === null
+                          ? "Select payment frequency"
+                          : PAYMENT_FREQUENCY_LABELS[value]
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {paymentFrequencyOptions.map((option) => (
@@ -376,7 +399,13 @@ export function InvestmentForm() {
                       errors.reinvestmentBehavior?.message,
                     )}
                   >
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: ReinvestmentBehavior | null) =>
+                        value === null
+                          ? "Select reinvestment"
+                          : REINVESTMENT_BEHAVIOR_LABELS[value]
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {REINVESTMENT_BEHAVIOR_OPTIONS.map((option) => (
