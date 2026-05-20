@@ -1,4 +1,6 @@
 import type React from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   CURRENCIES,
   CURRENCY_LABELS,
@@ -8,8 +10,15 @@ import {
   PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIORS,
   REINVESTMENT_BEHAVIOR_LABELS,
+  type InvestmentType,
+  type PaymentFrequency,
+  type ReinvestmentBehavior,
 } from "@/domain/investments"
 import { InvestmentFormPreview } from "@/app/screens/invest/InvestmentFormPreview"
+import {
+  investmentFormSchema,
+  type InvestmentFormValues,
+} from "@/app/screens/invest/investment-form-schema"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -29,28 +38,74 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 
+// UI order for dropdown fields; domain constants still own the allowed values.
 const INVESTMENT_TYPE_OPTIONS = [
   INVESTMENT_TYPES.fixedTerm,
   INVESTMENT_TYPES.openEnded,
-] as const
+] as const satisfies ReadonlyArray<InvestmentType>
 
 const PAYMENT_FREQUENCY_OPTIONS = [
   PAYMENT_FREQUENCIES.daily,
   PAYMENT_FREQUENCIES.weekly,
   PAYMENT_FREQUENCIES.monthly,
   PAYMENT_FREQUENCIES.atMaturity,
-] as const
+] as const satisfies ReadonlyArray<PaymentFrequency>
 
 const REINVESTMENT_BEHAVIOR_OPTIONS = [
   REINVESTMENT_BEHAVIORS.automatic,
   REINVESTMENT_BEHAVIORS.toCash,
-] as const
+] as const satisfies ReadonlyArray<ReinvestmentBehavior>
 
 const CURRENCY_OPTIONS = [CURRENCIES.mxn] as const
 
+// DOM ids used to connect labels, inputs, and accessibility messages.
+const FORM_FIELD_IDS = {
+  annualRate: "annual-rate",
+  currency: "currency",
+  endDate: "end-date",
+  institutionName: "institution-name",
+  investmentType: "investment-type",
+  name: "investment-name",
+  originalAmount: "original-amount",
+  paymentFrequency: "payment-frequency",
+  reinvestmentBehavior: "reinvestment",
+} as const
+
 export function InvestmentForm() {
+  const {
+    control,
+    formState: { errors, isSubmitSuccessful, isValid },
+    handleSubmit,
+    register,
+    setValue,
+  } = useForm<InvestmentFormValues>({
+    defaultValues: {
+      currency: CURRENCIES.mxn,
+      notes: "",
+      paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+      reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+      investmentType: INVESTMENT_TYPES.fixedTerm,
+    },
+    mode: "onChange",
+    resolver: zodResolver(investmentFormSchema),
+    shouldUnregister: true,
+  })
+
+  const investmentType = useWatch({ control, name: "investmentType" })
+  const paymentFrequency = useWatch({ control, name: "paymentFrequency" })
+  const paymentFrequencyOptions =
+    investmentType === INVESTMENT_TYPES.openEnded
+      ? PAYMENT_FREQUENCY_OPTIONS.filter((frequency) => {
+          return frequency !== PAYMENT_FREQUENCIES.atMaturity
+        })
+      : PAYMENT_FREQUENCY_OPTIONS
+
+  function handleValidSubmit() {
+    // Persistence comes next; this submit currently proves the draft is valid.
+  }
+
   return (
-    <form className="space-y-4">
+    <form className="space-y-4" onSubmit={handleSubmit(handleValidSubmit)}>
       <Card>
         <CardHeader>
           <CardTitle>Basic information</CardTitle>
@@ -59,19 +114,35 @@ export function InvestmentForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Field label="Investment name" htmlFor="investment-name">
+          <Field
+            error={errors.name?.message}
+            label="Investment name"
+            htmlFor={FORM_FIELD_IDS.name}
+          >
             <Input
-              id="investment-name"
-              name="investmentName"
+              id={FORM_FIELD_IDS.name}
               placeholder="CETES 6 months"
+              {...getFieldAccessibilityProps(
+                FORM_FIELD_IDS.name,
+                errors.name?.message,
+              )}
+              {...register("name")}
             />
           </Field>
 
-          <Field label="Institution" htmlFor="institution-name">
+          <Field
+            error={errors.institutionName?.message}
+            label="Institution"
+            htmlFor={FORM_FIELD_IDS.institutionName}
+          >
             <Input
-              id="institution-name"
-              name="institutionName"
+              id={FORM_FIELD_IDS.institutionName}
               placeholder="CETES Directo"
+              {...getFieldAccessibilityProps(
+                FORM_FIELD_IDS.institutionName,
+                errors.institutionName?.message,
+              )}
+              {...register("institutionName")}
             />
           </Field>
         </CardContent>
@@ -86,72 +157,156 @@ export function InvestmentForm() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Type" htmlFor="investment-type">
-              <Select
+            <Field
+              error={errors.investmentType?.message}
+              label="Type"
+              htmlFor={FORM_FIELD_IDS.investmentType}
+            >
+              <Controller
+                control={control}
                 name="investmentType"
-                defaultValue={INVESTMENT_TYPES.fixedTerm}
-              >
-                <SelectTrigger id="investment-type" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {INVESTMENT_TYPE_OPTIONS.map((investmentType) => (
-                    <SelectItem key={investmentType} value={investmentType}>
-                      {INVESTMENT_TYPE_LABELS[investmentType]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                render={({ field: investmentTypeField }) => (
+                  <Select
+                    name={investmentTypeField.name}
+                    value={investmentTypeField.value}
+                    onValueChange={(value) => {
+                      investmentTypeField.onChange(value)
+
+                      if (
+                        value === INVESTMENT_TYPES.openEnded &&
+                        paymentFrequency === PAYMENT_FREQUENCIES.atMaturity
+                      ) {
+                        setValue(
+                          "paymentFrequency",
+                          PAYMENT_FREQUENCIES.monthly,
+                          {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          },
+                        )
+                      }
+                    }}
+                  >
+                    <SelectTrigger
+                      id={FORM_FIELD_IDS.investmentType}
+                      className="w-full"
+                      {...getFieldAccessibilityProps(
+                        FORM_FIELD_IDS.investmentType,
+                        errors.investmentType?.message,
+                      )}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INVESTMENT_TYPE_OPTIONS.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {INVESTMENT_TYPE_LABELS[option]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </Field>
 
-            <Field label="Currency" htmlFor="currency">
-              <Select name="currency" defaultValue={CURRENCIES.mxn}>
-                <SelectTrigger id="currency" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((currency) => (
-                    <SelectItem key={currency} value={currency}>
-                      {CURRENCY_LABELS[currency]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Field
+              error={errors.currency?.message}
+              label="Currency"
+              htmlFor={FORM_FIELD_IDS.currency}
+            >
+              <Controller
+                control={control}
+                name="currency"
+                render={({ field: currencyField }) => (
+                  <Select
+                    name={currencyField.name}
+                    value={currencyField.value}
+                    onValueChange={currencyField.onChange}
+                  >
+                    <SelectTrigger
+                      id={FORM_FIELD_IDS.currency}
+                      className="w-full"
+                      {...getFieldAccessibilityProps(
+                        FORM_FIELD_IDS.currency,
+                        errors.currency?.message,
+                      )}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCY_OPTIONS.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {CURRENCY_LABELS[option]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Original amount" htmlFor="original-amount">
+            <Field
+              error={errors.originalAmount?.message}
+              label="Original amount"
+              htmlFor={FORM_FIELD_IDS.originalAmount}
+            >
               <Input
-                id="original-amount"
-                name="originalAmount"
+                id={FORM_FIELD_IDS.originalAmount}
                 type="number"
                 inputMode="decimal"
                 min="0"
                 placeholder="10000"
+                {...getFieldAccessibilityProps(
+                  FORM_FIELD_IDS.originalAmount,
+                  errors.originalAmount?.message,
+                )}
+                {...register("originalAmount", { valueAsNumber: true })}
               />
             </Field>
 
-            <Field label="Annual rate" htmlFor="annual-rate">
+            <Field
+              error={errors.annualRate?.message}
+              label="Annual rate"
+              htmlFor={FORM_FIELD_IDS.annualRate}
+            >
               <Input
-                id="annual-rate"
-                name="annualRate"
+                id={FORM_FIELD_IDS.annualRate}
                 type="number"
                 inputMode="decimal"
                 min="0"
                 step="0.01"
                 placeholder="11.25"
+                {...getFieldAccessibilityProps(
+                  FORM_FIELD_IDS.annualRate,
+                  errors.annualRate?.message,
+                )}
+                {...register("annualRate", { valueAsNumber: true })}
               />
             </Field>
           </div>
 
-          <Field label="End date" htmlFor="end-date">
-            <Input id="end-date" name="endDate" type="date" />
-            <p className="text-xs leading-5 text-muted-foreground">
-              Required for fixed-term investments. Hidden later for open-ended
-              investments.
-            </p>
-          </Field>
+          {investmentType === INVESTMENT_TYPES.fixedTerm ? (
+            <Field
+              error={errors.endDate?.message}
+              label="End date"
+              htmlFor={FORM_FIELD_IDS.endDate}
+            >
+              <Input
+                id={FORM_FIELD_IDS.endDate}
+                type="date"
+                {...getFieldAccessibilityProps(
+                  FORM_FIELD_IDS.endDate,
+                  errors.endDate?.message,
+                )}
+                {...register("endDate")}
+              />
+              <p className="text-xs leading-5 text-muted-foreground">
+                Required for fixed-term investments.
+              </p>
+            </Field>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -163,43 +318,76 @@ export function InvestmentForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Field label="Payment frequency" htmlFor="payment-frequency">
-            <Select
+          <Field
+            error={errors.paymentFrequency?.message}
+            label="Payment frequency"
+            htmlFor={FORM_FIELD_IDS.paymentFrequency}
+          >
+            <Controller
+              control={control}
               name="paymentFrequency"
-              defaultValue={PAYMENT_FREQUENCIES.monthly}
-            >
-              <SelectTrigger id="payment-frequency" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_FREQUENCY_OPTIONS.map((paymentFrequency) => (
-                  <SelectItem key={paymentFrequency} value={paymentFrequency}>
-                    {PAYMENT_FREQUENCY_LABELS[paymentFrequency]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              render={({ field: paymentFrequencyField }) => (
+                <Select
+                  name={paymentFrequencyField.name}
+                  value={paymentFrequencyField.value}
+                  onValueChange={paymentFrequencyField.onChange}
+                >
+                  <SelectTrigger
+                    id={FORM_FIELD_IDS.paymentFrequency}
+                    className="w-full"
+                    {...getFieldAccessibilityProps(
+                      FORM_FIELD_IDS.paymentFrequency,
+                      errors.paymentFrequency?.message,
+                    )}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentFrequencyOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {PAYMENT_FREQUENCY_LABELS[option]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </Field>
 
-          <Field label="Reinvestment" htmlFor="reinvestment">
-            <Select
+          <Field
+            error={errors.reinvestmentBehavior?.message}
+            label="Reinvestment"
+            htmlFor={FORM_FIELD_IDS.reinvestmentBehavior}
+          >
+            <Controller
+              control={control}
               name="reinvestmentBehavior"
-              defaultValue={REINVESTMENT_BEHAVIORS.automatic}
-            >
-              <SelectTrigger id="reinvestment" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {REINVESTMENT_BEHAVIOR_OPTIONS.map((reinvestmentBehavior) => (
-                  <SelectItem
-                    key={reinvestmentBehavior}
-                    value={reinvestmentBehavior}
+              render={({ field: reinvestmentBehaviorField }) => (
+                <Select
+                  name={reinvestmentBehaviorField.name}
+                  value={reinvestmentBehaviorField.value}
+                  onValueChange={reinvestmentBehaviorField.onChange}
+                >
+                  <SelectTrigger
+                    id={FORM_FIELD_IDS.reinvestmentBehavior}
+                    className="w-full"
+                    {...getFieldAccessibilityProps(
+                      FORM_FIELD_IDS.reinvestmentBehavior,
+                      errors.reinvestmentBehavior?.message,
+                    )}
                   >
-                    {REINVESTMENT_BEHAVIOR_LABELS[reinvestmentBehavior]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {REINVESTMENT_BEHAVIOR_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {REINVESTMENT_BEHAVIOR_LABELS[option]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </Field>
         </CardContent>
       </Card>
@@ -211,34 +399,58 @@ export function InvestmentForm() {
         </CardHeader>
         <CardContent>
           <Textarea
-            name="notes"
             placeholder="Example: rate renewal expected after maturity."
+            {...register("notes")}
           />
         </CardContent>
       </Card>
 
-      <InvestmentFormPreview />
+      <InvestmentFormPreview isValid={isValid} />
 
-      <Button type="button" className="w-full" disabled>
+      <Button type="submit" className="w-full" disabled={!isValid}>
         Save investment
       </Button>
+
+      {isSubmitSuccessful ? (
+        <p className="text-center text-sm font-medium text-primary">
+          Draft is valid. Saving comes next.
+        </p>
+      ) : null}
     </form>
   )
 }
 
 function Field({
   children,
+  error,
   htmlFor,
   label,
 }: {
   children: React.ReactNode
+  error?: string
   htmlFor: string
   label: string
 }) {
+  const errorId = `${htmlFor}-error`
+
   return (
     <div className="space-y-2">
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
+      {error === undefined ? null : (
+        // Accessibility: aria-describedby points each field to this message.
+        <p id={errorId} className="text-xs leading-5 text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   )
+}
+
+function getFieldAccessibilityProps(fieldId: string, error?: string) {
+  // Accessibility: links invalid fields to their validation message.
+  return {
+    "aria-describedby": error === undefined ? undefined : `${fieldId}-error`,
+    "aria-invalid": error !== undefined,
+  }
 }

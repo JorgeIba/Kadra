@@ -8,6 +8,7 @@ import {
 import {
   getDaysActive,
   getDaysBetween,
+  isCalendarDateString,
   isOnOrAfterDate,
 } from "@/domain/investments/dates"
 import type { Investment } from "@/domain/investments/types"
@@ -50,5 +51,17 @@ describe("investment date helpers", () => {
     expect(
       isOnOrAfterDate(new Date("2026-01-30T12:00:00.000Z"), "2026-01-31"),
     ).toBe(false)
+  })
+
+  it("accepts valid calendar date strings", () => {
+    expect(isCalendarDateString("2026-05-19")).toBe(true)
+  })
+
+  it("rejects non-calendar date string formats", () => {
+    expect(isCalendarDateString("05/19/2026")).toBe(false)
+  })
+
+  it("rejects impossible calendar date strings", () => {
+    expect(isCalendarDateString("2026-02-30")).toBe(false)
   })
 })
