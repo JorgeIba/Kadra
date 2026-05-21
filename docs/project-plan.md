@@ -22,7 +22,7 @@ Related docs:
 | Financial rules | In progress | Fixed annual rate agreed for MVP; taxes deferred |
 | Screen contracts | Mostly complete | MVP screens confirmed; detail screen added; Trends removed |
 | Component tree | Mostly complete | MVP component responsibilities accepted |
-| Persistence strategy | Pending | Likely `localStorage` first, but not locked |
+| Persistence strategy | In progress | `localStorage` first; defensive storage adapter added |
 | PWA strategy | Pending | Installable iPhone standalone app remains a goal |
 | App shell | Mostly complete | Top bar and bottom nav confirmed |
 

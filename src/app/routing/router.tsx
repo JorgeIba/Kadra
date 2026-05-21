@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   BrowserRouter,
   Navigate,
@@ -21,12 +21,20 @@ import { AssetsScreen } from "@/app/screens/assets/AssetsScreen"
 import { DashboardScreen } from "@/app/screens/dashboard/DashboardScreen"
 import { InvestScreen } from "@/app/screens/invest/InvestScreen"
 import { InvestmentDetailScreen } from "@/app/screens/investment-detail/InvestmentDetailScreen"
+import {
+  loadInvestmentsFromStorage,
+  saveInvestmentsToStorage,
+} from "@/app/storage/investments-storage"
 import { sampleInvestments, type Investment } from "@/domain/investments"
 
 export function AppRouter() {
   const [investments, setInvestments] = useState<Investment[]>(() => {
-    return sampleInvestments
+    return loadInvestmentsFromStorage(sampleInvestments)
   })
+
+  useEffect(() => {
+    saveInvestmentsToStorage(investments)
+  }, [investments])
 
   function addInvestment(investment: Investment) {
     setInvestments((currentInvestments) => {
