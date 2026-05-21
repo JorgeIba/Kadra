@@ -7,6 +7,7 @@ import {
   type Investment,
 } from "@/domain/investments"
 import {
+  clearInvestmentsFromStorage,
   loadInvestmentsFromStorage,
   saveInvestmentsToStorage,
 } from "@/app/storage/investments-storage"
@@ -98,12 +99,36 @@ describe("investments storage", () => {
   it("reports failed saves without throwing", () => {
     const storage = {
       getItem: () => null,
+      removeItem: () => undefined,
       setItem: () => {
         throw new Error("storage unavailable")
       },
     }
 
     expect(saveInvestmentsToStorage(storedInvestments, storage)).toBe(false)
+  })
+
+  it("clears stored investments", () => {
+    const storage = createMemoryStorage()
+
+    saveInvestmentsToStorage(storedInvestments, storage)
+
+    expect(clearInvestmentsFromStorage(storage)).toBe(true)
+    expect(loadInvestmentsFromStorage(fallbackInvestments, storage)).toBe(
+      fallbackInvestments,
+    )
+  })
+
+  it("reports failed clears without throwing", () => {
+    const storage = {
+      getItem: () => null,
+      removeItem: () => {
+        throw new Error("storage unavailable")
+      },
+      setItem: () => undefined,
+    }
+
+    expect(clearInvestmentsFromStorage(storage)).toBe(false)
   })
 })
 
@@ -113,6 +138,9 @@ function createMemoryStorage(initialValues: Record<string, string> = {}) {
   return {
     getItem(key: string) {
       return values[key] ?? null
+    },
+    removeItem(key: string) {
+      delete values[key]
     },
     setItem(key: string, value: string) {
       values[key] = value
