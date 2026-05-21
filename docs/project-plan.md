@@ -489,6 +489,8 @@ This sequence is currently recommended and can be adjusted as we agree.
 - Dashboard and Assets both render investment summary cards. Consider a shared investment list component if their list behavior stays similar.
 - Dashboard should remain a preview experience, while Assets should remain the full operational list.
 - `InvestmentFormPreview` can stay local while it is placeholder-only. Move it to shared investment components once it renders real projection data from an investment draft.
+- Storage currently persists the same plain-string shape used by the runtime domain model. If runtime models later use `Date` objects or diverge from persisted records, add explicit `recordToInvestment` / `investmentToRecord` mappers instead of relying on raw `JSON.parse`.
+- Before adding more silent fallback paths, define a small app logging policy or logger wrapper so storage/schema failures can be reported consistently without random `console.warn` calls across the codebase.
 
 ## Next Recommended Step
 
