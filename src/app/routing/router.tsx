@@ -42,10 +42,14 @@ export function AppRouter() {
     })
   }
 
+  function resetLocalData() {
+    setInvestments(sampleInvestments)
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AppShell />}>
+        <Route element={<AppShell onResetLocalData={resetLocalData} />}>
           <Route index element={<DashboardRoute investments={investments} />} />
           <Route
             path={APP_ROUTE_PATHS.assets}
