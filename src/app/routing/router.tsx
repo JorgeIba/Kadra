@@ -42,6 +42,14 @@ export function AppRouter() {
     })
   }
 
+  function deleteInvestment(investmentId: string) {
+    setInvestments((currentInvestments) => {
+      return currentInvestments.filter((investment) => {
+        return investment.id !== investmentId
+      })
+    })
+  }
+
   function resetLocalData() {
     setInvestments(sampleInvestments)
   }
@@ -61,7 +69,12 @@ export function AppRouter() {
           />
           <Route
             path={APP_ROUTE_PATHS.investmentDetail}
-            element={<InvestmentDetailRoute investments={investments} />}
+            element={
+              <InvestmentDetailRoute
+                deleteInvestment={deleteInvestment}
+                investments={investments}
+              />
+            }
           />
           <Route path="*" element={<Navigate to={APP_PATHS.dashboard} />} />
         </Route>
@@ -121,7 +134,13 @@ function InvestRoute({
   return <InvestScreen onInvestmentCreate={handleInvestmentCreate} />
 }
 
-function InvestmentDetailRoute({ investments }: { investments: Investment[] }) {
+function InvestmentDetailRoute({
+  deleteInvestment,
+  investments,
+}: {
+  deleteInvestment: (investmentId: string) => void
+  investments: Investment[]
+}) {
   const navigate = useNavigate()
   const location = useLocation()
   const { investmentId } = useParams()
@@ -134,6 +153,15 @@ function InvestmentDetailRoute({ investments }: { investments: Investment[] }) {
     navigate(getSectionPath(previousSection))
   }
 
+  function handleDelete() {
+    if (selectedInvestment === undefined) {
+      return
+    }
+
+    deleteInvestment(selectedInvestment.id)
+    navigate(getSectionPath(previousSection))
+  }
+
   if (selectedInvestment === undefined) {
     return <InvestmentNotFound onBack={handleBack} />
   }
@@ -142,6 +170,7 @@ function InvestmentDetailRoute({ investments }: { investments: Investment[] }) {
     <InvestmentDetailScreen
       investment={selectedInvestment}
       onBack={handleBack}
+      onDelete={handleDelete}
     />
   )
 }

@@ -1,4 +1,4 @@
-import { ArrowLeft, Landmark, Percent, WalletCards } from "lucide-react"
+import { ArrowLeft, Landmark, Percent, Trash2, WalletCards } from "lucide-react"
 import {
   INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
@@ -14,13 +14,27 @@ import { formatMxn, formatPercentage } from "@/lib/formatters"
 interface InvestmentDetailScreenProps {
   investment: Investment
   onBack: () => void
+  onDelete: () => void
 }
 
 export function InvestmentDetailScreen({
   investment,
   onBack,
+  onDelete,
 }: InvestmentDetailScreenProps) {
   const derivedValues = getInvestmentDerivedValues(investment, new Date())
+
+  function handleDelete() {
+    const shouldDelete = window.confirm(
+      `Delete "${investment.name}" from your investments?`,
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    onDelete()
+  }
 
   return (
     <section className="space-y-5">
@@ -100,6 +114,24 @@ export function InvestmentDetailScreen({
             label="Accrued return"
             value={formatMxn(derivedValues.estimatedAccruedReturn)}
           />
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg border-destructive/20 bg-destructive/5">
+        <CardContent className="space-y-3">
+          <div>
+            <h2 className="text-base font-semibold text-destructive">
+              Delete investment
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Remove this investment from your local list. This action cannot be
+              undone.
+            </p>
+          </div>
+          <Button variant="destructive" size="sm" onClick={handleDelete}>
+            <Trash2 className="size-4" aria-hidden="true" />
+            Delete investment
+          </Button>
         </CardContent>
       </Card>
     </section>

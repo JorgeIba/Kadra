@@ -372,7 +372,7 @@ User actions:
 
 - Go back to the previous screen.
 - Edit investment later.
-- Delete investment later.
+- Delete investment.
 - Finish/close an open-ended investment later.
 
 States:
@@ -382,7 +382,7 @@ States:
 
 Product note:
 
-MVP includes a dedicated detail screen, but destructive actions can wait until the core read/detail flow works.
+MVP includes a dedicated detail screen. Delete is supported from detail as a local-only destructive action.
 
 MVP decision:
 
@@ -491,6 +491,7 @@ This sequence is currently recommended and can be adjusted as we agree.
 - `InvestmentFormPreview` can stay local while it is placeholder-only. Move it to shared investment components once it renders real projection data from an investment draft.
 - Storage currently persists the same plain-string shape used by the runtime domain model. If runtime models later use `Date` objects or diverge from persisted records, add explicit `recordToInvestment` / `investmentToRecord` mappers instead of relying on raw `JSON.parse`.
 - Before adding more silent fallback paths, define a small app logging policy or logger wrapper so storage/schema failures can be reported consistently without random `console.warn` calls across the codebase.
+- The top-bar reset action is a temporary escape hatch while we do not have settings. Move reset/data-management actions into a dedicated Settings or Data Management screen before polishing V1.
 
 ## Next Recommended Step
 
