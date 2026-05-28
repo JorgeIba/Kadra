@@ -163,22 +163,20 @@ function InvestmentDetailRoute({
     navigate(getSectionPath(previousSection))
   }
 
-  function handleDelete() {
-    if (selectedInvestment === undefined) {
-      return
-    }
-
-    deleteInvestment(selectedInvestment.id)
-    navigate(getSectionPath(previousSection))
-  }
-
   if (selectedInvestment === undefined) {
     return <InvestmentNotFound onBack={handleBack} />
   }
 
+  const investment = selectedInvestment
+
+  function handleDelete() {
+    deleteInvestment(investment.id)
+    navigate(getSectionPath(previousSection))
+  }
+
   return (
     <InvestmentDetailScreen
-      investment={selectedInvestment}
+      investment={investment}
       onBack={handleBack}
       onDelete={handleDelete}
     />
