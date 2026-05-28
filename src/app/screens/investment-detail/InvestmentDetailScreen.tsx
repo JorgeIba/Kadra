@@ -1,4 +1,6 @@
+import { useState } from "react"
 import { ArrowLeft, Landmark, Percent, Trash2, WalletCards } from "lucide-react"
+import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import {
   INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
@@ -23,18 +25,7 @@ export function InvestmentDetailScreen({
   onDelete,
 }: InvestmentDetailScreenProps) {
   const derivedValues = getInvestmentDerivedValues(investment, new Date())
-
-  function handleDelete() {
-    const shouldDelete = window.confirm(
-      `Delete "${investment.name}" from your investments?`,
-    )
-
-    if (!shouldDelete) {
-      return
-    }
-
-    onDelete()
-  }
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   return (
     <section className="space-y-5">
@@ -128,12 +119,26 @@ export function InvestmentDetailScreen({
               undone.
             </p>
           </div>
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
             <Trash2 className="size-4" aria-hidden="true" />
             Delete investment
           </Button>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        title="Delete investment?"
+        description={`This removes "${investment.name}" from your local investment list. This action cannot be undone.`}
+        confirmLabel="Delete investment"
+        variant="destructive"
+        onRequestOpenChange={setIsDeleteDialogOpen}
+        onConfirm={onDelete}
+      />
     </section>
   )
 }

@@ -192,6 +192,7 @@ Shared app shell:
 - Top app bar with app logo and name.
 - Bottom navigation with current route highlight.
 - Empty-state support when there are no investments.
+- App-styled confirmation dialogs for destructive local actions.
 - PWA-safe layout for mobile-first use.
 - A future profile entry may live in the top bar.
 
@@ -405,7 +406,7 @@ Trends is removed from MVP navigation for now. We can reintroduce it later once 
 - `AppShell`
   Owns the mobile-first layout and renders top bar, active screen, and bottom nav.
 - `TopBar`
-  Shows app logo and app name. May later include profile/settings.
+  Shows app logo, app name, and a temporary reset action. May later include profile/settings.
 - `BottomNav`
   Moves between `Dashboard`, `Assets`, and `Invest`.
 
