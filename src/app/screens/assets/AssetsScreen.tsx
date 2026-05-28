@@ -3,16 +3,19 @@ import {
   getPortfolioEstimatedCurrentValue,
   type Investment,
 } from "@/domain/investments"
+import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
 import { formatMxn } from "@/lib/formatters"
 
 interface AssetsScreenProps {
   investments: Investment[]
+  onAddInvestment: () => void
   onInvestmentSelect: (investmentId: string) => void
 }
 
 export function AssetsScreen({
   investments,
+  onAddInvestment,
   onInvestmentSelect,
 }: AssetsScreenProps) {
   const asOfDate = new Date()
@@ -35,24 +38,33 @@ export function AssetsScreen({
         <p className="mt-1 text-2xl font-semibold">{formatMxn(totalValue)}</p>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Investment list</h2>
-          <span className="text-sm font-medium text-muted-foreground">
-            {investmentSummaries.length} total
-          </span>
-        </div>
-
+      {investments.length === 0 ? (
+        <EmptyInvestmentsState
+          title="Your asset list is empty"
+          description="Create an investment to build your local portfolio list."
+          actionLabel="Add investment"
+          onAction={onAddInvestment}
+        />
+      ) : (
         <div className="space-y-3">
-          {investmentSummaries.map((investment) => (
-            <InvestmentCard
-              key={investment.id}
-              investment={investment}
-              onSelect={onInvestmentSelect}
-            />
-          ))}
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Investment list</h2>
+            <span className="text-sm font-medium text-muted-foreground">
+              {investmentSummaries.length} total
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {investmentSummaries.map((investment) => (
+              <InvestmentCard
+                key={investment.id}
+                investment={investment}
+                onSelect={onInvestmentSelect}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

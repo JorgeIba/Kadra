@@ -4,11 +4,13 @@ import {
   getPortfolioEstimatedDailyReturn,
   type Investment,
 } from "@/domain/investments"
+import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
 import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCard"
 
 interface DashboardScreenProps {
   investments: Investment[]
+  onAddInvestment: () => void
   onInvestmentSelect: (investmentId: string) => void
 }
 
@@ -16,6 +18,7 @@ const DASHBOARD_INVESTMENT_PREVIEW_LIMIT = 3
 
 export function DashboardScreen({
   investments,
+  onAddInvestment,
   onInvestmentSelect,
 }: DashboardScreenProps) {
   const asOfDate = new Date()
@@ -39,11 +42,20 @@ export function DashboardScreen({
         dailyCashFlow={dailyCashFlow}
       />
 
-      <InvestmentPreviewList
-        investments={investmentSummaries}
-        totalInvestmentCount={investments.length}
-        onInvestmentSelect={onInvestmentSelect}
-      />
+      {investments.length === 0 ? (
+        <EmptyInvestmentsState
+          title="No investments yet"
+          description="Add your first investment to start tracking total value, daily cash flow, and projected returns."
+          actionLabel="Add investment"
+          onAction={onAddInvestment}
+        />
+      ) : (
+        <InvestmentPreviewList
+          investments={investmentSummaries}
+          totalInvestmentCount={investments.length}
+          onInvestmentSelect={onInvestmentSelect}
+        />
+      )}
     </section>
   )
 }

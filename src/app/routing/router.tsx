@@ -86,6 +86,10 @@ export function AppRouter() {
 function DashboardRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
 
+  function handleAddInvestment() {
+    navigate(getSectionPath(APP_SECTIONS.invest))
+  }
+
   function handleInvestmentSelect(investmentId: string) {
     navigate(getInvestmentDetailPath(investmentId), {
       state: { fromSection: APP_SECTIONS.dashboard },
@@ -95,6 +99,7 @@ function DashboardRoute({ investments }: { investments: Investment[] }) {
   return (
     <DashboardScreen
       investments={investments}
+      onAddInvestment={handleAddInvestment}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )
@@ -102,6 +107,10 @@ function DashboardRoute({ investments }: { investments: Investment[] }) {
 
 function AssetsRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
+
+  function handleAddInvestment() {
+    navigate(getSectionPath(APP_SECTIONS.invest))
+  }
 
   function handleInvestmentSelect(investmentId: string) {
     navigate(getInvestmentDetailPath(investmentId), {
@@ -112,6 +121,7 @@ function AssetsRoute({ investments }: { investments: Investment[] }) {
   return (
     <AssetsScreen
       investments={investments}
+      onAddInvestment={handleAddInvestment}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )

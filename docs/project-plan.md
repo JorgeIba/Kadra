@@ -231,6 +231,7 @@ States:
 Product note:
 
 Dashboard should show a summary card with total value and estimated daily cash flow, plus an investment list using investment summary cards.
+When no investments exist, Dashboard should show an empty state that guides the user to add an investment.
 
 #### Invest Screen
 
@@ -341,6 +342,7 @@ Assets is the operational list view. It should be more dense and scannable than 
 MVP decision:
 
 Assets starts as a clean full list without filters or sorting. Filters can be added later.
+When no investments exist, Assets should show an empty state instead of an empty list.
 
 #### Investment Detail Screen
 
