@@ -74,10 +74,18 @@ const FORM_FIELD_IDS = {
 } as const
 
 interface InvestmentFormProps {
+  initialValues?: InvestmentFormValues
   onSubmit: (values: InvestmentFormValues) => void
+  submitLabel?: string
+  successMessage?: string
 }
 
-export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
+export function InvestmentForm({
+  initialValues,
+  onSubmit,
+  submitLabel = "Save investment",
+  successMessage = "Draft is valid. Saving comes next.",
+}: InvestmentFormProps) {
   const {
     control,
     formState: { errors, isSubmitSuccessful, isValid },
@@ -85,7 +93,7 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
     register,
     setValue,
   } = useForm<InvestmentFormValues>({
-    defaultValues: {
+    defaultValues: initialValues ?? {
       currency: CURRENCIES.mxn,
       notes: "",
       paymentFrequency: PAYMENT_FREQUENCIES.monthly,
@@ -440,12 +448,12 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
       <InvestmentFormPreview investment={previewInvestment} />
 
       <Button type="submit" className="w-full" disabled={!isValid}>
-        Save investment
+        {submitLabel}
       </Button>
 
       {isSubmitSuccessful ? (
         <p className="text-center text-sm font-medium text-primary">
-          Draft is valid. Saving comes next.
+          {successMessage}
         </p>
       ) : null}
     </form>

@@ -325,7 +325,7 @@ User actions:
 - Filter by `fixed-term` or `open-ended`.
 - Sort by amount, rate, end date, or newest.
 - Open investment detail later.
-- Edit investment later.
+- Edit investment from detail.
 - Finish/close an open-ended investment later.
 
 States:
@@ -374,7 +374,7 @@ Domain inputs:
 User actions:
 
 - Go back to the previous screen.
-- Edit investment later.
+- Edit investment.
 - Delete investment.
 - Finish/close an open-ended investment later.
 
@@ -385,7 +385,7 @@ States:
 
 Product note:
 
-MVP includes a dedicated detail screen. Delete is supported from detail as a local-only destructive action.
+MVP includes a dedicated detail screen. Edit and delete are supported from detail as local-only management actions.
 
 MVP decision:
 

@@ -14,11 +14,13 @@ import {
   APP_ROUTE_PATHS,
   APP_SECTIONS,
   getInvestmentDetailPath,
+  getInvestmentEditPath,
   getSectionPath,
 } from "@/app/routing/navigation"
 import { getPreviousSectionFromLocation } from "@/app/routing/active-section"
 import { AssetsScreen } from "@/app/screens/assets/AssetsScreen"
 import { DashboardScreen } from "@/app/screens/dashboard/DashboardScreen"
+import { EditInvestmentScreen } from "@/app/screens/edit-investment/EditInvestmentScreen"
 import { InvestScreen } from "@/app/screens/invest/InvestScreen"
 import { InvestmentDetailScreen } from "@/app/screens/investment-detail/InvestmentDetailScreen"
 import {
@@ -50,6 +52,18 @@ export function AppRouter() {
     })
   }
 
+  function updateInvestment(updatedInvestment: Investment) {
+    setInvestments((currentInvestments) => {
+      return currentInvestments.map((investment) => {
+        if (investment.id !== updatedInvestment.id) {
+          return investment
+        }
+
+        return updatedInvestment
+      })
+    })
+  }
+
   function resetLocalData() {
     setInvestments(sampleInvestments)
   }
@@ -73,6 +87,15 @@ export function AppRouter() {
               <InvestmentDetailRoute
                 deleteInvestment={deleteInvestment}
                 investments={investments}
+              />
+            }
+          />
+          <Route
+            path={APP_ROUTE_PATHS.investmentEdit}
+            element={
+              <EditInvestmentRoute
+                investments={investments}
+                updateInvestment={updateInvestment}
               />
             }
           />
@@ -174,11 +197,58 @@ function InvestmentDetailRoute({
     navigate(getSectionPath(previousSection))
   }
 
+  function handleEdit() {
+    navigate(getInvestmentEditPath(investment.id), {
+      state: { fromSection: previousSection },
+    })
+  }
+
   return (
     <InvestmentDetailScreen
       investment={investment}
       onBack={handleBack}
       onDelete={handleDelete}
+      onEdit={handleEdit}
+    />
+  )
+}
+
+function EditInvestmentRoute({
+  investments,
+  updateInvestment,
+}: {
+  investments: Investment[]
+  updateInvestment: (investment: Investment) => void
+}) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { investmentId } = useParams()
+  const previousSection = getPreviousSectionFromLocation(location)
+  const selectedInvestment = investments.find((investment) => {
+    return investment.id === investmentId
+  })
+
+  function handleBack() {
+    navigate(getSectionPath(previousSection))
+  }
+
+  if (selectedInvestment === undefined) {
+    return <InvestmentNotFound onBack={handleBack} />
+  }
+
+  const investment = selectedInvestment
+
+  function handleInvestmentUpdate(updatedInvestment: Investment) {
+    updateInvestment(updatedInvestment)
+    navigate(getInvestmentDetailPath(updatedInvestment.id), {
+      state: { fromSection: previousSection },
+    })
+  }
+
+  return (
+    <EditInvestmentScreen
+      investment={investment}
+      onInvestmentUpdate={handleInvestmentUpdate}
     />
   )
 }

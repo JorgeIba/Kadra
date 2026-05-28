@@ -20,6 +20,7 @@ export const APP_ROUTE_PATHS = {
   assets: "assets",
   invest: "invest",
   investmentDetail: "investments/:investmentId",
+  investmentEdit: "investments/:investmentId/edit",
 } as const
 
 export const APP_PATHS = {
@@ -30,6 +31,13 @@ export const APP_PATHS = {
 
 export function getInvestmentDetailPath(investmentId: string) {
   return `/${APP_ROUTE_PATHS.investmentDetail.replace(
+    ":investmentId",
+    encodeURIComponent(investmentId),
+  )}`
+}
+
+export function getInvestmentEditPath(investmentId: string) {
+  return `/${APP_ROUTE_PATHS.investmentEdit.replace(
     ":investmentId",
     encodeURIComponent(investmentId),
   )}`

@@ -6,9 +6,11 @@ import {
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments"
 import {
-  createInvestmentFromFormValues,
+  buildInvestmentFromFormValues,
   getInvestmentFormPreview,
+  mapInvestmentToFormValues,
   mapInvestmentFormToInvestment,
+  buildUpdatedInvestmentFromFormValues,
 } from "@/app/screens/invest/adapters/investment-form-adapter"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
 
@@ -76,7 +78,7 @@ describe("investment form adapter", () => {
   })
 
   it("creates an investment using generated timestamp metadata", () => {
-    const investment = createInvestmentFromFormValues(
+    const investment = buildInvestmentFromFormValues(
       {
         ...baseFormValues,
         endDate: "2026-12-31",
@@ -88,6 +90,57 @@ describe("investment form adapter", () => {
     expect(investment.createdAt).toBe(metadata.now)
     expect(investment.updatedAt).toBe(metadata.now)
     expect(investment.startDate).toBe(metadata.startDate)
+  })
+
+  it("maps an existing investment back to form values", () => {
+    const investment = mapInvestmentFormToInvestment(
+      {
+        ...baseFormValues,
+        endDate: "2026-12-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+      },
+      metadata,
+    )
+
+    expect(mapInvestmentToFormValues(investment)).toEqual({
+      ...baseFormValues,
+      endDate: "2026-12-31",
+      investmentType: INVESTMENT_TYPES.fixedTerm,
+    })
+  })
+
+  it("updates an investment while preserving system-owned fields", () => {
+    const existingInvestment = mapInvestmentFormToInvestment(
+      {
+        ...baseFormValues,
+        endDate: "2026-12-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+      },
+      metadata,
+    )
+    const updatedAt = new Date("2026-06-01T15:30:00.000Z")
+
+    const updatedInvestment = buildUpdatedInvestmentFromFormValues(
+      {
+        ...baseFormValues,
+        annualRate: 12,
+        endDate: "2027-01-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+        name: "Updated CETES",
+      },
+      existingInvestment,
+      { asOfDate: updatedAt },
+    )
+
+    expect(updatedInvestment).toMatchObject({
+      annualRate: 12,
+      createdAt: metadata.now,
+      endDate: "2027-01-31",
+      id: metadata.id,
+      name: "Updated CETES",
+      startDate: metadata.startDate,
+      updatedAt: updatedAt.toISOString(),
+    })
   })
 
   it("returns an incomplete preview for invalid form drafts", () => {

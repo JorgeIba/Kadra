@@ -3,6 +3,7 @@ import {
   APP_PATHS,
   APP_SECTIONS,
   getInvestmentDetailPath,
+  getInvestmentEditPath,
   getSectionPath,
 } from "@/app/routing/navigation"
 
@@ -19,9 +20,18 @@ describe("app navigation helpers", () => {
     )
   })
 
+  it("builds investment edit paths from investment ids", () => {
+    expect(getInvestmentEditPath("investment-1")).toBe(
+      "/investments/investment-1/edit",
+    )
+  })
+
   it("encodes investment ids for safe URL path usage", () => {
     expect(getInvestmentDetailPath("my investment/2026")).toBe(
       "/investments/my%20investment%2F2026",
+    )
+    expect(getInvestmentEditPath("my investment/2026")).toBe(
+      "/investments/my%20investment%2F2026/edit",
     )
   })
 })

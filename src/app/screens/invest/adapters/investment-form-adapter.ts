@@ -14,7 +14,7 @@ interface InvestmentFormAdapterMetadata {
   startDate: string
 }
 
-interface CreateInvestmentFromFormOptions {
+interface BuildInvestmentFromFormOptions {
   asOfDate: Date
   id: string
 }
@@ -25,15 +25,59 @@ interface InvestmentFormPreviewOptions {
 
 const PREVIEW_INVESTMENT_ID = "investment-preview"
 
-export function createInvestmentFromFormValues(
+export function buildInvestmentFromFormValues(
   values: InvestmentFormValues,
-  options: CreateInvestmentFromFormOptions,
+  options: BuildInvestmentFromFormOptions,
 ): Investment {
   return mapInvestmentFormToInvestment(values, {
     id: options.id,
     now: options.asOfDate.toISOString(),
     startDate: toDateString(options.asOfDate),
   })
+}
+
+export function buildUpdatedInvestmentFromFormValues(
+  values: InvestmentFormValues,
+  investment: Investment,
+  options: { asOfDate: Date },
+): Investment {
+  return {
+    ...mapInvestmentFormToInvestment(values, {
+      id: investment.id,
+      now: options.asOfDate.toISOString(),
+      startDate: investment.startDate,
+    }),
+    createdAt: investment.createdAt,
+  }
+}
+
+export function mapInvestmentToFormValues(
+  investment: Investment,
+): InvestmentFormValues {
+  const commonFormValues = {
+    annualRate: investment.annualRate,
+    currency: investment.currency,
+    institutionName: investment.institutionName,
+    investmentType: investment.type,
+    name: investment.name,
+    notes: investment.notes ?? "",
+    originalAmount: investment.originalAmount,
+    paymentFrequency: investment.paymentFrequency,
+    reinvestmentBehavior: investment.reinvestmentBehavior,
+  }
+
+  if (investment.type === INVESTMENT_TYPES.fixedTerm) {
+    return {
+      ...commonFormValues,
+      endDate: investment.endDate,
+      investmentType: INVESTMENT_TYPES.fixedTerm,
+    }
+  }
+
+  return {
+    ...commonFormValues,
+    investmentType: INVESTMENT_TYPES.openEnded,
+  }
 }
 
 export function getInvestmentFormPreview(
@@ -47,7 +91,7 @@ export function getInvestmentFormPreview(
   }
 
   const asOfDate = options.asOfDate ?? new Date()
-  return createInvestmentFromFormValues(parsedValues.data, {
+  return buildInvestmentFromFormValues(parsedValues.data, {
     asOfDate,
     id: PREVIEW_INVESTMENT_ID,
   })

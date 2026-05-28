@@ -43,13 +43,22 @@ describe("active app section helpers", () => {
     expect(getPreviousSectionFromLocation(location)).toBe(APP_SECTIONS.assets)
   })
 
-  it("keeps the previous section active on detail routes", () => {
+  it("keeps the previous section active on investment detail routes", () => {
     const location = createLocation({
       pathname: "/investments/investment-1",
       state: { fromSection: APP_SECTIONS.dashboard },
     })
 
     expect(getActiveSectionFromLocation(location)).toBe(APP_SECTIONS.dashboard)
+  })
+
+  it("keeps the previous section active on investment edit routes", () => {
+    const location = createLocation({
+      pathname: "/investments/investment-1/edit",
+      state: { fromSection: APP_SECTIONS.assets },
+    })
+
+    expect(getActiveSectionFromLocation(location)).toBe(APP_SECTIONS.assets)
   })
 })
 

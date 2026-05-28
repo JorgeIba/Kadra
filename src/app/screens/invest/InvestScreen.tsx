@@ -1,4 +1,4 @@
-import { createInvestmentFromFormValues } from "@/app/screens/invest/adapters/investment-form-adapter"
+import { buildInvestmentFromFormValues } from "@/app/screens/invest/adapters/investment-form-adapter"
 import { InvestmentForm } from "@/app/screens/invest/InvestmentForm"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
 import type { Investment } from "@/domain/investments"
@@ -9,7 +9,7 @@ interface InvestScreenProps {
 
 export function InvestScreen({ onInvestmentCreate }: InvestScreenProps) {
   function handleInvestmentSubmit(values: InvestmentFormValues) {
-    const investment = createInvestmentFromFormValues(values, {
+    const investment = buildInvestmentFromFormValues(values, {
       asOfDate: new Date(),
       id: crypto.randomUUID(),
     })

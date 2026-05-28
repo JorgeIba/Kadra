@@ -1,5 +1,12 @@
 import { useState } from "react"
-import { ArrowLeft, Landmark, Percent, Trash2, WalletCards } from "lucide-react"
+import {
+  ArrowLeft,
+  Landmark,
+  Pencil,
+  Percent,
+  Trash2,
+  WalletCards,
+} from "lucide-react"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import {
   INVESTMENT_TYPE_LABELS,
@@ -17,12 +24,14 @@ interface InvestmentDetailScreenProps {
   investment: Investment
   onBack: () => void
   onDelete: () => void
+  onEdit: () => void
 }
 
 export function InvestmentDetailScreen({
   investment,
   onBack,
   onDelete,
+  onEdit,
 }: InvestmentDetailScreenProps) {
   const derivedValues = getInvestmentDerivedValues(investment, new Date())
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -34,13 +43,19 @@ export function InvestmentDetailScreen({
         Back
       </Button>
 
-      <div className="space-y-1">
-        <p className="text-sm font-medium text-muted-foreground">
-          {investment.institutionName}
-        </p>
-        <h1 className="text-3xl font-semibold tracking-normal">
-          {investment.name}
-        </h1>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-muted-foreground">
+            {investment.institutionName}
+          </p>
+          <h1 className="text-3xl font-semibold tracking-normal">
+            {investment.name}
+          </h1>
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={onEdit}>
+          <Pencil className="size-4" aria-hidden="true" />
+          Edit
+        </Button>
       </div>
 
       <Card className="border-none bg-primary text-primary-foreground shadow-xl shadow-emerald-950/10 ring-0">
