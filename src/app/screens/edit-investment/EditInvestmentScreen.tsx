@@ -8,11 +8,13 @@ import type { Investment } from "@/domain/investments"
 
 interface EditInvestmentScreenProps {
   investment: Investment
+  onCancel: () => void
   onInvestmentUpdate: (investment: Investment) => void
 }
 
 export function EditInvestmentScreen({
   investment,
+  onCancel,
   onInvestmentUpdate,
 }: EditInvestmentScreenProps) {
   function handleInvestmentSubmit(values: InvestmentFormValues) {
@@ -40,7 +42,9 @@ export function EditInvestmentScreen({
       </div>
 
       <InvestmentForm
+        cancelLabel="Back to detail"
         initialValues={mapInvestmentToFormValues(investment)}
+        onCancel={onCancel}
         submitLabel="Save changes"
         successMessage="Changes saved."
         onSubmit={handleInvestmentSubmit}

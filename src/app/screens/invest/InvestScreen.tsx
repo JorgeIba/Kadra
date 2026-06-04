@@ -4,10 +4,14 @@ import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-
 import type { Investment } from "@/domain/investments"
 
 interface InvestScreenProps {
+  onCancel: () => void
   onInvestmentCreate: (investment: Investment) => void
 }
 
-export function InvestScreen({ onInvestmentCreate }: InvestScreenProps) {
+export function InvestScreen({
+  onCancel,
+  onInvestmentCreate,
+}: InvestScreenProps) {
   function handleInvestmentSubmit(values: InvestmentFormValues) {
     const investment = buildInvestmentFromFormValues(values, {
       asOfDate: new Date(),
@@ -30,7 +34,7 @@ export function InvestScreen({ onInvestmentCreate }: InvestScreenProps) {
         </p>
       </div>
 
-      <InvestmentForm onSubmit={handleInvestmentSubmit} />
+      <InvestmentForm onCancel={onCancel} onSubmit={handleInvestmentSubmit} />
     </section>
   )
 }

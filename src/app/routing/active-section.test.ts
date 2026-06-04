@@ -43,6 +43,17 @@ describe("active app section helpers", () => {
     expect(getPreviousSectionFromLocation(location)).toBe(APP_SECTIONS.assets)
   })
 
+  it("supports a custom fallback section when no previous section exists", () => {
+    const location = createLocation({
+      pathname: "/invest",
+      state: null,
+    })
+
+    expect(
+      getPreviousSectionFromLocation(location, APP_SECTIONS.dashboard),
+    ).toBe(APP_SECTIONS.dashboard)
+  })
+
   it("keeps the previous section active on investment detail routes", () => {
     const location = createLocation({
       pathname: "/investments/investment-1",

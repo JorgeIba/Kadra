@@ -75,6 +75,8 @@ const FORM_FIELD_IDS = {
 
 interface InvestmentFormProps {
   initialValues?: InvestmentFormValues
+  onCancel?: () => void
+  cancelLabel?: string
   onSubmit: (values: InvestmentFormValues) => void
   submitLabel?: string
   successMessage?: string
@@ -82,6 +84,8 @@ interface InvestmentFormProps {
 
 export function InvestmentForm({
   initialValues,
+  onCancel,
+  cancelLabel = "Cancel",
   onSubmit,
   submitLabel = "Save investment",
   successMessage = "Draft is valid. Saving comes next.",
@@ -447,9 +451,22 @@ export function InvestmentForm({
 
       <InvestmentFormPreview investment={previewInvestment} />
 
-      <Button type="submit" className="w-full" disabled={!isValid}>
-        {submitLabel}
-      </Button>
+      <div className="grid gap-2">
+        <Button type="submit" className="w-full" disabled={!isValid}>
+          {submitLabel}
+        </Button>
+        
+        {onCancel === undefined ? null : (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={onCancel}
+          >
+            {cancelLabel}
+          </Button>
+        )}
+      </div>
 
       {isSubmitSuccessful ? (
         <p className="text-center text-sm font-medium text-primary">

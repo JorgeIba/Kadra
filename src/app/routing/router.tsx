@@ -110,7 +110,9 @@ function DashboardRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
 
   function handleAddInvestment() {
-    navigate(getSectionPath(APP_SECTIONS.invest))
+    navigate(getSectionPath(APP_SECTIONS.invest), {
+      state: { fromSection: APP_SECTIONS.dashboard },
+    })
   }
 
   function handleInvestmentSelect(investmentId: string) {
@@ -132,7 +134,9 @@ function AssetsRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
 
   function handleAddInvestment() {
-    navigate(getSectionPath(APP_SECTIONS.invest))
+    navigate(getSectionPath(APP_SECTIONS.invest), {
+      state: { fromSection: APP_SECTIONS.assets },
+    })
   }
 
   function handleInvestmentSelect(investmentId: string) {
@@ -156,6 +160,11 @@ function InvestRoute({
   addInvestment: (investment: Investment) => void
 }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const previousSection = getPreviousSectionFromLocation(
+    location,
+    APP_SECTIONS.dashboard,
+  )
 
   function handleInvestmentCreate(investment: Investment) {
     addInvestment(investment)
@@ -164,7 +173,16 @@ function InvestRoute({
     })
   }
 
-  return <InvestScreen onInvestmentCreate={handleInvestmentCreate} />
+  function handleCancel() {
+    navigate(getSectionPath(previousSection))
+  }
+
+  return (
+    <InvestScreen
+      onCancel={handleCancel}
+      onInvestmentCreate={handleInvestmentCreate}
+    />
+  )
 }
 
 function InvestmentDetailRoute({
@@ -245,9 +263,16 @@ function EditInvestmentRoute({
     })
   }
 
+  function handleCancel() {
+    navigate(getInvestmentDetailPath(investment.id), {
+      state: { fromSection: previousSection },
+    })
+  }
+
   return (
     <EditInvestmentScreen
       investment={investment}
+      onCancel={handleCancel}
       onInvestmentUpdate={handleInvestmentUpdate}
     />
   )

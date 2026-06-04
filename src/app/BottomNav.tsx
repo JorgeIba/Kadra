@@ -1,5 +1,9 @@
 import { Link } from "react-router"
-import { APP_NAV_ITEMS, type AppSection } from "@/app/routing/navigation"
+import {
+  APP_NAV_ITEMS,
+  APP_SECTIONS,
+  type AppSection,
+} from "@/app/routing/navigation"
 import { cn } from "@/lib/utils"
 
 interface BottomNavProps {
@@ -18,6 +22,11 @@ export function BottomNav({ activeSection }: BottomNavProps) {
             <Link
               key={item.value}
               to={item.path}
+              state={
+                item.value === APP_SECTIONS.invest
+                  ? { fromSection: activeSection }
+                  : undefined
+              }
               className={cn(
                 "flex h-14 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-muted-foreground transition-colors",
                 isActive && "bg-primary text-primary-foreground shadow-sm",

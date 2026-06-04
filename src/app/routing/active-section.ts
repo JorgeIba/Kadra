@@ -28,10 +28,13 @@ interface AppRouterLocationState {
   fromSection?: AppSection
 }
 
-export function getPreviousSectionFromLocation(location: Location): AppSection {
+export function getPreviousSectionFromLocation(
+  location: Location,
+  fallbackSection: AppSection = APP_SECTIONS.assets,
+): AppSection {
   const locationState = location.state as AppRouterLocationState | null
 
-  return locationState?.fromSection ?? APP_SECTIONS.assets
+  return locationState?.fromSection ?? fallbackSection
 }
 
 export function getActiveSectionFromLocation(location: Location): AppSection {
