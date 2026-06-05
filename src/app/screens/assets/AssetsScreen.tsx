@@ -93,66 +93,25 @@ export function AssetsScreen({
             </div>
 
             <div className="grid gap-2 rounded-lg border bg-card px-3 py-3 text-card-foreground">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-muted-foreground">
-                  Filter
-                </span>
-                <Select
-                  value={filterOption}
-                  onValueChange={(value) => {
-                    setFilterOption(value as AssetFilterOption)
-                  }}
-                >
-                  <SelectTrigger
-                    className="w-44"
-                    aria-label="Filter investments"
-                  >
-                    <SelectValue>
-                      {(value: AssetFilterOption | null) =>
-                        value === null
-                          ? "Select filter"
-                          : ASSET_FILTER_OPTION_LABELS[value]
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ASSET_FILTER_OPTION_VALUES.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {ASSET_FILTER_OPTION_LABELS[option]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <AssetsSelectControl
+                ariaLabel="Filter investments"
+                fallbackLabel="Select filter"
+                label="Filter"
+                labels={ASSET_FILTER_OPTION_LABELS}
+                options={ASSET_FILTER_OPTION_VALUES}
+                value={filterOption}
+                onValueChange={setFilterOption}
+              />
 
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-muted-foreground">
-                  Sort by
-                </span>
-                <Select
-                  value={sortOption}
-                  onValueChange={(value) => {
-                    setSortOption(value as AssetSortOption)
-                  }}
-                >
-                  <SelectTrigger className="w-44" aria-label="Sort investments">
-                    <SelectValue>
-                      {(value: AssetSortOption | null) =>
-                        value === null
-                          ? "Select sort"
-                          : ASSET_SORT_OPTION_LABELS[value]
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ASSET_SORT_OPTION_VALUES.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {ASSET_SORT_OPTION_LABELS[option]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <AssetsSelectControl
+                ariaLabel="Sort investments"
+                fallbackLabel="Select sort"
+                label="Sort by"
+                labels={ASSET_SORT_OPTION_LABELS}
+                options={ASSET_SORT_OPTION_VALUES}
+                value={sortOption}
+                onValueChange={setSortOption}
+              />
             </div>
           </div>
 
@@ -174,5 +133,52 @@ export function AssetsScreen({
         </div>
       )}
     </section>
+  )
+}
+
+interface AssetsSelectControlProps<TOption extends string> {
+  ariaLabel: string
+  fallbackLabel: string
+  label: string
+  labels: Record<TOption, string>
+  options: ReadonlyArray<TOption>
+  value: TOption
+  onValueChange: (value: TOption) => void
+}
+
+function AssetsSelectControl<TOption extends string>({
+  ariaLabel,
+  fallbackLabel,
+  label,
+  labels,
+  onValueChange,
+  options,
+  value,
+}: AssetsSelectControlProps<TOption>) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <Select
+        value={value}
+        onValueChange={(nextValue) => {
+          onValueChange(nextValue as TOption)
+        }}
+      >
+        <SelectTrigger className="w-44" aria-label={ariaLabel}>
+          <SelectValue>
+            {(nextValue: TOption | null) =>
+              nextValue === null ? fallbackLabel : labels[nextValue]
+            }
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {labels[option]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
