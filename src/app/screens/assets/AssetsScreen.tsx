@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   getInvestmentSummary,
   getPortfolioEstimatedCurrentValue,
@@ -5,6 +6,20 @@ import {
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
+import {
+  ASSET_SORT_OPTION_LABELS,
+  ASSET_SORT_OPTION_VALUES,
+  ASSET_SORT_OPTIONS,
+  getSortedInvestments,
+  type AssetSortOption,
+} from "@/app/screens/assets/assets-sorting"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { formatMxn } from "@/lib/formatters"
 
 interface AssetsScreenProps {
@@ -18,9 +33,13 @@ export function AssetsScreen({
   onAddInvestment,
   onInvestmentSelect,
 }: AssetsScreenProps) {
+  const [sortOption, setSortOption] = useState<AssetSortOption>(
+    ASSET_SORT_OPTIONS.newest,
+  )
   const asOfDate = new Date()
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
-  const investmentSummaries = investments.map((investment) =>
+  const sortedInvestments = getSortedInvestments(investments, sortOption)
+  const investmentSummaries = sortedInvestments.map((investment) =>
     getInvestmentSummary(investment, asOfDate),
   )
 
@@ -47,11 +66,42 @@ export function AssetsScreen({
         />
       ) : (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Investment list</h2>
-            <span className="text-sm font-medium text-muted-foreground">
-              {investmentSummaries.length} total
-            </span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Investment list</h2>
+              <span className="text-sm font-medium text-muted-foreground">
+                {investmentSummaries.length} total
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2 text-card-foreground">
+              <span className="text-sm font-medium text-muted-foreground">
+                Sort by
+              </span>
+              <Select
+                value={sortOption}
+                onValueChange={(value) => {
+                  setSortOption(value as AssetSortOption)
+                }}
+              >
+                <SelectTrigger className="w-44" aria-label="Sort investments">
+                  <SelectValue>
+                    {(value: AssetSortOption | null) =>
+                      value === null
+                        ? "Select sort"
+                        : ASSET_SORT_OPTION_LABELS[value]
+                    }
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {ASSET_SORT_OPTION_VALUES.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {ASSET_SORT_OPTION_LABELS[option]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-3">
