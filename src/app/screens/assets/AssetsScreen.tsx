@@ -14,6 +14,13 @@ import {
   type AssetSortOption,
 } from "@/app/screens/assets/assets-sorting"
 import {
+  ASSET_FILTER_OPTION_LABELS,
+  ASSET_FILTER_OPTION_VALUES,
+  ASSET_FILTER_OPTIONS,
+  getFilteredInvestments,
+  type AssetFilterOption,
+} from "@/app/screens/assets/assets-filtering"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -33,12 +40,23 @@ export function AssetsScreen({
   onAddInvestment,
   onInvestmentSelect,
 }: AssetsScreenProps) {
+  const [filterOption, setFilterOption] = useState<AssetFilterOption>(
+    ASSET_FILTER_OPTIONS.all,
+  )
   const [sortOption, setSortOption] = useState<AssetSortOption>(
     ASSET_SORT_OPTIONS.newest,
   )
   const asOfDate = new Date()
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
-  const sortedInvestments = getSortedInvestments(investments, sortOption)
+  const filteredInvestments = getFilteredInvestments(
+    investments,
+    filterOption,
+    asOfDate,
+  )
+  const sortedInvestments = getSortedInvestments(
+    filteredInvestments,
+    sortOption,
+  )
   const investmentSummaries = sortedInvestments.map((investment) =>
     getInvestmentSummary(investment, asOfDate),
   )
@@ -70,49 +88,89 @@ export function AssetsScreen({
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Investment list</h2>
               <span className="text-sm font-medium text-muted-foreground">
-                {investmentSummaries.length} total
+                {investmentSummaries.length} shown
               </span>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2 text-card-foreground">
-              <span className="text-sm font-medium text-muted-foreground">
-                Sort by
-              </span>
-              <Select
-                value={sortOption}
-                onValueChange={(value) => {
-                  setSortOption(value as AssetSortOption)
-                }}
-              >
-                <SelectTrigger className="w-44" aria-label="Sort investments">
-                  <SelectValue>
-                    {(value: AssetSortOption | null) =>
-                      value === null
-                        ? "Select sort"
-                        : ASSET_SORT_OPTION_LABELS[value]
-                    }
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {ASSET_SORT_OPTION_VALUES.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {ASSET_SORT_OPTION_LABELS[option]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid gap-2 rounded-lg border bg-card px-3 py-3 text-card-foreground">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Filter
+                </span>
+                <Select
+                  value={filterOption}
+                  onValueChange={(value) => {
+                    setFilterOption(value as AssetFilterOption)
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-44"
+                    aria-label="Filter investments"
+                  >
+                    <SelectValue>
+                      {(value: AssetFilterOption | null) =>
+                        value === null
+                          ? "Select filter"
+                          : ASSET_FILTER_OPTION_LABELS[value]
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ASSET_FILTER_OPTION_VALUES.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {ASSET_FILTER_OPTION_LABELS[option]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Sort by
+                </span>
+                <Select
+                  value={sortOption}
+                  onValueChange={(value) => {
+                    setSortOption(value as AssetSortOption)
+                  }}
+                >
+                  <SelectTrigger className="w-44" aria-label="Sort investments">
+                    <SelectValue>
+                      {(value: AssetSortOption | null) =>
+                        value === null
+                          ? "Select sort"
+                          : ASSET_SORT_OPTION_LABELS[value]
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ASSET_SORT_OPTION_VALUES.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {ASSET_SORT_OPTION_LABELS[option]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            {investmentSummaries.map((investment) => (
-              <InvestmentCard
-                key={investment.id}
-                investment={investment}
-                onSelect={onInvestmentSelect}
-              />
-            ))}
-          </div>
+          {investmentSummaries.length === 0 ? (
+            <div className="rounded-lg border border-dashed bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+              No investments match this filter.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {investmentSummaries.map((investment) => (
+                <InvestmentCard
+                  key={investment.id}
+                  investment={investment}
+                  onSelect={onInvestmentSelect}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </section>

@@ -341,7 +341,7 @@ Assets is the operational list view. It should be more dense and scannable than 
 
 MVP decision:
 
-Assets starts as a clean full list with sorting. Filters can be added later.
+Assets starts as a clean full list with filtering and sorting.
 When no investments exist, Assets should show an empty state instead of an empty list.
 
 #### Investment Detail Screen
