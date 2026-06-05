@@ -6,6 +6,8 @@ import {
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
+import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
+import { PortfolioProjectionChart } from "@/app/screens/dashboard/PortfolioProjectionChart"
 import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCard"
 
 interface DashboardScreenProps {
@@ -24,6 +26,7 @@ export function DashboardScreen({
   const asOfDate = new Date()
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
   const dailyCashFlow = getPortfolioEstimatedDailyReturn(investments)
+  const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
   const investmentSummaries = investments
     .map((investment) => getInvestmentSummary(investment, asOfDate))
     .slice(0, DASHBOARD_INVESTMENT_PREVIEW_LIMIT)
@@ -50,11 +53,14 @@ export function DashboardScreen({
           onAction={onAddInvestment}
         />
       ) : (
-        <InvestmentPreviewList
-          investments={investmentSummaries}
-          totalInvestmentCount={investments.length}
-          onInvestmentSelect={onInvestmentSelect}
-        />
+        <>
+          <PortfolioProjectionChart points={projectionPoints} />
+          <InvestmentPreviewList
+            investments={investmentSummaries}
+            totalInvestmentCount={investments.length}
+            onInvestmentSelect={onInvestmentSelect}
+          />
+        </>
       )}
     </section>
   )

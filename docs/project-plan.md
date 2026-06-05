@@ -176,6 +176,7 @@ An investment is an asset you own that has capital allocated to it and may produ
 - Return at the end of a custom period
 - Progress percentage for fixed-term investments only
 - Estimated current value
+- Projected portfolio value over simple future horizons
 - Other computed metrics derived from user-provided investment fields
 
 ### Accepted Screen Contracts Draft
@@ -213,6 +214,7 @@ Domain inputs:
 
 - Estimated current value.
 - Estimated daily return.
+- Projected portfolio value points.
 - Investment summaries for the list.
 
 User actions:
@@ -230,7 +232,7 @@ States:
 
 Product note:
 
-Dashboard should show a summary card with total value and estimated daily cash flow, plus an investment list using investment summary cards.
+Dashboard should show a summary card with total value and estimated daily cash flow, a projected value chart, plus an investment list using investment summary cards.
 When no investments exist, Dashboard should show an empty state that guides the user to add an investment.
 
 #### Invest Screen
