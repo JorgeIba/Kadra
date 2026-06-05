@@ -324,6 +324,7 @@ User actions:
 - Filter by `active` or `finished`.
 - Filter by `fixed-term` or `open-ended`.
 - Sort by amount, rate, end date, or newest.
+- Search by investment name or institution later.
 - Open investment detail later.
 - Edit investment from detail.
 - Finish/close an open-ended investment later.
@@ -341,7 +342,7 @@ Assets is the operational list view. It should be more dense and scannable than 
 
 MVP decision:
 
-Assets starts as a clean full list with filtering and sorting.
+Assets starts as a clean full list with filtering and sorting. Search can be added later.
 When no investments exist, Assets should show an empty state instead of an empty list.
 
 #### Investment Detail Screen
