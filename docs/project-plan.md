@@ -5,6 +5,7 @@ This document is the shared source of truth for explicit product and architectur
 Related docs:
 
 - [Engineering Guidelines](./engineering-guidelines.md)
+- [Design Guidelines](./design-guidelines.md)
 
 ## How We Use This File
 

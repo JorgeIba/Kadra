@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "format": "prettier . --write",
-    "format:check": "prettier . --check",
+    "format": "prettier src public scripts vite.config.ts eslint.config.js index.html package.json tsconfig*.json --write",
+    "format:check": "prettier src public scripts vite.config.ts eslint.config.js index.html package.json tsconfig*.json --check",
+    "format:docs": "prettier docs README.md AGENTS.md init.md --write",
+    "format:docs:check": "prettier docs README.md AGENTS.md init.md --check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
