@@ -6,6 +6,7 @@ import {
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments/constants"
 import {
+  compareCalendarDatesAscending,
   getDaysActive,
   getDaysBetween,
   isCalendarDateString,
@@ -32,6 +33,16 @@ const fixedInvestment = {
 describe("investment date helpers", () => {
   it("calculates calendar days between two date-only strings", () => {
     expect(getDaysBetween("2026-01-01", "2026-01-31")).toBe(30)
+  })
+
+  it("compares calendar date strings in ascending order", () => {
+    expect(
+      compareCalendarDatesAscending("2026-01-01", "2026-01-31"),
+    ).toBeLessThan(0)
+    expect(
+      compareCalendarDatesAscending("2026-01-31", "2026-01-01"),
+    ).toBeGreaterThan(0)
+    expect(compareCalendarDatesAscending("2026-01-01", "2026-01-01")).toBe(0)
   })
 
   it("does not return negative day counts", () => {

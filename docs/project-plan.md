@@ -216,6 +216,7 @@ Domain inputs:
 - Estimated daily return.
 - Portfolio breakdown by type and status.
 - Projected portfolio value points.
+- Upcoming fixed-term maturity timeline.
 - Investment summaries for the list.
 
 User actions:
@@ -233,7 +234,7 @@ States:
 
 Product note:
 
-Dashboard should show a summary card with total value and estimated daily cash flow, portfolio breakdown by type/status, a projected value chart, plus an investment list using investment summary cards.
+Dashboard should show a summary card with total value and estimated daily cash flow, portfolio breakdown by type/status, a projected value chart, upcoming maturities, plus an investment list using investment summary cards.
 When no investments exist, Dashboard should show an empty state that guides the user to add an investment.
 
 #### Invest Screen

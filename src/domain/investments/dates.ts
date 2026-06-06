@@ -16,6 +16,16 @@ export function getDaysBetween(startDate: string, endDate: string): number {
   )
 }
 
+export function compareCalendarDatesAscending(
+  leftDate: string,
+  rightDate: string,
+): number {
+  return differenceInCalendarDays(
+    parseCalendarDate(leftDate),
+    parseCalendarDate(rightDate),
+  )
+}
+
 export function getDaysActive(
   investment: Investment,
   asOfDate = new Date(),

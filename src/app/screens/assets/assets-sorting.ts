@@ -1,4 +1,8 @@
-import { INVESTMENT_TYPES, type Investment } from "@/domain/investments"
+import {
+  INVESTMENT_TYPES,
+  compareCalendarDatesAscending,
+  type Investment,
+} from "@/domain/investments"
 
 export const ASSET_SORT_OPTIONS = {
   newest: "newest",
@@ -59,16 +63,16 @@ function compareEndDateSoonest(
   leftInvestment: Investment,
   rightInvestment: Investment,
 ) {
-  const leftEndDate = getSortableEndDate(leftInvestment)
-  const rightEndDate = getSortableEndDate(rightInvestment)
-
-  return leftEndDate - rightEndDate
-}
-
-function getSortableEndDate(investment: Investment) {
-  if (investment.type === INVESTMENT_TYPES.openEnded) {
-    return Number.POSITIVE_INFINITY
+  if (leftInvestment.type === INVESTMENT_TYPES.openEnded) {
+    return 1
   }
 
-  return Date.parse(investment.endDate)
+  if (rightInvestment.type === INVESTMENT_TYPES.openEnded) {
+    return -1
+  }
+
+  return compareCalendarDatesAscending(
+    leftInvestment.endDate,
+    rightInvestment.endDate,
+  )
 }

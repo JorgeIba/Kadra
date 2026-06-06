@@ -6,6 +6,8 @@ import {
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
+import { getMaturityTimelineItems } from "@/app/screens/dashboard/maturity-timeline"
+import { MaturityTimelineCard } from "@/app/screens/dashboard/MaturityTimelineCard"
 import { getPortfolioBreakdown } from "@/app/screens/dashboard/portfolio-breakdown"
 import { PortfolioBreakdownCard } from "@/app/screens/dashboard/PortfolioBreakdownCard"
 import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
@@ -30,6 +32,7 @@ export function DashboardScreen({
   const dailyCashFlow = getPortfolioEstimatedDailyReturn(investments)
   const portfolioBreakdown = getPortfolioBreakdown(investments, asOfDate)
   const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
+  const maturityTimelineItems = getMaturityTimelineItems(investments, asOfDate)
   const investmentSummaries = investments
     .map((investment) => getInvestmentSummary(investment, asOfDate))
     .slice(0, DASHBOARD_INVESTMENT_PREVIEW_LIMIT)
@@ -59,6 +62,10 @@ export function DashboardScreen({
         <>
           <PortfolioBreakdownCard breakdown={portfolioBreakdown} />
           <PortfolioProjectionChart points={projectionPoints} />
+          <MaturityTimelineCard
+            maturityTimelineItems={maturityTimelineItems}
+            onInvestmentSelect={onInvestmentSelect}
+          />
           <InvestmentPreviewList
             investments={investmentSummaries}
             totalInvestmentCount={investments.length}
