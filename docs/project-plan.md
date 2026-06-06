@@ -23,7 +23,7 @@ Related docs:
 | Screen contracts | Mostly complete | MVP screens confirmed; detail screen added; Trends removed |
 | Component tree | Mostly complete | MVP component responsibilities accepted |
 | Persistence strategy | In progress | `localStorage` first; defensive storage adapter added |
-| PWA strategy | Pending | Installable iPhone standalone app remains a goal |
+| PWA strategy | In progress | Basic installability configured with manifest, service worker generation, and iPhone home-screen icons |
 | App shell | Mostly complete | Top bar and bottom nav confirmed |
 
 ## Final Goal
