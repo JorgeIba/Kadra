@@ -500,6 +500,7 @@ This sequence is currently recommended and can be adjusted as we agree.
 - Storage currently persists the same plain-string shape used by the runtime domain model. If runtime models later use `Date` objects or diverge from persisted records, add explicit `recordToInvestment` / `investmentToRecord` mappers instead of relying on raw `JSON.parse`.
 - Before adding more silent fallback paths, define a small app logging policy or logger wrapper so storage/schema failures can be reported consistently without random `console.warn` calls across the codebase.
 - The top-bar reset action is a temporary escape hatch while we do not have settings. Move reset/data-management actions into a dedicated Settings or Data Management screen before polishing V1.
+- Code-splitting approach: prefer route-level lazy loading first, then split feature-level heavy dependencies such as charts only when bundle output shows value. Keep lightweight fallback UI outside heavy dependency modules so importing the fallback does not eagerly load the dependency. If a lazy feature grows, consider grouping its shell, fallback, and heavy content under a dedicated component folder.
 
 ## Next Recommended Step
 
