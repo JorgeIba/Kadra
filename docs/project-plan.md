@@ -489,6 +489,8 @@ This sequence is currently recommended and can be adjusted as we agree.
 - More detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
 - Support for investment transitions between `open-ended` and `fixed-term` over time
 - Richer lifecycle or configuration history for investments
+- Custom production domain after the free Vercel URL is validated on iPhone
+- Vercel Speed Insights or similar real-user performance monitoring after MVP usage starts
 
 ## Architecture Considerations
 
