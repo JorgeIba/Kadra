@@ -6,6 +6,8 @@ import {
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
+import { getPortfolioBreakdown } from "@/app/screens/dashboard/portfolio-breakdown"
+import { PortfolioBreakdownCard } from "@/app/screens/dashboard/PortfolioBreakdownCard"
 import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
 import { PortfolioProjectionChart } from "@/app/screens/dashboard/PortfolioProjectionChart"
 import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCard"
@@ -26,6 +28,7 @@ export function DashboardScreen({
   const asOfDate = new Date()
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
   const dailyCashFlow = getPortfolioEstimatedDailyReturn(investments)
+  const portfolioBreakdown = getPortfolioBreakdown(investments, asOfDate)
   const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
   const investmentSummaries = investments
     .map((investment) => getInvestmentSummary(investment, asOfDate))
@@ -54,6 +57,7 @@ export function DashboardScreen({
         />
       ) : (
         <>
+          <PortfolioBreakdownCard breakdown={portfolioBreakdown} />
           <PortfolioProjectionChart points={projectionPoints} />
           <InvestmentPreviewList
             investments={investmentSummaries}
