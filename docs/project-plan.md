@@ -4,6 +4,8 @@ This document is the shared source of truth for explicit product and architectur
 
 Related docs:
 
+- [Product Context](../PRODUCT.md)
+- [Design System](../DESIGN.md)
 - [Engineering Guidelines](./engineering-guidelines.md)
 - [Design Guidelines](./design-guidelines.md)
 

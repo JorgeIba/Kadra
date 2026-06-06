@@ -44,6 +44,7 @@ Current direction:
 
 - dark theme first
 - light theme later
+- `assets/screenshots_2/dashboard_idea_1.png` is the current visual baseline
 
 Dark theme should use:
 
@@ -59,6 +60,14 @@ Avoid:
 - bright neon finance aesthetics
 - purple-first themes
 - glossy glassmorphism as a default
+
+Baseline notes from the selected Stitch direction:
+
+- use one continuous dark ledger surface rather than a stack of cards
+- use serif type for major financial values and asset names
+- use compact sans labels and muted blue-gray metadata
+- use mint only for value, progress, status, and active navigation
+- use thin dividers and spacing before adding framed containers
 
 ## Visual Personality
 
