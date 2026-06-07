@@ -3,14 +3,14 @@ import { formatMxn } from "@/lib/formatters"
 
 interface PortfolioSummaryCardProps {
   totalValue: number
-  dailyCashFlow: number
-  investmentCount: number
+  dailyEarnings: number
+  monthlyEarnings: number
 }
 
 export function PortfolioSummaryCard({
   totalValue,
-  dailyCashFlow,
-  investmentCount,
+  dailyEarnings,
+  monthlyEarnings,
 }: PortfolioSummaryCardProps) {
   return (
     <Card className="rounded-lg bg-secondary/70">
@@ -27,18 +27,18 @@ export function PortfolioSummaryCard({
         <div className="grid grid-cols-2 gap-5">
           <div className="space-y-2">
             <p className="text-xs leading-none text-muted-foreground">
-              Daily flow
+              Daily earnings
             </p>
             <p className="font-ledger text-xl leading-none text-primary">
-              {formatMxn(dailyCashFlow)}
+              {formatMxn(dailyEarnings)}
             </p>
           </div>
           <div className="space-y-2">
             <p className="text-xs leading-none text-muted-foreground">
-              Holdings
+              Monthly earnings
             </p>
             <p className="font-ledger text-xl leading-none text-foreground">
-              {investmentCount}
+              {formatMxn(monthlyEarnings)}
             </p>
           </div>
         </div>

@@ -16,7 +16,9 @@ import {
 } from "@/domain/investments/dates"
 import {
   getEstimatedAccruedReturn,
+  getEstimatedMonthlyReturn,
   getEstimatedPeriodicReturn,
+  getEstimatedYearlyReturn,
   getSimpleInterest,
 } from "@/domain/investments/returns"
 
@@ -129,5 +131,21 @@ export function getPortfolioEstimatedDailyReturn(
       total +
       getSimpleInterest(investment.originalAmount, investment.annualRate, 1)
     )
+  }, 0)
+}
+
+export function getPortfolioEstimatedMonthlyReturn(
+  investments: Investment[],
+): number {
+  return investments.reduce((total, investment) => {
+    return total + getEstimatedMonthlyReturn(investment)
+  }, 0)
+}
+
+export function getPortfolioEstimatedYearlyReturn(
+  investments: Investment[],
+): number {
+  return investments.reduce((total, investment) => {
+    return total + getEstimatedYearlyReturn(investment)
   }, 0)
 }

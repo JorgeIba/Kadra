@@ -12,6 +12,8 @@ import {
   getInvestmentSummary,
   getPortfolioEstimatedCurrentValue,
   getPortfolioEstimatedDailyReturn,
+  getPortfolioEstimatedMonthlyReturn,
+  getPortfolioEstimatedYearlyReturn,
 } from "@/domain/investments/calculations"
 import type { Investment } from "@/domain/investments/types"
 
@@ -113,5 +115,7 @@ describe("investment calculations", () => {
       ),
     ).toBe(46_680)
     expect(getPortfolioEstimatedDailyReturn(investments)).toBe(12)
+    expect(getPortfolioEstimatedMonthlyReturn(investments)).toBe(360)
+    expect(getPortfolioEstimatedYearlyReturn(investments)).toBe(4_380)
   })
 })

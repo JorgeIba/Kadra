@@ -237,7 +237,7 @@ States:
 
 Product note:
 
-Dashboard should show a summary card with total value and estimated daily cash flow, portfolio breakdown by type/status, a projected value chart, upcoming maturities, plus an investment list using investment summary cards.
+Dashboard should show a summary card with total value and estimated daily/monthly earnings, portfolio breakdown by type/status, a projected value chart, upcoming maturities, plus an investment list using investment summary cards.
 When no investments exist, Dashboard should show an empty state that guides the user to add an investment.
 
 #### Invest Screen
@@ -425,7 +425,7 @@ Trends is removed from MVP navigation for now. We can reintroduce it later once 
 - `DashboardScreen`
   Coordinates dashboard data and actions.
 - `PortfolioSummaryCard`
-  Shows total value and estimated daily cash flow.
+  Shows total value and estimated daily/monthly earnings.
 - `InvestmentList`
   Renders a short preview of investment summary cards on Dashboard.
 - `InvestmentSummaryCard`
@@ -504,7 +504,7 @@ This sequence is currently recommended and can be adjusted as we agree.
 - `InvestmentFormPreview` can stay local while it is placeholder-only. Move it to shared investment components once it renders real projection data from an investment draft.
 - Storage currently persists the same plain-string shape used by the runtime domain model. If runtime models later use `Date` objects or diverge from persisted records, add explicit `recordToInvestment` / `investmentToRecord` mappers instead of relying on raw `JSON.parse`.
 - Before adding more silent fallback paths, define a small app logging policy or logger wrapper so storage/schema failures can be reported consistently without random `console.warn` calls across the codebase.
-- The top-bar reset action is a temporary escape hatch while we do not have settings. Move reset/data-management actions into a dedicated Settings or Data Management screen before polishing V1.
+- The top-bar reset icon is an intentional temporary escape hatch while we do not have settings. Move reset/data-management actions into a dedicated Settings or Data Management screen before polishing V1.
 - Code-splitting approach: prefer route-level lazy loading first, then split feature-level heavy dependencies such as charts only when bundle output shows value. Keep lightweight fallback UI outside heavy dependency modules so importing the fallback does not eagerly load the dependency. If a lazy feature grows, consider grouping its shell, fallback, and heavy content under a dedicated component folder.
 
 ## Next Recommended Step

@@ -2,6 +2,7 @@ import {
   getInvestmentSummary,
   getPortfolioEstimatedCurrentValue,
   getPortfolioEstimatedDailyReturn,
+  getPortfolioEstimatedMonthlyReturn,
   type Investment,
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
@@ -29,7 +30,8 @@ export function DashboardScreen({
 }: DashboardScreenProps) {
   const asOfDate = new Date()
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
-  const dailyCashFlow = getPortfolioEstimatedDailyReturn(investments)
+  const dailyEarnings = getPortfolioEstimatedDailyReturn(investments)
+  const monthlyEarnings = getPortfolioEstimatedMonthlyReturn(investments)
   const portfolioBreakdown = getPortfolioBreakdown(investments, asOfDate)
   const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
   const maturityTimelineItems = getMaturityTimelineItems(investments, asOfDate)
@@ -41,14 +43,14 @@ export function DashboardScreen({
     <section className="space-y-9">
       <PortfolioSummaryCard
         totalValue={totalValue}
-        dailyCashFlow={dailyCashFlow}
-        investmentCount={investments.length}
+        dailyEarnings={dailyEarnings}
+        monthlyEarnings={monthlyEarnings}
       />
 
       {investments.length === 0 ? (
         <EmptyInvestmentsState
           title="No investments yet"
-          description="Add your first investment to start tracking total value, daily cash flow, and projected returns."
+          description="Add your first investment to start tracking total value, estimated earnings, and projected returns."
           actionLabel="Add investment"
           onAction={onAddInvestment}
         />
