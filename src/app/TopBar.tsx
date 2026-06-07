@@ -1,3 +1,4 @@
+import { Shield, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface TopBarProps {
@@ -6,27 +7,24 @@ interface TopBarProps {
 
 export function TopBar({ onResetLocalData }: TopBarProps) {
   return (
-    <header className="sticky top-0 z-10 border-b border-border/80 bg-background/90 px-5 py-4 backdrop-blur">
+    <header className="sticky top-0 z-10 bg-background/95 px-5 pb-3 pt-5 backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
-            T
-          </div>
-          <div>
-            <p className="text-base font-semibold leading-none">Trafin</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Local investment tracker
-            </p>
-          </div>
+          <Shield className="size-5 text-primary" aria-hidden="true" />
+          <p className="font-ledger text-2xl leading-none text-foreground">
+            Trafin
+          </p>
         </div>
 
         <Button
           type="button"
           variant="ghost"
-          size="sm"
+          size="icon"
+          aria-label="Reset local data"
+          className="rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground"
           onClick={onResetLocalData}
         >
-          Reset
+          <UserCircle className="size-5" aria-hidden="true" />
         </Button>
       </div>
     </header>

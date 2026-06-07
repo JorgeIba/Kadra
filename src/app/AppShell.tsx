@@ -17,7 +17,7 @@ export function AppShell({ onResetLocalData }: AppShellProps) {
     <div className="app-background">
       <div className="app-frame">
         <TopBar onResetLocalData={() => setIsResetDialogOpen(true)} />
-        <main className="flex-1 px-5 pb-28 pt-5">
+        <main className="flex-1 px-5 pb-28 pt-6">
           <Outlet />
         </main>
         <BottomNav activeSection={activeSection} />

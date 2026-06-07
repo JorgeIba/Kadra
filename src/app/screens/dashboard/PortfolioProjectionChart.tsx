@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { PortfolioProjectionPoint } from "@/app/screens/dashboard/portfolio-projection"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatMxn } from "@/lib/formatters"
@@ -20,35 +21,27 @@ export function PortfolioProjectionChart({
 }: PortfolioProjectionChartProps) {
   return (
     <Card className="rounded-lg">
-      <CardContent className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold">Projected value</h2>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Estimated portfolio value over the next year using current simple
-            interest assumptions.
-          </p>
-        </div>
+      <CardContent className="space-y-5">
+        <DashboardSectionHeader
+          title="Growth forecast"
+          description="Estimated projection based on yield."
+        />
 
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={points}
-              margin={{ bottom: 0, left: 0, right: 8, top: 8 }}
+              margin={{ bottom: 0, left: 0, right: 8, top: 28 }}
             >
-              <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" />
+              <CartesianGrid vertical={false} stroke="transparent" />
               <XAxis
                 dataKey="label"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
+                dy={14}
               />
-              <YAxis
-                width={72}
-                tickFormatter={formatCompactMxn}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
-              />
+              <YAxis hide domain={["dataMin", "dataMax"]} />
               <Tooltip
                 formatter={(value) => {
                   return [formatMxn(Number(value)), "Estimated value"]
@@ -63,7 +56,7 @@ export function PortfolioProjectionChart({
                 contentStyle={{
                   background: "var(--card)",
                   border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-lg)",
+                  borderRadius: "var(--radius-md)",
                   color: "var(--card-foreground)",
                 }}
               />
@@ -71,9 +64,9 @@ export function PortfolioProjectionChart({
                 type="monotone"
                 dataKey="estimatedValue"
                 stroke="var(--primary)"
-                strokeWidth={3}
-                dot={{ fill: "var(--primary)", r: 3 }}
-                activeDot={{ r: 5 }}
+                strokeWidth={2}
+                dot={{ fill: "var(--primary)", r: 2 }}
+                activeDot={{ fill: "var(--primary)", r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -81,8 +74,4 @@ export function PortfolioProjectionChart({
       </CardContent>
     </Card>
   )
-}
-
-function formatCompactMxn(value: number) {
-  return `$${Math.round(value / 1000)}k`
 }

@@ -7,7 +7,7 @@ import {
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
 import { getMaturityTimelineItems } from "@/app/screens/dashboard/maturity-timeline"
-import { MaturityTimelineCard } from "@/app/screens/dashboard/MaturityTimelineCard"
+import { MaturityTimelineSection } from "@/app/screens/dashboard/MaturityTimelineSection"
 import { getPortfolioBreakdown } from "@/app/screens/dashboard/portfolio-breakdown"
 import { PortfolioBreakdownCard } from "@/app/screens/dashboard/PortfolioBreakdownCard"
 import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
@@ -38,17 +38,11 @@ export function DashboardScreen({
     .slice(0, DASHBOARD_INVESTMENT_PREVIEW_LIMIT)
 
   return (
-    <section className="space-y-5">
-      <div className="space-y-1">
-        <p className="text-sm font-medium text-muted-foreground">Dashboard</p>
-        <h1 className="text-3xl font-semibold tracking-normal">
-          Portfolio snapshot
-        </h1>
-      </div>
-
+    <section className="space-y-9">
       <PortfolioSummaryCard
         totalValue={totalValue}
         dailyCashFlow={dailyCashFlow}
+        investmentCount={investments.length}
       />
 
       {investments.length === 0 ? (
@@ -62,7 +56,7 @@ export function DashboardScreen({
         <>
           <PortfolioBreakdownCard breakdown={portfolioBreakdown} />
           <PortfolioProjectionChart points={projectionPoints} />
-          <MaturityTimelineCard
+          <MaturityTimelineSection
             maturityTimelineItems={maturityTimelineItems}
             onInvestmentSelect={onInvestmentSelect}
           />

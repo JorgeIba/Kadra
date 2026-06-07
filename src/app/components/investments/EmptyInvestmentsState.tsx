@@ -15,11 +15,11 @@ export function EmptyInvestmentsState({
   onAction,
 }: EmptyInvestmentsStateProps) {
   return (
-    <div className="rounded-xl border border-dashed bg-card px-5 py-8 text-center text-card-foreground">
-      <div className="mx-auto grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
+    <div className="border-y border-border/70 px-5 py-10 text-center text-foreground">
+      <div className="mx-auto grid size-12 place-items-center rounded-lg bg-secondary text-primary">
         <WalletCards className="size-6" aria-hidden="true" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold">{title}</h2>
+      <h2 className="mt-4 font-ledger text-xl">{title}</h2>
       <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-muted-foreground">
         {description}
       </p>
