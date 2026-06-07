@@ -46,10 +46,11 @@ export function usePwaUpdate({ onUpdateAvailable }: UsePwaUpdateOptions = {}) {
     setIsCheckingForUpdate(true)
 
     try {
-      await Promise.race([
-        checkServiceWorkerForUpdates(registrationRef.current),
-        wait(PWA_UPDATE_CHECK_TIMEOUT_MS),
-      ])
+      const updateCheck = checkServiceWorkerForUpdates(
+        registrationRef.current,
+      ).catch(() => {})
+
+      await Promise.race([updateCheck, wait(PWA_UPDATE_CHECK_TIMEOUT_MS)])
     } finally {
       setIsCheckingForUpdate(false)
     }

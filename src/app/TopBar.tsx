@@ -30,7 +30,9 @@ export function TopBar({
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Check for app updates"
+            aria-label={
+              hasAppUpdate ? "App update available" : "Check for app updates"
+            }
             className={cn(
               "relative rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground",
               hasAppUpdate &&
