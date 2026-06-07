@@ -169,7 +169,7 @@ function InvestRoute({
   function handleInvestmentCreate(investment: Investment) {
     addInvestment(investment)
     navigate(getInvestmentDetailPath(investment.id), {
-      state: { fromSection: APP_SECTIONS.invest },
+      state: { fromSection: APP_SECTIONS.assets },
     })
   }
 
