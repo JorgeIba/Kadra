@@ -49,3 +49,11 @@ Current recommendation:
 
 - Add a short inline comment when code exists mainly for accessibility behavior.
 - Keep the comment focused on why the behavior exists, such as keyboard focus or screen-reader semantics.
+
+## Learning Explanations
+
+- Explain new code as a story before explaining individual lines.
+- Start with the product goal, then describe the naive implementation someone might try first.
+- Name the missing browser, React, or library capability that forces the final shape.
+- Explain each code block by the role it plays in that story, not only by syntax.
+- Use line-by-line explanations only after the flow is clear.
