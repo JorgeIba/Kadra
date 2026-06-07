@@ -33,7 +33,11 @@ export function PortfolioProjectionChart({
               data={points}
               margin={{ bottom: 0, left: 0, right: 8, top: 28 }}
             >
-              <CartesianGrid vertical={false} stroke="transparent" />
+              <CartesianGrid
+                vertical={false}
+                stroke="var(--border)"
+                strokeOpacity={0.45}
+              />
               <XAxis
                 dataKey="label"
                 tickLine={false}
