@@ -37,7 +37,7 @@ export function InvestmentDetailScreen({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-7">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
         <ArrowLeft className="size-4" aria-hidden="true" />
         Back
@@ -48,7 +48,7 @@ export function InvestmentDetailScreen({
           <p className="text-sm font-medium text-muted-foreground">
             {investment.institutionName}
           </p>
-          <h1 className="text-3xl font-semibold tracking-normal">
+          <h1 className="font-ledger text-3xl font-normal tracking-normal">
             {investment.name}
           </h1>
         </div>
@@ -58,18 +58,16 @@ export function InvestmentDetailScreen({
         </Button>
       </div>
 
-      <Card className="border-none bg-primary text-primary-foreground shadow-xl shadow-emerald-950/10 ring-0">
+      <Card className="rounded-lg bg-secondary/70">
         <CardContent className="space-y-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm text-primary-foreground/70">
-                Estimated value
-              </p>
-              <p className="mt-2 text-4xl font-semibold tracking-normal">
+              <p className="text-xs text-muted-foreground">Estimated value</p>
+              <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
                 {formatMxn(derivedValues.estimatedCurrentValue)}
               </p>
             </div>
-            <div className="grid size-10 place-items-center rounded-lg bg-primary-foreground/10">
+            <div className="grid size-10 place-items-center rounded-lg bg-background/60 text-primary">
               <WalletCards className="size-5" aria-hidden="true" />
             </div>
           </div>
@@ -123,7 +121,7 @@ export function InvestmentDetailScreen({
         </CardContent>
       </Card>
 
-      <Card className="rounded-lg border-destructive/20 bg-destructive/5">
+      <Card className="rounded-lg border-destructive/20 bg-destructive/10">
         <CardContent className="space-y-3">
           <div>
             <h2 className="text-base font-semibold text-destructive">
@@ -168,22 +166,21 @@ function DetailMetric({
   value: string
 }) {
   return (
-    <div className="rounded-lg bg-primary-foreground/10 px-3 py-3">
-      <Icon
-        className="mb-3 size-4 text-primary-foreground/70"
-        aria-hidden="true"
-      />
-      <p className="text-xs text-primary-foreground/60">{label}</p>
-      <p className="mt-1 font-semibold">{value}</p>
+    <div className="rounded-lg bg-background/60 px-3 py-3">
+      <Icon className="mb-3 size-4 text-primary" aria-hidden="true" />
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 font-ledger text-base text-foreground">{value}</p>
     </div>
   )
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b pb-3 last:border-b-0 last:pb-0">
+    <div className="flex items-center justify-between gap-4 border-b border-border/70 pb-3 last:border-b-0 last:pb-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-right text-sm font-medium">{value}</span>
+      <span className="text-right font-ledger text-sm text-foreground">
+        {value}
+      </span>
     </div>
   )
 }

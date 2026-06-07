@@ -62,17 +62,21 @@ export function AssetsScreen({
   )
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-8">
       <div className="space-y-1">
-        <p className="text-sm font-medium text-muted-foreground">Assets</p>
-        <h1 className="text-3xl font-semibold tracking-normal">
+        <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          Assets
+        </p>
+        <h1 className="font-ledger text-3xl font-normal tracking-normal">
           All investments
         </h1>
       </div>
 
-      <div className="rounded-lg border bg-card px-4 py-3 text-card-foreground">
-        <p className="text-sm text-muted-foreground">Current total value</p>
-        <p className="mt-1 text-2xl font-semibold">{formatMxn(totalValue)}</p>
+      <div className="rounded-lg bg-secondary/70 px-4 py-4">
+        <p className="text-xs text-muted-foreground">Current total value</p>
+        <p className="mt-2 font-ledger text-3xl leading-none">
+          {formatMxn(totalValue)}
+        </p>
       </div>
 
       {investments.length === 0 ? (
@@ -83,16 +87,16 @@ export function AssetsScreen({
           onAction={onAddInvestment}
         />
       ) : (
-        <div className="space-y-3">
-          <div className="space-y-3">
+        <div className="space-y-5">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Investment list</h2>
-              <span className="text-sm font-medium text-muted-foreground">
+              <h2 className="text-base font-bold">Investment list</h2>
+              <span className="text-xs font-medium text-muted-foreground">
                 {investmentSummaries.length} shown
               </span>
             </div>
 
-            <div className="grid gap-2 rounded-lg border bg-card px-3 py-3 text-card-foreground">
+            <div className="grid gap-3 border-y border-border/70 py-3">
               <AssetsSelectControl
                 ariaLabel="Filter investments"
                 fallbackLabel="Select filter"
@@ -116,11 +120,11 @@ export function AssetsScreen({
           </div>
 
           {investmentSummaries.length === 0 ? (
-            <div className="rounded-lg border border-dashed bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+            <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center text-sm text-muted-foreground">
               No investments match this filter.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="divide-y divide-border/70 border-t border-border/70">
               {investmentSummaries.map((investment) => (
                 <InvestmentCard
                   key={investment.id}
@@ -157,7 +161,7 @@ function AssetsSelectControl<TOption extends string>({
 }: AssetsSelectControlProps<TOption>) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <Select
         value={value}
         onValueChange={(nextValue) => {
