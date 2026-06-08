@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Outlet } from "react-router"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useLocation, useOutlet } from "react-router"
 import { BottomNav } from "@/app/BottomNav"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import { usePwaUpdate } from "@/app/pwa/usePwaUpdate"
@@ -8,6 +9,43 @@ import { useActiveAppSection } from "@/app/routing/useActiveAppSection"
 
 interface AppShellProps {
   onResetLocalData: () => void
+}
+
+function getScreenMotionProps(prefersReducedMotion: boolean) {
+  if (prefersReducedMotion) {
+    return {
+      initial: { opacity: 1 },
+      animate: { opacity: 1 },
+      exit: { opacity: 1 },
+      transition: { duration: 0 },
+    }
+  }
+
+  return {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -4 },
+    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const },
+  }
+}
+
+function AnimatedOutlet() {
+  const location = useLocation()
+  const outlet = useOutlet()
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const screenMotionProps = getScreenMotionProps(prefersReducedMotion)
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        className="w-full"
+        {...screenMotionProps}
+      >
+        {outlet}
+      </motion.div>
+    </AnimatePresence>
+  )
 }
 
 export function AppShell({ onResetLocalData }: AppShellProps) {
@@ -44,7 +82,7 @@ export function AppShell({ onResetLocalData }: AppShellProps) {
           onResetLocalData={() => setIsResetDialogOpen(true)}
         />
         <main className="flex-1 px-5 pb-28 pt-6">
-          <Outlet />
+          <AnimatedOutlet />
         </main>
         <BottomNav activeSection={activeSection} />
       </div>
