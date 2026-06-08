@@ -54,7 +54,7 @@ export function TopBar({
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Restore sample data"
+            aria-label="Clear local data"
             className="rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground"
             onClick={onResetLocalData}
           >

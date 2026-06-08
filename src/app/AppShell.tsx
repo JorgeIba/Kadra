@@ -88,9 +88,9 @@ export function AppShell({ onResetLocalData }: AppShellProps) {
       </div>
       <ConfirmDialog
         open={isResetDialogOpen}
-        title="Restore sample data?"
-        description="This replaces your current local investments with Trafin's sample portfolio."
-        confirmLabel="Restore sample data"
+        title="Clear local data?"
+        description="This removes every investment from your local Trafin portfolio."
+        confirmLabel="Clear local data"
         variant="destructive"
         onRequestOpenChange={setIsResetDialogOpen}
         onConfirm={onResetLocalData}

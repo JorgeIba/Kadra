@@ -9,6 +9,7 @@ import {
   useParams,
 } from "react-router"
 import { AppShell } from "@/app/AppShell"
+import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   APP_PATHS,
   APP_ROUTE_PATHS,
@@ -27,11 +28,11 @@ import {
   loadInvestmentsFromStorage,
   saveInvestmentsToStorage,
 } from "@/app/storage/investments-storage"
-import { sampleInvestments, type Investment } from "@/domain/investments"
+import type { Investment } from "@/domain/investments"
 
 export function AppRouter() {
   const [investments, setInvestments] = useState<Investment[]>(() => {
-    return loadInvestmentsFromStorage(sampleInvestments)
+    return loadInvestmentsFromStorage([])
   })
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export function AppRouter() {
   }
 
   function resetLocalData() {
-    setInvestments(sampleInvestments)
+    setInvestments([])
   }
 
   return (
@@ -281,11 +282,11 @@ function EditInvestmentRoute({
 function InvestmentNotFound({ onBack }: { onBack: () => void }) {
   return (
     <section className="space-y-3">
-      <p className="text-sm font-medium text-muted-foreground">Investment</p>
-      <h1 className="text-3xl font-semibold tracking-normal">Not found</h1>
-      <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-        This investment is not available in the current local data.
-      </p>
+      <ScreenIntro
+        eyebrow="Investment"
+        title="Not found"
+        description="This investment is no longer available in your local portfolio."
+      />
       <button
         type="button"
         className="text-sm font-medium text-primary"

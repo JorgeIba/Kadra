@@ -8,6 +8,7 @@ import {
   WalletCards,
 } from "lucide-react"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
+import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
@@ -44,18 +45,16 @@ export function InvestmentDetailScreen({
       </Button>
 
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">
-            {investment.institutionName}
-          </p>
-          <h1 className="font-ledger text-3xl font-normal tracking-normal">
-            {investment.name}
-          </h1>
-        </div>
-        <Button type="button" variant="outline" size="sm" onClick={onEdit}>
-          <Pencil className="size-4" aria-hidden="true" />
-          Edit
-        </Button>
+        <ScreenIntro
+          eyebrow={investment.institutionName}
+          title={investment.name}
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={onEdit}>
+              <Pencil className="size-4" aria-hidden="true" />
+              Edit
+            </Button>
+          }
+        />
       </div>
 
       <Card className="rounded-lg bg-secondary/70">

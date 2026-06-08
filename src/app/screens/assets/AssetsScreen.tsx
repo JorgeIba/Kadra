@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   getInvestmentSummary,
   getPortfolioEstimatedCurrentValue,
@@ -64,14 +65,7 @@ export function AssetsScreen({
 
   return (
     <section className="space-y-6">
-      <div className="space-y-1">
-        <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Assets
-        </p>
-        <h1 className="font-ledger text-3xl font-normal tracking-normal">
-          All investments
-        </h1>
-      </div>
+      <ScreenIntro eyebrow="Assets" title="All investments" />
 
       {investments.length === 0 ? (
         <EmptyInvestmentsState

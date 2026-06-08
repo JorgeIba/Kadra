@@ -1,3 +1,4 @@
+import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   mapInvestmentToFormValues,
   buildUpdatedInvestmentFromFormValues,
@@ -31,15 +32,11 @@ export function EditInvestmentScreen({
 
   return (
     <section className="space-y-5">
-      <div className="space-y-1">
-        <p className="text-sm font-medium text-muted-foreground">
-          Edit investment
-        </p>
-        <h1 className="text-3xl font-semibold tracking-normal">Update terms</h1>
-        <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-          Adjust the stored terms for this local investment.
-        </p>
-      </div>
+      <ScreenIntro
+        eyebrow="Edit investment"
+        title="Update terms"
+        description="Adjust the stored terms so Trafin keeps current value, income, and maturity tracking aligned with the latest details."
+      />
 
       <InvestmentForm
         cancelLabel="Back to detail"
