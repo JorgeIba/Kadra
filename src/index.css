@@ -11,6 +11,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --motion-productive: 180ms;
+  --ease-productive: cubic-bezier(0.22, 1, 0.36, 1);
   --background: oklch(0.15 0.012 190);
   --foreground: oklch(0.96 0.012 80);
   --card: oklch(0.18 0.014 190);
@@ -53,6 +55,14 @@ body,
 
 body {
   margin: 0;
+}
+
+dialog {
+  opacity: 0;
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0);
 }
 
 @theme inline {
@@ -112,6 +122,23 @@ body {
 }
 
 @layer components {
+  .dialog-surface[open] {
+    animation: dialog-enter var(--motion-productive) var(--ease-productive)
+      forwards;
+  }
+
+  .dialog-surface[data-state="closing"][open] {
+    animation: dialog-exit 140ms var(--ease-productive) forwards;
+  }
+
+  .dialog-surface[open]::backdrop {
+    animation: backdrop-enter var(--motion-productive) ease-out forwards;
+  }
+
+  .dialog-surface[data-state="closing"][open]::backdrop {
+    animation: backdrop-exit 140ms ease-out forwards;
+  }
+
   .app-background {
     min-height: 100dvh;
     color: var(--foreground);
@@ -124,5 +151,58 @@ body {
 
   .font-ledger {
     font-family: var(--font-ledger);
+  }
+}
+
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 10px)) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dialog-exit {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 6px)) scale(0.985);
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    background: rgb(11 17 19 / 0);
+  }
+
+  to {
+    background: rgb(11 17 19 / 0.52);
+  }
+}
+
+@keyframes backdrop-exit {
+  from {
+    background: rgb(11 17 19 / 0.52);
+  }
+
+  to {
+    background: rgb(11 17 19 / 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-surface[open],
+  .dialog-surface[data-state="closing"][open],
+  .dialog-surface[open]::backdrop,
+  .dialog-surface[data-state="closing"][open]::backdrop {
+    animation: none;
   }
 }

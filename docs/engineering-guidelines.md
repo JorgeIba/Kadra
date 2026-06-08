@@ -57,3 +57,22 @@ Current recommendation:
 - Name the missing browser, React, or library capability that forces the final shape.
 - Explain each code block by the role it plays in that story, not only by syntax.
 - Use line-by-line explanations only after the flow is clear.
+- Give both layers of explanation:
+  - architectural: why this shape fits the product and codebase
+  - mechanical: what the syntax literally does at runtime or in the browser
+- For each non-obvious API, utility, or pattern, say what category it belongs to:
+  - native browser behavior
+  - React behavior
+  - Tailwind behavior
+  - library behavior
+  - project-defined naming or variable
+- Prefer this explanation order for unfamiliar code:
+  1. what problem we are solving
+  2. what happens if we do nothing or use the naive approach
+  3. what tool or pattern we are using
+  4. what the syntax literally means
+  5. why this version is better here
+- When explaining Tailwind classes, describe which element they affect and which state triggers them.
+- Use concrete parent/child examples for patterns like `group`, `group-hover`, `focus-visible`, descendant selectors, and motion variants.
+- When introducing variables or tokens, explain whether they are built-in keywords or names we created, and what value they store.
+- Avoid assuming the reader already knows terms like `preventDefault`, CSS custom properties, controlled state, variant, or arbitrary value syntax.

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -24,6 +24,7 @@ export function ConfirmDialog({
   variant = "default",
 }: ConfirmDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const [isClosing, setIsClosing] = useState(false)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -32,15 +33,22 @@ export function ConfirmDialog({
       return
     }
 
-    // Should be opened
+    setIsClosing(false)
+
     if (open && !dialog.open) {
       dialog.showModal()
       return
     }
 
-    // Should be closed
     if (!open && dialog.open) {
-      dialog.close()
+      setIsClosing(true)
+
+      const closeTimeout = window.setTimeout(() => {
+        dialog.close()
+        setIsClosing(false)
+      }, 180)
+
+      return () => window.clearTimeout(closeTimeout)
     }
   }, [open])
 
@@ -52,8 +60,15 @@ export function ConfirmDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed left-1/2 top-1/2 w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-foreground/30"
-      onCancel={() => onRequestOpenChange(false)}
+      data-state={
+        open && !isClosing ? "open" : isClosing ? "closing" : "closed"
+      }
+      className="dialog-surface fixed left-1/2 top-1/2 w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-foreground/30"
+      onCancel={(event) => {
+        // Keep Escape-key dismissal accessible while routing close through the controlled animation.
+        event.preventDefault()
+        onRequestOpenChange(false)
+      }}
       onClose={() => onRequestOpenChange(false)}
     >
       <div className="space-y-5 p-5">
