@@ -1,4 +1,4 @@
-import { RefreshCw, Shield, UserCircle } from "lucide-react"
+import { Database, RefreshCw, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -54,11 +54,11 @@ export function TopBar({
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Reset local data"
+            aria-label="Restore sample data"
             className="rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground"
             onClick={onResetLocalData}
           >
-            <UserCircle className="size-5" aria-hidden="true" />
+            <Database className="size-5" aria-hidden="true" />
           </Button>
         </div>
       </div>

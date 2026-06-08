@@ -24,13 +24,15 @@ export function InvestScreen({
   return (
     <section className="space-y-5">
       <div className="space-y-1">
-        <p className="text-sm font-medium text-muted-foreground">Invest</p>
-        <h1 className="text-3xl font-semibold tracking-normal">
+        <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          Invest
+        </p>
+        <h1 className="font-ledger text-3xl font-normal tracking-normal">
           New investment
         </h1>
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-          Capture the investment terms first. For this pass, valid submissions
-          become a local draft before database persistence exists.
+          Capture the terms once so Trafin can track value, estimated income,
+          and maturity progress from the moment you save it.
         </p>
       </div>
 

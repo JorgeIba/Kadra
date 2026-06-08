@@ -60,9 +60,10 @@ export function AssetsScreen({
   const investmentSummaries = sortedInvestments.map((investment) =>
     getInvestmentSummary(investment, asOfDate),
   )
+  const shownCountLabel = `${investmentSummaries.length} shown`
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6">
       <div className="space-y-1">
         <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
           Assets
@@ -70,13 +71,6 @@ export function AssetsScreen({
         <h1 className="font-ledger text-3xl font-normal tracking-normal">
           All investments
         </h1>
-      </div>
-
-      <div className="rounded-lg bg-secondary/70 px-4 py-4">
-        <p className="text-xs text-muted-foreground">Current total value</p>
-        <p className="mt-2 font-ledger text-3xl leading-none">
-          {formatMxn(totalValue)}
-        </p>
       </div>
 
       {investments.length === 0 ? (
@@ -88,15 +82,22 @@ export function AssetsScreen({
         />
       ) : (
         <div className="space-y-5">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold">Investment list</h2>
-              <span className="text-xs font-medium text-muted-foreground">
-                {investmentSummaries.length} shown
+          <div className="rounded-lg bg-secondary/60 px-4 py-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Current total value
+                </p>
+                <p className="font-ledger text-[2rem] leading-none">
+                  {formatMxn(totalValue)}
+                </p>
+              </div>
+              <span className="rounded-full bg-background/70 px-2.5 py-1 text-[0.68rem] font-medium tracking-[0.08em] text-muted-foreground">
+                {shownCountLabel}
               </span>
             </div>
 
-            <div className="grid gap-3 border-y border-border/70 py-3">
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border/70 pt-4">
               <AssetsSelectControl
                 ariaLabel="Filter investments"
                 fallbackLabel="Select filter"
@@ -124,14 +125,23 @@ export function AssetsScreen({
               No investments match this filter.
             </div>
           ) : (
-            <div className="divide-y divide-border/70 border-t border-border/70">
-              {investmentSummaries.map((investment) => (
-                <InvestmentCard
-                  key={investment.id}
-                  investment={investment}
-                  onSelect={onInvestmentSelect}
-                />
-              ))}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold">Investment list</h2>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {shownCountLabel}
+                </span>
+              </div>
+
+              <div className="divide-y divide-border/70 border-t border-border/70">
+                {investmentSummaries.map((investment) => (
+                  <InvestmentCard
+                    key={investment.id}
+                    investment={investment}
+                    onSelect={onInvestmentSelect}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -160,7 +170,7 @@ function AssetsSelectControl<TOption extends string>({
   value,
 }: AssetsSelectControlProps<TOption>) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="space-y-2">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <Select
         value={value}
@@ -168,7 +178,11 @@ function AssetsSelectControl<TOption extends string>({
           onValueChange(nextValue as TOption)
         }}
       >
-        <SelectTrigger className="w-44" aria-label={ariaLabel}>
+        <SelectTrigger
+          className="w-full min-w-0"
+          size="sm"
+          aria-label={ariaLabel}
+        >
           <SelectValue>
             {(nextValue: TOption | null) =>
               nextValue === null ? fallbackLabel : labels[nextValue]
