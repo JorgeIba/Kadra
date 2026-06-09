@@ -13,6 +13,7 @@
   -moz-osx-font-smoothing: grayscale;
   --motion-productive: 180ms;
   --ease-productive: cubic-bezier(0.22, 1, 0.36, 1);
+  --tap-highlight: color-mix(in oklch, var(--primary) 22%, transparent);
   --background: oklch(0.15 0.012 190);
   --foreground: oklch(0.96 0.012 80);
   --card: oklch(0.18 0.014 190);
@@ -110,6 +111,19 @@ body {
   }
   html {
     @apply font-sans;
+  }
+  :where(
+    a,
+    button,
+    [role="button"],
+    [role="tab"],
+    input,
+    textarea,
+    select,
+    summary
+  ) {
+    -webkit-tap-highlight-color: var(--tap-highlight);
+    touch-action: manipulation;
   }
 }
 

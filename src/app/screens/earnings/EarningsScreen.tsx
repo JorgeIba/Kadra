@@ -136,11 +136,11 @@ function BreakdownPeriodPicker({
               aria-label={option.label}
               title={option.label}
               className={cn(
-                "min-h-9 rounded-md px-3 text-sm font-medium transition-colors",
+                "min-h-9 rounded-md px-3 text-sm font-medium transition-[transform,background-color,color,box-shadow] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] active:translate-y-px active:scale-[0.99] motion-reduce:transform-none motion-reduce:transition-none",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
                 isSelected
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
+                  : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground active:bg-secondary/90 active:text-foreground",
               )}
               onClick={() => onSelectPeriod(option.value)}
             >

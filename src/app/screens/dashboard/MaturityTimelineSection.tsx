@@ -26,11 +26,11 @@ export function MaturityTimelineSection({
             key={item.id}
             type="button"
             variant="ghost"
-            className="group/timeline h-auto w-full justify-start rounded-lg border border-transparent px-3 py-4 text-left hover:border-primary/10 hover:bg-secondary/45"
+            className="group/timeline h-auto w-full justify-start rounded-lg border border-transparent px-3 py-4 text-left hover:border-primary/10 hover:bg-secondary/45 active:border-primary/10 active:bg-secondary/60"
             onClick={() => onInvestmentSelect(item.id)}
           >
             <CalendarClock
-              className="mt-1 size-4 shrink-0 text-muted-foreground transition-[color,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/timeline:-translate-y-px group-hover/timeline:text-primary motion-reduce:transform-none"
+              className="mt-1 size-4 shrink-0 text-muted-foreground transition-[color,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/timeline:-translate-y-px group-hover/timeline:text-primary group-active/timeline:text-primary motion-reduce:transform-none"
               aria-hidden="true"
             />
             <span className="grid min-w-0 flex-1 gap-1 pl-4">
@@ -41,7 +41,7 @@ export function MaturityTimelineSection({
                 {item.institutionName} · Ends {item.endDate}
               </span>
             </span>
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-primary transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/timeline:bg-primary/12">
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-primary transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/timeline:bg-primary/12 group-active/timeline:bg-primary/14">
               In {item.daysRemaining} days
             </span>
           </Button>

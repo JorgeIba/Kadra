@@ -28,7 +28,7 @@ export function BottomNav({ activeSection }: BottomNavProps) {
                   : undefined
               }
               className={cn(
-                "group/nav-item flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-transparent text-[0.7rem] font-medium text-muted-foreground transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/55 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none",
+                "group/nav-item flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-transparent text-[0.7rem] font-medium text-muted-foreground transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/55 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-px active:border-primary/10 active:bg-secondary/70 active:text-foreground motion-reduce:transform-none motion-reduce:transition-none",
                 isActive &&
                   "border-primary/20 bg-primary/10 text-primary shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]",
               )}

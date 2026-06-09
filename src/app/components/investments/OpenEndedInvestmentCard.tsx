@@ -13,7 +13,7 @@ export function OpenEndedInvestmentCard({
 }: OpenEndedInvestmentCardProps) {
   return (
     <article
-      className="group/investment -mx-3 flex cursor-pointer items-center gap-4 rounded-lg border border-transparent px-3 py-4 transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/45 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none"
+      className="group/investment -mx-3 flex cursor-pointer items-center gap-4 rounded-lg border border-transparent px-3 py-4 transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/45 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-px active:border-primary/10 active:bg-secondary/60 motion-reduce:transform-none motion-reduce:transition-none"
       role={onSelect === undefined ? undefined : "button"}
       tabIndex={onSelect === undefined ? undefined : 0}
       onClick={() => onSelect?.(investment.id)}
@@ -25,7 +25,7 @@ export function OpenEndedInvestmentCard({
       }}
     >
       <Repeat
-        className="size-5 shrink-0 text-muted-foreground transition-[color,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/investment:-translate-y-px group-hover/investment:text-primary motion-reduce:transform-none"
+        className="size-5 shrink-0 text-muted-foreground transition-[color,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/investment:-translate-y-px group-hover/investment:text-primary group-active/investment:text-primary motion-reduce:transform-none"
         aria-hidden="true"
       />
       <div className="min-w-0 flex-1">
@@ -44,7 +44,7 @@ export function OpenEndedInvestmentCard({
         <p className="mt-1 inline-flex items-center gap-1 text-xs text-primary">
           Liquid{" "}
           <ArrowUpRight
-            className="size-3 transition-transform duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/investment:translate-x-0.5 group-hover/investment:-translate-y-0.5 motion-reduce:transform-none"
+            className="size-3 transition-transform duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/investment:translate-x-0.5 group-hover/investment:-translate-y-0.5 group-active/investment:translate-x-0.5 group-active/investment:-translate-y-0.5 motion-reduce:transform-none"
             aria-hidden="true"
           />
         </p>
