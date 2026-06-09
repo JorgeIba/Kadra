@@ -12,7 +12,7 @@ import {
   getEstimatedYearlyReturn,
   getPaymentFrequencyDays,
   getSimpleInterest,
-} from "@/domain/investments/returns"
+} from "@/domain/investments/interest"
 import type { Investment } from "@/domain/investments/types"
 
 const fixedInvestment = {

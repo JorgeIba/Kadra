@@ -16,7 +16,7 @@ import {
   getPortfolioEstimatedDailyReturn,
   getPortfolioEstimatedMonthlyReturn,
   getPortfolioEstimatedYearlyReturn,
-} from "@/domain/investments/calculations"
+} from "@/domain/investments/derived-values"
 import type { Investment } from "@/domain/investments/types"
 
 const fixedInvestment = {

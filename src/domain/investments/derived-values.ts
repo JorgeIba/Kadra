@@ -20,7 +20,7 @@ import {
   getEstimatedPeriodicReturn,
   getEstimatedYearlyReturn,
   getSimpleInterest,
-} from "@/domain/investments/returns"
+} from "@/domain/investments/interest"
 
 export function getDerivedStatus(
   investment: Investment,

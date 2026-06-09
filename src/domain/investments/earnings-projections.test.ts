@@ -15,7 +15,7 @@ import {
   getUpcomingInvestmentEarningsUntilDate,
   getUpcomingPortfolioEarningsSummary,
   getUpcomingPortfolioEarningsUntilDate,
-} from "@/domain/investments/earnings"
+} from "@/domain/investments/earnings-projections"
 import type { Investment } from "@/domain/investments/types"
 
 const fixedInvestment = {

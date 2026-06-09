@@ -4,7 +4,7 @@ import {
   getDaysBetween,
   toDateString,
 } from "@/domain/investments/dates"
-import { getSimpleInterest } from "@/domain/investments/returns"
+import { getSimpleInterest } from "@/domain/investments/interest"
 import type { CalendarDateString, Investment } from "@/domain/investments/types"
 
 export const EARNINGS_PERIODS = {
