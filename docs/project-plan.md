@@ -517,7 +517,7 @@ Possible screen ideas:
 
 - `EarningsScreen`
 - Dashboard card that opens an earnings detail view
-- A chart/table showing portfolio total and individual investment contribution
+- A chart/table showing portfolio total and individual investment earnings breakdown
 
 Out of scope for the first pass:
 
@@ -612,7 +612,55 @@ Suggested UI direction:
 - Make it visually clear when a number includes projected contributions.
 - Avoid storing planned contributions as real contributions unless the user explicitly confirms them.
 
-### 4. Assets Grouping
+### 4. Rate Changes
+
+Purpose:
+
+Let the user model investments whose annual rate changes over time without rewriting past earnings history.
+
+Why this matters:
+
+The current MVP model assumes one stable `annualRate` per investment. That stops being true once an institution changes the rate, a promotional term ends, or an investment rolls into a different yield.
+
+Suggested domain direction:
+
+Use a rate-history concept such as `InvestmentRatePeriod`.
+
+Example shape:
+
+```ts
+interface InvestmentRatePeriod {
+  id: string
+  investmentId: string
+  annualRate: number
+  startDate: CalendarDateString
+  endDate?: CalendarDateString
+  createdAt: IsoDateTimeString
+}
+```
+
+Calculation direction:
+
+- Treat each rate period as a bounded segment where the annual rate is stable.
+- Split earnings calculations by overlapping capital-event dates and rate periods.
+- Preserve historical earnings by applying the rate that was active during each segment instead of rewriting old periods with the latest rate.
+- Keep the current single `annualRate` field only as an MVP shortcut until rate-history support exists.
+
+Suggested implementation order:
+
+1. Define storage schema for rate periods.
+2. Add pure helpers that calculate earnings across rate segments.
+3. Add tests for rate changes before and after maturity boundaries.
+4. Add UI to record a new rate period from investment detail.
+5. Show rate history in investment detail once the calculations are stable.
+
+Out of scope for the first pass:
+
+- Automatic fetching of institution rate changes
+- Variable benchmark-linked rates
+- Editing historical rate periods without audit/history rules
+
+### 5. Assets Grouping
 
 Purpose:
 
@@ -641,7 +689,7 @@ Suggested UI direction:
 
 Reason this is lower priority:
 
-Grouping becomes more valuable once the app has more assets and richer earnings/contribution views. It is useful, but less foundational than earnings and contribution modeling.
+Grouping becomes more valuable once the app has more assets and richer earnings/breakdown views. It is useful, but less foundational than earnings and contribution modeling.
 
 ## Open Questions
 
@@ -659,7 +707,7 @@ Grouping becomes more valuable once the app has more assets and richer earnings/
 
 - Manual adjustments such as top-ups and partial withdrawals
 - Earnings exploration by daily, weekly, monthly, yearly, and custom-date horizons
-- Per-investment earnings contribution breakdowns
+- Per-investment earnings breakdowns
 - Actual investment contributions recorded on specific dates
 - Planned recurring contribution assumptions for projections
 - Assets grouping by institution, type, status, payment frequency, or reinvestment behavior

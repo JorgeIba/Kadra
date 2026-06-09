@@ -1,4 +1,8 @@
-import { INVESTMENT_TYPES } from "@/domain/investments/constants"
+import {
+  DERIVED_STATUSES,
+  INVESTMENT_TYPES,
+} from "@/domain/investments/constants"
+import { getDerivedStatus } from "@/domain/investments/derived-values"
 import {
   addCalendarDays,
   getDaysBetween,
@@ -24,7 +28,7 @@ export interface EarningsSummary {
   yearly: number
 }
 
-export interface InvestmentEarningsContribution {
+export interface InvestmentEarningsBreakdownItem {
   investmentId: string
   name: string
   institutionName: string
@@ -32,12 +36,12 @@ export interface InvestmentEarningsContribution {
   percentage: number
 }
 
-export type InvestmentEarningsBreakdown = InvestmentEarningsContribution[]
+export type InvestmentEarningsBreakdown = InvestmentEarningsBreakdownItem[]
 
 export interface PortfolioEarningsView {
   totals: EarningsSummary
   breakdownPeriod: EarningsPeriod
-  byInvestment: InvestmentEarningsBreakdown
+  breakdown: InvestmentEarningsBreakdown
 }
 
 export interface PortfolioEarningsSnapshot {
@@ -123,12 +127,15 @@ export function getUpcomingPortfolioEarningsSummary(
 
 export function getPeriodPortfolioEarningsSummary(
   investments: Investment[],
+  asOfDate = new Date(),
 ): EarningsSummary {
+  const activeInvestments = getActiveInvestments(investments, asOfDate)
+
   return {
-    daily: getPeriodPortfolioEarningsForDays(investments, 1),
-    weekly: getPeriodPortfolioEarningsForDays(investments, 7),
-    monthly: getPeriodPortfolioEarningsForDays(investments, 30),
-    yearly: getPeriodPortfolioEarningsForDays(investments, 365),
+    daily: getPeriodPortfolioEarningsForDays(activeInvestments, 1),
+    weekly: getPeriodPortfolioEarningsForDays(activeInvestments, 7),
+    monthly: getPeriodPortfolioEarningsForDays(activeInvestments, 30),
+    yearly: getPeriodPortfolioEarningsForDays(activeInvestments, 365),
   }
 }
 
@@ -153,28 +160,29 @@ export function getPortfolioEarningsSnapshot(
     upcoming: {
       totals: getUpcomingPortfolioEarningsSummary(investments, asOfDate),
       breakdownPeriod,
-      byInvestment: getUpcomingInvestmentEarningsContributionBreakdown(
+      breakdown: getUpcomingInvestmentEarningsBreakdown(
         investments,
         breakdownPeriod,
         asOfDate,
       ),
     },
     period: {
-      totals: getPeriodPortfolioEarningsSummary(investments),
+      totals: getPeriodPortfolioEarningsSummary(investments, asOfDate),
       breakdownPeriod,
-      byInvestment: getPeriodInvestmentEarningsContributionBreakdown(
+      breakdown: getPeriodInvestmentEarningsBreakdown(
         investments,
         breakdownPeriod,
+        asOfDate,
       ),
     },
   }
 }
 
-export function getUpcomingInvestmentEarningsContributionBreakdown(
+export function getUpcomingInvestmentEarningsBreakdown(
   investments: Investment[],
   period: EarningsPeriod,
   asOfDate = new Date(),
-): InvestmentEarningsContribution[] {
+): InvestmentEarningsBreakdown {
   const days = EARNINGS_PERIOD_DAYS[period]
   const portfolioEstimatedEarnings = getUpcomingPortfolioEarningsForDays(
     investments,
@@ -182,7 +190,7 @@ export function getUpcomingInvestmentEarningsContributionBreakdown(
     asOfDate,
   )
 
-  return buildContributionBreakdown(
+  return buildInvestmentEarningsBreakdown(
     investments,
     (investment) =>
       getUpcomingInvestmentEarningsForDays(investment, days, asOfDate),
@@ -190,18 +198,20 @@ export function getUpcomingInvestmentEarningsContributionBreakdown(
   )
 }
 
-export function getPeriodInvestmentEarningsContributionBreakdown(
+export function getPeriodInvestmentEarningsBreakdown(
   investments: Investment[],
   period: EarningsPeriod,
-): InvestmentEarningsContribution[] {
+  asOfDate = new Date(),
+): InvestmentEarningsBreakdown {
+  const activeInvestments = getActiveInvestments(investments, asOfDate)
   const days = EARNINGS_PERIOD_DAYS[period]
   const portfolioEstimatedEarnings = getPeriodPortfolioEarningsForDays(
-    investments,
+    activeInvestments,
     days,
   )
 
-  return buildContributionBreakdown(
-    investments,
+  return buildInvestmentEarningsBreakdown(
+    activeInvestments,
     (investment) => getPeriodInvestmentEarningsForDays(investment, days),
     portfolioEstimatedEarnings,
   )
@@ -235,11 +245,11 @@ function getPeriodPortfolioEarningsForDays(
   }, 0)
 }
 
-function buildContributionBreakdown(
+function buildInvestmentEarningsBreakdown(
   investments: Investment[],
   getInvestmentEarnings: (investment: Investment) => number,
   portfolioEstimatedEarnings: number,
-): InvestmentEarningsContribution[] {
+): InvestmentEarningsBreakdown {
   return investments
     .map((investment) => {
       const estimatedEarnings = getInvestmentEarnings(investment)
@@ -295,4 +305,13 @@ function getPeriodInvestmentEarningDays(
     requestedDays,
     getDaysBetween(investment.startDate, investment.endDate),
   )
+}
+
+function getActiveInvestments(
+  investments: Investment[],
+  asOfDate: Date,
+): Investment[] {
+  return investments.filter((investment) => {
+    return getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.active
+  })
 }

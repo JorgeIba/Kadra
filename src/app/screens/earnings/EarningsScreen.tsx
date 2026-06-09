@@ -99,7 +99,7 @@ function EarningsViewCard({
 
         <ContributionSection
           breakdownPeriod={view.breakdownPeriod}
-          breakdown={view.byInvestment}
+          breakdown={view.breakdown}
         />
       </CardContent>
     </Card>

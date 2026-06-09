@@ -49,6 +49,22 @@ const openEndedInvestment = {
   updatedAt: "2026-01-01T18:00:00.000Z",
 } satisfies Investment
 
+const maturedFixedInvestment = {
+  id: "investment-matured",
+  name: "Finished fixed term",
+  institutionName: "Finished institution",
+  type: INVESTMENT_TYPES.fixedTerm,
+  originalAmount: 20_000,
+  annualRate: 11,
+  currency: CURRENCIES.mxn,
+  paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+  reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+  startDate: "2025-11-01",
+  endDate: "2025-12-01",
+  createdAt: "2025-11-01T18:00:00.000Z",
+  updatedAt: "2025-11-01T18:00:00.000Z",
+} satisfies Investment
+
 const investments = [fixedInvestment, openEndedInvestment]
 const asOfDate = new Date("2026-01-16T12:00:00.000Z")
 
@@ -99,12 +115,39 @@ describe("earnings exploration calculations", () => {
   })
 
   it("calculates portfolio period earnings across common periods", () => {
-    expect(getPeriodPortfolioEarningsSummary(investments)).toEqual({
+    expect(getPeriodPortfolioEarningsSummary(investments, asOfDate)).toEqual({
       daily: 12,
       weekly: 84,
       monthly: 360,
       yearly: 1_030,
     })
+  })
+
+  it("excludes matured investments from period earnings and breakdowns", () => {
+    const mixedInvestments = [maturedFixedInvestment, openEndedInvestment]
+    const snapshot = getPortfolioEarningsSnapshot(
+      mixedInvestments,
+      asOfDate,
+      EARNINGS_PERIODS.monthly,
+    )
+
+    expect(
+      getPeriodPortfolioEarningsSummary(mixedInvestments, asOfDate),
+    ).toEqual({
+      daily: 2,
+      weekly: 14,
+      monthly: 60,
+      yearly: 730,
+    })
+    expect(snapshot.period.breakdown).toEqual([
+      {
+        investmentId: "investment-open",
+        name: "Open daily",
+        institutionName: "Test institution",
+        estimatedEarnings: 60,
+        percentage: 100,
+      },
+    ])
   })
 
   it("estimates upcoming earnings until a custom target date", () => {
@@ -124,7 +167,7 @@ describe("earnings exploration calculations", () => {
     ).toBe(60)
   })
 
-  it("returns upcoming and period contribution breakdowns in one snapshot", () => {
+  it("returns upcoming and period earnings breakdowns in one snapshot", () => {
     const snapshot = getPortfolioEarningsSnapshot(
       investments,
       asOfDate,
@@ -133,7 +176,7 @@ describe("earnings exploration calculations", () => {
 
     expect(snapshot.upcoming.totals.monthly).toBe(210)
     expect(snapshot.period.totals.monthly).toBe(360)
-    expect(snapshot.upcoming.byInvestment).toEqual([
+    expect(snapshot.upcoming.breakdown).toEqual([
       {
         investmentId: "investment-fixed",
         name: "Fixed 30 days",
@@ -149,7 +192,7 @@ describe("earnings exploration calculations", () => {
         percentage: 28.57142857142857,
       },
     ])
-    expect(snapshot.period.byInvestment).toEqual([
+    expect(snapshot.period.breakdown).toEqual([
       {
         investmentId: "investment-fixed",
         name: "Fixed 30 days",
