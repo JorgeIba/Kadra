@@ -19,6 +19,7 @@ export const APP_ROUTE_PATHS = {
   dashboard: "/",
   assets: "assets",
   invest: "invest",
+  earnings: "earnings",
   investmentDetail: "investments/:investmentId",
   investmentEdit: "investments/:investmentId/edit",
 } as const
@@ -27,6 +28,7 @@ export const APP_PATHS = {
   dashboard: APP_ROUTE_PATHS.dashboard,
   assets: `/${APP_ROUTE_PATHS.assets}`,
   invest: `/${APP_ROUTE_PATHS.invest}`,
+  earnings: `/${APP_ROUTE_PATHS.earnings}`,
 } as const
 
 export function getInvestmentDetailPath(investmentId: string) {
@@ -41,6 +43,10 @@ export function getInvestmentEditPath(investmentId: string) {
     ":investmentId",
     encodeURIComponent(investmentId),
   )}`
+}
+
+export function getEarningsPath() {
+  return APP_PATHS.earnings
 }
 
 export function getSectionPath(section: AppSection) {

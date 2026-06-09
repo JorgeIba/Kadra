@@ -14,6 +14,7 @@ import {
   APP_PATHS,
   APP_ROUTE_PATHS,
   APP_SECTIONS,
+  getEarningsPath,
   getInvestmentDetailPath,
   getInvestmentEditPath,
   getSectionPath,
@@ -22,6 +23,7 @@ import { getPreviousSectionFromLocation } from "@/app/routing/active-section"
 import { AssetsScreen } from "@/app/screens/assets/AssetsScreen"
 import { DashboardScreen } from "@/app/screens/dashboard/DashboardScreen"
 import { EditInvestmentScreen } from "@/app/screens/edit-investment/EditInvestmentScreen"
+import { EarningsScreen } from "@/app/screens/earnings/EarningsScreen"
 import { InvestScreen } from "@/app/screens/invest/InvestScreen"
 import { InvestmentDetailScreen } from "@/app/screens/investment-detail/InvestmentDetailScreen"
 import {
@@ -83,6 +85,10 @@ export function AppRouter() {
             element={<InvestRoute addInvestment={addInvestment} />}
           />
           <Route
+            path={APP_ROUTE_PATHS.earnings}
+            element={<EarningsRoute investments={investments} />}
+          />
+          <Route
             path={APP_ROUTE_PATHS.investmentDetail}
             element={
               <InvestmentDetailRoute
@@ -122,13 +128,35 @@ function DashboardRoute({ investments }: { investments: Investment[] }) {
     })
   }
 
+  function handleOpenEarnings() {
+    navigate(getEarningsPath(), {
+      state: { fromSection: APP_SECTIONS.dashboard },
+    })
+  }
+
   return (
     <DashboardScreen
       investments={investments}
       onAddInvestment={handleAddInvestment}
+      onOpenEarnings={handleOpenEarnings}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )
+}
+
+function EarningsRoute({ investments }: { investments: Investment[] }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const previousSection = getPreviousSectionFromLocation(
+    location,
+    APP_SECTIONS.dashboard,
+  )
+
+  function handleBack() {
+    navigate(getSectionPath(previousSection))
+  }
+
+  return <EarningsScreen investments={investments} onBack={handleBack} />
 }
 
 function AssetsRoute({ investments }: { investments: Investment[] }) {

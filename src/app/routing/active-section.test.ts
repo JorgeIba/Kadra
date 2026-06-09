@@ -12,6 +12,9 @@ describe("active app section helpers", () => {
     expect(getActiveSectionFromPathname("/")).toBe(APP_SECTIONS.dashboard)
     expect(getActiveSectionFromPathname("/assets")).toBe(APP_SECTIONS.assets)
     expect(getActiveSectionFromPathname("/invest")).toBe(APP_SECTIONS.invest)
+    expect(getActiveSectionFromPathname("/earnings")).toBe(
+      APP_SECTIONS.dashboard,
+    )
   })
 
   it("uses the fallback section for non-root routes", () => {

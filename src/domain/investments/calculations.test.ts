@@ -7,9 +7,11 @@ import {
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments/constants"
 import {
+  getActiveInvestmentCount,
   getDerivedStatus,
   getInvestmentDerivedValues,
   getInvestmentSummary,
+  getPortfolioEstimatedAccruedReturn,
   getPortfolioEstimatedCurrentValue,
   getPortfolioEstimatedDailyReturn,
   getPortfolioEstimatedMonthlyReturn,
@@ -117,5 +119,13 @@ describe("investment calculations", () => {
     expect(getPortfolioEstimatedDailyReturn(investments)).toBe(12)
     expect(getPortfolioEstimatedMonthlyReturn(investments)).toBe(360)
     expect(getPortfolioEstimatedYearlyReturn(investments)).toBe(4_380)
+  })
+
+  it("calculates portfolio accrued return and active investment count", () => {
+    const investments = [fixedInvestment, openEndedInvestment]
+    const asOfDate = new Date("2026-01-16T12:00:00.000Z")
+
+    expect(getPortfolioEstimatedAccruedReturn(investments, asOfDate)).toBe(180)
+    expect(getActiveInvestmentCount(investments, asOfDate)).toBe(2)
   })
 })

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   APP_PATHS,
   APP_SECTIONS,
+  getEarningsPath,
   getInvestmentDetailPath,
   getInvestmentEditPath,
   getSectionPath,
@@ -24,6 +25,10 @@ describe("app navigation helpers", () => {
     expect(getInvestmentEditPath("investment-1")).toBe(
       "/investments/investment-1/edit",
     )
+  })
+
+  it("builds the earnings path", () => {
+    expect(getEarningsPath()).toBe(APP_PATHS.earnings)
   })
 
   it("encodes investment ids for safe URL path usage", () => {

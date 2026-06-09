@@ -506,6 +506,13 @@ Suggested implementation shape:
 - Add an app screen or dashboard drill-down after the domain model is stable.
 - Use Impeccable `shape` before building the screen so the visualization and hierarchy are deliberate.
 
+Current agreed distinction for the first implementation pass:
+
+- `Upcoming earnings`
+  Measures what the current portfolio is expected to generate from now through the next period, respecting each investment's remaining time to maturity.
+- `Period earnings`
+  Measures what each investment can generate over a fresh period window, while still respecting its full term length.
+
 Possible screen ideas:
 
 - `EarningsScreen`

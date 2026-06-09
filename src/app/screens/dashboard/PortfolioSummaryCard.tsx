@@ -2,15 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatMxn } from "@/lib/formatters"
 
 interface PortfolioSummaryCardProps {
+  activeInvestments: number
+  earnedSoFar: number
   totalValue: number
-  dailyEarnings: number
-  monthlyEarnings: number
 }
 
 export function PortfolioSummaryCard({
+  activeInvestments,
+  earnedSoFar,
   totalValue,
-  dailyEarnings,
-  monthlyEarnings,
 }: PortfolioSummaryCardProps) {
   return (
     <Card className="rounded-lg bg-secondary/70">
@@ -27,18 +27,18 @@ export function PortfolioSummaryCard({
         <div className="grid grid-cols-2 gap-5">
           <div className="space-y-2">
             <p className="text-xs leading-none text-muted-foreground">
-              Daily earnings
+              Active investments
             </p>
-            <p className="font-ledger text-xl leading-none text-primary">
-              {formatMxn(dailyEarnings)}
+            <p className="font-ledger text-xl leading-none text-primary tabular-nums">
+              {activeInvestments}
             </p>
           </div>
           <div className="space-y-2">
             <p className="text-xs leading-none text-muted-foreground">
-              Monthly earnings
+              Earned so far
             </p>
             <p className="font-ledger text-xl leading-none text-foreground">
-              {formatMxn(monthlyEarnings)}
+              {formatMxn(earnedSoFar)}
             </p>
           </div>
         </div>

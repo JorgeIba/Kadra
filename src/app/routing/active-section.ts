@@ -21,6 +21,10 @@ export function getActiveSectionFromPathname(
     return APP_SECTIONS.invest
   }
 
+  if (pathname === APP_PATHS.earnings) {
+    return APP_SECTIONS.dashboard
+  }
+
   return fallbackSection
 }
 

@@ -1,10 +1,12 @@
 import {
+  getActiveInvestmentCount,
+  getPortfolioEarningsSnapshot,
   getInvestmentSummary,
+  getPortfolioEstimatedAccruedReturn,
   getPortfolioEstimatedCurrentValue,
-  getPortfolioEstimatedDailyReturn,
-  getPortfolioEstimatedMonthlyReturn,
   type Investment,
 } from "@/domain/investments"
+import { EarningsExplorationCard } from "@/app/screens/dashboard/EarningsExplorationCard"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
 import { getMaturityTimelineItems } from "@/app/screens/dashboard/maturity-timeline"
@@ -18,6 +20,7 @@ import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCa
 interface DashboardScreenProps {
   investments: Investment[]
   onAddInvestment: () => void
+  onOpenEarnings: () => void
   onInvestmentSelect: (investmentId: string) => void
 }
 
@@ -26,12 +29,14 @@ const DASHBOARD_INVESTMENT_PREVIEW_LIMIT = 3
 export function DashboardScreen({
   investments,
   onAddInvestment,
+  onOpenEarnings,
   onInvestmentSelect,
 }: DashboardScreenProps) {
   const asOfDate = new Date()
+  const activeInvestments = getActiveInvestmentCount(investments, asOfDate)
+  const earnedSoFar = getPortfolioEstimatedAccruedReturn(investments, asOfDate)
   const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
-  const dailyEarnings = getPortfolioEstimatedDailyReturn(investments)
-  const monthlyEarnings = getPortfolioEstimatedMonthlyReturn(investments)
+  const earningsSnapshot = getPortfolioEarningsSnapshot(investments, asOfDate)
   const portfolioBreakdown = getPortfolioBreakdown(investments, asOfDate)
   const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
   const maturityTimelineItems = getMaturityTimelineItems(investments, asOfDate)
@@ -42,9 +47,9 @@ export function DashboardScreen({
   return (
     <section className="space-y-9">
       <PortfolioSummaryCard
+        activeInvestments={activeInvestments}
+        earnedSoFar={earnedSoFar}
         totalValue={totalValue}
-        dailyEarnings={dailyEarnings}
-        monthlyEarnings={monthlyEarnings}
       />
 
       {investments.length === 0 ? (
@@ -56,6 +61,10 @@ export function DashboardScreen({
         />
       ) : (
         <>
+          <EarningsExplorationCard
+            snapshot={earningsSnapshot}
+            onOpenDetails={onOpenEarnings}
+          />
           <PortfolioBreakdownCard breakdown={portfolioBreakdown} />
           <PortfolioProjectionChart points={projectionPoints} />
           <MaturityTimelineSection

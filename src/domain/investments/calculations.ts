@@ -123,6 +123,27 @@ export function getPortfolioEstimatedCurrentValue(
   }, 0)
 }
 
+export function getPortfolioEstimatedAccruedReturn(
+  investments: Investment[],
+  asOfDate = new Date(),
+): number {
+  return investments.reduce((total, investment) => {
+    return (
+      total +
+      getInvestmentDerivedValues(investment, asOfDate).estimatedAccruedReturn
+    )
+  }, 0)
+}
+
+export function getActiveInvestmentCount(
+  investments: Investment[],
+  asOfDate = new Date(),
+): number {
+  return investments.filter((investment) => {
+    return getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.active
+  }).length
+}
+
 export function getPortfolioEstimatedDailyReturn(
   investments: Investment[],
 ): number {

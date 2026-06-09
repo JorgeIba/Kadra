@@ -1,4 +1,10 @@
-import { differenceInCalendarDays, format, isValid, parseISO } from "date-fns"
+import {
+  addDays,
+  differenceInCalendarDays,
+  format,
+  isValid,
+  parseISO,
+} from "date-fns"
 import type { Investment } from "@/domain/investments/types"
 
 const CALENDAR_DATE_FORMAT = "yyyy-MM-dd"
@@ -24,6 +30,10 @@ export function compareCalendarDatesAscending(
     parseCalendarDate(leftDate),
     parseCalendarDate(rightDate),
   )
+}
+
+export function addCalendarDays(date: Date, days: number): string {
+  return toDateString(addDays(date, days))
 }
 
 export function getDaysActive(
