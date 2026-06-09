@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import type {
   EarningsPeriod,
@@ -5,10 +6,14 @@ import type {
   PortfolioEarningsView,
   Investment,
 } from "@/domain/investments"
-import { getPortfolioEarningsSnapshot } from "@/domain/investments"
+import {
+  EARNINGS_PERIODS,
+  getPortfolioEarningsSnapshot,
+} from "@/domain/investments"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatMxn, formatPercentage } from "@/lib/formatters"
+import { cn } from "@/lib/utils"
 
 interface EarningsScreenProps {
   investments: Investment[]
@@ -22,15 +27,45 @@ const EARNINGS_METRICS = [
   { key: "yearly", label: "1 year" },
 ] as const
 
-const CONTRIBUTION_LABELS = {
-  daily: "1-day contributors",
-  weekly: "7-day contributors",
-  monthly: "30-day contributors",
-  yearly: "1-year contributors",
+const BREAKDOWN_PERIOD_OPTIONS = [
+  {
+    value: EARNINGS_PERIODS.daily,
+    shortLabel: "1D",
+    label: "1 day",
+  },
+  {
+    value: EARNINGS_PERIODS.weekly,
+    shortLabel: "7D",
+    label: "7 days",
+  },
+  {
+    value: EARNINGS_PERIODS.monthly,
+    shortLabel: "30D",
+    label: "30 days",
+  },
+  {
+    value: EARNINGS_PERIODS.yearly,
+    shortLabel: "1Y",
+    label: "1 year",
+  },
+] as const
+
+const BREAKDOWN_LABELS = {
+  daily: "1-day earnings breakdown",
+  weekly: "7-day earnings breakdown",
+  monthly: "30-day earnings breakdown",
+  yearly: "1-year earnings breakdown",
 } as const satisfies Record<EarningsPeriod, string>
 
 export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
-  const snapshot = getPortfolioEarningsSnapshot(investments, new Date())
+  const [breakdownPeriod, setBreakdownPeriod] = useState<EarningsPeriod>(
+    EARNINGS_PERIODS.monthly,
+  )
+  const snapshot = getPortfolioEarningsSnapshot(
+    investments,
+    new Date(),
+    breakdownPeriod,
+  )
 
   return (
     <section className="space-y-7">
@@ -48,6 +83,11 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
         </h1>
       </div>
 
+      <BreakdownPeriodPicker
+        selectedPeriod={breakdownPeriod}
+        onSelectPeriod={setBreakdownPeriod}
+      />
+
       <EarningsViewCard
         title="Upcoming earnings"
         description="Uses the real portfolio state today, including each investment's remaining time to maturity."
@@ -60,6 +100,56 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
         view={snapshot.period}
       />
     </section>
+  )
+}
+
+function BreakdownPeriodPicker({
+  selectedPeriod,
+  onSelectPeriod,
+}: {
+  selectedPeriod: EarningsPeriod
+  onSelectPeriod: (period: EarningsPeriod) => void
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/70 bg-card/55 px-3 py-3">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-foreground">Breakdown window</p>
+        <p className="text-xs leading-5 text-muted-foreground">
+          Change the time horizon for both earnings views.
+        </p>
+      </div>
+
+      <div
+        className="inline-flex min-h-11 flex-wrap items-center gap-1 rounded-lg bg-background/70 p-1"
+        role="tablist"
+        aria-label="Breakdown window"
+      >
+        {BREAKDOWN_PERIOD_OPTIONS.map((option) => {
+          const isSelected = option.value === selectedPeriod
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={isSelected}
+              aria-label={option.label}
+              title={option.label}
+              className={cn(
+                "min-h-9 rounded-md px-3 text-sm font-medium transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+                isSelected
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
+              )}
+              onClick={() => onSelectPeriod(option.value)}
+            >
+              {option.shortLabel}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -116,7 +206,7 @@ function ContributionSection({
   return (
     <div className="space-y-3">
       <h3 className="border-b border-border/70 pb-3 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-        {CONTRIBUTION_LABELS[breakdownPeriod]}
+        {BREAKDOWN_LABELS[breakdownPeriod]}
       </h3>
       <div className="space-y-5">
         {breakdown.map((contribution) => (

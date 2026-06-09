@@ -184,14 +184,15 @@ export function getUpcomingInvestmentEarningsBreakdown(
   asOfDate = new Date(),
 ): InvestmentEarningsBreakdown {
   const days = EARNINGS_PERIOD_DAYS[period]
+  const activeInvestments = getActiveInvestments(investments, asOfDate)
   const portfolioEstimatedEarnings = getUpcomingPortfolioEarningsForDays(
-    investments,
+    activeInvestments,
     days,
     asOfDate,
   )
 
   return buildInvestmentEarningsBreakdown(
-    investments,
+    activeInvestments,
     (investment) =>
       getUpcomingInvestmentEarningsForDays(investment, days, asOfDate),
     portfolioEstimatedEarnings,
@@ -268,6 +269,15 @@ function buildInvestmentEarningsBreakdown(
     .sort((left, right) => right.estimatedEarnings - left.estimatedEarnings)
 }
 
+function getActiveInvestments(
+  investments: Investment[],
+  asOfDate: Date,
+): Investment[] {
+  return investments.filter((investment) => {
+    return getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.active
+  })
+}
+
 function getUpcomingInvestmentEarningDays(
   investment: Investment,
   requestedDays: number,
@@ -305,13 +315,4 @@ function getPeriodInvestmentEarningDays(
     requestedDays,
     getDaysBetween(investment.startDate, investment.endDate),
   )
-}
-
-function getActiveInvestments(
-  investments: Investment[],
-  asOfDate: Date,
-): Investment[] {
-  return investments.filter((investment) => {
-    return getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.active
-  })
 }

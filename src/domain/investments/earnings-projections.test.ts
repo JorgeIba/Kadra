@@ -210,6 +210,31 @@ describe("earnings exploration calculations", () => {
     ])
   })
 
+  it("excludes inactive investments from the upcoming breakdown", () => {
+    const snapshot = getPortfolioEarningsSnapshot(
+      [maturedFixedInvestment, ...investments],
+      asOfDate,
+      EARNINGS_PERIODS.monthly,
+    )
+
+    expect(snapshot.upcoming.breakdown).toEqual([
+      {
+        investmentId: "investment-fixed",
+        name: "Fixed 30 days",
+        institutionName: "Test institution",
+        estimatedEarnings: 150,
+        percentage: 71.42857142857143,
+      },
+      {
+        investmentId: "investment-open",
+        name: "Open daily",
+        institutionName: "Test institution",
+        estimatedEarnings: 60,
+        percentage: 28.57142857142857,
+      },
+    ])
+  })
+
   it("builds deterministic custom target dates from an as-of date", () => {
     expect(getCustomDateEarningsTarget(asOfDate, 90)).toBe("2026-04-16")
   })
