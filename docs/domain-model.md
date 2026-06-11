@@ -52,8 +52,8 @@ The long-term direction is history-based rather than overwrite-based.
 
 High-level idea:
 
-- `Investment` is the stable identity and descriptive container.
-- Time-varying behavior should come from dated records.
+- `Investment` is the full evolving asset and owns the dated records that describe its history.
+- Time-varying behavior should come from dated records inside the investment.
 - UI-friendly current state should be derived from history, not treated as the only source of truth.
 
 The important history families currently in scope are:
@@ -123,17 +123,20 @@ This should evolve from the current `DerivedInvestment` style object rather than
 
 We are not replacing the current flat MVP storage shape immediately, but the domain direction is now clear:
 
-- `Investment` stays as the stable identity record.
-- capital changes are modeled as dated contribution records
-- rate changes are modeled as dated rate periods
-- lifecycle changes are modeled as dated lifecycle periods
+- `Investment` becomes the full domain aggregate for one evolving asset.
+- stable descriptive fields live directly on `Investment`
+- capital changes are modeled as dated contribution records inside `Investment`
+- rate changes are modeled as dated rate periods inside `Investment`
+- lifecycle changes are modeled as dated lifecycle periods inside `Investment`
 - UI-facing current state should be derived from those records
 
 For MVP, this history model should stay intentionally constrained and simpler than the long-term vision.
 
-### Stable Identity
+### Investment Aggregate
 
-The stable `Investment` record should hold things that remain true even if the investment changes over time.
+`Investment` should represent the whole thing the user owns, not only an identity card.
+
+It should hold stable descriptive fields plus the history records that explain how the investment changed over time.
 
 Current direction:
 
@@ -150,6 +153,11 @@ Meaning of dates:
 - `createdAt` means when the record was created in the app
 - operational start should come from the first lifecycle period, not from `createdAt`
 
+Important source-of-truth rule:
+
+- do not store direct mutable current fields like `annualRate`, `type`, `paymentFrequency`, `reinvestmentBehavior`, `originalAmount`, or `endDate` on `Investment` beside the histories
+- those values should come from `DerivedInvestment` for a specific date
+
 ### Contribution Records
 
 Purpose:
@@ -158,7 +166,7 @@ Purpose:
 
 Current direction:
 
-- keep both `id` and `investmentId`
+- keep `id` on each contribution so individual entries can be referenced later
 - require `amount > 0`
 - require a valid contribution date
 - do not add contribution `kind` yet in MVP
@@ -179,7 +187,7 @@ Purpose:
 
 Current direction:
 
-- keep both `id` and `investmentId`
+- keep `id` on each rate period so individual periods can be referenced later
 - require `annualRate >= 0`
 - use one bounded or open-ended period at a time
 - do not allow overlapping rate periods for the same investment
@@ -199,7 +207,7 @@ Purpose:
 
 Current direction:
 
-- keep both `id` and `investmentId`
+- keep `id` on each lifecycle period so individual periods can be referenced later
 - keep `type`
 - keep `paymentFrequency`
 - keep `reinvestmentBehavior`
@@ -243,6 +251,7 @@ Why:
 
 - every contribution belongs to exactly one investment
 - every contribution must have its own `id`
+- the parent relationship comes from being nested inside `Investment`
 - contribution `amount` must be positive
 - contribution date must be a valid calendar date
 - an investment must have at least one contribution in the history-based model
@@ -253,6 +262,7 @@ Why:
 
 - every rate period belongs to exactly one investment
 - every rate period must have its own `id`
+- the parent relationship comes from being nested inside `Investment`
 - `annualRate >= 0`
 - rate periods for the same investment must not overlap
 - for MVP, rate periods should form one continuous timeline
@@ -262,6 +272,7 @@ Why:
 
 - every lifecycle period belongs to exactly one investment
 - every lifecycle period must have its own `id`
+- the parent relationship comes from being nested inside `Investment`
 - `type` must be `open-ended` or `fixed-term`
 - `paymentFrequency = at-maturity` is valid only for `fixed-term`
 - `fixed-term` requires `endDate`
@@ -272,7 +283,9 @@ Why:
 
 ## Derived Current State
 
-The future derived object should be the evolution of the current derived investment model.
+The future `DerivedInvestment` object should be the evolution of the current derived investment model.
+
+It acts like a snapshot of one `Investment` at a selected date.
 
 For any date, the app should be able to answer:
 
@@ -282,6 +295,7 @@ For any date, the app should be able to answer:
 
 From that, the current derived state can answer:
 
+- investment identity fields such as name and institution
 - current type
 - current payment frequency
 - current reinvestment behavior
@@ -290,6 +304,12 @@ From that, the current derived state can answer:
 - derived status
 - estimated accrued return
 - estimated current value
+
+Important source-of-truth rule:
+
+- `DerivedInvestment` is computed from `Investment`
+- it should not be persisted as the source of truth
+- if the active rate period has `annualRate = 10` at a given date, then `DerivedInvestment.annualRate` for that date is `10`
 
 ### Derived Principal
 
@@ -311,6 +331,4 @@ Non-MVP note:
 ## Modeling Questions Still Open
 
 - Should the first history implementation use narrow record types first, or a broader unified event model?
-- Should lifecycle history be a dedicated concept?
-- Which fields belong to stable investment identity versus dated lifecycle history?
 - When planned contributions arrive, how should reusable assumptions be stored separately from real balance history?

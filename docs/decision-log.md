@@ -22,10 +22,13 @@ Why:
 
 Decision:
 
-- Keep the current flat MVP investment record for near-term product work.
-- Move long-term thinking toward a history-based model where investment state is derived from dated changes over time.
+- Replace the current flat MVP investment record with a history-based `Investment` model as the next domain direction.
+- Treat `Investment` as the full evolving asset, not only a stable identity record.
+- Store contribution, rate, and lifecycle histories inside `Investment`.
+- Use `DerivedInvestment` as the date-specific snapshot computed from those histories.
 
 Why:
 
 - Real investments can change through contributions, rate updates, and lifecycle transitions.
 - A purely mutable current-state record cannot explain historical earnings cleanly.
+- Keeping histories inside `Investment` matches the product language: the investment is the whole thing the user owns, while current rate, type, principal, and value are derived at a specific date.

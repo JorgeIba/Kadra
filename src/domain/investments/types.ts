@@ -25,43 +25,78 @@ export type CalendarDateString = string
  */
 export type IsoDateTimeString = string
 
-/**
- * Shared persisted fields for any investment, regardless of its lifecycle mode.
- */
-export interface BaseInvestment {
+export interface InvestmentContribution {
   id: string
-  name: string
-  institutionName: string
-  originalAmount: number
+  amount: number
+  contributionDate: CalendarDateString
+  notes?: string
+  createdAt: IsoDateTimeString
+}
+
+export interface InvestmentRatePeriod {
+  id: string
   annualRate: number
-  currency: Currency
+  startDate: CalendarDateString
+  endDate?: CalendarDateString
+  createdAt: IsoDateTimeString
+}
+
+interface BaseInvestmentLifecyclePeriod {
+  id: string
   paymentFrequency: PaymentFrequency
   reinvestmentBehavior: ReinvestmentBehavior
   startDate: CalendarDateString
-  notes?: string
   createdAt: IsoDateTimeString
-  updatedAt: IsoDateTimeString
 }
 
-export interface FixedTermInvestment extends BaseInvestment {
+export interface FixedTermInvestmentLifecyclePeriod
+  extends BaseInvestmentLifecyclePeriod {
   type: typeof INVESTMENT_TYPES.fixedTerm
   endDate: CalendarDateString
 }
 
-export interface OpenEndedInvestment extends BaseInvestment {
+export interface OpenEndedInvestmentLifecyclePeriod
+  extends BaseInvestmentLifecyclePeriod {
   type: typeof INVESTMENT_TYPES.openEnded
   endDate?: never
 }
 
-/**
- * Main domain entity. An investment is either fixed-term or open-ended.
- */
-export type Investment = FixedTermInvestment | OpenEndedInvestment
+export type InvestmentLifecyclePeriod =
+  | FixedTermInvestmentLifecyclePeriod
+  | OpenEndedInvestmentLifecyclePeriod
 
 /**
- * Derived values we can calculate for every investment.
+ * Main domain entity. An investment owns the dated histories that describe how
+ * the asset has changed over time.
  */
-export interface CommonInvestmentDerivedValues {
+export interface Investment {
+  id: string
+  name: string
+  institutionName: string
+  currency: Currency
+  notes?: string
+  createdAt: IsoDateTimeString
+  updatedAt: IsoDateTimeString
+  contributions: InvestmentContribution[]
+  ratePeriods: InvestmentRatePeriod[]
+  lifecyclePeriods: InvestmentLifecyclePeriod[]
+}
+
+/**
+ * Current read model for one investment at a selected date.
+ */
+export interface BaseDerivedInvestment {
+  id: string
+  name: string
+  institutionName: string
+  currency: Currency
+  notes?: string
+  originalAmount: number
+  currentPrincipal: number
+  annualRate: number
+  paymentFrequency: PaymentFrequency
+  reinvestmentBehavior: ReinvestmentBehavior
+  startDate: CalendarDateString
   derivedStatus: DerivedStatus
   daysActive: number
   estimatedAccruedReturn: number
@@ -69,11 +104,9 @@ export interface CommonInvestmentDerivedValues {
   estimatedPeriodicReturn: number
 }
 
-/**
- * Extra derived values that only make sense for fixed-term investments.
- */
-export interface FixedTermInvestmentDerivedValues extends CommonInvestmentDerivedValues {
+export interface FixedTermDerivedInvestment extends BaseDerivedInvestment {
   type: typeof INVESTMENT_TYPES.fixedTerm
+  endDate: CalendarDateString
   totalTermDays: number
   daysRemaining: number
   progressPercentage: number
@@ -81,13 +114,16 @@ export interface FixedTermInvestmentDerivedValues extends CommonInvestmentDerive
   projectedTotalReturnAtEndDate: number
 }
 
-export interface OpenEndedInvestmentDerivedValues extends CommonInvestmentDerivedValues {
+export interface OpenEndedDerivedInvestment extends BaseDerivedInvestment {
   type: typeof INVESTMENT_TYPES.openEnded
+  endDate?: never
 }
 
-export type InvestmentDerivedValues =
-  | FixedTermInvestmentDerivedValues
-  | OpenEndedInvestmentDerivedValues
+export type DerivedInvestment =
+  | FixedTermDerivedInvestment
+  | OpenEndedDerivedInvestment
+
+export type InvestmentDerivedValues = DerivedInvestment
 
 /**
  * Compact view-model shape for cards and lists.
