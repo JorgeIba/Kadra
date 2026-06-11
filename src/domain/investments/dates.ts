@@ -5,7 +5,6 @@ import {
   isValid,
   parseISO,
 } from "date-fns"
-import type { Investment } from "@/domain/investments/types"
 
 const CALENDAR_DATE_FORMAT = "yyyy-MM-dd"
 const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
@@ -36,11 +35,31 @@ export function addCalendarDays(date: Date, days: number): string {
   return toDateString(addDays(date, days))
 }
 
+export function isCalendarDateWithinRange(
+  date: string,
+  startDate?: string | null,
+  endDate?: string,
+): boolean {
+  if (
+    startDate !== undefined &&
+    startDate !== null &&
+    compareCalendarDatesAscending(startDate, date) > 0
+  ) {
+    return false
+  }
+
+  if (endDate === undefined) {
+    return true
+  }
+
+  return compareCalendarDatesAscending(date, endDate) < 0
+}
+
 export function getDaysActive(
-  investment: Investment,
+  startDate: string,
   asOfDate = new Date(),
 ): number {
-  return getDaysBetween(investment.startDate, toDateString(asOfDate))
+  return getDaysBetween(startDate, toDateString(asOfDate))
 }
 
 export function isOnOrAfterDate(date: Date, calendarDate: string): boolean {

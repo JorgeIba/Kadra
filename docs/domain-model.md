@@ -77,6 +77,11 @@ Current direction:
 - treat later contributions as additional capital entries
 - keep planned contributions separate from real contributions
 
+Important distinction:
+
+- contribution history answers how much raw capital the user has put into the investment
+- that is different from the full value visible at a point in time, which also includes earned returns
+
 ### Rate History
 
 Purpose:
@@ -108,7 +113,7 @@ That current-state view should eventually be a derived snapshot that answers que
 
 - what type is this investment right now?
 - what rate is active right now?
-- what principal is currently invested?
+- what invested amount is currently active?
 - is it active or finished?
 - what is the estimated current value?
 
@@ -178,6 +183,11 @@ Future extension:
 MVP rule:
 
 - the earliest contribution acts as the initial principal
+
+Naming update:
+
+- use `currentInvestedAmount` for the derived investment-level amount currently allocated to the investment
+- use `totalContributedAmount` inside timeline segments when we mean cumulative contributed capital by the start of that segment
 
 ### Rate Periods
 
@@ -300,7 +310,7 @@ From that, the current derived state can answer:
 - current payment frequency
 - current reinvestment behavior
 - current annual rate
-- current principal
+- current invested amount
 - derived status
 - estimated accrued return
 - estimated current value
@@ -311,11 +321,17 @@ Important source-of-truth rule:
 - it should not be persisted as the source of truth
 - if the active rate period has `annualRate = 10` at a given date, then `DerivedInvestment.annualRate` for that date is `10`
 
-### Derived Principal
+### Derived Current Invested Amount
 
 For MVP:
 
-- principal at date `D` = sum of all contributions with date `<= D`
+- `currentInvestedAmount` at date `D` = sum of all contributions with date `<= D`
+
+### Derived Current Value
+
+For MVP:
+
+- `estimatedCurrentValue = currentInvestedAmount + estimatedAccruedReturn`
 
 ### Derived Status
 
@@ -327,6 +343,36 @@ For MVP:
 Non-MVP note:
 
 - later, we may need a broader lifecycle/status discussion for cases like an open-ended investment that the user has exited or closed
+
+## Timeline Segments
+
+Timeline segments are the recommended foundation for derived calculations.
+
+Idea:
+
+- split one investment timeline into contiguous intervals where contributed capital, annual rate, and lifecycle behavior stay constant
+- calculate returns from those stable intervals
+
+Current direction:
+
+- timeline segment `endDate` is exclusive in MVP
+- a fixed-term investment earns up to, but not including, its `endDate`
+- this keeps timeline behavior consistent across lifecycle types and simplifies segment composition
+
+Suggested segment shape:
+
+- `startDate`
+- `endDate`
+- `totalContributedAmount`
+- `annualRate`
+- `lifecycleType`
+- `paymentFrequency`
+- `reinvestmentBehavior`
+
+Current interpretation:
+
+- segment `totalContributedAmount` is the cumulative capital contributed and active at the start of the segment
+- it is not yet the full segment starting value including accrued earnings
 
 ## Modeling Questions Still Open
 

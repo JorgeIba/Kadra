@@ -92,7 +92,7 @@ export interface BaseDerivedInvestment {
   currency: Currency
   notes?: string
   originalAmount: number
-  currentPrincipal: number
+  currentInvestedAmount: number
   annualRate: number
   paymentFrequency: PaymentFrequency
   reinvestmentBehavior: ReinvestmentBehavior
