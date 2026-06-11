@@ -23,6 +23,11 @@ export interface InvestmentTimelineSegment {
   reinvestmentBehavior: ReinvestmentBehavior
 }
 
+export interface CalculatedInvestmentTimelineSegment
+  extends InvestmentTimelineSegment {
+  segmentStartingValue: number
+}
+
 interface TimelinePeriod {
   startDate: CalendarDateString
   endDate?: CalendarDateString
@@ -60,10 +65,7 @@ export function getInvestmentTimelineSegments(
       {
         startDate: boundary,
         endDate: nextBoundary,
-        totalContributedAmount: getTotalContributedAmountAtDate(
-          investment,
-          boundary,
-        ),
+        totalContributedAmount: getTotalContributedAmountAtDate(investment, boundary),
         annualRate: ratePeriod.annualRate,
         lifecycleType: lifecyclePeriod.type,
         paymentFrequency: lifecyclePeriod.paymentFrequency,

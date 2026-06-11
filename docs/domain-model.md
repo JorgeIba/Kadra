@@ -372,7 +372,12 @@ Suggested segment shape:
 Current interpretation:
 
 - segment `totalContributedAmount` is the cumulative capital contributed and active at the start of the segment
-- it is not yet the full segment starting value including accrued earnings
+- the structural segment does not yet include the propagated earning base
+
+Calculated segment direction:
+
+- a later calculated segment shape can extend the structural segment with fields such as `segmentStartingValue`
+- when automatic reinvestment is modeled more fully, `segmentStartingValue` may exceed `totalContributedAmount` because prior earnings can roll forward into later segments
 
 ## Modeling Questions Still Open
 
