@@ -23,16 +23,18 @@ export interface InvestmentTimelineSegment {
   reinvestmentBehavior: ReinvestmentBehavior
 }
 
-export interface CalculatedInvestmentTimelineSegment
-  extends InvestmentTimelineSegment {
-  segmentStartingValue: number
-}
-
 interface TimelinePeriod {
   startDate: CalendarDateString
   endDate?: CalendarDateString
 }
 
+/**
+ * Builds structural timeline segments up to `asOfDate`.
+ *
+ * Each segment represents a period where contributed capital, active rate, and
+ * lifecycle settings stay constant. `totalContributedAmount` is raw
+ * contributed capital at the segment start, not a compounded balance.
+ */
 export function getInvestmentTimelineSegments(
   investment: Investment,
   asOfDate: Date,
@@ -86,7 +88,9 @@ export function getInvestmentTimelineBoundaries(
     asOfDate,
   ]
 
-  return [...new Set(rawBoundaries)].sort(compareCalendarDatesAscending)
+  return [...new Set(rawBoundaries)]
+    .filter((boundary) => compareCalendarDatesAscending(boundary, asOfDate) <= 0)
+    .sort(compareCalendarDatesAscending)
 }
 
 function getContributionBoundaryDates(
@@ -120,6 +124,11 @@ export function getTotalContributedAmountAtDate(
   }, 0)
 }
 
+/**
+ * Returns the rate period that is active at `asOfDate`.
+ *
+ * `null` means there is no rate period covering that date.
+ */
 export function getActiveRatePeriodAtDate(
   investment: Investment,
   asOfDate: CalendarDateString,
@@ -127,6 +136,11 @@ export function getActiveRatePeriodAtDate(
   return getActivePeriodAtDate(investment.ratePeriods, asOfDate)
 }
 
+/**
+ * Returns the lifecycle period that is active at `asOfDate`.
+ *
+ * `null` means there is no lifecycle period covering that date.
+ */
 export function getActiveLifecyclePeriodAtDate(
   investment: Investment,
   asOfDate: CalendarDateString,

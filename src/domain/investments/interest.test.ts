@@ -1,60 +1,69 @@
 import { describe, expect, it } from "vitest"
+import { PAYMENT_FREQUENCIES } from "@/domain/investments/constants"
 import {
-  CURRENCIES,
-  INVESTMENT_TYPES,
-  PAYMENT_FREQUENCIES,
-  REINVESTMENT_BEHAVIORS,
-} from "@/domain/investments/constants"
-import {
-  getEstimatedAccruedReturn,
-  getEstimatedMonthlyReturn,
-  getEstimatedPeriodicReturn,
-  getEstimatedYearlyReturn,
+  getEstimatedInterestForDays,
+  getEstimatedInterestForPaymentFrequency,
+  getEstimatedMonthlyInterest,
+  getEstimatedYearlyInterest,
+  getInterestForPeriod,
   getPaymentFrequencyDays,
+  getProjectedTotalInterestAtDate,
   getSimpleInterest,
+  getTotalInterest,
+  type InterestPeriod,
 } from "@/domain/investments/interest"
-import type { Investment } from "@/domain/investments/types"
 
-const fixedInvestment = {
-  id: "investment-1",
-  name: "Test fixed investment",
-  institutionName: "Test institution",
-  type: INVESTMENT_TYPES.fixedTerm,
-  originalAmount: 36_500,
-  annualRate: 10,
-  currency: CURRENCIES.mxn,
-  paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-  reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-  startDate: "2026-01-01",
-  endDate: "2026-02-01",
-  createdAt: "2026-01-01T18:00:00.000Z",
-  updatedAt: "2026-01-01T18:00:00.000Z",
-} satisfies Investment
+const interestPeriods = [
+  {
+    startingAmount: 36_500,
+    annualRate: 10,
+    startDate: "2026-01-01",
+    endDate: "2026-01-16",
+  },
+  {
+    startingAmount: 36_500,
+    annualRate: 10,
+    startDate: "2026-01-16",
+    endDate: "2026-02-01",
+  },
+] satisfies InterestPeriod[]
 
-describe("investment return helpers", () => {
+describe("interest helpers", () => {
   it("calculates simple interest with a 365-day year", () => {
     expect(getSimpleInterest(36_500, 10, 365)).toBe(3_650)
   })
 
-  it("calculates accrued return from active days", () => {
+  it("calculates the interest for one period", () => {
+    expect(getInterestForPeriod(interestPeriods[0])).toBe(150)
+  })
+
+  it("accumulates the total interest across multiple periods", () => {
+    expect(getTotalInterest(interestPeriods)).toBe(310)
+  })
+
+  it("projects total interest up to a target date", () => {
+    expect(getProjectedTotalInterestAtDate(interestPeriods, "2026-01-16")).toBe(
+      150,
+    )
+    expect(getProjectedTotalInterestAtDate(interestPeriods, "2026-02-01")).toBe(
+      310,
+    )
+  })
+
+  it("estimates interest for a payment frequency", () => {
     expect(
-      getEstimatedAccruedReturn(
-        fixedInvestment,
-        new Date("2026-01-16T12:00:00.000Z"),
+      getEstimatedInterestForPaymentFrequency(
+        36_500,
+        10,
+        PAYMENT_FREQUENCIES.monthly,
       ),
-    ).toBe(150)
+    ).toBe(300)
   })
 
-  it("calculates periodic return from payment frequency", () => {
-    expect(getEstimatedPeriodicReturn(fixedInvestment)).toBe(300)
-  })
-
-  it("calculates estimated monthly return", () => {
-    expect(getEstimatedMonthlyReturn(fixedInvestment)).toBe(300)
-  })
-
-  it("calculates estimated yearly return", () => {
-    expect(getEstimatedYearlyReturn(fixedInvestment)).toBe(3_650)
+  it("estimates monthly, yearly, and explicit-day interest", () => {
+    expect(getEstimatedMonthlyInterest(36_500, 10)).toBe(300)
+    expect(getEstimatedYearlyInterest(36_500, 10)).toBe(3_650)
+    expect(getEstimatedInterestForDays(36_500, 10, 15)).toBe(150)
   })
 
   it("maps at-maturity payments to zero periodic days for MVP", () => {

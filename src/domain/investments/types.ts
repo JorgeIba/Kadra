@@ -98,7 +98,7 @@ export interface BaseDerivedInvestment {
   reinvestmentBehavior: ReinvestmentBehavior
   startDate: CalendarDateString
   derivedStatus: DerivedStatus
-  daysActive: number
+  currentLifecycleDaysActive: number
   estimatedAccruedReturn: number
   estimatedCurrentValue: number
   estimatedPeriodicReturn: number

@@ -1,0 +1,51 @@
+import { describe, expect, it } from "vitest"
+import {
+  evolvingInvestment,
+  fixedInvestment,
+} from "@/domain/investments/investment-test-fixtures"
+import { analyzeInvestment } from "@/domain/investments/investment-analysis"
+
+describe("investment analysis", () => {
+  it("builds the reusable as-of analysis for a fixed-term investment", () => {
+    const analysis = analyzeInvestment(
+      fixedInvestment,
+      new Date("2026-01-16T12:00:00.000Z"),
+    )
+
+    expect(analysis.lastActiveDate).toBe("2026-01-16")
+    expect(analysis.derivedStatus).toBe("active")
+    expect(analysis.originalAmount).toBe(36_500)
+    expect(analysis.totalContributedAmount).toBe(36_500)
+    expect(analysis.currentInvestedAmount).toBe(36_500)
+    expect(analysis.estimatedAccruedReturn).toBe(150)
+    expect(analysis.estimatedCurrentValue).toBe(36_650)
+    expect(analysis.currentAnnualRate).toBe(10)
+    expect(analysis.balanceTimeline).toHaveLength(1)
+    expect(analysis.currentLifecyclePeriod?.type).toBe("fixed-term")
+  })
+
+  it("captures reinvested balances in the evolving investment analysis", () => {
+    const analysis = analyzeInvestment(
+      evolvingInvestment,
+      new Date("2026-03-15T12:00:00.000Z"),
+    )
+
+    expect(analysis.structuralTimeline).toHaveLength(3)
+    expect(analysis.balanceTimeline).toHaveLength(3)
+    expect(analysis.totalContributedAmount).toBe(15_000)
+    expect(analysis.currentInvestedAmount).toBeCloseTo(15_270.616172)
+    expect(analysis.estimatedAccruedReturn).toBeCloseTo(270.616172)
+    expect(analysis.estimatedCurrentValue).toBeCloseTo(15_270.616172)
+    expect(analysis.currentAnnualRate).toBe(12)
+  })
+
+  it("snaps finished fixed-term analysis back to the last active date", () => {
+    const analysis = analyzeInvestment(
+      fixedInvestment,
+      new Date("2026-02-15T12:00:00.000Z"),
+    )
+
+    expect(analysis.lastActiveDate).toBe("2026-01-30")
+    expect(analysis.currentLifecyclePeriod?.type).toBe("fixed-term")
+  })
+})
