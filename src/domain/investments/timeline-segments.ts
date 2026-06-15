@@ -15,7 +15,7 @@ import type {
 
 export interface InvestmentTimelineSegment {
   startDate: CalendarDateString
-  endDate: CalendarDateString
+  endDate: CalendarDateString | null
   totalContributedAmount: number
   annualRate: number
   lifecycleType: InvestmentType
@@ -32,8 +32,10 @@ interface TimelinePeriod {
  * Builds structural timeline segments up to `asOfDate`.
  *
  * Each segment represents a period where contributed capital, active rate, and
- * lifecycle settings stay constant. `totalContributedAmount` is raw
- * contributed capital at the segment start, not a compounded balance.
+ * lifecycle settings stay constant. `endDate: null` means the current active
+ * segment continues indefinitely and should be clipped by callers to their
+ * calculation date. `totalContributedAmount` is raw contributed capital at the
+ * segment start, not a compounded balance.
  */
 export function getInvestmentTimelineSegments(
   investment: Investment,
@@ -45,12 +47,6 @@ export function getInvestmentTimelineSegments(
   )
 
   return boundaries.flatMap((boundary, index) => {
-    const nextBoundary = boundaries[index + 1]
-
-    if (nextBoundary === undefined) {
-      return []
-    }
-
     const lifecyclePeriod = getActiveLifecyclePeriodAtDate(investment, boundary)
 
     if (lifecyclePeriod === null) {
@@ -63,11 +59,16 @@ export function getInvestmentTimelineSegments(
       return []
     }
 
+    const nextBoundary = boundaries[index + 1] ?? null
+
     return [
       {
         startDate: boundary,
         endDate: nextBoundary,
-        totalContributedAmount: getTotalContributedAmountAtDate(investment, boundary),
+        totalContributedAmount: getTotalContributedAmountAtDate(
+          investment,
+          boundary,
+        ),
         annualRate: ratePeriod.annualRate,
         lifecycleType: lifecyclePeriod.type,
         paymentFrequency: lifecyclePeriod.paymentFrequency,
@@ -89,7 +90,9 @@ export function getInvestmentTimelineBoundaries(
   ]
 
   return [...new Set(rawBoundaries)]
-    .filter((boundary) => compareCalendarDatesAscending(boundary, asOfDate) <= 0)
+    .filter(
+      (boundary) => compareCalendarDatesAscending(boundary, asOfDate) <= 0,
+    )
     .sort(compareCalendarDatesAscending)
 }
 
@@ -101,7 +104,9 @@ function getContributionBoundaryDates(
   )
 }
 
-function getPeriodBoundaryDates(periods: TimelinePeriod[]): CalendarDateString[] {
+function getPeriodBoundaryDates(
+  periods: TimelinePeriod[],
+): CalendarDateString[] {
   return periods.flatMap((period) => {
     return period.endDate === undefined
       ? [period.startDate]
@@ -156,7 +161,9 @@ function getActivePeriodAtDate<TPeriod extends TimelinePeriod>(
     compareCalendarDatesAscending(leftPeriod.startDate, rightPeriod.startDate),
   )
 
-  return sortedPeriods.find((period) => isDateWithinPeriod(asOfDate, period)) ?? null
+  return (
+    sortedPeriods.find((period) => isDateWithinPeriod(asOfDate, period)) ?? null
+  )
 }
 
 function isDateWithinPeriod(

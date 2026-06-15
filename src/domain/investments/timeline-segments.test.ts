@@ -64,9 +64,7 @@ const investment = {
 
 describe("investment timeline segments", () => {
   it("builds sorted unique timeline boundaries", () => {
-    expect(
-      getInvestmentTimelineBoundaries(investment, "2026-03-15"),
-    ).toEqual([
+    expect(getInvestmentTimelineBoundaries(investment, "2026-03-15")).toEqual([
       "2026-01-01",
       "2026-02-01",
       "2026-03-01",
@@ -84,20 +82,23 @@ describe("investment timeline segments", () => {
   })
 
   it("finds the active rate and lifecycle period at a given date", () => {
-    expect(getActiveRatePeriodAtDate(investment, "2026-02-15")?.annualRate).toBe(
-      10,
-    )
-    expect(getActiveRatePeriodAtDate(investment, "2026-03-01")?.annualRate).toBe(
-      12,
-    )
     expect(
-      getActiveLifecyclePeriodAtDate(investment, "2026-02-15")?.type,
-    ).toBe(INVESTMENT_TYPES.openEnded)
+      getActiveRatePeriodAtDate(investment, "2026-02-15")?.annualRate,
+    ).toBe(10)
+    expect(
+      getActiveRatePeriodAtDate(investment, "2026-03-01")?.annualRate,
+    ).toBe(12)
+    expect(getActiveLifecyclePeriodAtDate(investment, "2026-02-15")?.type).toBe(
+      INVESTMENT_TYPES.openEnded,
+    )
   })
 
   it("builds stable segments where contributed capital and rate stay constant", () => {
     expect(
-      getInvestmentTimelineSegments(investment, new Date("2026-03-15T12:00:00.000Z")),
+      getInvestmentTimelineSegments(
+        investment,
+        new Date("2026-03-15T12:00:00.000Z"),
+      ),
     ).toEqual([
       {
         startDate: "2026-01-01",
@@ -122,6 +123,34 @@ describe("investment timeline segments", () => {
         endDate: "2026-03-15",
         totalContributedAmount: 15_000,
         annualRate: 12,
+        lifecycleType: INVESTMENT_TYPES.openEnded,
+        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+      },
+      {
+        startDate: "2026-03-15",
+        endDate: null,
+        totalContributedAmount: 15_000,
+        annualRate: 12,
+        lifecycleType: INVESTMENT_TYPES.openEnded,
+        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+      },
+    ])
+  })
+
+  it("builds the current open-ended segment when no time has elapsed yet", () => {
+    expect(
+      getInvestmentTimelineSegments(
+        investment,
+        new Date("2026-01-01T12:00:00.000Z"),
+      ),
+    ).toEqual([
+      {
+        startDate: "2026-01-01",
+        endDate: null,
+        totalContributedAmount: 10_000,
+        annualRate: 10,
         lifecycleType: INVESTMENT_TYPES.openEnded,
         paymentFrequency: PAYMENT_FREQUENCIES.monthly,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,

@@ -1,12 +1,12 @@
 import { getInterestForPeriod } from "@/domain/investments/interest"
+import { toDateString } from "@/domain/investments/dates"
 import {
   getInvestmentTimelineSegments,
   type InvestmentTimelineSegment,
 } from "@/domain/investments/timeline-segments"
 import type { Investment } from "@/domain/investments/types"
 
-export interface InvestmentBalanceTimelineSegment
-  extends InvestmentTimelineSegment {
+export interface InvestmentBalanceTimelineSegment extends InvestmentTimelineSegment {
   startingBalance: number
   interestEarned: number
   endingBalance: number
@@ -25,15 +25,17 @@ export function getInvestmentBalanceTimeline(
   asOfDate: Date,
 ): InvestmentBalanceTimelineSegment[] {
   let carriedReinvestedEarnings = 0
+  const asOfDateString = toDateString(asOfDate)
 
   return getInvestmentTimelineSegments(investment, asOfDate).map((segment) => {
     const startingBalance =
       segment.totalContributedAmount + carriedReinvestedEarnings
+    const calculationEndDate = segment.endDate ?? asOfDateString
     const interestEarned = getInterestForPeriod({
       startingAmount: startingBalance,
       annualRate: segment.annualRate,
       startDate: segment.startDate,
-      endDate: segment.endDate,
+      endDate: calculationEndDate,
     })
     // Current MVP limitation: this treats automatic reinvestment as one
     // end-of-segment accrual. A later pass should compound within the segment
