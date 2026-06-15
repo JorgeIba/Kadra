@@ -1,7 +1,7 @@
 import {
   DERIVED_STATUSES,
-  INVESTMENT_TYPES,
   getDerivedStatus,
+  getInvestmentDerivedValues,
   type Investment,
 } from "@/domain/investments"
 
@@ -42,9 +42,11 @@ export function getFilteredInvestments(
       case ASSET_FILTER_OPTIONS.all:
         return true
       case ASSET_FILTER_OPTIONS.fixedTerm:
-        return investment.type === INVESTMENT_TYPES.fixedTerm
+        return getInvestmentDerivedValues(investment, asOfDate).type === "fixed-term"
       case ASSET_FILTER_OPTIONS.openEnded:
-        return investment.type === INVESTMENT_TYPES.openEnded
+        return (
+          getInvestmentDerivedValues(investment, asOfDate).type === "open-ended"
+        )
       case ASSET_FILTER_OPTIONS.active:
         return (
           getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.active

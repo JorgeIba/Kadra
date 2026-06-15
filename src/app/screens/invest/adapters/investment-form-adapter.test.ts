@@ -34,19 +34,39 @@ describe("investment form adapter", () => {
     )
 
     expect(investment).toEqual({
-      annualRate: 11.25,
       createdAt: metadata.now,
       currency: CURRENCIES.mxn,
-      endDate: "2026-12-31",
       id: metadata.id,
       institutionName: "CETES Directo",
       name: "CETES 6 months",
-      originalAmount: 10_000,
-      paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-      reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      startDate: metadata.startDate,
-      type: INVESTMENT_TYPES.fixedTerm,
       updatedAt: metadata.now,
+      contributions: [
+        {
+          id: `${metadata.id}-contribution-1`,
+          amount: 10_000,
+          contributionDate: metadata.startDate,
+          createdAt: metadata.now,
+        },
+      ],
+      ratePeriods: [
+        {
+          id: `${metadata.id}-rate-period-1`,
+          annualRate: 11.25,
+          startDate: metadata.startDate,
+          createdAt: metadata.now,
+        },
+      ],
+      lifecyclePeriods: [
+        {
+          id: `${metadata.id}-lifecycle-period-1`,
+          type: INVESTMENT_TYPES.fixedTerm,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+          startDate: metadata.startDate,
+          endDate: "2026-12-31",
+          createdAt: metadata.now,
+        },
+      ],
     })
   })
 
@@ -59,8 +79,7 @@ describe("investment form adapter", () => {
       metadata,
     )
 
-    expect(investment.type).toBe(INVESTMENT_TYPES.openEnded)
-    expect("endDate" in investment).toBe(false)
+    expect(investment.lifecyclePeriods[0]?.type).toBe(INVESTMENT_TYPES.openEnded)
   })
 
   it("keeps non-empty notes", () => {
@@ -89,57 +108,185 @@ describe("investment form adapter", () => {
 
     expect(investment.createdAt).toBe(metadata.now)
     expect(investment.updatedAt).toBe(metadata.now)
-    expect(investment.startDate).toBe(metadata.startDate)
+    expect(investment.lifecyclePeriods[0]?.startDate).toBe(metadata.startDate)
   })
 
   it("maps an existing investment back to form values", () => {
-    const investment = mapInvestmentFormToInvestment(
-      {
-        ...baseFormValues,
-        endDate: "2026-12-31",
-        investmentType: INVESTMENT_TYPES.fixedTerm,
-      },
-      metadata,
-    )
+    const investment = {
+      ...mapInvestmentFormToInvestment(
+        {
+          ...baseFormValues,
+          endDate: "2026-12-31",
+          investmentType: INVESTMENT_TYPES.fixedTerm,
+        },
+        metadata,
+      ),
+      contributions: [
+        {
+          id: "investment-1-contribution-1",
+          amount: 10_000,
+          contributionDate: "2026-05-19",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-contribution-2",
+          amount: 2_000,
+          contributionDate: "2026-06-01",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+      ratePeriods: [
+        {
+          id: "investment-1-rate-period-1",
+          annualRate: 11.25,
+          startDate: "2026-05-19",
+          endDate: "2026-06-01",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-rate-period-2",
+          annualRate: 12,
+          startDate: "2026-06-01",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+      lifecyclePeriods: [
+        {
+          id: "investment-1-lifecycle-period-1",
+          type: INVESTMENT_TYPES.openEnded,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+          startDate: "2026-05-19",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-lifecycle-period-2",
+          type: INVESTMENT_TYPES.fixedTerm,
+          paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+          startDate: "2026-06-01",
+          endDate: "2026-12-31",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+    }
 
     expect(mapInvestmentToFormValues(investment)).toEqual({
       ...baseFormValues,
+      annualRate: 12,
       endDate: "2026-12-31",
       investmentType: INVESTMENT_TYPES.fixedTerm,
+      originalAmount: 2_000,
+      paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+      reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
     })
   })
 
-  it("updates an investment while preserving system-owned fields", () => {
-    const existingInvestment = mapInvestmentFormToInvestment(
-      {
-        ...baseFormValues,
-        endDate: "2026-12-31",
-        investmentType: INVESTMENT_TYPES.fixedTerm,
-      },
-      metadata,
-    )
-    const updatedAt = new Date("2026-06-01T15:30:00.000Z")
+  it("updates the latest history entries while preserving earlier history", () => {
+    const existingInvestment = {
+      ...mapInvestmentFormToInvestment(
+        {
+          ...baseFormValues,
+          endDate: "2026-12-31",
+          investmentType: INVESTMENT_TYPES.fixedTerm,
+        },
+        metadata,
+      ),
+      contributions: [
+        {
+          id: "investment-1-contribution-1",
+          amount: 10_000,
+          contributionDate: "2026-05-19",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-contribution-2",
+          amount: 2_000,
+          contributionDate: "2026-06-01",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+      ratePeriods: [
+        {
+          id: "investment-1-rate-period-1",
+          annualRate: 11.25,
+          startDate: "2026-05-19",
+          endDate: "2026-06-01",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-rate-period-2",
+          annualRate: 12,
+          startDate: "2026-06-01",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+      lifecyclePeriods: [
+        {
+          id: "investment-1-lifecycle-period-1",
+          type: INVESTMENT_TYPES.openEnded,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+          startDate: "2026-05-19",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-lifecycle-period-2",
+          type: INVESTMENT_TYPES.fixedTerm,
+          paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+          startDate: "2026-06-01",
+          endDate: "2026-12-31",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+    }
+    const updatedAt = new Date("2026-06-15T15:30:00.000Z")
 
     const updatedInvestment = buildUpdatedInvestmentFromFormValues(
       {
         ...baseFormValues,
-        annualRate: 12,
+        annualRate: 12.5,
         endDate: "2027-01-31",
         investmentType: INVESTMENT_TYPES.fixedTerm,
         name: "Updated CETES",
+        originalAmount: 3_000,
+        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
       },
       existingInvestment,
       { asOfDate: updatedAt },
     )
 
     expect(updatedInvestment).toMatchObject({
-      annualRate: 12,
       createdAt: metadata.now,
-      endDate: "2027-01-31",
       id: metadata.id,
       name: "Updated CETES",
-      startDate: metadata.startDate,
       updatedAt: updatedAt.toISOString(),
+    })
+    expect(updatedInvestment.contributions).toHaveLength(2)
+    expect(updatedInvestment.contributions[0]).toEqual(
+      existingInvestment.contributions[0],
+    )
+    expect(updatedInvestment.contributions[1]).toMatchObject({
+      amount: 3_000,
+      contributionDate: "2026-06-01",
+    })
+    expect(updatedInvestment.ratePeriods).toHaveLength(2)
+    expect(updatedInvestment.ratePeriods[0]).toEqual(existingInvestment.ratePeriods[0])
+    expect(updatedInvestment.ratePeriods[1]).toMatchObject({
+      annualRate: 12.5,
+      startDate: "2026-06-01",
+    })
+    expect(updatedInvestment.lifecyclePeriods).toHaveLength(2)
+    expect(updatedInvestment.lifecyclePeriods[0]).toEqual(
+      existingInvestment.lifecyclePeriods[0],
+    )
+    expect(updatedInvestment.lifecyclePeriods[1]).toMatchObject({
+      endDate: "2027-01-31",
+      paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+      reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+      startDate: "2026-06-01",
     })
   })
 
@@ -161,8 +308,8 @@ describe("investment form adapter", () => {
 
     expect(preview).toMatchObject({
       id: "investment-preview",
-      type: INVESTMENT_TYPES.fixedTerm,
     })
+    expect(preview?.lifecyclePeriods[0]?.type).toBe(INVESTMENT_TYPES.fixedTerm)
   })
 })
 

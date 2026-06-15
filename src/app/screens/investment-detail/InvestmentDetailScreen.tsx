@@ -11,7 +11,6 @@ import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   INVESTMENT_TYPE_LABELS,
-  INVESTMENT_TYPES,
   PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIOR_LABELS,
   getInvestmentDerivedValues,
@@ -72,16 +71,16 @@ export function InvestmentDetailScreen({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <DetailMetric
-              icon={Percent}
-              label="Annual rate"
-              value={formatPercentage(investment.annualRate)}
-            />
-            <DetailMetric
-              icon={Landmark}
-              label="Original amount"
-              value={formatMxn(investment.originalAmount)}
-            />
+          <DetailMetric
+            icon={Percent}
+            label="Annual rate"
+            value={formatPercentage(derivedValues.annualRate)}
+          />
+          <DetailMetric
+            icon={Landmark}
+            label="Original amount"
+            value={formatMxn(derivedValues.originalAmount)}
+          />
           </div>
         </CardContent>
       </Card>
@@ -90,23 +89,22 @@ export function InvestmentDetailScreen({
         <CardContent className="space-y-4">
           <DetailRow
             label="Type"
-            value={INVESTMENT_TYPE_LABELS[investment.type]}
+            value={INVESTMENT_TYPE_LABELS[derivedValues.type]}
           />
           <DetailRow
             label="Payment frequency"
-            value={PAYMENT_FREQUENCY_LABELS[investment.paymentFrequency]}
+            value={PAYMENT_FREQUENCY_LABELS[derivedValues.paymentFrequency]}
           />
           <DetailRow
             label="Reinvestment"
             value={
-              REINVESTMENT_BEHAVIOR_LABELS[investment.reinvestmentBehavior]
+              REINVESTMENT_BEHAVIOR_LABELS[derivedValues.reinvestmentBehavior]
             }
           />
-          <DetailRow label="Start date" value={investment.startDate} />
-          {investment.type === INVESTMENT_TYPES.fixedTerm &&
-          derivedValues.type === INVESTMENT_TYPES.fixedTerm ? (
+          <DetailRow label="Start date" value={derivedValues.startDate} />
+          {derivedValues.type === "fixed-term" ? (
             <>
-              <DetailRow label="End date" value={investment.endDate} />
+              <DetailRow label="End date" value={derivedValues.endDate} />
               <DetailRow
                 label="Progress"
                 value={`${Math.round(derivedValues.progressPercentage)}%`}

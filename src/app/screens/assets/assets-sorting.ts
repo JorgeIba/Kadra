@@ -1,7 +1,8 @@
 import {
-  INVESTMENT_TYPES,
   compareCalendarDatesAscending,
+  getInvestmentDerivedValues,
   type Investment,
+  type InvestmentDerivedValues,
 } from "@/domain/investments"
 
 export const ASSET_SORT_OPTIONS = {
@@ -32,7 +33,15 @@ export function getSortedInvestments(
   investments: Investment[],
   sortOption: AssetSortOption,
 ) {
+  const asOfDate = new Date()
+
   return [...investments].sort((leftInvestment, rightInvestment) => {
+    const leftDerivedValues = getInvestmentDerivedValues(leftInvestment, asOfDate)
+    const rightDerivedValues = getInvestmentDerivedValues(
+      rightInvestment,
+      asOfDate,
+    )
+
     switch (sortOption) {
       case ASSET_SORT_OPTIONS.newest:
         return compareDescending(
@@ -41,16 +50,16 @@ export function getSortedInvestments(
         )
       case ASSET_SORT_OPTIONS.highestAmount:
         return compareDescending(
-          leftInvestment.originalAmount,
-          rightInvestment.originalAmount,
+          leftDerivedValues.originalAmount,
+          rightDerivedValues.originalAmount,
         )
       case ASSET_SORT_OPTIONS.highestRate:
         return compareDescending(
-          leftInvestment.annualRate,
-          rightInvestment.annualRate,
+          leftDerivedValues.annualRate,
+          rightDerivedValues.annualRate,
         )
       case ASSET_SORT_OPTIONS.endDateSoonest:
-        return compareEndDateSoonest(leftInvestment, rightInvestment)
+        return compareEndDateSoonest(leftDerivedValues, rightDerivedValues)
     }
   })
 }
@@ -60,14 +69,14 @@ function compareDescending(leftValue: number, rightValue: number) {
 }
 
 function compareEndDateSoonest(
-  leftInvestment: Investment,
-  rightInvestment: Investment,
+  leftInvestment: InvestmentDerivedValues,
+  rightInvestment: InvestmentDerivedValues,
 ) {
-  if (leftInvestment.type === INVESTMENT_TYPES.openEnded) {
+  if (leftInvestment.type === "open-ended") {
     return 1
   }
 
-  if (rightInvestment.type === INVESTMENT_TYPES.openEnded) {
+  if (rightInvestment.type === "open-ended") {
     return -1
   }
 

@@ -105,19 +105,39 @@ function buildFixedTermInvestment({
   originalAmount: number
 }): Investment {
   return {
-    annualRate,
     createdAt,
     currency: CURRENCIES.mxn,
-    endDate,
     id,
     institutionName: "CETES",
     name: id,
-    originalAmount,
-    paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-    startDate: "2026-01-01",
-    type: INVESTMENT_TYPES.fixedTerm,
     updatedAt: createdAt,
+    contributions: [
+      {
+        id: `${id}-contribution-1`,
+        amount: originalAmount,
+        contributionDate: "2026-01-01",
+        createdAt,
+      },
+    ],
+    ratePeriods: [
+      {
+        id: `${id}-rate-period-1`,
+        annualRate,
+        startDate: "2026-01-01",
+        createdAt,
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: `${id}-lifecycle-period-1`,
+        type: INVESTMENT_TYPES.fixedTerm,
+        paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+        startDate: "2026-01-01",
+        endDate,
+        createdAt,
+      },
+    ],
   }
 }
 
@@ -133,17 +153,37 @@ function buildOpenEndedInvestment({
   originalAmount: number
 }): Investment {
   return {
-    annualRate,
     createdAt,
     currency: CURRENCIES.mxn,
     id,
     institutionName: "Klar",
     name: id,
-    originalAmount,
-    paymentFrequency: PAYMENT_FREQUENCIES.daily,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-    startDate: "2025-12-01",
-    type: INVESTMENT_TYPES.openEnded,
     updatedAt: createdAt,
+    contributions: [
+      {
+        id: `${id}-contribution-1`,
+        amount: originalAmount,
+        contributionDate: "2025-12-01",
+        createdAt,
+      },
+    ],
+    ratePeriods: [
+      {
+        id: `${id}-rate-period-1`,
+        annualRate,
+        startDate: "2025-12-01",
+        createdAt,
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: `${id}-lifecycle-period-1`,
+        type: INVESTMENT_TYPES.openEnded,
+        paymentFrequency: PAYMENT_FREQUENCIES.daily,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+        startDate: "2025-12-01",
+        createdAt,
+      },
+    ],
   }
 }

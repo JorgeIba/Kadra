@@ -35,16 +35,36 @@ describe("portfolio projection", () => {
 })
 
 const investment: Investment = {
-  annualRate: 10,
   createdAt: "2026-06-05T12:00:00.000Z",
   currency: CURRENCIES.mxn,
   id: "projection-investment",
   institutionName: "CETES",
   name: "Projection investment",
-  originalAmount: 10_000,
-  paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-  reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-  startDate: "2026-06-05",
-  type: INVESTMENT_TYPES.openEnded,
   updatedAt: "2026-06-05T12:00:00.000Z",
+  contributions: [
+    {
+      id: "projection-contribution-1",
+      amount: 10_000,
+      contributionDate: "2026-06-05",
+      createdAt: "2026-06-05T12:00:00.000Z",
+    },
+  ],
+  ratePeriods: [
+    {
+      id: "projection-rate-period-1",
+      annualRate: 10,
+      startDate: "2026-06-05",
+      createdAt: "2026-06-05T12:00:00.000Z",
+    },
+  ],
+  lifecyclePeriods: [
+    {
+      id: "projection-lifecycle-period-1",
+      type: INVESTMENT_TYPES.openEnded,
+      paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+      reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+      startDate: "2026-06-05",
+      createdAt: "2026-06-05T12:00:00.000Z",
+    },
+  ],
 }

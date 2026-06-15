@@ -1,10 +1,9 @@
 import {
-  INVESTMENT_TYPES,
   compareCalendarDatesAscending,
   getDaysBetween,
-  isOnOrAfterDate,
+  getInvestmentDerivedValues,
   toDateString,
-  type FixedTermInvestment,
+  type FixedTermDerivedInvestment,
   type Investment,
 } from "@/domain/investments"
 
@@ -25,33 +24,41 @@ export function getMaturityTimelineItems(
   const asOfDateString = toDateString(asOfDate)
 
   return investments
-    .filter((investment): investment is FixedTermInvestment => {
-      return isUpcomingFixedTermInvestment(investment, asOfDate)
-    })
+    // Transitional pairing: the UI still needs raw identity fields plus derived
+    // state. This should simplify once we promote the resolved/read-model shape.
+    .map((investment) => ({
+      investment,
+      derivedValues: getInvestmentDerivedValues(investment, asOfDate),
+    }))
+    .filter(
+      (
+        item,
+      ): item is {
+        investment: Investment
+        derivedValues: FixedTermDerivedInvestment
+      } => {
+        const { derivedValues } = item
+
+      return (
+        derivedValues.type === "fixed-term" &&
+        derivedValues.derivedStatus === "active"
+      )
+      },
+    )
     .sort((leftInvestment, rightInvestment) => {
       return compareCalendarDatesAscending(
-        leftInvestment.endDate,
-        rightInvestment.endDate,
+        leftInvestment.derivedValues.endDate,
+        rightInvestment.derivedValues.endDate,
       )
     })
     .slice(0, MATURITY_TIMELINE_LIMIT)
-    .map((investment) => {
+    .map(({ investment, derivedValues }) => {
       return {
         id: investment.id,
         name: investment.name,
         institutionName: investment.institutionName,
-        endDate: investment.endDate,
-        daysRemaining: getDaysBetween(asOfDateString, investment.endDate),
+        endDate: derivedValues.endDate,
+        daysRemaining: getDaysBetween(asOfDateString, derivedValues.endDate),
       }
     })
-}
-
-function isUpcomingFixedTermInvestment(
-  investment: Investment,
-  asOfDate: Date,
-): investment is FixedTermInvestment {
-  return (
-    investment.type === INVESTMENT_TYPES.fixedTerm &&
-    !isOnOrAfterDate(asOfDate, investment.endDate)
-  )
 }

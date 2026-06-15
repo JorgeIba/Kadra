@@ -34,14 +34,18 @@ export function getPortfolioBreakdown(
       getBreakdownItem({
         investments,
         label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.fixedTerm],
-        matches: (investment) => investment.type === INVESTMENT_TYPES.fixedTerm,
+        matches: (investment) =>
+          getInvestmentDerivedValues(investment, asOfDate).type ===
+          INVESTMENT_TYPES.fixedTerm,
         totalEstimatedValue,
         asOfDate,
       }),
       getBreakdownItem({
         investments,
         label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.openEnded],
-        matches: (investment) => investment.type === INVESTMENT_TYPES.openEnded,
+        matches: (investment) =>
+          getInvestmentDerivedValues(investment, asOfDate).type ===
+          INVESTMENT_TYPES.openEnded,
         totalEstimatedValue,
         asOfDate,
       }),

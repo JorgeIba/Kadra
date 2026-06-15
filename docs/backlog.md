@@ -14,6 +14,7 @@ This document holds future ideas and deferred work that are worth remembering, b
 ## Deferred Ideas
 
 - manual adjustments such as top-ups and partial withdrawals
+- edit-history flow that lets the user choose which contribution, rate period, or lifecycle period to edit or remove instead of only editing the latest event
 - per-investment earnings breakdowns beyond the current first pass
 - user-editable investment start dates with safe validation
 - more detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
