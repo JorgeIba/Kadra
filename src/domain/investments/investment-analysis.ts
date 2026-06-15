@@ -48,17 +48,30 @@ export function analyzeInvestment(
   asOfDate = new Date(),
 ): InvestmentAnalysis {
   const asOfDateString = toDateString(asOfDate)
-  const lastActiveDate = getLastActiveDateForInvestment(investment, asOfDateString)
-  const timelineEndDate = getTimelineEndDateForInvestment(investment, asOfDateString)
+  const lastActiveDate = getLastActiveDateForInvestment(
+    investment,
+    asOfDateString,
+  )
+  const timelineEndDate = getTimelineEndDateForInvestment(
+    investment,
+    asOfDateString,
+  )
   const effectiveDate = parseCalendarDate(timelineEndDate)
-  const structuralTimeline = getInvestmentTimelineSegments(investment, effectiveDate)
-  const balanceTimeline = getInvestmentBalanceTimeline(investment, effectiveDate)
+  const structuralTimeline = getInvestmentTimelineSegments(
+    investment,
+    effectiveDate,
+  )
+  const balanceTimeline = getInvestmentBalanceTimeline(
+    investment,
+    effectiveDate,
+  )
   const currentBalanceSegment = balanceTimeline.at(-1) ?? null
   const currentLifecyclePeriod = getActiveLifecyclePeriodAtDate(
     investment,
     lastActiveDate,
   )
-  const totalContributedAmount = currentBalanceSegment?.totalContributedAmount ?? 0
+  const totalContributedAmount =
+    currentBalanceSegment?.totalContributedAmount ?? 0
   const currentInvestedAmount = currentBalanceSegment?.endingBalance ?? 0
   const estimatedAccruedReturn = balanceTimeline.reduce((total, segment) => {
     return total + segment.interestEarned

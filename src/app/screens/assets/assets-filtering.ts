@@ -42,7 +42,9 @@ export function getFilteredInvestments(
       case ASSET_FILTER_OPTIONS.all:
         return true
       case ASSET_FILTER_OPTIONS.fixedTerm:
-        return getInvestmentDerivedValues(investment, asOfDate).type === "fixed-term"
+        return (
+          getInvestmentDerivedValues(investment, asOfDate).type === "fixed-term"
+        )
       case ASSET_FILTER_OPTIONS.openEnded:
         return (
           getInvestmentDerivedValues(investment, asOfDate).type === "open-ended"

@@ -7,9 +7,7 @@ import {
 } from "@/domain/investments/dates"
 import { analyzeInvestment } from "@/domain/investments/investment-analysis"
 import { getEstimatedPeriodicReturn } from "@/domain/investments/investment-returns"
-import {
-  getActiveLifecyclePeriodAtDate,
-} from "@/domain/investments/timeline-segments"
+import { getActiveLifecyclePeriodAtDate } from "@/domain/investments/timeline-segments"
 import type {
   BaseDerivedInvestment,
   CalendarDateString,
@@ -33,8 +31,10 @@ export function getInvestmentDerivedValues(
   const currentBalanceSegment = getCurrentBalanceSegmentOrThrow(analysis)
   const effectiveEndDate =
     activeLifecyclePeriod.type === INVESTMENT_TYPES.fixedTerm &&
-    compareCalendarDatesAscending(asOfDateString, activeLifecyclePeriod.endDate) >=
-      0
+    compareCalendarDatesAscending(
+      asOfDateString,
+      activeLifecyclePeriod.endDate,
+    ) >= 0
       ? activeLifecyclePeriod.endDate
       : asOfDateString
   const commonValues: BaseDerivedInvestment = {
@@ -117,7 +117,10 @@ function getFixedTermDerivedValues(
     totalTermDays,
   )
   const daysRemaining = Math.max(0, getDaysBetween(asOfDateString, endDate))
-  const projectedAnalysis = analyzeInvestment(investment, parseCalendarDate(endDate))
+  const projectedAnalysis = analyzeInvestment(
+    investment,
+    parseCalendarDate(endDate),
+  )
   const projectedTotalReturnAtEndDate = projectedAnalysis.estimatedAccruedReturn
 
   return {

@@ -79,7 +79,9 @@ describe("investment form adapter", () => {
       metadata,
     )
 
-    expect(investment.lifecyclePeriods[0]?.type).toBe(INVESTMENT_TYPES.openEnded)
+    expect(investment.lifecyclePeriods[0]?.type).toBe(
+      INVESTMENT_TYPES.openEnded,
+    )
   })
 
   it("keeps non-empty notes", () => {
@@ -273,7 +275,9 @@ describe("investment form adapter", () => {
       contributionDate: "2026-06-01",
     })
     expect(updatedInvestment.ratePeriods).toHaveLength(2)
-    expect(updatedInvestment.ratePeriods[0]).toEqual(existingInvestment.ratePeriods[0])
+    expect(updatedInvestment.ratePeriods[0]).toEqual(
+      existingInvestment.ratePeriods[0],
+    )
     expect(updatedInvestment.ratePeriods[1]).toMatchObject({
       annualRate: 12.5,
       startDate: "2026-06-01",

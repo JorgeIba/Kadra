@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { DERIVED_STATUSES, INVESTMENT_TYPES } from "@/domain/investments/constants"
+import {
+  DERIVED_STATUSES,
+  INVESTMENT_TYPES,
+} from "@/domain/investments/constants"
 import {
   fixedInvestment,
   openEndedInvestment,

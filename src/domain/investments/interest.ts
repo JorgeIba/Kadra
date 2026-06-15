@@ -41,7 +41,9 @@ export function getProjectedTotalInterestAtDate(
   periods: InterestPeriod[],
   targetDate: CalendarDateString,
 ): number {
-  const relevantPeriods = periods.filter((period) => period.startDate < targetDate)
+  const relevantPeriods = periods.filter(
+    (period) => period.startDate < targetDate,
+  )
 
   return getTotalInterest(
     relevantPeriods.map((period) => ({

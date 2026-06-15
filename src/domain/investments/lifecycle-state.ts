@@ -1,4 +1,7 @@
-import { DERIVED_STATUSES, INVESTMENT_TYPES } from "@/domain/investments/constants"
+import {
+  DERIVED_STATUSES,
+  INVESTMENT_TYPES,
+} from "@/domain/investments/constants"
 import {
   addCalendarDays,
   parseCalendarDate,
@@ -58,10 +61,7 @@ export function getLastActiveDateForInvestment(
 
   // `endDate` is the open end of the lifecycle interval, so the last active
   // day is the calendar day immediately before it.
-  return addCalendarDays(
-    parseCalendarDate(latestLifecyclePeriod.endDate),
-    -1,
-  )
+  return addCalendarDays(parseCalendarDate(latestLifecyclePeriod.endDate), -1)
 }
 
 /**

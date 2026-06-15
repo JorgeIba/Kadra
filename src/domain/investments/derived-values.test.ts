@@ -159,12 +159,12 @@ describe("investment calculations", () => {
     expect(getPortfolioEstimatedDailyReturn(investments, asOfDate)).toBeCloseTo(
       12.006,
     )
-    expect(getPortfolioEstimatedMonthlyReturn(investments, asOfDate)).toBeCloseTo(
-      360.18,
-    )
-    expect(getPortfolioEstimatedYearlyReturn(investments, asOfDate)).toBeCloseTo(
-      4_382.19,
-    )
+    expect(
+      getPortfolioEstimatedMonthlyReturn(investments, asOfDate),
+    ).toBeCloseTo(360.18)
+    expect(
+      getPortfolioEstimatedYearlyReturn(investments, asOfDate),
+    ).toBeCloseTo(4_382.19)
   })
 
   it("calculates portfolio accrued return and active investment count", () => {

@@ -226,7 +226,8 @@ export function getPeriodInvestmentEarningsBreakdown(
 
   return buildInvestmentEarningsBreakdown(
     activeInvestments,
-    (investment) => getPeriodInvestmentEarningsForDays(investment, days, asOfDate),
+    (investment) =>
+      getPeriodInvestmentEarningsForDays(investment, days, asOfDate),
     portfolioEstimatedEarnings,
   )
 }
@@ -256,7 +257,9 @@ function getPeriodPortfolioEarningsForDays(
   asOfDate: Date,
 ): number {
   return investments.reduce((total, investment) => {
-    return total + getPeriodInvestmentEarningsForDays(investment, days, asOfDate)
+    return (
+      total + getPeriodInvestmentEarningsForDays(investment, days, asOfDate)
+    )
   }, 0)
 }
 

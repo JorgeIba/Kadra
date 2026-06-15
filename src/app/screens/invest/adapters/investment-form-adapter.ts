@@ -218,7 +218,9 @@ function getLatestContributionOrThrow(
   return latestContribution
 }
 
-function getLatestRatePeriodOrThrow(investment: Investment): InvestmentRatePeriod {
+function getLatestRatePeriodOrThrow(
+  investment: Investment,
+): InvestmentRatePeriod {
   const latestRatePeriod = investment.ratePeriods.at(-1)
 
   if (latestRatePeriod === undefined) {

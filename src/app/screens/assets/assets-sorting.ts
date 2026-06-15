@@ -36,7 +36,10 @@ export function getSortedInvestments(
   const asOfDate = new Date()
 
   return [...investments].sort((leftInvestment, rightInvestment) => {
-    const leftDerivedValues = getInvestmentDerivedValues(leftInvestment, asOfDate)
+    const leftDerivedValues = getInvestmentDerivedValues(
+      leftInvestment,
+      asOfDate,
+    )
     const rightDerivedValues = getInvestmentDerivedValues(
       rightInvestment,
       asOfDate,

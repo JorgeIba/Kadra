@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  EARNINGS_PERIODS,
-} from "@/domain/investments"
+import { EARNINGS_PERIODS } from "@/domain/investments"
 import {
   getCustomDateEarningsTarget,
   getPeriodInvestmentEarningsByPeriod,

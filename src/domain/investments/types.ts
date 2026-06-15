@@ -49,14 +49,12 @@ interface BaseInvestmentLifecyclePeriod {
   createdAt: IsoDateTimeString
 }
 
-export interface FixedTermInvestmentLifecyclePeriod
-  extends BaseInvestmentLifecyclePeriod {
+export interface FixedTermInvestmentLifecyclePeriod extends BaseInvestmentLifecyclePeriod {
   type: typeof INVESTMENT_TYPES.fixedTerm
   endDate: CalendarDateString
 }
 
-export interface OpenEndedInvestmentLifecyclePeriod
-  extends BaseInvestmentLifecyclePeriod {
+export interface OpenEndedInvestmentLifecyclePeriod extends BaseInvestmentLifecyclePeriod {
   type: typeof INVESTMENT_TYPES.openEnded
   endDate?: never
 }

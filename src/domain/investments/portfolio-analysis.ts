@@ -32,9 +32,12 @@ export function analyzePortfolio(
     totalEstimatedCurrentValue: investmentAnalyses.reduce((total, analysis) => {
       return total + analysis.estimatedCurrentValue
     }, 0),
-    totalEstimatedAccruedReturn: investmentAnalyses.reduce((total, analysis) => {
-      return total + analysis.estimatedAccruedReturn
-    }, 0),
+    totalEstimatedAccruedReturn: investmentAnalyses.reduce(
+      (total, analysis) => {
+        return total + analysis.estimatedAccruedReturn
+      },
+      0,
+    ),
     activeInvestmentCount: investmentAnalyses.filter((analysis) => {
       return analysis.derivedStatus === "active"
     }).length,
@@ -52,19 +55,22 @@ export function analyzePortfolio(
         )
       )
     }, 0),
-    totalEstimatedMonthlyReturn: investmentAnalyses.reduce((total, analysis) => {
-      if (analysis.currentAnnualRate === null) {
-        return total
-      }
+    totalEstimatedMonthlyReturn: investmentAnalyses.reduce(
+      (total, analysis) => {
+        if (analysis.currentAnnualRate === null) {
+          return total
+        }
 
-      return (
-        total +
-        getEstimatedMonthlyInterest(
-          analysis.currentInvestedAmount,
-          analysis.currentAnnualRate,
+        return (
+          total +
+          getEstimatedMonthlyInterest(
+            analysis.currentInvestedAmount,
+            analysis.currentAnnualRate,
+          )
         )
-      )
-    }, 0),
+      },
+      0,
+    ),
     totalEstimatedYearlyReturn: investmentAnalyses.reduce((total, analysis) => {
       if (analysis.currentAnnualRate === null) {
         return total

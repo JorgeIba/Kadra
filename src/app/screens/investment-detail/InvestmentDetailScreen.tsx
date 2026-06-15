@@ -71,16 +71,16 @@ export function InvestmentDetailScreen({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-          <DetailMetric
-            icon={Percent}
-            label="Annual rate"
-            value={formatPercentage(derivedValues.annualRate)}
-          />
-          <DetailMetric
-            icon={Landmark}
-            label="Original amount"
-            value={formatMxn(derivedValues.originalAmount)}
-          />
+            <DetailMetric
+              icon={Percent}
+              label="Annual rate"
+              value={formatPercentage(derivedValues.annualRate)}
+            />
+            <DetailMetric
+              icon={Landmark}
+              label="Original amount"
+              value={formatMxn(derivedValues.originalAmount)}
+            />
           </div>
         </CardContent>
       </Card>

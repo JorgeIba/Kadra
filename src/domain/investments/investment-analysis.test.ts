@@ -20,7 +20,7 @@ describe("investment analysis", () => {
     expect(analysis.estimatedAccruedReturn).toBe(150)
     expect(analysis.estimatedCurrentValue).toBe(36_650)
     expect(analysis.currentAnnualRate).toBe(10)
-    expect(analysis.balanceTimeline).toHaveLength(1)
+    expect(analysis.balanceTimeline).toHaveLength(2)
     expect(analysis.currentLifecyclePeriod?.type).toBe("fixed-term")
   })
 
@@ -30,8 +30,8 @@ describe("investment analysis", () => {
       new Date("2026-03-15T12:00:00.000Z"),
     )
 
-    expect(analysis.structuralTimeline).toHaveLength(3)
-    expect(analysis.balanceTimeline).toHaveLength(3)
+    expect(analysis.structuralTimeline).toHaveLength(4)
+    expect(analysis.balanceTimeline).toHaveLength(4)
     expect(analysis.totalContributedAmount).toBe(15_000)
     expect(analysis.currentInvestedAmount).toBeCloseTo(15_270.616172)
     expect(analysis.estimatedAccruedReturn).toBeCloseTo(270.616172)

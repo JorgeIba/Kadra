@@ -28,7 +28,9 @@ describe("investment date helpers", () => {
   })
 
   it("calculates active days from an explicit as-of date", () => {
-    expect(getDaysActive("2026-01-01", new Date("2026-01-16T12:00:00.000Z"))).toBe(15)
+    expect(
+      getDaysActive("2026-01-01", new Date("2026-01-16T12:00:00.000Z")),
+    ).toBe(15)
   })
 
   it("checks whether an exact date is on or after a calendar date", () => {
@@ -50,15 +52,13 @@ describe("investment date helpers", () => {
     expect(
       isCalendarDateWithinRange("2026-02-01", "2026-01-01", "2026-02-01"),
     ).toBe(false)
-    expect(
-      isCalendarDateWithinRange("2026-03-01", "2026-01-01"),
-    ).toBe(true)
-    expect(
-      isCalendarDateWithinRange("2026-01-01", null, "2026-02-01"),
-    ).toBe(true)
-    expect(
-      isCalendarDateWithinRange("2026-02-01", null, "2026-02-01"),
-    ).toBe(false)
+    expect(isCalendarDateWithinRange("2026-03-01", "2026-01-01")).toBe(true)
+    expect(isCalendarDateWithinRange("2026-01-01", null, "2026-02-01")).toBe(
+      true,
+    )
+    expect(isCalendarDateWithinRange("2026-02-01", null, "2026-02-01")).toBe(
+      false,
+    )
   })
 
   it("accepts valid calendar date strings", () => {
