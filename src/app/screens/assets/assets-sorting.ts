@@ -1,8 +1,8 @@
 import {
   compareCalendarDatesAscending,
   getInvestmentDerivedValues,
+  type DerivedInvestment,
   type Investment,
-  type InvestmentDerivedValues,
 } from "@/domain/investments"
 
 export const ASSET_SORT_OPTIONS = {
@@ -69,8 +69,8 @@ function compareDescending(leftValue: number, rightValue: number) {
 }
 
 function compareEndDateSoonest(
-  leftInvestment: InvestmentDerivedValues,
-  rightInvestment: InvestmentDerivedValues,
+  leftInvestment: DerivedInvestment,
+  rightInvestment: DerivedInvestment,
 ) {
   if (leftInvestment.type === "open-ended") {
     return 1

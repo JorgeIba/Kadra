@@ -123,8 +123,6 @@ export type DerivedInvestment =
   | FixedTermDerivedInvestment
   | OpenEndedDerivedInvestment
 
-export type InvestmentDerivedValues = DerivedInvestment
-
 /**
  * Compact view-model shape for cards and lists.
  */

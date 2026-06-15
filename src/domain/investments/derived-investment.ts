@@ -13,9 +13,9 @@ import {
 import type {
   BaseDerivedInvestment,
   CalendarDateString,
+  DerivedInvestment,
   FixedTermDerivedInvestment,
   Investment,
-  InvestmentDerivedValues,
   InvestmentLifecyclePeriod,
   InvestmentSummary,
 } from "@/domain/investments/types"
@@ -23,7 +23,7 @@ import type {
 export function getInvestmentDerivedValues(
   investment: Investment,
   asOfDate = new Date(),
-): InvestmentDerivedValues {
+): DerivedInvestment {
   const analysis = analyzeInvestment(investment, asOfDate)
   const asOfDateString = toDateString(asOfDate)
   const activeLifecyclePeriod = getActiveLifecyclePeriodOrThrow(
