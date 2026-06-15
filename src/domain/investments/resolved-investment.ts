@@ -9,19 +9,19 @@ import { analyzeInvestment } from "@/domain/investments/investment-analysis"
 import { getEstimatedPeriodicReturn } from "@/domain/investments/investment-returns"
 import { getActiveLifecyclePeriodAtDate } from "@/domain/investments/timeline-segments"
 import type {
-  BaseDerivedInvestment,
+  BaseResolvedInvestment,
   CalendarDateString,
-  DerivedInvestment,
-  FixedTermDerivedInvestment,
+  FixedTermResolvedInvestment,
   Investment,
-  InvestmentLifecyclePeriod,
   InvestmentSummary,
+  InvestmentLifecyclePeriod,
+  ResolvedInvestment,
 } from "@/domain/investments/types"
 
-export function getInvestmentDerivedValues(
+export function resolveInvestment(
   investment: Investment,
   asOfDate = new Date(),
-): DerivedInvestment {
+): ResolvedInvestment {
   const analysis = analyzeInvestment(investment, asOfDate)
   const asOfDateString = toDateString(asOfDate)
   const activeLifecyclePeriod = getActiveLifecyclePeriodOrThrow(
@@ -37,12 +37,14 @@ export function getInvestmentDerivedValues(
     ) >= 0
       ? activeLifecyclePeriod.endDate
       : asOfDateString
-  const commonValues: BaseDerivedInvestment = {
+  const commonValues: BaseResolvedInvestment = {
     id: investment.id,
     name: investment.name,
     institutionName: investment.institutionName,
     currency: investment.currency,
     notes: investment.notes,
+    createdAt: investment.createdAt,
+    updatedAt: investment.updatedAt,
     originalAmount: analysis.originalAmount,
     currentInvestedAmount: analysis.currentInvestedAmount,
     annualRate: currentBalanceSegment.annualRate,
@@ -66,7 +68,7 @@ export function getInvestmentDerivedValues(
     }
   }
 
-  return getFixedTermDerivedValues(
+  return resolveFixedTermInvestment(
     commonValues,
     investment,
     activeLifecyclePeriod.endDate,
@@ -78,24 +80,28 @@ export function getInvestmentSummary(
   investment: Investment,
   asOfDate = new Date(),
 ): InvestmentSummary {
-  const derivedValues = getInvestmentDerivedValues(investment, asOfDate)
+  return getResolvedInvestmentSummary(resolveInvestment(investment, asOfDate))
+}
 
+export function getResolvedInvestmentSummary(
+  resolvedInvestment: ResolvedInvestment,
+): InvestmentSummary {
   const commonSummaryFields = {
-    id: investment.id,
-    name: investment.name,
-    institutionName: investment.institutionName,
-    originalAmount: derivedValues.originalAmount,
-    annualRate: derivedValues.annualRate,
-    currency: investment.currency,
-    estimatedCurrentValue: derivedValues.estimatedCurrentValue,
-    derivedStatus: derivedValues.derivedStatus,
+    id: resolvedInvestment.id,
+    name: resolvedInvestment.name,
+    institutionName: resolvedInvestment.institutionName,
+    originalAmount: resolvedInvestment.originalAmount,
+    annualRate: resolvedInvestment.annualRate,
+    currency: resolvedInvestment.currency,
+    estimatedCurrentValue: resolvedInvestment.estimatedCurrentValue,
+    derivedStatus: resolvedInvestment.derivedStatus,
   }
 
-  if (derivedValues.type === INVESTMENT_TYPES.fixedTerm) {
+  if (resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm) {
     return {
       ...commonSummaryFields,
       type: INVESTMENT_TYPES.fixedTerm,
-      progressPercentage: derivedValues.progressPercentage,
+      progressPercentage: resolvedInvestment.progressPercentage,
     }
   }
 
@@ -105,12 +111,12 @@ export function getInvestmentSummary(
   }
 }
 
-function getFixedTermDerivedValues(
-  commonValues: BaseDerivedInvestment,
+function resolveFixedTermInvestment(
+  commonValues: BaseResolvedInvestment,
   investment: Investment,
   endDate: CalendarDateString,
   asOfDateString: CalendarDateString,
-): FixedTermDerivedInvestment {
+): FixedTermResolvedInvestment {
   const totalTermDays = getDaysBetween(commonValues.startDate, endDate)
   const elapsedTermDays = Math.min(
     commonValues.currentLifecycleDaysActive,

@@ -1,8 +1,7 @@
 import {
   DERIVED_STATUSES,
-  getDerivedStatus,
-  getInvestmentDerivedValues,
-  type Investment,
+  INVESTMENT_TYPES,
+  type ResolvedInvestment,
 } from "@/domain/investments"
 
 export const ASSET_FILTER_OPTIONS = {
@@ -33,30 +32,21 @@ export const ASSET_FILTER_OPTION_VALUES = [
 ] as const satisfies ReadonlyArray<AssetFilterOption>
 
 export function getFilteredInvestments(
-  investments: Investment[],
+  investments: ResolvedInvestment[],
   filterOption: AssetFilterOption,
-  asOfDate: Date,
 ) {
   return investments.filter((investment) => {
     switch (filterOption) {
       case ASSET_FILTER_OPTIONS.all:
         return true
       case ASSET_FILTER_OPTIONS.fixedTerm:
-        return (
-          getInvestmentDerivedValues(investment, asOfDate).type === "fixed-term"
-        )
+        return investment.type === INVESTMENT_TYPES.fixedTerm
       case ASSET_FILTER_OPTIONS.openEnded:
-        return (
-          getInvestmentDerivedValues(investment, asOfDate).type === "open-ended"
-        )
+        return investment.type === INVESTMENT_TYPES.openEnded
       case ASSET_FILTER_OPTIONS.active:
-        return (
-          getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.active
-        )
+        return investment.derivedStatus === DERIVED_STATUSES.active
       case ASSET_FILTER_OPTIONS.finished:
-        return (
-          getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.finished
-        )
+        return investment.derivedStatus === DERIVED_STATUSES.finished
     }
   })
 }

@@ -4,6 +4,7 @@ import {
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import { getMaturityTimelineItems } from "@/app/screens/dashboard/maturity-timeline"
@@ -13,12 +14,16 @@ const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 describe("maturity timeline", () => {
   it("keeps only upcoming fixed-term investments sorted by end date", () => {
     expect(
-      getMaturityTimelineItems(investments, asOfDate).map((item) => item.id),
+      getMaturityTimelineItems(resolvedInvestments, asOfDate).map(
+        (item) => item.id,
+      ),
     ).toEqual(["soonest", "middle", "latest"])
   })
 
   it("calculates days remaining from the as-of date", () => {
-    expect(getMaturityTimelineItems(investments, asOfDate)[0]).toMatchObject({
+    expect(
+      getMaturityTimelineItems(resolvedInvestments, asOfDate)[0],
+    ).toMatchObject({
       daysRemaining: 5,
       endDate: "2026-06-10",
       id: "soonest",
@@ -26,7 +31,9 @@ describe("maturity timeline", () => {
   })
 
   it("limits the dashboard timeline to three items", () => {
-    expect(getMaturityTimelineItems(investments, asOfDate)).toHaveLength(3)
+    expect(
+      getMaturityTimelineItems(resolvedInvestments, asOfDate),
+    ).toHaveLength(3)
   })
 })
 
@@ -55,6 +62,9 @@ const investments: Investment[] = [
     id: "open-ended",
   }),
 ]
+const resolvedInvestments = investments.map((investment) =>
+  resolveInvestment(investment, asOfDate),
+)
 
 function buildFixedTermInvestment({
   endDate,

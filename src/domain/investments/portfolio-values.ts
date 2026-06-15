@@ -1,44 +1,38 @@
 import { analyzePortfolio } from "@/domain/investments/portfolio-analysis"
-import type { Investment } from "@/domain/investments/types"
+import type { ResolvedInvestment } from "@/domain/investments/types"
 
 export function getPortfolioEstimatedCurrentValue(
-  investments: Investment[],
-  asOfDate = new Date(),
+  investments: ResolvedInvestment[],
 ): number {
-  return analyzePortfolio(investments, asOfDate).totalEstimatedCurrentValue
+  return analyzePortfolio(investments).totalEstimatedCurrentValue
 }
 
 export function getPortfolioEstimatedAccruedReturn(
-  investments: Investment[],
-  asOfDate = new Date(),
+  investments: ResolvedInvestment[],
 ): number {
-  return analyzePortfolio(investments, asOfDate).totalEstimatedAccruedReturn
+  return analyzePortfolio(investments).totalEstimatedAccruedReturn
 }
 
 export function getActiveInvestmentCount(
-  investments: Investment[],
-  asOfDate = new Date(),
+  investments: ResolvedInvestment[],
 ): number {
-  return analyzePortfolio(investments, asOfDate).activeInvestmentCount
+  return analyzePortfolio(investments).activeInvestmentCount
 }
 
 export function getPortfolioEstimatedDailyReturn(
-  investments: Investment[],
-  asOfDate = new Date(),
+  investments: ResolvedInvestment[],
 ): number {
-  return analyzePortfolio(investments, asOfDate).totalEstimatedDailyReturn
+  return analyzePortfolio(investments).totalEstimatedDailyReturn
 }
 
 export function getPortfolioEstimatedMonthlyReturn(
-  investments: Investment[],
-  asOfDate = new Date(),
+  investments: ResolvedInvestment[],
 ): number {
-  return analyzePortfolio(investments, asOfDate).totalEstimatedMonthlyReturn
+  return analyzePortfolio(investments).totalEstimatedMonthlyReturn
 }
 
 export function getPortfolioEstimatedYearlyReturn(
-  investments: Investment[],
-  asOfDate = new Date(),
+  investments: ResolvedInvestment[],
 ): number {
-  return analyzePortfolio(investments, asOfDate).totalEstimatedYearlyReturn
+  return analyzePortfolio(investments).totalEstimatedYearlyReturn
 }

@@ -109,6 +109,13 @@ Current direction:
 
 The app will still need a simple current-state shape for screens such as Dashboard, Assets, and Investment Detail.
 
+Important distinction:
+
+- `Investment` is the source-of-truth history model.
+- `ResolvedInvestment` is the current state of that investment as of one selected date.
+- A resolved investment should be used for read/UI questions like sorting by current amount, filtering by current status, showing the active rate, or rendering cards.
+- Raw `Investment` should be used when the operation needs the full historical record, such as persistence, editing history, replaying projections, or deriving a new resolved state.
+
 That current-state view should eventually be a derived snapshot that answers questions like:
 
 - what type is this investment right now?
@@ -122,7 +129,7 @@ The important rule is:
 - the snapshot is a read model for UI and calculations
 - the underlying dated history remains the source of truth
 
-This should evolve from the current `DerivedInvestment` style object rather than creating two competing "current state" concepts.
+This should evolve from the current `ResolvedInvestment` style object rather than creating two competing "current state" concepts.
 
 ## MVP History-Based Direction
 
@@ -161,7 +168,7 @@ Meaning of dates:
 Important source-of-truth rule:
 
 - do not store direct mutable current fields like `annualRate`, `type`, `paymentFrequency`, `reinvestmentBehavior`, `originalAmount`, or `endDate` on `Investment` beside the histories
-- those values should come from `DerivedInvestment` for a specific date
+- those values should come from `ResolvedInvestment` for a specific date
 
 ### Contribution Records
 
@@ -186,7 +193,7 @@ MVP rule:
 
 Naming update:
 
-- use `currentInvestedAmount` for the derived investment-level amount currently allocated to the investment
+- use `currentInvestedAmount` for the resolved investment-level amount currently allocated to the investment
 - use `totalContributedAmount` inside timeline segments when we mean cumulative contributed capital by the start of that segment
 
 ### Rate Periods
@@ -293,7 +300,7 @@ Why:
 
 ## Derived Current State
 
-The future `DerivedInvestment` object should be the evolution of the current derived investment model.
+The future `ResolvedInvestment` object should be the evolution of the current resolved investment model.
 
 It acts like a snapshot of one `Investment` at a selected date.
 
@@ -317,9 +324,9 @@ From that, the current derived state can answer:
 
 Important source-of-truth rule:
 
-- `DerivedInvestment` is computed from `Investment`
+- `ResolvedInvestment` is computed from `Investment`
 - it should not be persisted as the source of truth
-- if the active rate period has `annualRate = 10` at a given date, then `DerivedInvestment.annualRate` for that date is `10`
+- if the active rate period has `annualRate = 10` at a given date, then `ResolvedInvestment.annualRate` for that date is `10`
 
 ### Derived Current Invested Amount
 

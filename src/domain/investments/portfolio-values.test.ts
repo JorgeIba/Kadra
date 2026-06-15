@@ -3,6 +3,7 @@ import {
   fixedInvestment,
   openEndedInvestment,
 } from "@/domain/investments/investment-test-fixtures"
+import { resolveInvestment } from "@/domain/investments/resolved-investment"
 import {
   getActiveInvestmentCount,
   getPortfolioEstimatedAccruedReturn,
@@ -13,37 +14,30 @@ import {
 } from "@/domain/investments/portfolio-values"
 
 const investments = [fixedInvestment, openEndedInvestment]
+const asOfDate = new Date("2026-01-16T12:00:00.000Z")
+const resolvedInvestments = investments.map((investment) =>
+  resolveInvestment(investment, asOfDate),
+)
 
 describe("portfolio values", () => {
   it("aggregates portfolio current value and accrued return", () => {
-    const asOfDate = new Date("2026-01-16T12:00:00.000Z")
-
-    expect(getPortfolioEstimatedCurrentValue(investments, asOfDate)).toBe(
-      46_680,
-    )
-    expect(getPortfolioEstimatedAccruedReturn(investments, asOfDate)).toBe(180)
+    expect(getPortfolioEstimatedCurrentValue(resolvedInvestments)).toBe(46_680)
+    expect(getPortfolioEstimatedAccruedReturn(resolvedInvestments)).toBe(180)
   })
 
   it("counts active investments", () => {
-    expect(
-      getActiveInvestmentCount(
-        investments,
-        new Date("2026-01-16T12:00:00.000Z"),
-      ),
-    ).toBe(2)
+    expect(getActiveInvestmentCount(resolvedInvestments)).toBe(2)
   })
 
   it("aggregates daily, monthly, and yearly return estimates", () => {
-    const asOfDate = new Date("2026-01-16T12:00:00.000Z")
-
-    expect(getPortfolioEstimatedDailyReturn(investments, asOfDate)).toBeCloseTo(
+    expect(getPortfolioEstimatedDailyReturn(resolvedInvestments)).toBeCloseTo(
       12.006,
     )
-    expect(
-      getPortfolioEstimatedMonthlyReturn(investments, asOfDate),
-    ).toBeCloseTo(360.18)
-    expect(
-      getPortfolioEstimatedYearlyReturn(investments, asOfDate),
-    ).toBeCloseTo(4_382.19)
+    expect(getPortfolioEstimatedMonthlyReturn(resolvedInvestments)).toBeCloseTo(
+      360.18,
+    )
+    expect(getPortfolioEstimatedYearlyReturn(resolvedInvestments)).toBeCloseTo(
+      4_382.19,
+    )
   })
 })

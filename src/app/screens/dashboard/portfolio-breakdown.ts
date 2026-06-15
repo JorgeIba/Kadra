@@ -3,9 +3,8 @@ import {
   DERIVED_STATUSES,
   INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
-  getInvestmentDerivedValues,
   getPortfolioEstimatedCurrentValue,
-  type Investment,
+  type ResolvedInvestment,
 } from "@/domain/investments"
 
 export interface PortfolioBreakdownItem {
@@ -21,33 +20,23 @@ export interface PortfolioBreakdown {
 }
 
 export function getPortfolioBreakdown(
-  investments: Investment[],
-  asOfDate: Date,
+  investments: ResolvedInvestment[],
 ): PortfolioBreakdown {
-  const totalEstimatedValue = getPortfolioEstimatedCurrentValue(
-    investments,
-    asOfDate,
-  )
+  const totalEstimatedValue = getPortfolioEstimatedCurrentValue(investments)
 
   return {
     byType: [
       getBreakdownItem({
         investments,
         label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.fixedTerm],
-        matches: (investment) =>
-          getInvestmentDerivedValues(investment, asOfDate).type ===
-          INVESTMENT_TYPES.fixedTerm,
+        matches: (investment) => investment.type === INVESTMENT_TYPES.fixedTerm,
         totalEstimatedValue,
-        asOfDate,
       }),
       getBreakdownItem({
         investments,
         label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.openEnded],
-        matches: (investment) =>
-          getInvestmentDerivedValues(investment, asOfDate).type ===
-          INVESTMENT_TYPES.openEnded,
+        matches: (investment) => investment.type === INVESTMENT_TYPES.openEnded,
         totalEstimatedValue,
-        asOfDate,
       }),
     ],
     byStatus: [
@@ -55,42 +44,33 @@ export function getPortfolioBreakdown(
         investments,
         label: DERIVED_STATUS_LABELS[DERIVED_STATUSES.active],
         matches: (investment) =>
-          getInvestmentDerivedValues(investment, asOfDate).derivedStatus ===
-          DERIVED_STATUSES.active,
+          investment.derivedStatus === DERIVED_STATUSES.active,
         totalEstimatedValue,
-        asOfDate,
       }),
       getBreakdownItem({
         investments,
         label: DERIVED_STATUS_LABELS[DERIVED_STATUSES.finished],
         matches: (investment) =>
-          getInvestmentDerivedValues(investment, asOfDate).derivedStatus ===
-          DERIVED_STATUSES.finished,
+          investment.derivedStatus === DERIVED_STATUSES.finished,
         totalEstimatedValue,
-        asOfDate,
       }),
     ],
   }
 }
 
 function getBreakdownItem({
-  asOfDate,
   investments,
   label,
   matches,
   totalEstimatedValue,
 }: {
-  asOfDate: Date
-  investments: Investment[]
+  investments: ResolvedInvestment[]
   label: string
-  matches: (investment: Investment) => boolean
+  matches: (investment: ResolvedInvestment) => boolean
   totalEstimatedValue: number
 }): PortfolioBreakdownItem {
   const matchingInvestments = investments.filter(matches)
-  const estimatedValue = getPortfolioEstimatedCurrentValue(
-    matchingInvestments,
-    asOfDate,
-  )
+  const estimatedValue = getPortfolioEstimatedCurrentValue(matchingInvestments)
 
   return {
     label,

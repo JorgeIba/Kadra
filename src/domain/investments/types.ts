@@ -67,12 +67,15 @@ export type InvestmentLifecyclePeriod =
  * Main domain entity. An investment owns the dated histories that describe how
  * the asset has changed over time.
  */
-export interface Investment {
+export interface InvestmentProfile {
   id: string
   name: string
   institutionName: string
   currency: Currency
   notes?: string
+}
+
+export interface Investment extends InvestmentProfile {
   createdAt: IsoDateTimeString
   updatedAt: IsoDateTimeString
   contributions: InvestmentContribution[]
@@ -83,12 +86,9 @@ export interface Investment {
 /**
  * Current read model for one investment at a selected date.
  */
-export interface BaseDerivedInvestment {
-  id: string
-  name: string
-  institutionName: string
-  currency: Currency
-  notes?: string
+export interface BaseResolvedInvestment extends InvestmentProfile {
+  createdAt: IsoDateTimeString
+  updatedAt: IsoDateTimeString
   originalAmount: number
   currentInvestedAmount: number
   annualRate: number
@@ -102,7 +102,7 @@ export interface BaseDerivedInvestment {
   estimatedPeriodicReturn: number
 }
 
-export interface FixedTermDerivedInvestment extends BaseDerivedInvestment {
+export interface FixedTermResolvedInvestment extends BaseResolvedInvestment {
   type: typeof INVESTMENT_TYPES.fixedTerm
   endDate: CalendarDateString
   totalTermDays: number
@@ -112,14 +112,14 @@ export interface FixedTermDerivedInvestment extends BaseDerivedInvestment {
   projectedTotalReturnAtEndDate: number
 }
 
-export interface OpenEndedDerivedInvestment extends BaseDerivedInvestment {
+export interface OpenEndedResolvedInvestment extends BaseResolvedInvestment {
   type: typeof INVESTMENT_TYPES.openEnded
   endDate?: never
 }
 
-export type DerivedInvestment =
-  | FixedTermDerivedInvestment
-  | OpenEndedDerivedInvestment
+export type ResolvedInvestment =
+  | FixedTermResolvedInvestment
+  | OpenEndedResolvedInvestment
 
 /**
  * Compact view-model shape for cards and lists.

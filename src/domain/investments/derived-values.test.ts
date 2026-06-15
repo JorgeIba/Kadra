@@ -9,13 +9,13 @@ import {
 import {
   getActiveInvestmentCount,
   getDerivedStatus,
-  getInvestmentDerivedValues,
   getInvestmentSummary,
   getPortfolioEstimatedAccruedReturn,
   getPortfolioEstimatedCurrentValue,
   getPortfolioEstimatedDailyReturn,
   getPortfolioEstimatedMonthlyReturn,
   getPortfolioEstimatedYearlyReturn,
+  resolveInvestment,
 } from "@/domain/investments/derived-values"
 import type { Investment } from "@/domain/investments/types"
 
@@ -110,7 +110,7 @@ describe("investment calculations", () => {
   })
 
   it("calculates fixed-term progress and projected end value", () => {
-    const values = getInvestmentDerivedValues(
+    const values = resolveInvestment(
       fixedInvestment,
       new Date("2026-01-16T12:00:00.000Z"),
     )
@@ -152,26 +152,30 @@ describe("investment calculations", () => {
   it("calculates portfolio-level estimates", () => {
     const investments = [fixedInvestment, openEndedInvestment]
     const asOfDate = new Date("2026-01-16T12:00:00.000Z")
-
-    expect(getPortfolioEstimatedCurrentValue(investments, asOfDate)).toBe(
-      46_680,
+    const resolvedInvestments = investments.map((investment) =>
+      resolveInvestment(investment, asOfDate),
     )
-    expect(getPortfolioEstimatedDailyReturn(investments, asOfDate)).toBeCloseTo(
+
+    expect(getPortfolioEstimatedCurrentValue(resolvedInvestments)).toBe(46_680)
+    expect(getPortfolioEstimatedDailyReturn(resolvedInvestments)).toBeCloseTo(
       12.006,
     )
-    expect(
-      getPortfolioEstimatedMonthlyReturn(investments, asOfDate),
-    ).toBeCloseTo(360.18)
-    expect(
-      getPortfolioEstimatedYearlyReturn(investments, asOfDate),
-    ).toBeCloseTo(4_382.19)
+    expect(getPortfolioEstimatedMonthlyReturn(resolvedInvestments)).toBeCloseTo(
+      360.18,
+    )
+    expect(getPortfolioEstimatedYearlyReturn(resolvedInvestments)).toBeCloseTo(
+      4_382.19,
+    )
   })
 
   it("calculates portfolio accrued return and active investment count", () => {
     const investments = [fixedInvestment, openEndedInvestment]
     const asOfDate = new Date("2026-01-16T12:00:00.000Z")
+    const resolvedInvestments = investments.map((investment) =>
+      resolveInvestment(investment, asOfDate),
+    )
 
-    expect(getPortfolioEstimatedAccruedReturn(investments, asOfDate)).toBe(180)
-    expect(getActiveInvestmentCount(investments, asOfDate)).toBe(2)
+    expect(getPortfolioEstimatedAccruedReturn(resolvedInvestments)).toBe(180)
+    expect(getActiveInvestmentCount(resolvedInvestments)).toBe(2)
   })
 })

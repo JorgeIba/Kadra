@@ -4,13 +4,15 @@ import {
   openEndedInvestment,
 } from "@/domain/investments/investment-test-fixtures"
 import { analyzePortfolio } from "@/domain/investments/portfolio-analysis"
+import { resolveInvestment } from "@/domain/investments/resolved-investment"
 
 describe("portfolio analysis", () => {
-  it("aggregates reusable investment analyses into portfolio totals", () => {
-    const analysis = analyzePortfolio(
-      [fixedInvestment, openEndedInvestment],
-      new Date("2026-01-16T12:00:00.000Z"),
+  it("aggregates resolved investments into portfolio totals", () => {
+    const asOfDate = new Date("2026-01-16T12:00:00.000Z")
+    const resolvedInvestments = [fixedInvestment, openEndedInvestment].map(
+      (investment) => resolveInvestment(investment, asOfDate),
     )
+    const analysis = analyzePortfolio(resolvedInvestments)
 
     expect(analysis.investments).toHaveLength(2)
     expect(analysis.totalEstimatedCurrentValue).toBe(46_680)

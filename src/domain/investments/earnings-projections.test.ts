@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { EARNINGS_PERIODS } from "@/domain/investments"
+import {
+  EARNINGS_PERIODS,
+  INVESTMENT_TYPES,
+  PAYMENT_FREQUENCIES,
+  REINVESTMENT_BEHAVIORS,
+} from "@/domain/investments"
 import {
   getCustomDateEarningsTarget,
   getPeriodInvestmentEarningsByPeriod,
@@ -42,9 +47,9 @@ const maturedFixedInvestment = {
   lifecyclePeriods: [
     {
       id: "lifecycle-period-1",
-      type: "fixed-term",
-      paymentFrequency: "at-maturity",
-      reinvestmentBehavior: "to-cash",
+      type: INVESTMENT_TYPES.fixedTerm,
+      paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+      reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
       startDate: "2025-11-01",
       endDate: "2025-12-01",
       createdAt: "2025-11-01T18:00:00.000Z",

@@ -4,6 +4,7 @@ import {
   fixedInvestment,
 } from "@/domain/investments/investment-test-fixtures"
 import { analyzeInvestment } from "@/domain/investments/investment-analysis"
+import { DERIVED_STATUSES, INVESTMENT_TYPES } from "@/domain/investments"
 
 describe("investment analysis", () => {
   it("builds the reusable as-of analysis for a fixed-term investment", () => {
@@ -13,7 +14,7 @@ describe("investment analysis", () => {
     )
 
     expect(analysis.lastActiveDate).toBe("2026-01-16")
-    expect(analysis.derivedStatus).toBe("active")
+    expect(analysis.derivedStatus).toBe(DERIVED_STATUSES.active)
     expect(analysis.originalAmount).toBe(36_500)
     expect(analysis.totalContributedAmount).toBe(36_500)
     expect(analysis.currentInvestedAmount).toBe(36_500)
@@ -21,7 +22,9 @@ describe("investment analysis", () => {
     expect(analysis.estimatedCurrentValue).toBe(36_650)
     expect(analysis.currentAnnualRate).toBe(10)
     expect(analysis.balanceTimeline).toHaveLength(2)
-    expect(analysis.currentLifecyclePeriod?.type).toBe("fixed-term")
+    expect(analysis.currentLifecyclePeriod?.type).toBe(
+      INVESTMENT_TYPES.fixedTerm,
+    )
   })
 
   it("captures reinvested balances in the evolving investment analysis", () => {
@@ -46,6 +49,8 @@ describe("investment analysis", () => {
     )
 
     expect(analysis.lastActiveDate).toBe("2026-01-30")
-    expect(analysis.currentLifecyclePeriod?.type).toBe("fixed-term")
+    expect(analysis.currentLifecyclePeriod?.type).toBe(
+      INVESTMENT_TYPES.fixedTerm,
+    )
   })
 })

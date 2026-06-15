@@ -1,8 +1,7 @@
 import {
   compareCalendarDatesAscending,
-  getInvestmentDerivedValues,
-  type DerivedInvestment,
-  type Investment,
+  INVESTMENT_TYPES,
+  type ResolvedInvestment,
 } from "@/domain/investments"
 
 export const ASSET_SORT_OPTIONS = {
@@ -30,21 +29,10 @@ export const ASSET_SORT_OPTION_VALUES = [
 ] as const satisfies ReadonlyArray<AssetSortOption>
 
 export function getSortedInvestments(
-  investments: Investment[],
+  investments: ResolvedInvestment[],
   sortOption: AssetSortOption,
 ) {
-  const asOfDate = new Date()
-
   return [...investments].sort((leftInvestment, rightInvestment) => {
-    const leftDerivedValues = getInvestmentDerivedValues(
-      leftInvestment,
-      asOfDate,
-    )
-    const rightDerivedValues = getInvestmentDerivedValues(
-      rightInvestment,
-      asOfDate,
-    )
-
     switch (sortOption) {
       case ASSET_SORT_OPTIONS.newest:
         return compareDescending(
@@ -53,16 +41,16 @@ export function getSortedInvestments(
         )
       case ASSET_SORT_OPTIONS.highestAmount:
         return compareDescending(
-          leftDerivedValues.originalAmount,
-          rightDerivedValues.originalAmount,
+          leftInvestment.originalAmount,
+          rightInvestment.originalAmount,
         )
       case ASSET_SORT_OPTIONS.highestRate:
         return compareDescending(
-          leftDerivedValues.annualRate,
-          rightDerivedValues.annualRate,
+          leftInvestment.annualRate,
+          rightInvestment.annualRate,
         )
       case ASSET_SORT_OPTIONS.endDateSoonest:
-        return compareEndDateSoonest(leftDerivedValues, rightDerivedValues)
+        return compareEndDateSoonest(leftInvestment, rightInvestment)
     }
   })
 }
@@ -72,14 +60,14 @@ function compareDescending(leftValue: number, rightValue: number) {
 }
 
 function compareEndDateSoonest(
-  leftInvestment: DerivedInvestment,
-  rightInvestment: DerivedInvestment,
+  leftInvestment: ResolvedInvestment,
+  rightInvestment: ResolvedInvestment,
 ) {
-  if (leftInvestment.type === "open-ended") {
+  if (leftInvestment.type === INVESTMENT_TYPES.openEnded) {
     return 1
   }
 
-  if (rightInvestment.type === "open-ended") {
+  if (rightInvestment.type === INVESTMENT_TYPES.openEnded) {
     return -1
   }
 

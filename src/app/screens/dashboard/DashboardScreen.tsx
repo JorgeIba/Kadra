@@ -1,9 +1,10 @@
 import {
   getActiveInvestmentCount,
   getPortfolioEarningsSnapshot,
-  getInvestmentSummary,
   getPortfolioEstimatedAccruedReturn,
   getPortfolioEstimatedCurrentValue,
+  getResolvedInvestmentSummary,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import { EarningsExplorationCard } from "@/app/screens/dashboard/EarningsExplorationCard"
@@ -33,15 +34,21 @@ export function DashboardScreen({
   onInvestmentSelect,
 }: DashboardScreenProps) {
   const asOfDate = new Date()
-  const activeInvestments = getActiveInvestmentCount(investments, asOfDate)
-  const earnedSoFar = getPortfolioEstimatedAccruedReturn(investments, asOfDate)
-  const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
+  const resolvedInvestments = investments.map((investment) =>
+    resolveInvestment(investment, asOfDate),
+  )
+  const activeInvestments = getActiveInvestmentCount(resolvedInvestments)
+  const earnedSoFar = getPortfolioEstimatedAccruedReturn(resolvedInvestments)
+  const totalValue = getPortfolioEstimatedCurrentValue(resolvedInvestments)
   const earningsSnapshot = getPortfolioEarningsSnapshot(investments, asOfDate)
-  const portfolioBreakdown = getPortfolioBreakdown(investments, asOfDate)
+  const portfolioBreakdown = getPortfolioBreakdown(resolvedInvestments)
   const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
-  const maturityTimelineItems = getMaturityTimelineItems(investments, asOfDate)
-  const investmentSummaries = investments
-    .map((investment) => getInvestmentSummary(investment, asOfDate))
+  const maturityTimelineItems = getMaturityTimelineItems(
+    resolvedInvestments,
+    asOfDate,
+  )
+  const investmentSummaries = resolvedInvestments
+    .map((investment) => getResolvedInvestmentSummary(investment))
     .slice(0, DASHBOARD_INVESTMENT_PREVIEW_LIMIT)
 
   return (

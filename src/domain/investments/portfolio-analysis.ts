@@ -3,14 +3,11 @@ import {
   getEstimatedMonthlyInterest,
   getEstimatedYearlyInterest,
 } from "@/domain/investments/interest"
-import {
-  analyzeInvestment,
-  type InvestmentAnalysis,
-} from "@/domain/investments/investment-analysis"
-import type { Investment } from "@/domain/investments/types"
+import { DERIVED_STATUSES } from "@/domain/investments/constants"
+import type { ResolvedInvestment } from "@/domain/investments/types"
 
 export interface PortfolioAnalysis {
-  investments: InvestmentAnalysis[]
+  investments: ResolvedInvestment[]
   totalEstimatedCurrentValue: number
   totalEstimatedAccruedReturn: number
   activeInvestmentCount: number
@@ -20,67 +17,44 @@ export interface PortfolioAnalysis {
 }
 
 export function analyzePortfolio(
-  investments: Investment[],
-  asOfDate = new Date(),
+  investments: ResolvedInvestment[],
 ): PortfolioAnalysis {
-  const investmentAnalyses = investments.map((investment) =>
-    analyzeInvestment(investment, asOfDate),
-  )
-
   return {
-    investments: investmentAnalyses,
-    totalEstimatedCurrentValue: investmentAnalyses.reduce((total, analysis) => {
-      return total + analysis.estimatedCurrentValue
+    investments,
+    totalEstimatedCurrentValue: investments.reduce((total, investment) => {
+      return total + investment.estimatedCurrentValue
     }, 0),
-    totalEstimatedAccruedReturn: investmentAnalyses.reduce(
-      (total, analysis) => {
-        return total + analysis.estimatedAccruedReturn
-      },
-      0,
-    ),
-    activeInvestmentCount: investmentAnalyses.filter((analysis) => {
-      return analysis.derivedStatus === "active"
+    totalEstimatedAccruedReturn: investments.reduce((total, investment) => {
+      return total + investment.estimatedAccruedReturn
+    }, 0),
+    activeInvestmentCount: investments.filter((investment) => {
+      return investment.derivedStatus === DERIVED_STATUSES.active
     }).length,
-    totalEstimatedDailyReturn: investmentAnalyses.reduce((total, analysis) => {
-      if (analysis.currentAnnualRate === null) {
-        return total
-      }
-
+    totalEstimatedDailyReturn: investments.reduce((total, investment) => {
       return (
         total +
         getEstimatedInterestForDays(
-          analysis.currentInvestedAmount,
-          analysis.currentAnnualRate,
+          investment.currentInvestedAmount,
+          investment.annualRate,
           1,
         )
       )
     }, 0),
-    totalEstimatedMonthlyReturn: investmentAnalyses.reduce(
-      (total, analysis) => {
-        if (analysis.currentAnnualRate === null) {
-          return total
-        }
-
-        return (
-          total +
-          getEstimatedMonthlyInterest(
-            analysis.currentInvestedAmount,
-            analysis.currentAnnualRate,
-          )
+    totalEstimatedMonthlyReturn: investments.reduce((total, investment) => {
+      return (
+        total +
+        getEstimatedMonthlyInterest(
+          investment.currentInvestedAmount,
+          investment.annualRate,
         )
-      },
-      0,
-    ),
-    totalEstimatedYearlyReturn: investmentAnalyses.reduce((total, analysis) => {
-      if (analysis.currentAnnualRate === null) {
-        return total
-      }
-
+      )
+    }, 0),
+    totalEstimatedYearlyReturn: investments.reduce((total, investment) => {
       return (
         total +
         getEstimatedYearlyInterest(
-          analysis.currentInvestedAmount,
-          analysis.currentAnnualRate,
+          investment.currentInvestedAmount,
+          investment.annualRate,
         )
       )
     }, 0),

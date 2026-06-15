@@ -4,6 +4,7 @@ import {
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import { getPortfolioBreakdown } from "@/app/screens/dashboard/portfolio-breakdown"
@@ -12,7 +13,7 @@ const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 
 describe("portfolio breakdown", () => {
   it("groups investments by type", () => {
-    const breakdown = getPortfolioBreakdown(investments, asOfDate)
+    const breakdown = getPortfolioBreakdown(resolvedInvestments)
 
     expect(
       breakdown.byType.map(({ count, label }) => {
@@ -25,7 +26,7 @@ describe("portfolio breakdown", () => {
   })
 
   it("groups investments by derived status", () => {
-    const breakdown = getPortfolioBreakdown(investments, asOfDate)
+    const breakdown = getPortfolioBreakdown(resolvedInvestments)
 
     expect(
       breakdown.byStatus.map(({ count, label }) => {
@@ -38,7 +39,7 @@ describe("portfolio breakdown", () => {
   })
 
   it("returns percentages that represent each group share of estimated value", () => {
-    const breakdown = getPortfolioBreakdown(investments, asOfDate)
+    const breakdown = getPortfolioBreakdown(resolvedInvestments)
     const typePercentageTotal = breakdown.byType.reduce((total, item) => {
       return total + item.percentage
     }, 0)
@@ -47,7 +48,7 @@ describe("portfolio breakdown", () => {
   })
 
   it("returns zero percentages for an empty portfolio", () => {
-    const breakdown = getPortfolioBreakdown([], asOfDate)
+    const breakdown = getPortfolioBreakdown([])
 
     expect([...breakdown.byType, ...breakdown.byStatus]).toEqual(
       expect.arrayContaining([expect.objectContaining({ percentage: 0 })]),
@@ -68,6 +69,9 @@ const investments: Investment[] = [
     id: "open-ended",
   }),
 ]
+const resolvedInvestments = investments.map((investment) =>
+  resolveInvestment(investment, asOfDate),
+)
 
 function buildFixedTermInvestment({
   endDate,

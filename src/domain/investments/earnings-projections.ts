@@ -2,7 +2,6 @@ import {
   DERIVED_STATUSES,
   INVESTMENT_TYPES,
 } from "@/domain/investments/constants"
-import { getInvestmentDerivedValues } from "@/domain/investments/derived-investment"
 import { getDerivedStatus } from "@/domain/investments/derived-values"
 import {
   addCalendarDays,
@@ -10,10 +9,11 @@ import {
   toDateString,
 } from "@/domain/investments/dates"
 import { getSimpleInterest } from "@/domain/investments/interest"
+import { resolveInvestment } from "@/domain/investments/resolved-investment"
 import type {
   CalendarDateString,
-  DerivedInvestment,
   Investment,
+  ResolvedInvestment,
 } from "@/domain/investments/types"
 
 export const EARNINGS_PERIODS = {
@@ -66,12 +66,12 @@ export function getUpcomingInvestmentEarningsForDays(
   days: number,
   asOfDate = new Date(),
 ): number {
-  const derivedInvestment = getInvestmentDerivedValues(investment, asOfDate)
+  const resolvedInvestment = resolveInvestment(investment, asOfDate)
 
   return getSimpleInterest(
-    derivedInvestment.originalAmount,
-    derivedInvestment.annualRate,
-    getUpcomingInvestmentEarningDays(derivedInvestment, days, asOfDate),
+    resolvedInvestment.originalAmount,
+    resolvedInvestment.annualRate,
+    getUpcomingInvestmentEarningDays(resolvedInvestment, days, asOfDate),
   )
 }
 
@@ -80,12 +80,12 @@ export function getPeriodInvestmentEarningsForDays(
   days: number,
   asOfDate = new Date(),
 ): number {
-  const derivedInvestment = getInvestmentDerivedValues(investment, asOfDate)
+  const resolvedInvestment = resolveInvestment(investment, asOfDate)
 
   return getSimpleInterest(
-    derivedInvestment.originalAmount,
-    derivedInvestment.annualRate,
-    getPeriodInvestmentEarningDays(derivedInvestment, days),
+    resolvedInvestment.originalAmount,
+    resolvedInvestment.annualRate,
+    getPeriodInvestmentEarningDays(resolvedInvestment, days),
   )
 }
 
@@ -296,7 +296,7 @@ function getActiveInvestments(
 }
 
 function getUpcomingInvestmentEarningDays(
-  investment: DerivedInvestment,
+  investment: ResolvedInvestment,
   requestedDays: number,
   asOfDate: Date,
 ): number {
@@ -317,7 +317,7 @@ function getUpcomingInvestmentEarningDays(
 }
 
 function getPeriodInvestmentEarningDays(
-  investment: DerivedInvestment,
+  investment: ResolvedInvestment,
   requestedDays: number,
 ): number {
   if (requestedDays <= 0) {

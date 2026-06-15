@@ -11,9 +11,10 @@ import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   INVESTMENT_TYPE_LABELS,
+  INVESTMENT_TYPES,
   PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIOR_LABELS,
-  getInvestmentDerivedValues,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import { Button } from "@/components/ui/button"
@@ -33,7 +34,7 @@ export function InvestmentDetailScreen({
   onDelete,
   onEdit,
 }: InvestmentDetailScreenProps) {
-  const derivedValues = getInvestmentDerivedValues(investment, new Date())
+  const resolvedInvestment = resolveInvestment(investment, new Date())
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   return (
@@ -62,7 +63,7 @@ export function InvestmentDetailScreen({
             <div>
               <p className="text-xs text-muted-foreground">Estimated value</p>
               <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
-                {formatMxn(derivedValues.estimatedCurrentValue)}
+                {formatMxn(resolvedInvestment.estimatedCurrentValue)}
               </p>
             </div>
             <div className="grid size-10 place-items-center rounded-lg bg-background/60 text-primary">
@@ -74,12 +75,12 @@ export function InvestmentDetailScreen({
             <DetailMetric
               icon={Percent}
               label="Annual rate"
-              value={formatPercentage(derivedValues.annualRate)}
+              value={formatPercentage(resolvedInvestment.annualRate)}
             />
             <DetailMetric
               icon={Landmark}
               label="Original amount"
-              value={formatMxn(derivedValues.originalAmount)}
+              value={formatMxn(resolvedInvestment.originalAmount)}
             />
           </div>
         </CardContent>
@@ -89,31 +90,35 @@ export function InvestmentDetailScreen({
         <CardContent className="space-y-4">
           <DetailRow
             label="Type"
-            value={INVESTMENT_TYPE_LABELS[derivedValues.type]}
+            value={INVESTMENT_TYPE_LABELS[resolvedInvestment.type]}
           />
           <DetailRow
             label="Payment frequency"
-            value={PAYMENT_FREQUENCY_LABELS[derivedValues.paymentFrequency]}
+            value={
+              PAYMENT_FREQUENCY_LABELS[resolvedInvestment.paymentFrequency]
+            }
           />
           <DetailRow
             label="Reinvestment"
             value={
-              REINVESTMENT_BEHAVIOR_LABELS[derivedValues.reinvestmentBehavior]
+              REINVESTMENT_BEHAVIOR_LABELS[
+                resolvedInvestment.reinvestmentBehavior
+              ]
             }
           />
-          <DetailRow label="Start date" value={derivedValues.startDate} />
-          {derivedValues.type === "fixed-term" ? (
+          <DetailRow label="Start date" value={resolvedInvestment.startDate} />
+          {resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm ? (
             <>
-              <DetailRow label="End date" value={derivedValues.endDate} />
+              <DetailRow label="End date" value={resolvedInvestment.endDate} />
               <DetailRow
                 label="Progress"
-                value={`${Math.round(derivedValues.progressPercentage)}%`}
+                value={`${Math.round(resolvedInvestment.progressPercentage)}%`}
               />
             </>
           ) : null}
           <DetailRow
             label="Accrued return"
-            value={formatMxn(derivedValues.estimatedAccruedReturn)}
+            value={formatMxn(resolvedInvestment.estimatedAccruedReturn)}
           />
         </CardContent>
       </Card>

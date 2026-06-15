@@ -8,13 +8,13 @@ import {
   openEndedInvestment,
 } from "@/domain/investments/investment-test-fixtures"
 import {
-  getInvestmentDerivedValues,
   getInvestmentSummary,
-} from "@/domain/investments/derived-investment"
+  resolveInvestment,
+} from "@/domain/investments/resolved-investment"
 
-describe("derived investment", () => {
+describe("resolved investment", () => {
   it("builds the current read model for a fixed-term investment", () => {
-    const values = getInvestmentDerivedValues(
+    const values = resolveInvestment(
       fixedInvestment,
       new Date("2026-01-16T12:00:00.000Z"),
     )
@@ -41,7 +41,7 @@ describe("derived investment", () => {
   })
 
   it("builds the current read model for an open-ended investment", () => {
-    const values = getInvestmentDerivedValues(
+    const values = resolveInvestment(
       openEndedInvestment,
       new Date("2026-01-16T12:00:00.000Z"),
     )
