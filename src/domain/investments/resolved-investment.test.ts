@@ -49,12 +49,12 @@ describe("resolved investment", () => {
     expect(values).toMatchObject({
       id: "investment-2",
       type: INVESTMENT_TYPES.openEnded,
-      currentInvestedAmount: 10_030,
       annualRate: 7.3,
-      estimatedAccruedReturn: 30,
-      estimatedCurrentValue: 10_030,
       derivedStatus: DERIVED_STATUSES.active,
     })
+    expect(values.currentInvestedAmount).toBeCloseTo(10_030.042036)
+    expect(values.estimatedAccruedReturn).toBeCloseTo(30.042036)
+    expect(values.estimatedCurrentValue).toBeCloseTo(10_030.042036)
   })
 
   it("returns a compact summary for list views", () => {

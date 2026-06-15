@@ -21,19 +21,19 @@ describe("investment balance timeline", () => {
       totalContributedAmount: 10_000,
       startingBalance: 10_000,
     })
-    expect(balanceTimeline[0].interestEarned).toBeCloseTo(84.93150684931507)
-    expect(balanceTimeline[0].endingBalance).toBeCloseTo(10_084.931507)
+    expect(balanceTimeline[0].interestEarned).toBeCloseTo(84.95402514543093)
+    expect(balanceTimeline[0].endingBalance).toBeCloseTo(10_084.954025)
 
     expect(balanceTimeline[1]).toMatchObject({
       totalContributedAmount: 15_000,
     })
-    expect(balanceTimeline[1].startingBalance).toBeCloseTo(15_084.931507)
-    expect(balanceTimeline[1].interestEarned).toBeCloseTo(115.72002251829613)
-    expect(balanceTimeline[1].endingBalance).toBeCloseTo(15_200.651529367611)
+    expect(balanceTimeline[1].startingBalance).toBeCloseTo(15_084.954025)
+    expect(balanceTimeline[1].interestEarned).toBeCloseTo(115.72019526139047)
+    expect(balanceTimeline[1].endingBalance).toBeCloseTo(15_200.67422)
 
-    expect(balanceTimeline[2].startingBalance).toBeCloseTo(15_200.651529)
-    expect(balanceTimeline[2].interestEarned).toBeCloseTo(69.96464265571942)
-    expect(balanceTimeline[2].endingBalance).toBeCloseTo(15_270.616172)
+    expect(balanceTimeline[2].startingBalance).toBeCloseTo(15_200.67422)
+    expect(balanceTimeline[2].interestEarned).toBeCloseTo(69.96474709666654)
+    expect(balanceTimeline[2].endingBalance).toBeCloseTo(15_270.638968)
 
     expect(balanceTimeline[3]).toMatchObject({
       startDate: "2026-03-15",
@@ -41,8 +41,8 @@ describe("investment balance timeline", () => {
       totalContributedAmount: 15_000,
       interestEarned: 0,
     })
-    expect(balanceTimeline[3].startingBalance).toBeCloseTo(15_270.616172)
-    expect(balanceTimeline[3].endingBalance).toBeCloseTo(15_270.616172)
+    expect(balanceTimeline[3].startingBalance).toBeCloseTo(15_270.638968)
+    expect(balanceTimeline[3].endingBalance).toBeCloseTo(15_270.638968)
   })
 
   it("does not add earned interest back into principal when reinvestment is to cash", () => {

@@ -21,8 +21,12 @@ const resolvedInvestments = investments.map((investment) =>
 
 describe("portfolio values", () => {
   it("aggregates portfolio current value and accrued return", () => {
-    expect(getPortfolioEstimatedCurrentValue(resolvedInvestments)).toBe(46_680)
-    expect(getPortfolioEstimatedAccruedReturn(resolvedInvestments)).toBe(180)
+    expect(getPortfolioEstimatedCurrentValue(resolvedInvestments)).toBeCloseTo(
+      46_680.042036,
+    )
+    expect(getPortfolioEstimatedAccruedReturn(resolvedInvestments)).toBeCloseTo(
+      180.042036,
+    )
   })
 
   it("counts active investments", () => {

@@ -15,8 +15,8 @@ describe("portfolio analysis", () => {
     const analysis = analyzePortfolio(resolvedInvestments)
 
     expect(analysis.investments).toHaveLength(2)
-    expect(analysis.totalEstimatedCurrentValue).toBe(46_680)
-    expect(analysis.totalEstimatedAccruedReturn).toBe(180)
+    expect(analysis.totalEstimatedCurrentValue).toBeCloseTo(46_680.042036)
+    expect(analysis.totalEstimatedAccruedReturn).toBeCloseTo(180.042036)
     expect(analysis.activeInvestmentCount).toBe(2)
     expect(analysis.totalEstimatedDailyReturn).toBeCloseTo(12.006)
     expect(analysis.totalEstimatedMonthlyReturn).toBeCloseTo(360.18)

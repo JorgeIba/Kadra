@@ -36,9 +36,9 @@ describe("investment analysis", () => {
     expect(analysis.structuralTimeline).toHaveLength(4)
     expect(analysis.balanceTimeline).toHaveLength(4)
     expect(analysis.totalContributedAmount).toBe(15_000)
-    expect(analysis.currentInvestedAmount).toBeCloseTo(15_270.616172)
-    expect(analysis.estimatedAccruedReturn).toBeCloseTo(270.616172)
-    expect(analysis.estimatedCurrentValue).toBeCloseTo(15_270.616172)
+    expect(analysis.currentInvestedAmount).toBeCloseTo(15_270.638968)
+    expect(analysis.estimatedAccruedReturn).toBeCloseTo(270.638968)
+    expect(analysis.estimatedCurrentValue).toBeCloseTo(15_270.638968)
     expect(analysis.currentAnnualRate).toBe(12)
   })
 

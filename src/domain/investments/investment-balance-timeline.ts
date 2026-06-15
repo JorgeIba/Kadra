@@ -1,10 +1,15 @@
-import { getInterestForPeriod } from "@/domain/investments/interest"
+import {
+  getCompoundInterestForPeriod,
+  getInterestForPeriod,
+} from "@/domain/investments/interest"
 import { toDateString } from "@/domain/investments/dates"
 import {
   getInvestmentTimelineSegments,
   type InvestmentTimelineSegment,
 } from "@/domain/investments/timeline-segments"
+import { REINVESTMENT_BEHAVIORS } from "@/domain/investments/constants"
 import type { Investment } from "@/domain/investments/types"
+import { getPaymentFrequencyDays } from "@/domain/investments/constants"
 
 export interface InvestmentBalanceTimelineSegment extends InvestmentTimelineSegment {
   startingBalance: number
@@ -31,21 +36,27 @@ export function getInvestmentBalanceTimeline(
     const startingBalance =
       segment.totalContributedAmount + carriedReinvestedEarnings
     const calculationEndDate = segment.endDate ?? asOfDateString
-    const interestEarned = getInterestForPeriod({
+    const interestPeriod = {
       startingAmount: startingBalance,
       annualRate: segment.annualRate,
       startDate: segment.startDate,
       endDate: calculationEndDate,
-    })
-    // Current MVP limitation: this treats automatic reinvestment as one
-    // end-of-segment accrual. A later pass should compound within the segment
-    // at each payment-frequency boundary.
+    }
+    const interestEarned =
+      segment.reinvestmentBehavior === REINVESTMENT_BEHAVIORS.automatic
+        ? getCompoundInterestForPeriod({
+            ...interestPeriod,
+            compoundingFrequencyDays: getPaymentFrequencyDays(
+              segment.paymentFrequency,
+            ),
+          })
+        : getInterestForPeriod(interestPeriod)
     const endingBalance =
-      segment.reinvestmentBehavior === "automatic"
+      segment.reinvestmentBehavior === REINVESTMENT_BEHAVIORS.automatic
         ? startingBalance + interestEarned
         : startingBalance
 
-    if (segment.reinvestmentBehavior === "automatic") {
+    if (segment.reinvestmentBehavior === REINVESTMENT_BEHAVIORS.automatic) {
       carriedReinvestedEarnings += interestEarned
     }
 

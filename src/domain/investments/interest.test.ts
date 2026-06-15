@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest"
-import { PAYMENT_FREQUENCIES } from "@/domain/investments/constants"
+import {
+  getPaymentFrequencyDays,
+  PAYMENT_FREQUENCIES,
+} from "@/domain/investments/constants"
 import {
   getEstimatedInterestForDays,
   getEstimatedInterestForPaymentFrequency,
   getEstimatedMonthlyInterest,
   getEstimatedYearlyInterest,
+  getCompoundInterest,
+  getCompoundInterestForPeriod,
   getInterestForPeriod,
-  getPaymentFrequencyDays,
   getProjectedTotalInterestAtDate,
   getSimpleInterest,
   getTotalInterest,
@@ -33,8 +37,31 @@ describe("interest helpers", () => {
     expect(getSimpleInterest(36_500, 10, 365)).toBe(3_650)
   })
 
+  it("calculates compound interest at the selected frequency", () => {
+    expect(getCompoundInterest(100, 10, 365, 1)).toBeCloseTo(10.515578161623253)
+    expect(getCompoundInterest(10_000, 12, 60, 30)).toBeCloseTo(
+      198.23306436479652,
+    )
+  })
+
+  it("falls back to simple interest when there is no compounding frequency", () => {
+    expect(getCompoundInterest(36_500, 10, 15, 0)).toBe(150)
+  })
+
   it("calculates the interest for one period", () => {
     expect(getInterestForPeriod(interestPeriods[0])).toBe(150)
+  })
+
+  it("calculates the compound interest for one period", () => {
+    expect(
+      getCompoundInterestForPeriod({
+        startingAmount: 10_000,
+        annualRate: 12,
+        startDate: "2026-01-01",
+        endDate: "2026-03-02",
+        compoundingFrequencyDays: 30,
+      }),
+    ).toBeCloseTo(198.23306436479652)
   })
 
   it("accumulates the total interest across multiple periods", () => {

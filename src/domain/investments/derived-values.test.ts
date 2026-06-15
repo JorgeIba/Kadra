@@ -156,7 +156,9 @@ describe("investment calculations", () => {
       resolveInvestment(investment, asOfDate),
     )
 
-    expect(getPortfolioEstimatedCurrentValue(resolvedInvestments)).toBe(46_680)
+    expect(getPortfolioEstimatedCurrentValue(resolvedInvestments)).toBeCloseTo(
+      46_680.042036,
+    )
     expect(getPortfolioEstimatedDailyReturn(resolvedInvestments)).toBeCloseTo(
       12.006,
     )
@@ -175,7 +177,9 @@ describe("investment calculations", () => {
       resolveInvestment(investment, asOfDate),
     )
 
-    expect(getPortfolioEstimatedAccruedReturn(resolvedInvestments)).toBe(180)
+    expect(getPortfolioEstimatedAccruedReturn(resolvedInvestments)).toBeCloseTo(
+      180.042036,
+    )
     expect(getActiveInvestmentCount(resolvedInvestments)).toBe(2)
   })
 })
