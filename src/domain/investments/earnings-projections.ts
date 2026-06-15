@@ -2,6 +2,7 @@ import {
   DERIVED_STATUSES,
   INVESTMENT_TYPES,
 } from "@/domain/investments/constants"
+import { getInvestmentDerivedValues } from "@/domain/investments/derived-investment"
 import { getDerivedStatus } from "@/domain/investments/derived-values"
 import {
   addCalendarDays,
@@ -9,7 +10,11 @@ import {
   toDateString,
 } from "@/domain/investments/dates"
 import { getSimpleInterest } from "@/domain/investments/interest"
-import type { CalendarDateString, Investment } from "@/domain/investments/types"
+import type {
+  CalendarDateString,
+  DerivedInvestment,
+  Investment,
+} from "@/domain/investments/types"
 
 export const EARNINGS_PERIODS = {
   daily: "daily",
@@ -61,21 +66,26 @@ export function getUpcomingInvestmentEarningsForDays(
   days: number,
   asOfDate = new Date(),
 ): number {
+  const derivedInvestment = getInvestmentDerivedValues(investment, asOfDate)
+
   return getSimpleInterest(
-    investment.originalAmount,
-    investment.annualRate,
-    getUpcomingInvestmentEarningDays(investment, days, asOfDate),
+    derivedInvestment.originalAmount,
+    derivedInvestment.annualRate,
+    getUpcomingInvestmentEarningDays(derivedInvestment, days, asOfDate),
   )
 }
 
 export function getPeriodInvestmentEarningsForDays(
   investment: Investment,
   days: number,
+  asOfDate = new Date(),
 ): number {
+  const derivedInvestment = getInvestmentDerivedValues(investment, asOfDate)
+
   return getSimpleInterest(
-    investment.originalAmount,
-    investment.annualRate,
-    getPeriodInvestmentEarningDays(investment, days),
+    derivedInvestment.originalAmount,
+    derivedInvestment.annualRate,
+    getPeriodInvestmentEarningDays(derivedInvestment, days),
   )
 }
 
@@ -94,10 +104,12 @@ export function getUpcomingInvestmentEarningsByPeriod(
 export function getPeriodInvestmentEarningsByPeriod(
   investment: Investment,
   period: EarningsPeriod,
+  asOfDate = new Date(),
 ): number {
   return getPeriodInvestmentEarningsForDays(
     investment,
     EARNINGS_PERIOD_DAYS[period],
+    asOfDate,
   )
 }
 
@@ -132,10 +144,10 @@ export function getPeriodPortfolioEarningsSummary(
   const activeInvestments = getActiveInvestments(investments, asOfDate)
 
   return {
-    daily: getPeriodPortfolioEarningsForDays(activeInvestments, 1),
-    weekly: getPeriodPortfolioEarningsForDays(activeInvestments, 7),
-    monthly: getPeriodPortfolioEarningsForDays(activeInvestments, 30),
-    yearly: getPeriodPortfolioEarningsForDays(activeInvestments, 365),
+    daily: getPeriodPortfolioEarningsForDays(activeInvestments, 1, asOfDate),
+    weekly: getPeriodPortfolioEarningsForDays(activeInvestments, 7, asOfDate),
+    monthly: getPeriodPortfolioEarningsForDays(activeInvestments, 30, asOfDate),
+    yearly: getPeriodPortfolioEarningsForDays(activeInvestments, 365, asOfDate),
   }
 }
 
@@ -209,11 +221,12 @@ export function getPeriodInvestmentEarningsBreakdown(
   const portfolioEstimatedEarnings = getPeriodPortfolioEarningsForDays(
     activeInvestments,
     days,
+    asOfDate,
   )
 
   return buildInvestmentEarningsBreakdown(
     activeInvestments,
-    (investment) => getPeriodInvestmentEarningsForDays(investment, days),
+    (investment) => getPeriodInvestmentEarningsForDays(investment, days, asOfDate),
     portfolioEstimatedEarnings,
   )
 }
@@ -240,9 +253,10 @@ function getUpcomingPortfolioEarningsForDays(
 function getPeriodPortfolioEarningsForDays(
   investments: Investment[],
   days: number,
+  asOfDate: Date,
 ): number {
   return investments.reduce((total, investment) => {
-    return total + getPeriodInvestmentEarningsForDays(investment, days)
+    return total + getPeriodInvestmentEarningsForDays(investment, days, asOfDate)
   }, 0)
 }
 
@@ -279,7 +293,7 @@ function getActiveInvestments(
 }
 
 function getUpcomingInvestmentEarningDays(
-  investment: Investment,
+  investment: DerivedInvestment,
   requestedDays: number,
   asOfDate: Date,
 ): number {
@@ -296,11 +310,11 @@ function getUpcomingInvestmentEarningDays(
     investment.endDate,
   )
 
-  return Math.min(requestedDays, daysUntilMaturity)
+  return Math.max(0, Math.min(requestedDays, daysUntilMaturity))
 }
 
 function getPeriodInvestmentEarningDays(
-  investment: Investment,
+  investment: DerivedInvestment,
   requestedDays: number,
 ): number {
   if (requestedDays <= 0) {
@@ -311,8 +325,5 @@ function getPeriodInvestmentEarningDays(
     return requestedDays
   }
 
-  return Math.min(
-    requestedDays,
-    getDaysBetween(investment.startDate, investment.endDate),
-  )
+  return Math.min(requestedDays, investment.totalTermDays)
 }
