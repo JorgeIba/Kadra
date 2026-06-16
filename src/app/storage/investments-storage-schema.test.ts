@@ -155,6 +155,39 @@ describe("investments storage schema", () => {
     ).toBeNull()
   })
 
+  it("rejects investments without contribution history", () => {
+    expect(
+      parseStoredInvestments([
+        {
+          ...validInvestments[0],
+          contributions: [],
+        },
+      ]),
+    ).toBeNull()
+  })
+
+  it("rejects investments without rate history", () => {
+    expect(
+      parseStoredInvestments([
+        {
+          ...validInvestments[0],
+          ratePeriods: [],
+        },
+      ]),
+    ).toBeNull()
+  })
+
+  it("rejects investments without lifecycle history", () => {
+    expect(
+      parseStoredInvestments([
+        {
+          ...validInvestments[0],
+          lifecyclePeriods: [],
+        },
+      ]),
+    ).toBeNull()
+  })
+
   it("rejects invalid calendar date strings inside nested history", () => {
     expect(
       parseStoredInvestments([

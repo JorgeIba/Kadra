@@ -64,9 +64,9 @@ const investmentSchema = z.strictObject({
   name: z.string().min(1),
   notes: z.string().optional(),
   updatedAt: timestampSchema,
-  contributions: z.array(contributionSchema),
-  ratePeriods: z.array(ratePeriodSchema),
-  lifecyclePeriods: z.array(lifecyclePeriodSchema),
+  contributions: z.array(contributionSchema).min(1),
+  ratePeriods: z.array(ratePeriodSchema).min(1),
+  lifecyclePeriods: z.array(lifecyclePeriodSchema).min(1),
 })
 
 const investmentsStorageSchema = z.array(investmentSchema)

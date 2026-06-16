@@ -69,6 +69,26 @@ const activeOpenEndedInvestment = {
   name: "Open daily",
 } satisfies Investment
 
+const contributedOpenEndedInvestment = {
+  ...openEndedInvestment,
+  id: "investment-contributed-open",
+  name: "Open with extra contribution",
+  contributions: [
+    {
+      id: "contribution-1",
+      amount: 10_000,
+      contributionDate: "2026-01-01",
+      createdAt: "2026-01-01T18:00:00.000Z",
+    },
+    {
+      id: "contribution-2",
+      amount: 5_000,
+      contributionDate: "2026-01-10",
+      createdAt: "2026-01-10T18:00:00.000Z",
+    },
+  ],
+} satisfies Investment
+
 const investments = [activeFixedInvestment, activeOpenEndedInvestment]
 const asOfDate = new Date("2026-01-16T12:00:00.000Z")
 
@@ -89,6 +109,24 @@ describe("earnings exploration calculations", () => {
         asOfDate,
       ),
     ).toBe(10)
+  })
+
+  it("projects earnings from resolved history instead of only the original contribution", () => {
+    expect(
+      getPeriodInvestmentEarningsByPeriod(
+        contributedOpenEndedInvestment,
+        EARNINGS_PERIODS.monthly,
+        asOfDate,
+      ),
+    ).toBeCloseTo(81.21637848684077)
+
+    expect(
+      getUpcomingInvestmentEarningsByPeriod(
+        contributedOpenEndedInvestment,
+        EARNINGS_PERIODS.monthly,
+        asOfDate,
+      ),
+    ).toBeCloseTo(90.47838643770228)
   })
 
   it("caps upcoming fixed-term earnings by remaining time to maturity", () => {
@@ -112,21 +150,21 @@ describe("earnings exploration calculations", () => {
   })
 
   it("calculates portfolio upcoming earnings across common periods", () => {
-    expect(getUpcomingPortfolioEarningsSummary(investments, asOfDate)).toEqual({
-      daily: 12,
-      weekly: 84,
-      monthly: 210,
-      yearly: 880,
-    })
+    const summary = getUpcomingPortfolioEarningsSummary(investments, asOfDate)
+
+    expect(summary.daily).toBeCloseTo(12.006008407282934)
+    expect(summary.weekly).toBeCloseTo(84.05048689527212)
+    expect(summary.monthly).toBeCloseTo(210.35510116597834)
+    expect(summary.yearly).toBeCloseTo(909.5017152386336)
   })
 
   it("calculates portfolio period earnings across common periods", () => {
-    expect(getPeriodPortfolioEarningsSummary(investments, asOfDate)).toEqual({
-      daily: 12,
-      weekly: 84,
-      monthly: 360,
-      yearly: 1_030,
-    })
+    const summary = getPeriodPortfolioEarningsSummary(investments, asOfDate)
+
+    expect(summary.daily).toBeCloseTo(12)
+    expect(summary.weekly).toBeCloseTo(84.00840280055854)
+    expect(summary.monthly).toBeCloseTo(360.1743252389315)
+    expect(summary.yearly).toBeCloseTo(1_057.2268515731776)
   })
 
   it("excludes matured investments from period earnings and breakdowns", () => {
@@ -137,23 +175,25 @@ describe("earnings exploration calculations", () => {
       EARNINGS_PERIODS.monthly,
     )
 
-    expect(
-      getPeriodPortfolioEarningsSummary(mixedInvestments, asOfDate),
-    ).toEqual({
-      daily: 2,
-      weekly: 14,
-      monthly: 60,
-      yearly: 730,
+    const summary = getPeriodPortfolioEarningsSummary(
+      mixedInvestments,
+      asOfDate,
+    )
+
+    expect(summary.daily).toBeCloseTo(2)
+    expect(summary.weekly).toBeCloseTo(14.008402800558542)
+    expect(summary.monthly).toBeCloseTo(60.17432523893149)
+    expect(summary.yearly).toBeCloseTo(757.2268515731776)
+    expect(snapshot.period.breakdown).toHaveLength(1)
+    expect(snapshot.period.breakdown[0]).toMatchObject({
+      investmentId: "investment-open",
+      name: "Open daily",
+      institutionName: "Test institution",
+      percentage: 100,
     })
-    expect(snapshot.period.breakdown).toEqual([
-      {
-        investmentId: "investment-open",
-        name: "Open daily",
-        institutionName: "Test institution",
-        estimatedEarnings: 60,
-        percentage: 100,
-      },
-    ])
+    expect(snapshot.period.breakdown[0]?.estimatedEarnings).toBeCloseTo(
+      60.17432523893149,
+    )
   })
 
   it("estimates upcoming earnings until a custom target date", () => {
@@ -170,7 +210,7 @@ describe("earnings exploration calculations", () => {
         "2026-01-21",
         asOfDate,
       ),
-    ).toBe(60)
+    ).toBeCloseTo(60.03405485571966)
   })
 
   it("returns upcoming and period earnings breakdowns in one snapshot", () => {
@@ -180,40 +220,50 @@ describe("earnings exploration calculations", () => {
       EARNINGS_PERIODS.monthly,
     )
 
-    expect(snapshot.upcoming.totals.monthly).toBe(210)
-    expect(snapshot.period.totals.monthly).toBe(360)
-    expect(snapshot.upcoming.breakdown).toEqual([
-      {
-        investmentId: "investment-fixed",
-        name: "Fixed 30 days",
-        institutionName: "Test institution",
-        estimatedEarnings: 150,
-        percentage: 71.42857142857143,
-      },
-      {
-        investmentId: "investment-open",
-        name: "Open daily",
-        institutionName: "Test institution",
-        estimatedEarnings: 60,
-        percentage: 28.57142857142857,
-      },
-    ])
-    expect(snapshot.period.breakdown).toEqual([
-      {
-        investmentId: "investment-fixed",
-        name: "Fixed 30 days",
-        institutionName: "Test institution",
-        estimatedEarnings: 300,
-        percentage: 83.33333333333334,
-      },
-      {
-        investmentId: "investment-open",
-        name: "Open daily",
-        institutionName: "Test institution",
-        estimatedEarnings: 60,
-        percentage: 16.666666666666664,
-      },
-    ])
+    expect(snapshot.upcoming.totals.monthly).toBeCloseTo(210.35510116597834)
+    expect(snapshot.period.totals.monthly).toBeCloseTo(360.1743252389315)
+    expect(snapshot.upcoming.breakdown).toHaveLength(2)
+    expect(snapshot.upcoming.breakdown[0]).toMatchObject({
+      investmentId: "investment-fixed",
+      name: "Fixed 30 days",
+      institutionName: "Test institution",
+    })
+    expect(snapshot.upcoming.breakdown[0]?.estimatedEarnings).toBeCloseTo(150)
+    expect(snapshot.upcoming.breakdown[0]?.percentage).toBeCloseTo(
+      71.30799261276016,
+    )
+    expect(snapshot.upcoming.breakdown[1]).toMatchObject({
+      investmentId: "investment-open",
+      name: "Open daily",
+      institutionName: "Test institution",
+    })
+    expect(snapshot.upcoming.breakdown[1]?.estimatedEarnings).toBeCloseTo(
+      60.35510116597834,
+    )
+    expect(snapshot.upcoming.breakdown[1]?.percentage).toBeCloseTo(
+      28.692007387239837,
+    )
+    expect(snapshot.period.breakdown).toHaveLength(2)
+    expect(snapshot.period.breakdown[0]).toMatchObject({
+      investmentId: "investment-fixed",
+      name: "Fixed 30 days",
+      institutionName: "Test institution",
+    })
+    expect(snapshot.period.breakdown[0]?.estimatedEarnings).toBeCloseTo(300)
+    expect(snapshot.period.breakdown[0]?.percentage).toBeCloseTo(
+      83.2930004610256,
+    )
+    expect(snapshot.period.breakdown[1]).toMatchObject({
+      investmentId: "investment-open",
+      name: "Open daily",
+      institutionName: "Test institution",
+    })
+    expect(snapshot.period.breakdown[1]?.estimatedEarnings).toBeCloseTo(
+      60.17432523893149,
+    )
+    expect(snapshot.period.breakdown[1]?.percentage).toBeCloseTo(
+      16.70699953897439,
+    )
   })
 
   it("excludes inactive investments from the upcoming breakdown", () => {
@@ -223,22 +273,27 @@ describe("earnings exploration calculations", () => {
       EARNINGS_PERIODS.monthly,
     )
 
-    expect(snapshot.upcoming.breakdown).toEqual([
-      {
-        investmentId: "investment-fixed",
-        name: "Fixed 30 days",
-        institutionName: "Test institution",
-        estimatedEarnings: 150,
-        percentage: 71.42857142857143,
-      },
-      {
-        investmentId: "investment-open",
-        name: "Open daily",
-        institutionName: "Test institution",
-        estimatedEarnings: 60,
-        percentage: 28.57142857142857,
-      },
-    ])
+    expect(snapshot.upcoming.breakdown).toHaveLength(2)
+    expect(snapshot.upcoming.breakdown[0]).toMatchObject({
+      investmentId: "investment-fixed",
+      name: "Fixed 30 days",
+      institutionName: "Test institution",
+    })
+    expect(snapshot.upcoming.breakdown[0]?.estimatedEarnings).toBeCloseTo(150)
+    expect(snapshot.upcoming.breakdown[0]?.percentage).toBeCloseTo(
+      71.30799261276016,
+    )
+    expect(snapshot.upcoming.breakdown[1]).toMatchObject({
+      investmentId: "investment-open",
+      name: "Open daily",
+      institutionName: "Test institution",
+    })
+    expect(snapshot.upcoming.breakdown[1]?.estimatedEarnings).toBeCloseTo(
+      60.35510116597834,
+    )
+    expect(snapshot.upcoming.breakdown[1]?.percentage).toBeCloseTo(
+      28.692007387239837,
+    )
   })
 
   it("builds deterministic custom target dates from an as-of date", () => {
