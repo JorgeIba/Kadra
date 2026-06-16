@@ -93,6 +93,54 @@ describe("investment timeline segments", () => {
     )
   })
 
+  it("defensively prefers the most recent overlapping period when history is malformed", () => {
+    const overlappingInvestment = {
+      ...investment,
+      ratePeriods: [
+        {
+          id: "rate-older",
+          annualRate: 10,
+          startDate: "2026-01-01",
+          endDate: "2026-04-01",
+          createdAt: "2026-01-01T12:00:00.000Z",
+        },
+        {
+          id: "rate-newer",
+          annualRate: 12,
+          startDate: "2026-03-01",
+          createdAt: "2026-03-01T12:00:00.000Z",
+        },
+      ],
+      lifecyclePeriods: [
+        {
+          id: "lifecycle-older",
+          type: INVESTMENT_TYPES.openEnded,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+          startDate: "2026-01-01",
+          createdAt: "2026-01-01T12:00:00.000Z",
+        },
+        {
+          id: "lifecycle-newer",
+          type: INVESTMENT_TYPES.fixedTerm,
+          paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+          startDate: "2026-03-01",
+          endDate: "2026-06-01",
+          createdAt: "2026-03-01T12:00:00.000Z",
+        },
+      ],
+    } satisfies Investment
+
+    expect(
+      getActiveRatePeriodAtDate(overlappingInvestment, "2026-03-15")
+        ?.annualRate,
+    ).toBe(12)
+    expect(
+      getActiveLifecyclePeriodAtDate(overlappingInvestment, "2026-03-15")?.type,
+    ).toBe(INVESTMENT_TYPES.fixedTerm)
+  })
+
   it("builds stable segments where contributed capital and rate stay constant", () => {
     expect(
       getInvestmentTimelineSegments(

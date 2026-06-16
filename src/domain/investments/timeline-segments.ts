@@ -158,7 +158,9 @@ function getActivePeriodAtDate<TPeriod extends TimelinePeriod>(
   asOfDate: CalendarDateString,
 ): TPeriod | null {
   const sortedPeriods = [...periods].sort((leftPeriod, rightPeriod) =>
-    compareCalendarDatesAscending(leftPeriod.startDate, rightPeriod.startDate),
+    // More recent start dates first to get the most up-to-date period in case of overlaps
+    // This is defensive only
+    compareCalendarDatesAscending(rightPeriod.startDate, leftPeriod.startDate),
   )
 
   return (
