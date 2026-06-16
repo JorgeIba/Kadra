@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
   CURRENCIES,
-  INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
   type Investment,
@@ -14,36 +13,111 @@ import {
 
 const fallbackInvestments: Investment[] = [
   {
-    annualRate: 9,
     createdAt: "2026-05-20T12:00:00.000Z",
     currency: CURRENCIES.mxn,
-    endDate: "2026-12-31",
     id: "fallback-investment",
     institutionName: "Fallback institution",
     name: "Fallback investment",
-    originalAmount: 1_000,
-    paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-    startDate: "2026-05-20",
-    type: INVESTMENT_TYPES.fixedTerm,
-    updatedAt: "2026-05-20T12:00:00.000Z",
+    updatedAt: "2026-06-10T08:00:00.000Z",
+    contributions: [
+      {
+        id: "contribution-1",
+        amount: 1_000,
+        contributionDate: "2026-05-20",
+        createdAt: "2026-05-20T12:00:00.000Z",
+      },
+      {
+        id: "contribution-2",
+        amount: 500,
+        contributionDate: "2026-06-01",
+        createdAt: "2026-06-01T08:30:00.000Z",
+      },
+    ],
+    ratePeriods: [
+      {
+        id: "rate-period-1",
+        annualRate: 9,
+        startDate: "2026-05-20",
+        endDate: "2026-06-10",
+        createdAt: "2026-05-20T12:00:00.000Z",
+      },
+      {
+        id: "rate-period-2",
+        annualRate: 8.8,
+        startDate: "2026-06-10",
+        createdAt: "2026-06-10T08:00:00.000Z",
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: "lifecycle-period-1",
+        type: "fixed-term",
+        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+        startDate: "2026-05-20",
+        endDate: "2026-12-31",
+        createdAt: "2026-05-20T12:00:00.000Z",
+      },
+    ],
   },
 ]
 
 const storedInvestments: Investment[] = [
   {
-    annualRate: 11,
     createdAt: "2026-05-20T13:00:00.000Z",
     currency: CURRENCIES.mxn,
     id: "stored-investment",
     institutionName: "Stored institution",
     name: "Stored investment",
-    originalAmount: 2_000,
-    paymentFrequency: PAYMENT_FREQUENCIES.weekly,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-    startDate: "2026-05-20",
-    type: INVESTMENT_TYPES.openEnded,
-    updatedAt: "2026-05-20T13:00:00.000Z",
+    updatedAt: "2026-07-10T09:00:00.000Z",
+    contributions: [
+      {
+        id: "contribution-1",
+        amount: 2_000,
+        contributionDate: "2026-05-20",
+        createdAt: "2026-05-20T13:00:00.000Z",
+      },
+      {
+        id: "contribution-2",
+        amount: 750,
+        contributionDate: "2026-06-15",
+        createdAt: "2026-06-15T10:00:00.000Z",
+      },
+    ],
+    ratePeriods: [
+      {
+        id: "rate-period-1",
+        annualRate: 11,
+        startDate: "2026-05-20",
+        endDate: "2026-07-10",
+        createdAt: "2026-05-20T13:00:00.000Z",
+      },
+      {
+        id: "rate-period-2",
+        annualRate: 10.5,
+        startDate: "2026-07-10",
+        createdAt: "2026-07-10T09:00:00.000Z",
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: "lifecycle-period-1",
+        type: "open-ended",
+        paymentFrequency: PAYMENT_FREQUENCIES.weekly,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+        startDate: "2026-05-20",
+        createdAt: "2026-05-20T13:00:00.000Z",
+      },
+      {
+        id: "lifecycle-period-2",
+        type: "fixed-term",
+        paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+        startDate: "2026-07-10",
+        endDate: "2026-08-10",
+        createdAt: "2026-07-10T09:00:00.000Z",
+      },
+    ],
   },
 ]
 
@@ -86,7 +160,12 @@ describe("investments storage", () => {
       "trafin.investments.v1": JSON.stringify([
         {
           ...storedInvestments[0],
-          originalAmount: -1,
+          contributions: [
+            {
+              ...storedInvestments[0].contributions[0],
+              amount: -1,
+            },
+          ],
         },
       ]),
     })

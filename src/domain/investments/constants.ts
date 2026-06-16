@@ -75,3 +75,9 @@ export const DERIVED_STATUS_LABELS = {
   [DERIVED_STATUSES.active]: "Active",
   [DERIVED_STATUSES.finished]: "Finished",
 } as const satisfies Record<DerivedStatus, string>
+
+export function getPaymentFrequencyDays(
+  paymentFrequency: PaymentFrequency,
+): number {
+  return PAYMENT_FREQUENCY_DAYS[paymentFrequency]
+}

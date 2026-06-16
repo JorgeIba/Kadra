@@ -1,8 +1,8 @@
 import {
   getEstimatedMonthlyReturn,
   getEstimatedYearlyReturn,
-  getInvestmentDerivedValues,
   INVESTMENT_TYPES,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import { Card, CardContent } from "@/components/ui/card"
@@ -17,7 +17,7 @@ export function InvestmentPreview({
   asOfDate = new Date(),
   investment,
 }: InvestmentPreviewProps) {
-  const derivedValues = getInvestmentDerivedValues(investment, asOfDate)
+  const resolvedInvestment = resolveInvestment(investment, asOfDate)
 
   return (
     <Card className="border-dashed bg-secondary/40">
@@ -26,11 +26,11 @@ export function InvestmentPreview({
         <div className="grid grid-cols-2 gap-3">
           <PreviewMetric
             label="Estimated current value"
-            value={formatMxn(derivedValues.estimatedCurrentValue)}
+            value={formatMxn(resolvedInvestment.estimatedCurrentValue)}
           />
           <PreviewMetric
             label="Estimated periodic return"
-            value={formatMxn(derivedValues.estimatedPeriodicReturn)}
+            value={formatMxn(resolvedInvestment.estimatedPeriodicReturn)}
           />
         </div>
 
@@ -45,15 +45,15 @@ export function InvestmentPreview({
           />
         </div>
 
-        {derivedValues.type === INVESTMENT_TYPES.fixedTerm ? (
+        {resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm ? (
           <div className="grid grid-cols-2 gap-3">
             <PreviewMetric
               label="Projected maturity value"
-              value={formatMxn(derivedValues.projectedValueAtEndDate)}
+              value={formatMxn(resolvedInvestment.projectedValueAtEndDate)}
             />
             <PreviewMetric
               label="Term progress"
-              value={formatPercentage(derivedValues.progressPercentage)}
+              value={formatPercentage(resolvedInvestment.progressPercentage)}
             />
           </div>
         ) : null}

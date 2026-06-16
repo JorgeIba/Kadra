@@ -1,0 +1,38 @@
+import { analyzePortfolio } from "@/domain/investments/portfolio-analysis"
+import type { ResolvedInvestment } from "@/domain/investments/types"
+
+export function getPortfolioEstimatedCurrentValue(
+  investments: ResolvedInvestment[],
+): number {
+  return analyzePortfolio(investments).totalEstimatedCurrentValue
+}
+
+export function getPortfolioEstimatedAccruedReturn(
+  investments: ResolvedInvestment[],
+): number {
+  return analyzePortfolio(investments).totalEstimatedAccruedReturn
+}
+
+export function getActiveInvestmentCount(
+  investments: ResolvedInvestment[],
+): number {
+  return analyzePortfolio(investments).activeInvestmentCount
+}
+
+export function getPortfolioEstimatedDailyReturn(
+  investments: ResolvedInvestment[],
+): number {
+  return analyzePortfolio(investments).totalEstimatedDailyReturn
+}
+
+export function getPortfolioEstimatedMonthlyReturn(
+  investments: ResolvedInvestment[],
+): number {
+  return analyzePortfolio(investments).totalEstimatedMonthlyReturn
+}
+
+export function getPortfolioEstimatedYearlyReturn(
+  investments: ResolvedInvestment[],
+): number {
+  return analyzePortfolio(investments).totalEstimatedYearlyReturn
+}

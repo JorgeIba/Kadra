@@ -4,6 +4,7 @@ import {
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import {
@@ -16,7 +17,7 @@ const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 describe("asset filtering", () => {
   it("returns every investment for the all filter", () => {
     expect(
-      getFilteredInvestments(investments, ASSET_FILTER_OPTIONS.all, asOfDate)
+      getFilteredInvestments(resolvedInvestments, ASSET_FILTER_OPTIONS.all)
         .length,
     ).toBe(investments.length)
   })
@@ -24,9 +25,8 @@ describe("asset filtering", () => {
   it("filters fixed-term investments", () => {
     expect(
       getFilteredInvestments(
-        investments,
+        resolvedInvestments,
         ASSET_FILTER_OPTIONS.fixedTerm,
-        asOfDate,
       ).map((investment) => investment.id),
     ).toEqual(["finished-fixed", "active-fixed"])
   })
@@ -34,9 +34,8 @@ describe("asset filtering", () => {
   it("filters open-ended investments", () => {
     expect(
       getFilteredInvestments(
-        investments,
+        resolvedInvestments,
         ASSET_FILTER_OPTIONS.openEnded,
-        asOfDate,
       ).map((investment) => investment.id),
     ).toEqual(["open-ended"])
   })
@@ -44,9 +43,8 @@ describe("asset filtering", () => {
   it("filters active investments", () => {
     expect(
       getFilteredInvestments(
-        investments,
+        resolvedInvestments,
         ASSET_FILTER_OPTIONS.active,
-        asOfDate,
       ).map((investment) => investment.id),
     ).toEqual(["active-fixed", "open-ended"])
   })
@@ -54,9 +52,8 @@ describe("asset filtering", () => {
   it("filters finished investments", () => {
     expect(
       getFilteredInvestments(
-        investments,
+        resolvedInvestments,
         ASSET_FILTER_OPTIONS.finished,
-        asOfDate,
       ).map((investment) => investment.id),
     ).toEqual(["finished-fixed"])
   })
@@ -75,6 +72,9 @@ const investments: Investment[] = [
     id: "open-ended",
   }),
 ]
+const resolvedInvestments = investments.map((investment) =>
+  resolveInvestment(investment, asOfDate),
+)
 
 function buildFixedTermInvestment({
   endDate,
@@ -84,35 +84,75 @@ function buildFixedTermInvestment({
   id: string
 }): Investment {
   return {
-    annualRate: 10,
     createdAt: "2026-01-01T12:00:00.000Z",
     currency: CURRENCIES.mxn,
-    endDate,
     id,
     institutionName: "CETES",
     name: id,
-    originalAmount: 10_000,
-    paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-    startDate: "2026-01-01",
-    type: INVESTMENT_TYPES.fixedTerm,
     updatedAt: "2026-01-01T12:00:00.000Z",
+    contributions: [
+      {
+        id: `${id}-contribution-1`,
+        amount: 10_000,
+        contributionDate: "2026-01-01",
+        createdAt: "2026-01-01T12:00:00.000Z",
+      },
+    ],
+    ratePeriods: [
+      {
+        id: `${id}-rate-period-1`,
+        annualRate: 10,
+        startDate: "2026-01-01",
+        createdAt: "2026-01-01T12:00:00.000Z",
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: `${id}-lifecycle-period-1`,
+        type: INVESTMENT_TYPES.fixedTerm,
+        paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+        startDate: "2026-01-01",
+        endDate,
+        createdAt: "2026-01-01T12:00:00.000Z",
+      },
+    ],
   }
 }
 
 function buildOpenEndedInvestment({ id }: { id: string }): Investment {
   return {
-    annualRate: 8,
     createdAt: "2026-01-01T12:00:00.000Z",
     currency: CURRENCIES.mxn,
     id,
     institutionName: "Klar",
     name: id,
-    originalAmount: 10_000,
-    paymentFrequency: PAYMENT_FREQUENCIES.daily,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-    startDate: "2026-01-01",
-    type: INVESTMENT_TYPES.openEnded,
     updatedAt: "2026-01-01T12:00:00.000Z",
+    contributions: [
+      {
+        id: `${id}-contribution-1`,
+        amount: 10_000,
+        contributionDate: "2026-01-01",
+        createdAt: "2026-01-01T12:00:00.000Z",
+      },
+    ],
+    ratePeriods: [
+      {
+        id: `${id}-rate-period-1`,
+        annualRate: 8,
+        startDate: "2026-01-01",
+        createdAt: "2026-01-01T12:00:00.000Z",
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: `${id}-lifecycle-period-1`,
+        type: INVESTMENT_TYPES.openEnded,
+        paymentFrequency: PAYMENT_FREQUENCIES.daily,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+        startDate: "2026-01-01",
+        createdAt: "2026-01-01T12:00:00.000Z",
+      },
+    ],
   }
 }

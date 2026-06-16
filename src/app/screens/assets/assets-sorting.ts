@@ -1,7 +1,7 @@
 import {
-  INVESTMENT_TYPES,
   compareCalendarDatesAscending,
-  type Investment,
+  INVESTMENT_TYPES,
+  type ResolvedInvestment,
 } from "@/domain/investments"
 
 export const ASSET_SORT_OPTIONS = {
@@ -29,7 +29,7 @@ export const ASSET_SORT_OPTION_VALUES = [
 ] as const satisfies ReadonlyArray<AssetSortOption>
 
 export function getSortedInvestments(
-  investments: Investment[],
+  investments: ResolvedInvestment[],
   sortOption: AssetSortOption,
 ) {
   return [...investments].sort((leftInvestment, rightInvestment) => {
@@ -60,8 +60,8 @@ function compareDescending(leftValue: number, rightValue: number) {
 }
 
 function compareEndDateSoonest(
-  leftInvestment: Investment,
-  rightInvestment: Investment,
+  leftInvestment: ResolvedInvestment,
+  rightInvestment: ResolvedInvestment,
 ) {
   if (leftInvestment.type === INVESTMENT_TYPES.openEnded) {
     return 1

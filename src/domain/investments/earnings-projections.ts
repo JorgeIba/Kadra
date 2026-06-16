@@ -6,10 +6,19 @@ import { getDerivedStatus } from "@/domain/investments/derived-values"
 import {
   addCalendarDays,
   getDaysBetween,
+  parseCalendarDate,
   toDateString,
 } from "@/domain/investments/dates"
-import { getSimpleInterest } from "@/domain/investments/interest"
-import type { CalendarDateString, Investment } from "@/domain/investments/types"
+import {
+  analyzePortfolio,
+  type PortfolioAnalysis,
+} from "@/domain/investments/portfolio-analysis"
+import { resolveInvestment } from "@/domain/investments/resolved-investment"
+import type {
+  CalendarDateString,
+  Investment,
+  ResolvedInvestment,
+} from "@/domain/investments/types"
 
 export const EARNINGS_PERIODS = {
   daily: "daily",
@@ -61,21 +70,26 @@ export function getUpcomingInvestmentEarningsForDays(
   days: number,
   asOfDate = new Date(),
 ): number {
-  return getSimpleInterest(
-    investment.originalAmount,
-    investment.annualRate,
-    getUpcomingInvestmentEarningDays(investment, days, asOfDate),
+  const resolvedInvestment = resolveInvestment(investment, asOfDate)
+
+  return getInvestmentEarningsBetweenDates(
+    investment,
+    asOfDate,
+    getUpcomingEarningsTargetDate(resolvedInvestment, days, asOfDate),
   )
 }
 
 export function getPeriodInvestmentEarningsForDays(
   investment: Investment,
   days: number,
+  asOfDate = new Date(),
 ): number {
-  return getSimpleInterest(
-    investment.originalAmount,
-    investment.annualRate,
-    getPeriodInvestmentEarningDays(investment, days),
+  const resolvedInvestment = resolveInvestment(investment, asOfDate)
+
+  return getInvestmentEarningsBetweenDates(
+    investment,
+    parseCalendarDate(resolvedInvestment.startDate),
+    getPeriodEarningsTargetDate(resolvedInvestment, days),
   )
 }
 
@@ -94,10 +108,12 @@ export function getUpcomingInvestmentEarningsByPeriod(
 export function getPeriodInvestmentEarningsByPeriod(
   investment: Investment,
   period: EarningsPeriod,
+  asOfDate = new Date(),
 ): number {
   return getPeriodInvestmentEarningsForDays(
     investment,
     EARNINGS_PERIOD_DAYS[period],
+    asOfDate,
   )
 }
 
@@ -132,10 +148,10 @@ export function getPeriodPortfolioEarningsSummary(
   const activeInvestments = getActiveInvestments(investments, asOfDate)
 
   return {
-    daily: getPeriodPortfolioEarningsForDays(activeInvestments, 1),
-    weekly: getPeriodPortfolioEarningsForDays(activeInvestments, 7),
-    monthly: getPeriodPortfolioEarningsForDays(activeInvestments, 30),
-    yearly: getPeriodPortfolioEarningsForDays(activeInvestments, 365),
+    daily: getPeriodPortfolioEarningsForDays(activeInvestments, 1, asOfDate),
+    weekly: getPeriodPortfolioEarningsForDays(activeInvestments, 7, asOfDate),
+    monthly: getPeriodPortfolioEarningsForDays(activeInvestments, 30, asOfDate),
+    yearly: getPeriodPortfolioEarningsForDays(activeInvestments, 365, asOfDate),
   }
 }
 
@@ -209,11 +225,13 @@ export function getPeriodInvestmentEarningsBreakdown(
   const portfolioEstimatedEarnings = getPeriodPortfolioEarningsForDays(
     activeInvestments,
     days,
+    asOfDate,
   )
 
   return buildInvestmentEarningsBreakdown(
     activeInvestments,
-    (investment) => getPeriodInvestmentEarningsForDays(investment, days),
+    (investment) =>
+      getPeriodInvestmentEarningsForDays(investment, days, asOfDate),
     portfolioEstimatedEarnings,
   )
 }
@@ -240,9 +258,12 @@ function getUpcomingPortfolioEarningsForDays(
 function getPeriodPortfolioEarningsForDays(
   investments: Investment[],
   days: number,
+  asOfDate: Date,
 ): number {
   return investments.reduce((total, investment) => {
-    return total + getPeriodInvestmentEarningsForDays(investment, days)
+    return (
+      total + getPeriodInvestmentEarningsForDays(investment, days, asOfDate)
+    )
   }, 0)
 }
 
@@ -278,41 +299,67 @@ function getActiveInvestments(
   })
 }
 
-function getUpcomingInvestmentEarningDays(
+function getInvestmentEarningsBetweenDates(
   investment: Investment,
+  startDate: Date,
+  endDate: Date,
+): number {
+  return getAnalysisEarningsDelta(
+    analyzePortfolio([resolveInvestment(investment, startDate)]),
+    analyzePortfolio([resolveInvestment(investment, endDate)]),
+  )
+}
+
+function getAnalysisEarningsDelta(
+  currentAnalysis: PortfolioAnalysis,
+  futureAnalysis: PortfolioAnalysis,
+): number {
+  return (
+    futureAnalysis.totalEstimatedAccruedReturn -
+    currentAnalysis.totalEstimatedAccruedReturn
+  )
+}
+
+function getUpcomingEarningsTargetDate(
+  investment: ResolvedInvestment,
   requestedDays: number,
   asOfDate: Date,
-): number {
+): Date {
   if (requestedDays <= 0) {
-    return 0
+    return asOfDate
   }
 
   if (investment.type === INVESTMENT_TYPES.openEnded) {
-    return requestedDays
+    return parseCalendarDate(addCalendarDays(asOfDate, requestedDays))
   }
 
   const daysUntilMaturity = getDaysBetween(
     toDateString(asOfDate),
     investment.endDate,
   )
+  const earningDays = Math.max(0, Math.min(requestedDays, daysUntilMaturity))
 
-  return Math.min(requestedDays, daysUntilMaturity)
+  return parseCalendarDate(addCalendarDays(asOfDate, earningDays))
 }
 
-function getPeriodInvestmentEarningDays(
-  investment: Investment,
+function getPeriodEarningsTargetDate(
+  investment: ResolvedInvestment,
   requestedDays: number,
-): number {
+): Date {
+  const startDate = parseCalendarDate(investment.startDate)
+
   if (requestedDays <= 0) {
-    return 0
+    return startDate
   }
 
   if (investment.type === INVESTMENT_TYPES.openEnded) {
-    return requestedDays
+    return parseCalendarDate(addCalendarDays(startDate, requestedDays))
   }
 
-  return Math.min(
-    requestedDays,
-    getDaysBetween(investment.startDate, investment.endDate),
+  return parseCalendarDate(
+    addCalendarDays(
+      startDate,
+      Math.min(requestedDays, investment.totalTermDays),
+    ),
   )
 }

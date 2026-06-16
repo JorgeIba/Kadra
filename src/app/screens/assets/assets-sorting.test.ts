@@ -4,6 +4,7 @@ import {
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import {
@@ -14,7 +15,7 @@ import {
 describe("asset sorting", () => {
   it("sorts investments by newest creation date first", () => {
     expect(
-      getSortedInvestments(investments, ASSET_SORT_OPTIONS.newest).map(
+      getSortedInvestments(resolvedInvestments, ASSET_SORT_OPTIONS.newest).map(
         (investment) => investment.id,
       ),
     ).toEqual(["newest", "middle", "oldest", "open-ended-newer", "open-ended"])
@@ -22,38 +23,43 @@ describe("asset sorting", () => {
 
   it("sorts investments by highest original amount first", () => {
     expect(
-      getSortedInvestments(investments, ASSET_SORT_OPTIONS.highestAmount).map(
-        (investment) => investment.id,
-      ),
+      getSortedInvestments(
+        resolvedInvestments,
+        ASSET_SORT_OPTIONS.highestAmount,
+      ).map((investment) => investment.id),
     ).toEqual(["open-ended", "middle", "oldest", "open-ended-newer", "newest"])
   })
 
   it("sorts investments by highest annual rate first", () => {
     expect(
-      getSortedInvestments(investments, ASSET_SORT_OPTIONS.highestRate).map(
-        (investment) => investment.id,
-      ),
+      getSortedInvestments(
+        resolvedInvestments,
+        ASSET_SORT_OPTIONS.highestRate,
+      ).map((investment) => investment.id),
     ).toEqual(["open-ended-newer", "newest", "middle", "oldest", "open-ended"])
   })
 
   it("sorts fixed-term investments by soonest end date and leaves open-ended last", () => {
     expect(
-      getSortedInvestments(investments, ASSET_SORT_OPTIONS.endDateSoonest).map(
-        (investment) => investment.id,
-      ),
+      getSortedInvestments(
+        resolvedInvestments,
+        ASSET_SORT_OPTIONS.endDateSoonest,
+      ).map((investment) => investment.id),
     ).toEqual(["middle", "oldest", "newest", "open-ended", "open-ended-newer"])
   })
 
   it("does not mutate the original investment list", () => {
-    const originalOrder = investments.map((investment) => investment.id)
+    const originalOrder = resolvedInvestments.map((investment) => investment.id)
 
-    getSortedInvestments(investments, ASSET_SORT_OPTIONS.highestAmount)
+    getSortedInvestments(resolvedInvestments, ASSET_SORT_OPTIONS.highestAmount)
 
-    expect(investments.map((investment) => investment.id)).toEqual(
+    expect(resolvedInvestments.map((investment) => investment.id)).toEqual(
       originalOrder,
     )
   })
 })
+
+const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 
 const investments: Investment[] = [
   buildFixedTermInvestment({
@@ -90,6 +96,9 @@ const investments: Investment[] = [
     originalAmount: 25_000,
   }),
 ]
+const resolvedInvestments = investments.map((investment) =>
+  resolveInvestment(investment, asOfDate),
+)
 
 function buildFixedTermInvestment({
   annualRate,
@@ -105,19 +114,39 @@ function buildFixedTermInvestment({
   originalAmount: number
 }): Investment {
   return {
-    annualRate,
     createdAt,
     currency: CURRENCIES.mxn,
-    endDate,
     id,
     institutionName: "CETES",
     name: id,
-    originalAmount,
-    paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-    startDate: "2026-01-01",
-    type: INVESTMENT_TYPES.fixedTerm,
     updatedAt: createdAt,
+    contributions: [
+      {
+        id: `${id}-contribution-1`,
+        amount: originalAmount,
+        contributionDate: "2026-01-01",
+        createdAt,
+      },
+    ],
+    ratePeriods: [
+      {
+        id: `${id}-rate-period-1`,
+        annualRate,
+        startDate: "2026-01-01",
+        createdAt,
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: `${id}-lifecycle-period-1`,
+        type: INVESTMENT_TYPES.fixedTerm,
+        paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+        startDate: "2026-01-01",
+        endDate,
+        createdAt,
+      },
+    ],
   }
 }
 
@@ -133,17 +162,37 @@ function buildOpenEndedInvestment({
   originalAmount: number
 }): Investment {
   return {
-    annualRate,
     createdAt,
     currency: CURRENCIES.mxn,
     id,
     institutionName: "Klar",
     name: id,
-    originalAmount,
-    paymentFrequency: PAYMENT_FREQUENCIES.daily,
-    reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-    startDate: "2025-12-01",
-    type: INVESTMENT_TYPES.openEnded,
     updatedAt: createdAt,
+    contributions: [
+      {
+        id: `${id}-contribution-1`,
+        amount: originalAmount,
+        contributionDate: "2025-12-01",
+        createdAt,
+      },
+    ],
+    ratePeriods: [
+      {
+        id: `${id}-rate-period-1`,
+        annualRate,
+        startDate: "2025-12-01",
+        createdAt,
+      },
+    ],
+    lifecyclePeriods: [
+      {
+        id: `${id}-lifecycle-period-1`,
+        type: INVESTMENT_TYPES.openEnded,
+        paymentFrequency: PAYMENT_FREQUENCIES.daily,
+        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+        startDate: "2025-12-01",
+        createdAt,
+      },
+    ],
   }
 }

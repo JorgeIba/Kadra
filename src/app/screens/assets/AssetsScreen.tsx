@@ -1,8 +1,9 @@
 import { useState } from "react"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
-  getInvestmentSummary,
   getPortfolioEstimatedCurrentValue,
+  getResolvedInvestmentSummary,
+  resolveInvestment,
   type Investment,
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
@@ -48,18 +49,20 @@ export function AssetsScreen({
     ASSET_SORT_OPTIONS.newest,
   )
   const asOfDate = new Date()
-  const totalValue = getPortfolioEstimatedCurrentValue(investments, asOfDate)
+  const resolvedInvestments = investments.map((investment) =>
+    resolveInvestment(investment, asOfDate),
+  )
+  const totalValue = getPortfolioEstimatedCurrentValue(resolvedInvestments)
   const filteredInvestments = getFilteredInvestments(
-    investments,
+    resolvedInvestments,
     filterOption,
-    asOfDate,
   )
   const sortedInvestments = getSortedInvestments(
     filteredInvestments,
     sortOption,
   )
-  const investmentSummaries = sortedInvestments.map((investment) =>
-    getInvestmentSummary(investment, asOfDate),
+  const investmentSummaries = sortedInvestments.map((resolvedInvestment) =>
+    getResolvedInvestmentSummary(resolvedInvestment),
   )
   const shownCountLabel = `${investmentSummaries.length} shown`
 
