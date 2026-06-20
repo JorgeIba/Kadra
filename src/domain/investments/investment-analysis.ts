@@ -1,20 +1,8 @@
-import { parseCalendarDate, toDateString } from "@/domain/investments/dates"
-import {
-  getInvestmentBalanceTimeline,
-  type InvestmentBalanceTimelineSegment,
-} from "@/domain/investments/investment-balance-timeline"
-import {
-  getDerivedStatus,
-  getLastActiveDateForInvestment,
-  getTimelineEndDateForInvestment,
-} from "@/domain/investments/lifecycle-state"
-import {
-  getActiveLifecyclePeriodAtDate,
-  getInvestmentTimelineSegments,
-  type InvestmentTimelineSegment,
-} from "@/domain/investments/timeline-segments"
+import type { InvestmentBalanceSegment } from "@/domain/investments/investment-balance-timeline"
+import { getDerivedStatus } from "@/domain/investments/lifecycle-periods"
+import { getInvestmentBalanceState } from "@/domain/investments/investment-state"
+import type { InvestmentTermsSegment } from "@/domain/investments/timeline-segments"
 import type {
-  CalendarDateString,
   DerivedStatus,
   Investment,
   InvestmentLifecyclePeriod,
@@ -23,10 +11,9 @@ import type {
 export interface InvestmentAnalysis {
   investment: Investment
   asOfDate: Date
-  lastActiveDate: CalendarDateString
-  structuralTimeline: InvestmentTimelineSegment[]
-  balanceTimeline: InvestmentBalanceTimelineSegment[]
-  currentBalanceSegment: InvestmentBalanceTimelineSegment | null
+  termsSegments: InvestmentTermsSegment[]
+  balanceTimeline: InvestmentBalanceSegment[]
+  currentBalanceSegment: InvestmentBalanceSegment | null
   currentLifecyclePeriod: InvestmentLifecyclePeriod | null
   derivedStatus: DerivedStatus
   originalAmount: number
@@ -47,57 +34,29 @@ export function analyzeInvestment(
   investment: Investment,
   asOfDate = new Date(),
 ): InvestmentAnalysis {
-  const asOfDateString = toDateString(asOfDate)
-  const lastActiveDate = getLastActiveDateForInvestment(
-    investment,
-    asOfDateString,
-  )
-  const timelineEndDate = getTimelineEndDateForInvestment(
-    investment,
-    asOfDateString,
-  )
-  const effectiveDate = parseCalendarDate(timelineEndDate)
-  const structuralTimeline = getInvestmentTimelineSegments(
-    investment,
-    effectiveDate,
-  )
-  const balanceTimeline = getInvestmentBalanceTimeline(
-    investment,
-    effectiveDate,
-  )
-  const currentBalanceSegment = balanceTimeline.at(-1) ?? null
-  const currentLifecyclePeriod = getActiveLifecyclePeriodAtDate(
-    investment,
-    lastActiveDate,
-  )
-  const totalContributedAmount =
-    currentBalanceSegment?.totalContributedAmount ?? 0
-  const currentInvestedAmount = currentBalanceSegment?.endingBalance ?? 0
-  const estimatedAccruedReturn = balanceTimeline.reduce((total, segment) => {
-    return total + segment.interestEarned
-  }, 0)
+  const balanceState = getInvestmentBalanceState(investment, asOfDate)
 
   return {
     investment,
     asOfDate,
-    lastActiveDate,
-    structuralTimeline,
-    balanceTimeline,
-    currentBalanceSegment,
-    currentLifecyclePeriod,
+    termsSegments: balanceState.termsSegments,
+    balanceTimeline: balanceState.balanceTimeline,
+    currentBalanceSegment: balanceState.currentBalanceSegment,
+    currentLifecyclePeriod: balanceState.currentLifecyclePeriod,
     derivedStatus: getDerivedStatus(investment, asOfDate),
     originalAmount: getOriginalAmount(investment),
-    totalContributedAmount,
-    currentInvestedAmount,
-    estimatedAccruedReturn,
-    estimatedCurrentValue: totalContributedAmount + estimatedAccruedReturn,
-    currentAnnualRate: currentBalanceSegment?.annualRate ?? null,
+    totalContributedAmount: balanceState.totalContributedAmount,
+    currentInvestedAmount: balanceState.currentInvestedAmount,
+    estimatedAccruedReturn: balanceState.estimatedAccruedReturn,
+    estimatedCurrentValue: balanceState.estimatedCurrentValue,
+    currentAnnualRate:
+      balanceState.currentBalanceSegment?.ratePeriod.annualRate ?? null,
   }
 }
 
 function getOriginalAmount(investment: Investment): number {
-  const firstContribution = [...investment.contributions].sort((left, right) =>
-    left.contributionDate.localeCompare(right.contributionDate),
+  const firstContribution = [...investment.contributionEvents].sort(
+    (left, right) => left.effectiveDate.localeCompare(right.effectiveDate),
   )[0]
 
   if (firstContribution === undefined) {

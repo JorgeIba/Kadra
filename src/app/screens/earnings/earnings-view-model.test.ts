@@ -1,20 +1,16 @@
 import { describe, expect, it } from "vitest"
 import {
-  EARNINGS_PERIODS,
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments"
 import {
+  EARNINGS_PERIODS,
   getCustomDateEarningsTarget,
-  getPeriodInvestmentEarningsByPeriod,
   getPeriodPortfolioEarningsSummary,
   getPortfolioEarningsSnapshot,
-  getUpcomingInvestmentEarningsByPeriod,
-  getUpcomingInvestmentEarningsUntilDate,
   getUpcomingPortfolioEarningsSummary,
-  getUpcomingPortfolioEarningsUntilDate,
-} from "@/domain/investments/earnings-projections"
+} from "@/app/screens/earnings/earnings-view-model"
 import {
   fixedInvestment,
   openEndedInvestment,
@@ -28,30 +24,30 @@ const maturedFixedInvestment = {
   institutionName: "Finished institution",
   createdAt: "2025-11-01T18:00:00.000Z",
   updatedAt: "2025-11-01T18:00:00.000Z",
-  contributions: [
+  contributionEvents: [
     {
-      id: "contribution-1",
+      id: "contribution-event-1",
       amount: 20_000,
-      contributionDate: "2025-11-01",
+      effectiveDate: "2025-11-01",
       createdAt: "2025-11-01T18:00:00.000Z",
     },
   ],
-  ratePeriods: [
+  rateEvents: [
     {
-      id: "rate-period-1",
+      id: "rate-event-1",
       annualRate: 11,
-      startDate: "2025-11-01",
+      effectiveDate: "2025-11-01",
       createdAt: "2025-11-01T18:00:00.000Z",
     },
   ],
-  lifecyclePeriods: [
+  lifecycleEvents: [
     {
-      id: "lifecycle-period-1",
+      id: "lifecycle-event-1",
       type: INVESTMENT_TYPES.fixedTerm,
       paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
       reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-      startDate: "2025-11-01",
-      endDate: "2025-12-01",
+      effectiveDate: "2025-11-01",
+      maturityDate: "2025-12-01",
       createdAt: "2025-11-01T18:00:00.000Z",
     },
   ],
@@ -69,86 +65,10 @@ const activeOpenEndedInvestment = {
   name: "Open daily",
 } satisfies Investment
 
-const contributedOpenEndedInvestment = {
-  ...openEndedInvestment,
-  id: "investment-contributed-open",
-  name: "Open with extra contribution",
-  contributions: [
-    {
-      id: "contribution-1",
-      amount: 10_000,
-      contributionDate: "2026-01-01",
-      createdAt: "2026-01-01T18:00:00.000Z",
-    },
-    {
-      id: "contribution-2",
-      amount: 5_000,
-      contributionDate: "2026-01-10",
-      createdAt: "2026-01-10T18:00:00.000Z",
-    },
-  ],
-} satisfies Investment
-
 const investments = [activeFixedInvestment, activeOpenEndedInvestment]
 const asOfDate = new Date("2026-01-16T12:00:00.000Z")
 
 describe("earnings exploration calculations", () => {
-  it("keeps upcoming and period daily estimates aligned for active investments", () => {
-    expect(
-      getUpcomingInvestmentEarningsByPeriod(
-        activeFixedInvestment,
-        EARNINGS_PERIODS.daily,
-        asOfDate,
-      ),
-    ).toBe(10)
-
-    expect(
-      getPeriodInvestmentEarningsByPeriod(
-        activeFixedInvestment,
-        EARNINGS_PERIODS.daily,
-        asOfDate,
-      ),
-    ).toBe(10)
-  })
-
-  it("projects earnings from resolved history instead of only the original contribution", () => {
-    expect(
-      getPeriodInvestmentEarningsByPeriod(
-        contributedOpenEndedInvestment,
-        EARNINGS_PERIODS.monthly,
-        asOfDate,
-      ),
-    ).toBeCloseTo(81.21637848684077)
-
-    expect(
-      getUpcomingInvestmentEarningsByPeriod(
-        contributedOpenEndedInvestment,
-        EARNINGS_PERIODS.monthly,
-        asOfDate,
-      ),
-    ).toBeCloseTo(90.47838643770228)
-  })
-
-  it("caps upcoming fixed-term earnings by remaining time to maturity", () => {
-    expect(
-      getUpcomingInvestmentEarningsByPeriod(
-        activeFixedInvestment,
-        EARNINGS_PERIODS.monthly,
-        asOfDate,
-      ),
-    ).toBe(150)
-  })
-
-  it("caps period fixed-term earnings by full term length", () => {
-    expect(
-      getPeriodInvestmentEarningsByPeriod(
-        activeFixedInvestment,
-        EARNINGS_PERIODS.monthly,
-        asOfDate,
-      ),
-    ).toBe(300)
-  })
-
   it("calculates portfolio upcoming earnings across common periods", () => {
     const summary = getUpcomingPortfolioEarningsSummary(investments, asOfDate)
 
@@ -194,23 +114,6 @@ describe("earnings exploration calculations", () => {
     expect(snapshot.period.breakdown[0]?.estimatedEarnings).toBeCloseTo(
       60.17432523893149,
     )
-  })
-
-  it("estimates upcoming earnings until a custom target date", () => {
-    expect(
-      getUpcomingInvestmentEarningsUntilDate(
-        activeFixedInvestment,
-        "2026-01-21",
-        asOfDate,
-      ),
-    ).toBe(50)
-    expect(
-      getUpcomingPortfolioEarningsUntilDate(
-        investments,
-        "2026-01-21",
-        asOfDate,
-      ),
-    ).toBeCloseTo(60.03405485571966)
   })
 
   it("returns upcoming and period earnings breakdowns in one snapshot", () => {

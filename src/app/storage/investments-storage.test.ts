@@ -19,43 +19,42 @@ const fallbackInvestments: Investment[] = [
     institutionName: "Fallback institution",
     name: "Fallback investment",
     updatedAt: "2026-06-10T08:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: "contribution-1",
+        id: "contribution-event-1",
         amount: 1_000,
-        contributionDate: "2026-05-20",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T12:00:00.000Z",
       },
       {
-        id: "contribution-2",
+        id: "contribution-event-2",
         amount: 500,
-        contributionDate: "2026-06-01",
+        effectiveDate: "2026-06-01",
         createdAt: "2026-06-01T08:30:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: "rate-period-1",
+        id: "rate-event-1",
         annualRate: 9,
-        startDate: "2026-05-20",
-        endDate: "2026-06-10",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T12:00:00.000Z",
       },
       {
-        id: "rate-period-2",
+        id: "rate-event-2",
         annualRate: 8.8,
-        startDate: "2026-06-10",
+        effectiveDate: "2026-06-10",
         createdAt: "2026-06-10T08:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: "lifecycle-period-1",
+        id: "lifecycle-event-1",
         type: "fixed-term",
         paymentFrequency: PAYMENT_FREQUENCIES.monthly,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-        startDate: "2026-05-20",
-        endDate: "2026-12-31",
+        effectiveDate: "2026-05-20",
+        maturityDate: "2026-12-31",
         createdAt: "2026-05-20T12:00:00.000Z",
       },
     ],
@@ -70,51 +69,50 @@ const storedInvestments: Investment[] = [
     institutionName: "Stored institution",
     name: "Stored investment",
     updatedAt: "2026-07-10T09:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: "contribution-1",
+        id: "contribution-event-1",
         amount: 2_000,
-        contributionDate: "2026-05-20",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T13:00:00.000Z",
       },
       {
-        id: "contribution-2",
+        id: "contribution-event-2",
         amount: 750,
-        contributionDate: "2026-06-15",
+        effectiveDate: "2026-06-15",
         createdAt: "2026-06-15T10:00:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: "rate-period-1",
+        id: "rate-event-1",
         annualRate: 11,
-        startDate: "2026-05-20",
-        endDate: "2026-07-10",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T13:00:00.000Z",
       },
       {
-        id: "rate-period-2",
+        id: "rate-event-2",
         annualRate: 10.5,
-        startDate: "2026-07-10",
+        effectiveDate: "2026-07-10",
         createdAt: "2026-07-10T09:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: "lifecycle-period-1",
+        id: "lifecycle-event-1",
         type: "open-ended",
         paymentFrequency: PAYMENT_FREQUENCIES.weekly,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-        startDate: "2026-05-20",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T13:00:00.000Z",
       },
       {
-        id: "lifecycle-period-2",
+        id: "lifecycle-event-2",
         type: "fixed-term",
         paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-        startDate: "2026-07-10",
-        endDate: "2026-08-10",
+        effectiveDate: "2026-07-10",
+        maturityDate: "2026-08-10",
         createdAt: "2026-07-10T09:00:00.000Z",
       },
     ],
@@ -160,9 +158,9 @@ describe("investments storage", () => {
       "trafin.investments.v1": JSON.stringify([
         {
           ...storedInvestments[0],
-          contributions: [
+          contributionEvents: [
             {
-              ...storedInvestments[0].contributions[0],
+              ...storedInvestments[0].contributionEvents[0],
               amount: -1,
             },
           ],

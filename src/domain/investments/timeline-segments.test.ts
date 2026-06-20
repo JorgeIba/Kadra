@@ -8,10 +8,10 @@ import {
 import {
   getActiveLifecyclePeriodAtDate,
   getActiveRatePeriodAtDate,
-  getInvestmentTimelineBoundaries,
-  getInvestmentTimelineSegments,
-  getTotalContributedAmountAtDate,
+  getInvestmentTermsTimelineBoundaries,
+  getInvestmentTermsTimeline,
 } from "@/domain/investments/timeline-segments"
+import { getContributionStateAtDate } from "@/domain/investments/contribution-state"
 import type { Investment } from "@/domain/investments/types"
 
 const investment = {
@@ -21,64 +21,118 @@ const investment = {
   currency: CURRENCIES.mxn,
   createdAt: "2026-01-01T12:00:00.000Z",
   updatedAt: "2026-01-01T12:00:00.000Z",
-  contributions: [
+  contributionEvents: [
     {
-      id: "contribution-1",
+      id: "contribution-event-1",
       amount: 10_000,
-      contributionDate: "2026-01-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T12:00:00.000Z",
     },
     {
-      id: "contribution-2",
+      id: "contribution-event-2",
       amount: 5_000,
-      contributionDate: "2026-02-01",
+      effectiveDate: "2026-02-01",
       createdAt: "2026-02-01T12:00:00.000Z",
     },
   ],
-  ratePeriods: [
+  rateEvents: [
     {
       id: "rate-1",
       annualRate: 10,
-      startDate: "2026-01-01",
-      endDate: "2026-03-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T12:00:00.000Z",
     },
     {
       id: "rate-2",
       annualRate: 12,
-      startDate: "2026-03-01",
+      effectiveDate: "2026-03-01",
       createdAt: "2026-03-01T12:00:00.000Z",
     },
   ],
-  lifecyclePeriods: [
+  lifecycleEvents: [
     {
       id: "lifecycle-1",
       type: INVESTMENT_TYPES.openEnded,
       paymentFrequency: PAYMENT_FREQUENCIES.monthly,
       reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      startDate: "2026-01-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T12:00:00.000Z",
     },
   ],
 } satisfies Investment
 
-describe("investment timeline segments", () => {
+describe("investment terms timeline", () => {
   it("builds sorted unique timeline boundaries", () => {
-    expect(getInvestmentTimelineBoundaries(investment, "2026-03-15")).toEqual([
+    expect(
+      getInvestmentTermsTimelineBoundaries(investment, "2026-03-15"),
+    ).toEqual(["2026-01-01", "2026-02-01", "2026-03-01", "2026-03-15"])
+  })
+
+  it("includes contribution, rate, lifecycle, maturity, and as-of boundaries", () => {
+    const fixedTermInvestment = {
+      ...investment,
+      contributionEvents: [
+        ...investment.contributionEvents,
+        {
+          id: "contribution-event-3",
+          amount: 1_000,
+          effectiveDate: "2026-04-01",
+          createdAt: "2026-04-01T12:00:00.000Z",
+        },
+      ],
+      rateEvents: [
+        ...investment.rateEvents,
+        {
+          id: "rate-3",
+          annualRate: 14,
+          effectiveDate: "2026-05-01",
+          createdAt: "2026-05-01T12:00:00.000Z",
+        },
+      ],
+      lifecycleEvents: [
+        {
+          id: "lifecycle-1",
+          type: INVESTMENT_TYPES.openEnded,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+          effectiveDate: "2026-01-01",
+          createdAt: "2026-01-01T12:00:00.000Z",
+        },
+        {
+          id: "lifecycle-2",
+          type: INVESTMENT_TYPES.fixedTerm,
+          paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+          effectiveDate: "2026-06-01",
+          maturityDate: "2026-07-01",
+          createdAt: "2026-06-01T12:00:00.000Z",
+        },
+      ],
+    } satisfies Investment
+
+    expect(
+      getInvestmentTermsTimelineBoundaries(fixedTermInvestment, "2026-08-01"),
+    ).toEqual([
       "2026-01-01",
       "2026-02-01",
       "2026-03-01",
-      "2026-03-15",
+      "2026-04-01",
+      "2026-05-01",
+      "2026-06-01",
+      "2026-07-01",
+      "2026-08-01",
     ])
   })
 
   it("derives total contributed amount from contributions up to a specific date", () => {
-    expect(getTotalContributedAmountAtDate(investment, "2026-01-31")).toBe(
-      10_000,
-    )
-    expect(getTotalContributedAmountAtDate(investment, "2026-02-01")).toBe(
-      15_000,
-    )
+    expect(
+      getContributionStateAtDate(investment, "2026-01-31")
+        .totalContributedAmount,
+    ).toBe(10_000)
+    expect(
+      getContributionStateAtDate(investment, "2026-02-01")
+        .totalContributedAmount,
+    ).toBe(15_000)
   })
 
   it("finds the active rate and lifecycle period at a given date", () => {
@@ -96,28 +150,27 @@ describe("investment timeline segments", () => {
   it("defensively prefers the most recent overlapping period when history is malformed", () => {
     const overlappingInvestment = {
       ...investment,
-      ratePeriods: [
+      rateEvents: [
         {
           id: "rate-older",
           annualRate: 10,
-          startDate: "2026-01-01",
-          endDate: "2026-04-01",
+          effectiveDate: "2026-01-01",
           createdAt: "2026-01-01T12:00:00.000Z",
         },
         {
           id: "rate-newer",
           annualRate: 12,
-          startDate: "2026-03-01",
+          effectiveDate: "2026-03-01",
           createdAt: "2026-03-01T12:00:00.000Z",
         },
       ],
-      lifecyclePeriods: [
+      lifecycleEvents: [
         {
           id: "lifecycle-older",
           type: INVESTMENT_TYPES.openEnded,
           paymentFrequency: PAYMENT_FREQUENCIES.monthly,
           reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-          startDate: "2026-01-01",
+          effectiveDate: "2026-01-01",
           createdAt: "2026-01-01T12:00:00.000Z",
         },
         {
@@ -125,8 +178,8 @@ describe("investment timeline segments", () => {
           type: INVESTMENT_TYPES.fixedTerm,
           paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
           reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-          startDate: "2026-03-01",
-          endDate: "2026-06-01",
+          effectiveDate: "2026-03-01",
+          maturityDate: "2026-06-01",
           createdAt: "2026-03-01T12:00:00.000Z",
         },
       ],
@@ -142,67 +195,81 @@ describe("investment timeline segments", () => {
   })
 
   it("builds stable segments where contributed capital and rate stay constant", () => {
-    expect(
-      getInvestmentTimelineSegments(
-        investment,
-        new Date("2026-03-15T12:00:00.000Z"),
-      ),
-    ).toEqual([
-      {
+    const segments = getInvestmentTermsTimeline(
+      investment,
+      new Date("2026-03-15T12:00:00.000Z"),
+    )
+
+    expect(segments).toEqual([
+      expect.objectContaining({
         startDate: "2026-01-01",
         endDate: "2026-02-01",
-        totalContributedAmount: 10_000,
-        annualRate: 10,
-        lifecycleType: INVESTMENT_TYPES.openEnded,
-        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      },
-      {
+        contributionState: { totalContributedAmount: 10_000 },
+        ratePeriod: expect.objectContaining({
+          annualRate: 10,
+        }),
+        lifecyclePeriod: expect.objectContaining({
+          type: INVESTMENT_TYPES.openEnded,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+        }),
+      }),
+      expect.objectContaining({
         startDate: "2026-02-01",
         endDate: "2026-03-01",
-        totalContributedAmount: 15_000,
-        annualRate: 10,
-        lifecycleType: INVESTMENT_TYPES.openEnded,
-        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      },
-      {
+        contributionState: { totalContributedAmount: 15_000 },
+        ratePeriod: expect.objectContaining({
+          annualRate: 10,
+        }),
+        lifecyclePeriod: expect.objectContaining({
+          type: INVESTMENT_TYPES.openEnded,
+        }),
+      }),
+      expect.objectContaining({
         startDate: "2026-03-01",
         endDate: "2026-03-15",
-        totalContributedAmount: 15_000,
-        annualRate: 12,
-        lifecycleType: INVESTMENT_TYPES.openEnded,
-        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      },
-      {
+        contributionState: { totalContributedAmount: 15_000 },
+        ratePeriod: expect.objectContaining({
+          annualRate: 12,
+        }),
+        lifecyclePeriod: expect.objectContaining({
+          type: INVESTMENT_TYPES.openEnded,
+        }),
+      }),
+      expect.objectContaining({
         startDate: "2026-03-15",
         endDate: null,
-        totalContributedAmount: 15_000,
-        annualRate: 12,
-        lifecycleType: INVESTMENT_TYPES.openEnded,
-        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      },
+        contributionState: { totalContributedAmount: 15_000 },
+        ratePeriod: expect.objectContaining({
+          annualRate: 12,
+        }),
+        lifecyclePeriod: expect.objectContaining({
+          type: INVESTMENT_TYPES.openEnded,
+        }),
+      }),
     ])
   })
 
   it("builds the current open-ended segment when no time has elapsed yet", () => {
     expect(
-      getInvestmentTimelineSegments(
+      getInvestmentTermsTimeline(
         investment,
         new Date("2026-01-01T12:00:00.000Z"),
       ),
     ).toEqual([
-      {
+      expect.objectContaining({
         startDate: "2026-01-01",
         endDate: null,
-        totalContributedAmount: 10_000,
-        annualRate: 10,
-        lifecycleType: INVESTMENT_TYPES.openEnded,
-        paymentFrequency: PAYMENT_FREQUENCIES.monthly,
-        reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      },
+        contributionState: { totalContributedAmount: 10_000 },
+        ratePeriod: expect.objectContaining({
+          annualRate: 10,
+        }),
+        lifecyclePeriod: expect.objectContaining({
+          type: INVESTMENT_TYPES.openEnded,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+        }),
+      }),
     ])
   })
 })

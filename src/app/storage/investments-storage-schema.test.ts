@@ -15,43 +15,42 @@ const validInvestments: Investment[] = [
     institutionName: "CETES Directo",
     name: "CETES 6 months",
     updatedAt: "2026-06-15T09:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: "contribution-1",
+        id: "contribution-event-1",
         amount: 10_000,
-        contributionDate: "2026-05-20",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T12:00:00.000Z",
       },
       {
-        id: "contribution-2",
+        id: "contribution-event-2",
         amount: 2_500,
-        contributionDate: "2026-06-01",
+        effectiveDate: "2026-06-01",
         createdAt: "2026-06-01T10:30:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: "rate-period-1",
+        id: "rate-event-1",
         annualRate: 10,
-        startDate: "2026-05-20",
-        endDate: "2026-06-15",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T12:00:00.000Z",
       },
       {
-        id: "rate-period-2",
+        id: "rate-event-2",
         annualRate: 9.75,
-        startDate: "2026-06-15",
+        effectiveDate: "2026-06-15",
         createdAt: "2026-06-15T09:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: "lifecycle-period-1",
+        id: "lifecycle-event-1",
         type: "fixed-term",
         paymentFrequency: PAYMENT_FREQUENCIES.monthly,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-        startDate: "2026-05-20",
-        endDate: "2026-12-31",
+        effectiveDate: "2026-05-20",
+        maturityDate: "2026-12-31",
         createdAt: "2026-05-20T12:00:00.000Z",
       },
     ],
@@ -64,66 +63,64 @@ const validInvestments: Investment[] = [
     name: "Klar flexible",
     notes: "Open-ended account that later entered a promo term.",
     updatedAt: "2026-07-10T08:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: "contribution-1",
+        id: "contribution-event-1",
         amount: 25_000,
-        contributionDate: "2026-05-03",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
       },
       {
-        id: "contribution-2",
+        id: "contribution-event-2",
         amount: 5_000,
-        contributionDate: "2026-05-20",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T10:00:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: "rate-period-1",
+        id: "rate-event-1",
         annualRate: 12,
-        startDate: "2026-05-03",
-        endDate: "2026-06-10",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
       },
       {
-        id: "rate-period-2",
+        id: "rate-event-2",
         annualRate: 11.4,
-        startDate: "2026-06-10",
-        endDate: "2026-07-10",
+        effectiveDate: "2026-06-10",
         createdAt: "2026-06-10T08:45:00.000Z",
       },
       {
-        id: "rate-period-3",
+        id: "rate-event-3",
         annualRate: 10.8,
-        startDate: "2026-07-10",
+        effectiveDate: "2026-07-10",
         createdAt: "2026-07-10T08:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: "lifecycle-period-1",
+        id: "lifecycle-event-1",
         type: "open-ended",
         paymentFrequency: PAYMENT_FREQUENCIES.daily,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-        startDate: "2026-05-03",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
       },
       {
-        id: "lifecycle-period-2",
+        id: "lifecycle-event-2",
         type: "fixed-term",
         paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-        startDate: "2026-06-10",
-        endDate: "2026-07-10",
+        effectiveDate: "2026-06-10",
+        maturityDate: "2026-07-10",
         createdAt: "2026-06-10T08:45:00.000Z",
       },
       {
-        id: "lifecycle-period-3",
+        id: "lifecycle-event-3",
         type: "open-ended",
         paymentFrequency: PAYMENT_FREQUENCIES.daily,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-        startDate: "2026-07-10",
+        effectiveDate: "2026-07-10",
         createdAt: "2026-07-10T08:00:00.000Z",
       },
     ],
@@ -144,9 +141,9 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          contributions: [
+          contributionEvents: [
             {
-              ...validInvestments[0].contributions[0],
+              ...validInvestments[0].contributionEvents[0],
               amount: -1,
             },
           ],
@@ -160,7 +157,7 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          contributions: [],
+          contributionEvents: [],
         },
       ]),
     ).toBeNull()
@@ -171,7 +168,7 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          ratePeriods: [],
+          rateEvents: [],
         },
       ]),
     ).toBeNull()
@@ -182,7 +179,7 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          lifecyclePeriods: [],
+          lifecycleEvents: [],
         },
       ]),
     ).toBeNull()
@@ -193,10 +190,10 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          ratePeriods: [
+          rateEvents: [
             {
-              ...validInvestments[0].ratePeriods[0],
-              startDate: "2026-02-30",
+              ...validInvestments[0].rateEvents[0],
+              effectiveDate: "2026-02-30",
             },
           ],
         },
@@ -209,9 +206,9 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          contributions: [
+          contributionEvents: [
             {
-              ...validInvestments[0].contributions[0],
+              ...validInvestments[0].contributionEvents[0],
               createdAt: "not-a-real-timestamp",
             },
           ],
@@ -225,11 +222,11 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          lifecyclePeriods: [
+          lifecycleEvents: [
             {
-              ...validInvestments[0].lifecyclePeriods[0],
+              ...validInvestments[0].lifecycleEvents[0],
               type: "open-ended",
-              endDate: "2026-12-31",
+              maturityDate: "2026-12-31",
             },
           ],
         },
@@ -242,13 +239,34 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          lifecyclePeriods: [
+          lifecycleEvents: [
             {
-              id: "lifecycle-period-1",
+              id: "lifecycle-event-1",
               type: "fixed-term",
               paymentFrequency: PAYMENT_FREQUENCIES.monthly,
               reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-              startDate: "2026-05-20",
+              effectiveDate: "2026-05-20",
+              createdAt: "2026-05-20T12:00:00.000Z",
+            },
+          ],
+        },
+      ]),
+    ).toBeNull()
+  })
+
+  it("rejects fixed-term lifecycle events that mature on their effective date", () => {
+    expect(
+      parseStoredInvestments([
+        {
+          ...validInvestments[0],
+          lifecycleEvents: [
+            {
+              id: "lifecycle-event-1",
+              type: "fixed-term",
+              paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+              reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+              effectiveDate: "2026-05-20",
+              maturityDate: "2026-05-20",
               createdAt: "2026-05-20T12:00:00.000Z",
             },
           ],
@@ -273,9 +291,9 @@ describe("investments storage schema", () => {
       parseStoredInvestments([
         {
           ...validInvestments[0],
-          ratePeriods: [
+          rateEvents: [
             {
-              ...validInvestments[0].ratePeriods[0],
+              ...validInvestments[0].rateEvents[0],
               teaserRate: 99,
             },
           ],

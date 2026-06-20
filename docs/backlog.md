@@ -15,8 +15,11 @@ This document holds future ideas and deferred work that are worth remembering, b
 
 - manual adjustments such as top-ups and partial withdrawals
 - edit-history flow that lets the user choose which contribution, rate period, or lifecycle period to edit or remove instead of only editing the latest event
+- explicit same-day event ordering with timestamps or sequence numbers when date-only precision is not enough
 - per-investment earnings breakdowns beyond the current first pass
 - user-editable investment start dates with safe validation
+- route-level/component-level error boundaries plus form draft restore so a
+  screen crash does not risk losing in-progress user input
 - more detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
 - custom production domain after the free Vercel URL is validated on iPhone
 - Vercel Speed Insights or similar real-user performance monitoring after MVP usage starts

@@ -40,19 +40,53 @@ describe("portfolio breakdown", () => {
 
   it("returns percentages that represent each group share of estimated value", () => {
     const breakdown = getPortfolioBreakdown(resolvedInvestments)
-    const typePercentageTotal = breakdown.byType.reduce((total, item) => {
-      return total + item.percentage
-    }, 0)
 
-    expect(typePercentageTotal).toBeCloseTo(100)
+    expect(breakdown.byType).toEqual([
+      expect.objectContaining({
+        count: 2,
+        estimatedValue: expect.closeTo(20_753.424657),
+        label: "Fixed term",
+        percentage: expect.closeTo(66.73352469619994),
+      }),
+      expect.objectContaining({
+        count: 1,
+        estimatedValue: expect.closeTo(10_345.524112),
+        label: "Open ended",
+        percentage: expect.closeTo(33.26647530380005),
+      }),
+    ])
+    expect(breakdown.byStatus).toEqual([
+      expect.objectContaining({
+        count: 2,
+        estimatedValue: expect.closeTo(20_770.181646),
+        label: "Active",
+        percentage: expect.closeTo(66.78740751093414),
+      }),
+      expect.objectContaining({
+        count: 1,
+        estimatedValue: expect.closeTo(10_328.767123),
+        label: "Finished",
+        percentage: expect.closeTo(33.21259248906585),
+      }),
+    ])
   })
 
   it("returns zero percentages for an empty portfolio", () => {
     const breakdown = getPortfolioBreakdown([])
 
     expect([...breakdown.byType, ...breakdown.byStatus]).toEqual(
-      expect.arrayContaining([expect.objectContaining({ percentage: 0 })]),
+      expect.arrayContaining([
+        expect.objectContaining({ percentage: 0 }),
+        expect.objectContaining({ percentage: 0 }),
+        expect.objectContaining({ percentage: 0 }),
+        expect.objectContaining({ percentage: 0 }),
+      ]),
     )
+    expect(
+      [...breakdown.byType, ...breakdown.byStatus].every((item) => {
+        return item.percentage === 0
+      }),
+    ).toBe(true)
   })
 })
 
@@ -87,30 +121,30 @@ function buildFixedTermInvestment({
     institutionName: "CETES",
     name: id,
     updatedAt: "2026-01-01T12:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: `${id}-contribution-1`,
+        id: `${id}-contribution-event-1`,
         amount: 10_000,
-        contributionDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: `${id}-rate-period-1`,
+        id: `${id}-rate-event-1`,
         annualRate: 10,
-        startDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: `${id}-lifecycle-period-1`,
+        id: `${id}-lifecycle-event-1`,
         type: INVESTMENT_TYPES.fixedTerm,
         paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-        startDate: "2026-01-01",
-        endDate,
+        effectiveDate: "2026-01-01",
+        maturityDate: endDate,
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
@@ -125,29 +159,29 @@ function buildOpenEndedInvestment({ id }: { id: string }): Investment {
     institutionName: "Klar",
     name: id,
     updatedAt: "2026-01-01T12:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: `${id}-contribution-1`,
+        id: `${id}-contribution-event-1`,
         amount: 10_000,
-        contributionDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: `${id}-rate-period-1`,
+        id: `${id}-rate-event-1`,
         annualRate: 8,
-        startDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: `${id}-lifecycle-period-1`,
+        id: `${id}-lifecycle-event-1`,
         type: INVESTMENT_TYPES.openEnded,
         paymentFrequency: PAYMENT_FREQUENCIES.daily,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-        startDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],

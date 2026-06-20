@@ -10,6 +10,12 @@ const CALENDAR_DATE_FORMAT = "yyyy-MM-dd"
 const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
 export const CALENDAR_DATE_FORMAT_LABEL = "YYYY-MM-DD"
+export const DAY_COUNTS = {
+  day: 1,
+  week: 7,
+  month: 30,
+  year: 365,
+} as const
 
 export function getDaysBetween(startDate: string, endDate: string): number {
   return Math.max(
@@ -38,7 +44,7 @@ export function addCalendarDays(date: Date, days: number): string {
 export function isCalendarDateWithinRange(
   date: string,
   startDate?: string | null,
-  endDate?: string,
+  endDate?: string | null,
 ): boolean {
   if (
     startDate !== undefined &&
@@ -48,7 +54,7 @@ export function isCalendarDateWithinRange(
     return false
   }
 
-  if (endDate === undefined) {
+  if (endDate === undefined || endDate === null) {
     return true
   }
 

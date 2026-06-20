@@ -1,13 +1,18 @@
-import { INVESTMENT_TYPES } from "@/domain/investments/constants"
+import {
+  getPaymentFrequencyDays,
+  INVESTMENT_TYPES,
+} from "@/domain/investments/constants"
 import {
   compareCalendarDatesAscending,
   getDaysBetween,
   parseCalendarDate,
   toDateString,
 } from "@/domain/investments/dates"
-import { analyzeInvestment } from "@/domain/investments/investment-analysis"
-import { getEstimatedPeriodicReturn } from "@/domain/investments/investment-returns"
-import { getActiveLifecyclePeriodAtDate } from "@/domain/investments/timeline-segments"
+import {
+  analyzeInvestment,
+  type InvestmentAnalysis,
+} from "@/domain/investments/investment-analysis"
+import { getUpcomingInvestmentProjectedEarningsForDays } from "@/domain/investments/investment-projections"
 import type {
   BaseResolvedInvestment,
   CalendarDateString,
@@ -24,10 +29,7 @@ export function resolveInvestment(
 ): ResolvedInvestment {
   const analysis = analyzeInvestment(investment, asOfDate)
   const asOfDateString = toDateString(asOfDate)
-  const activeLifecyclePeriod = getActiveLifecyclePeriodOrThrow(
-    investment,
-    analysis.lastActiveDate,
-  )
+  const activeLifecyclePeriod = getCurrentLifecyclePeriodOrThrow(analysis)
   const currentBalanceSegment = getCurrentBalanceSegmentOrThrow(analysis)
   const effectiveEndDate =
     activeLifecyclePeriod.type === INVESTMENT_TYPES.fixedTerm &&
@@ -47,9 +49,10 @@ export function resolveInvestment(
     updatedAt: investment.updatedAt,
     originalAmount: analysis.originalAmount,
     currentInvestedAmount: analysis.currentInvestedAmount,
-    annualRate: currentBalanceSegment.annualRate,
-    paymentFrequency: currentBalanceSegment.paymentFrequency,
-    reinvestmentBehavior: currentBalanceSegment.reinvestmentBehavior,
+    annualRate: currentBalanceSegment.ratePeriod.annualRate,
+    paymentFrequency: currentBalanceSegment.lifecyclePeriod.paymentFrequency,
+    reinvestmentBehavior:
+      currentBalanceSegment.lifecyclePeriod.reinvestmentBehavior,
     startDate: activeLifecyclePeriod.startDate,
     derivedStatus: analysis.derivedStatus,
     currentLifecycleDaysActive: getDaysBetween(
@@ -58,7 +61,13 @@ export function resolveInvestment(
     ),
     estimatedAccruedReturn: analysis.estimatedAccruedReturn,
     estimatedCurrentValue: analysis.estimatedCurrentValue,
-    estimatedPeriodicReturn: getEstimatedPeriodicReturn(investment, asOfDate),
+    estimatedPeriodicReturn: getUpcomingInvestmentProjectedEarningsForDays(
+      investment,
+      getPaymentFrequencyDays(
+        currentBalanceSegment.lifecyclePeriod.paymentFrequency,
+      ),
+      asOfDate,
+    ),
   }
 
   if (activeLifecyclePeriod.type === INVESTMENT_TYPES.openEnded) {
@@ -144,24 +153,21 @@ function resolveFixedTermInvestment(
   }
 }
 
-function getActiveLifecyclePeriodOrThrow(
-  investment: Investment,
-  asOfDate: CalendarDateString,
+function getCurrentLifecyclePeriodOrThrow(
+  analysis: InvestmentAnalysis,
 ): InvestmentLifecyclePeriod {
-  const lifecyclePeriod = getActiveLifecyclePeriodAtDate(investment, asOfDate)
+  const lifecyclePeriod = analysis.currentLifecyclePeriod
 
   if (lifecyclePeriod === null) {
     throw new Error(
-      `Investment ${investment.id} has no active lifecycle period at ${asOfDate}`,
+      `Investment ${analysis.investment.id} has no lifecycle period at ${analysis.asOfDate.toISOString()}`,
     )
   }
 
   return lifecyclePeriod
 }
 
-function getCurrentBalanceSegmentOrThrow(
-  analysis: ReturnType<typeof analyzeInvestment>,
-) {
+function getCurrentBalanceSegmentOrThrow(analysis: InvestmentAnalysis) {
   const currentBalanceSegment = analysis.currentBalanceSegment
 
   if (currentBalanceSegment === null) {

@@ -1,3 +1,5 @@
+import { DAY_COUNTS } from "@/domain/investments/dates"
+
 // Investment type
 export const INVESTMENT_TYPES = {
   fixedTerm: "fixed-term",
@@ -42,9 +44,9 @@ export const PAYMENT_FREQUENCY_LABELS = {
 } as const satisfies Record<PaymentFrequency, string>
 
 export const PAYMENT_FREQUENCY_DAYS = {
-  [PAYMENT_FREQUENCIES.daily]: 1,
-  [PAYMENT_FREQUENCIES.weekly]: 7,
-  [PAYMENT_FREQUENCIES.monthly]: 30,
+  [PAYMENT_FREQUENCIES.daily]: DAY_COUNTS.day,
+  [PAYMENT_FREQUENCIES.weekly]: DAY_COUNTS.week,
+  [PAYMENT_FREQUENCIES.monthly]: DAY_COUNTS.month,
   [PAYMENT_FREQUENCIES.atMaturity]: 0,
 } as const satisfies Record<PaymentFrequency, number>
 

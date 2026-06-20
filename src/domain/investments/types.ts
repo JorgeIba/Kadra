@@ -25,19 +25,52 @@ export type CalendarDateString = string
  */
 export type IsoDateTimeString = string
 
-export interface InvestmentContribution {
+export interface InvestmentContributionEvent {
   id: string
   amount: number
-  contributionDate: CalendarDateString
+  effectiveDate: CalendarDateString
   notes?: string
   createdAt: IsoDateTimeString
+}
+
+export interface InvestmentRateEvent {
+  id: string
+  annualRate: number
+  effectiveDate: CalendarDateString
+  createdAt: IsoDateTimeString
+}
+
+interface BaseInvestmentLifecycleEvent {
+  id: string
+  paymentFrequency: PaymentFrequency
+  reinvestmentBehavior: ReinvestmentBehavior
+  effectiveDate: CalendarDateString
+  createdAt: IsoDateTimeString
+}
+
+export interface FixedTermInvestmentLifecycleEvent extends BaseInvestmentLifecycleEvent {
+  type: typeof INVESTMENT_TYPES.fixedTerm
+  maturityDate: CalendarDateString
+}
+
+export interface OpenEndedInvestmentLifecycleEvent extends BaseInvestmentLifecycleEvent {
+  type: typeof INVESTMENT_TYPES.openEnded
+  maturityDate?: never
+}
+
+export type InvestmentLifecycleEvent =
+  | FixedTermInvestmentLifecycleEvent
+  | OpenEndedInvestmentLifecycleEvent
+
+export interface InvestmentContributionState {
+  totalContributedAmount: number
 }
 
 export interface InvestmentRatePeriod {
   id: string
   annualRate: number
   startDate: CalendarDateString
-  endDate?: CalendarDateString
+  endDate: CalendarDateString | null
   createdAt: IsoDateTimeString
 }
 
@@ -46,17 +79,19 @@ interface BaseInvestmentLifecyclePeriod {
   paymentFrequency: PaymentFrequency
   reinvestmentBehavior: ReinvestmentBehavior
   startDate: CalendarDateString
+  endDate: CalendarDateString | null
   createdAt: IsoDateTimeString
 }
 
 export interface FixedTermInvestmentLifecyclePeriod extends BaseInvestmentLifecyclePeriod {
   type: typeof INVESTMENT_TYPES.fixedTerm
   endDate: CalendarDateString
+  maturityDate: CalendarDateString
 }
 
 export interface OpenEndedInvestmentLifecyclePeriod extends BaseInvestmentLifecyclePeriod {
   type: typeof INVESTMENT_TYPES.openEnded
-  endDate?: never
+  maturityDate?: never
 }
 
 export type InvestmentLifecyclePeriod =
@@ -78,9 +113,9 @@ export interface InvestmentProfile {
 export interface Investment extends InvestmentProfile {
   createdAt: IsoDateTimeString
   updatedAt: IsoDateTimeString
-  contributions: InvestmentContribution[]
-  ratePeriods: InvestmentRatePeriod[]
-  lifecyclePeriods: InvestmentLifecyclePeriod[]
+  contributionEvents: InvestmentContributionEvent[]
+  rateEvents: InvestmentRateEvent[]
+  lifecycleEvents: InvestmentLifecycleEvent[]
 }
 
 /**

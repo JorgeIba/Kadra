@@ -5,7 +5,9 @@ import {
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
+  compareCalendarDatesAscending,
   isCalendarDateString,
+  toDateString,
 } from "@/domain/investments"
 
 const dateOnlySchema = z.string().refine(isCalendarDateString, {
@@ -15,9 +17,9 @@ const dateOnlySchema = z.string().refine(isCalendarDateString, {
 const commonInvestmentFormSchema = z.object({
   name: z.string().trim().min(1, "Investment name is required."),
   institutionName: z.string().trim().min(1, "Institution is required."),
-  originalAmount: z
+  contributionAmount: z
     .number()
-    .positive("Original amount must be greater than zero."),
+    .positive("Contribution amount must be greater than zero."),
   annualRate: z.number().min(0, "Annual rate cannot be negative."),
   currency: z.literal(CURRENCIES.mxn),
   paymentFrequency: z.enum([
@@ -45,6 +47,18 @@ export const investmentFormSchema = z
     }),
   ])
   .superRefine((values, context) => {
+    if (
+      values.investmentType === INVESTMENT_TYPES.fixedTerm &&
+      compareCalendarDatesAscending(values.endDate, toDateString(new Date())) <=
+        0
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "End date must be after today.",
+        path: ["endDate"],
+      })
+    }
+
     if (
       values.investmentType === INVESTMENT_TYPES.openEnded &&
       values.paymentFrequency === PAYMENT_FREQUENCIES.atMaturity

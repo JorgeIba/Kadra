@@ -80,30 +80,30 @@ function buildFixedTermInvestment({
     institutionName: "CETES",
     name: id,
     updatedAt: "2026-01-01T12:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: `${id}-contribution-1`,
+        id: `${id}-contribution-event-1`,
         amount: 10_000,
-        contributionDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: `${id}-rate-period-1`,
+        id: `${id}-rate-event-1`,
         annualRate: 10,
-        startDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: `${id}-lifecycle-period-1`,
+        id: `${id}-lifecycle-event-1`,
         type: INVESTMENT_TYPES.fixedTerm,
         paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-        startDate: "2026-01-01",
-        endDate,
+        effectiveDate: "2026-01-01",
+        maturityDate: endDate,
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
@@ -118,29 +118,29 @@ function buildOpenEndedInvestment({ id }: { id: string }): Investment {
     institutionName: "Klar",
     name: id,
     updatedAt: "2026-01-01T12:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
-        id: `${id}-contribution-1`,
+        id: `${id}-contribution-event-1`,
         amount: 10_000,
-        contributionDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: `${id}-rate-period-1`,
+        id: `${id}-rate-event-1`,
         annualRate: 8,
-        startDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: `${id}-lifecycle-period-1`,
+        id: `${id}-lifecycle-event-1`,
         type: INVESTMENT_TYPES.openEnded,
         paymentFrequency: PAYMENT_FREQUENCIES.daily,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-        startDate: "2026-01-01",
+        effectiveDate: "2026-01-01",
         createdAt: "2026-01-01T12:00:00.000Z",
       },
     ],

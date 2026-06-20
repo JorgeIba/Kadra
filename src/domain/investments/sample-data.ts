@@ -15,44 +15,43 @@ export const sampleInvestments: Investment[] = [
     notes: "Sample fixed-term SOFIPO-style investment with a later top-up.",
     createdAt: "2026-05-03T12:00:00.000Z",
     updatedAt: "2026-06-02T09:15:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
         id: "contribution-nu-90-1",
         amount: 50000,
-        contributionDate: "2026-05-03",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:00:00.000Z",
       },
       {
         id: "contribution-nu-90-2",
         amount: 10000,
-        contributionDate: "2026-06-02",
+        effectiveDate: "2026-06-02",
         notes: "Additional funds after first payout estimate review.",
         createdAt: "2026-06-02T09:15:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: "rate-period-nu-90-1",
+        id: "rate-event-nu-90-1",
         annualRate: 14.25,
-        startDate: "2026-05-03",
-        endDate: "2026-06-15",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:00:00.000Z",
       },
       {
-        id: "rate-period-nu-90-2",
+        id: "rate-event-nu-90-2",
         annualRate: 13.9,
-        startDate: "2026-06-15",
+        effectiveDate: "2026-06-15",
         createdAt: "2026-06-15T08:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: "lifecycle-period-nu-90-1",
+        id: "lifecycle-event-nu-90-1",
         type: INVESTMENT_TYPES.fixedTerm,
         paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-        startDate: "2026-05-03",
-        endDate: "2026-08-01",
+        effectiveDate: "2026-05-03",
+        maturityDate: "2026-08-01",
         createdAt: "2026-05-03T12:00:00.000Z",
       },
     ],
@@ -64,37 +63,36 @@ export const sampleInvestments: Investment[] = [
     currency: CURRENCIES.mxn,
     createdAt: "2026-05-03T12:05:00.000Z",
     updatedAt: "2026-05-31T11:00:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
         id: "contribution-cetes-28-1",
         amount: 35000,
-        contributionDate: "2026-05-03",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:05:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: "rate-period-cetes-28-1",
+        id: "rate-event-cetes-28-1",
         annualRate: 10.15,
-        startDate: "2026-05-03",
-        endDate: "2026-05-17",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:05:00.000Z",
       },
       {
-        id: "rate-period-cetes-28-2",
+        id: "rate-event-cetes-28-2",
         annualRate: 9.95,
-        startDate: "2026-05-17",
+        effectiveDate: "2026-05-17",
         createdAt: "2026-05-17T08:30:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: "lifecycle-period-cetes-28-1",
+        id: "lifecycle-event-cetes-28-1",
         type: INVESTMENT_TYPES.fixedTerm,
         paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-        startDate: "2026-05-03",
-        endDate: "2026-05-31",
+        effectiveDate: "2026-05-03",
+        maturityDate: "2026-05-31",
         createdAt: "2026-05-03T12:05:00.000Z",
       },
     ],
@@ -107,49 +105,47 @@ export const sampleInvestments: Investment[] = [
     notes: "Sample flexible account with promotional rate changes over time.",
     createdAt: "2026-05-03T12:10:00.000Z",
     updatedAt: "2026-06-10T08:45:00.000Z",
-    contributions: [
+    contributionEvents: [
       {
         id: "contribution-klar-flex-1",
         amount: 25000,
-        contributionDate: "2026-05-03",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
       },
       {
         id: "contribution-klar-flex-2",
         amount: 5000,
-        contributionDate: "2026-05-20",
+        effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T10:00:00.000Z",
       },
     ],
-    ratePeriods: [
+    rateEvents: [
       {
-        id: "rate-period-klar-flex-1",
+        id: "rate-event-klar-flex-1",
         annualRate: 12,
-        startDate: "2026-05-03",
-        endDate: "2026-06-10",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
       },
       {
-        id: "rate-period-klar-flex-2",
+        id: "rate-event-klar-flex-2",
         annualRate: 11.4,
-        startDate: "2026-06-10",
-        endDate: "2026-07-10",
+        effectiveDate: "2026-06-10",
         createdAt: "2026-06-10T08:45:00.000Z",
       },
       {
-        id: "rate-period-klar-flex-3",
+        id: "rate-event-klar-flex-3",
         annualRate: 10.8,
-        startDate: "2026-07-10",
+        effectiveDate: "2026-07-10",
         createdAt: "2026-07-10T08:00:00.000Z",
       },
     ],
-    lifecyclePeriods: [
+    lifecycleEvents: [
       {
-        id: "lifecycle-period-klar-flex-1",
+        id: "lifecycle-event-klar-flex-1",
         type: INVESTMENT_TYPES.openEnded,
         paymentFrequency: PAYMENT_FREQUENCIES.daily,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-        startDate: "2026-05-03",
+        effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
       },
     ],

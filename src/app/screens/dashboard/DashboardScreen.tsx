@@ -1,6 +1,5 @@
 import {
   getActiveInvestmentCount,
-  getPortfolioEarningsSnapshot,
   getPortfolioEstimatedAccruedReturn,
   getPortfolioEstimatedCurrentValue,
   getResolvedInvestmentSummary,
@@ -17,6 +16,7 @@ import { PortfolioBreakdownCard } from "@/app/screens/dashboard/PortfolioBreakdo
 import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
 import { PortfolioProjectionChart } from "@/app/screens/dashboard/PortfolioProjectionChart"
 import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCard"
+import { getPortfolioEarningsSnapshot } from "@/app/screens/earnings/earnings-view-model"
 
 interface DashboardScreenProps {
   investments: Investment[]

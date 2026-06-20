@@ -26,30 +26,30 @@ const fixedInvestment = {
   currency: CURRENCIES.mxn,
   createdAt: "2026-01-01T18:00:00.000Z",
   updatedAt: "2026-01-01T18:00:00.000Z",
-  contributions: [
+  contributionEvents: [
     {
-      id: "contribution-1",
+      id: "contribution-event-1",
       amount: 36_500,
-      contributionDate: "2026-01-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
-  ratePeriods: [
+  rateEvents: [
     {
-      id: "rate-period-1",
+      id: "rate-event-1",
       annualRate: 10,
-      startDate: "2026-01-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
-  lifecyclePeriods: [
+  lifecycleEvents: [
     {
-      id: "lifecycle-period-1",
+      id: "lifecycle-event-1",
       type: INVESTMENT_TYPES.fixedTerm,
       paymentFrequency: PAYMENT_FREQUENCIES.monthly,
       reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
-      startDate: "2026-01-01",
-      endDate: "2026-01-31",
+      effectiveDate: "2026-01-01",
+      maturityDate: "2026-01-31",
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
@@ -62,29 +62,29 @@ const openEndedInvestment = {
   currency: CURRENCIES.mxn,
   createdAt: "2026-01-01T18:00:00.000Z",
   updatedAt: "2026-01-01T18:00:00.000Z",
-  contributions: [
+  contributionEvents: [
     {
-      id: "contribution-1",
+      id: "contribution-event-1",
       amount: 10_000,
-      contributionDate: "2026-01-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
-  ratePeriods: [
+  rateEvents: [
     {
-      id: "rate-period-1",
+      id: "rate-event-1",
       annualRate: 7.3,
-      startDate: "2026-01-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
-  lifecyclePeriods: [
+  lifecycleEvents: [
     {
-      id: "lifecycle-period-1",
+      id: "lifecycle-event-1",
       type: INVESTMENT_TYPES.openEnded,
       paymentFrequency: PAYMENT_FREQUENCIES.daily,
       reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      startDate: "2026-01-01",
+      effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],

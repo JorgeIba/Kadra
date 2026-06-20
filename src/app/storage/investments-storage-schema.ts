@@ -12,23 +12,22 @@ const timestampSchema = z.string().refine((value) => {
   return !Number.isNaN(Date.parse(value))
 })
 
-const contributionSchema = z.strictObject({
+const contributionEventSchema = z.strictObject({
   createdAt: timestampSchema,
   id: z.string().min(1),
   amount: z.number().positive(),
-  contributionDate: calendarDateSchema,
+  effectiveDate: calendarDateSchema,
   notes: z.string().optional(),
 })
 
-const ratePeriodSchema = z.strictObject({
+const rateEventSchema = z.strictObject({
   annualRate: z.number().min(0),
   createdAt: timestampSchema,
   id: z.string().min(1),
-  startDate: calendarDateSchema,
-  endDate: calendarDateSchema.optional(),
+  effectiveDate: calendarDateSchema,
 })
 
-const lifecyclePeriodBaseShape = {
+const lifecycleEventBaseShape = {
   createdAt: timestampSchema,
   id: z.string().min(1),
   paymentFrequency: z.enum([
@@ -41,17 +40,22 @@ const lifecyclePeriodBaseShape = {
     REINVESTMENT_BEHAVIORS.automatic,
     REINVESTMENT_BEHAVIORS.toCash,
   ]),
-  startDate: calendarDateSchema,
+  effectiveDate: calendarDateSchema,
 }
 
-const lifecyclePeriodSchema = z.discriminatedUnion("type", [
+const lifecycleEventSchema = z.discriminatedUnion("type", [
+  z
+    .strictObject({
+      ...lifecycleEventBaseShape,
+      maturityDate: calendarDateSchema,
+      type: z.literal("fixed-term"),
+    })
+    .refine(
+      (event) => event.maturityDate > event.effectiveDate,
+      "Fixed-term lifecycle events must mature after they become effective",
+    ),
   z.strictObject({
-    ...lifecyclePeriodBaseShape,
-    endDate: calendarDateSchema,
-    type: z.literal("fixed-term"),
-  }),
-  z.strictObject({
-    ...lifecyclePeriodBaseShape,
+    ...lifecycleEventBaseShape,
     type: z.literal("open-ended"),
   }),
 ])
@@ -64,9 +68,9 @@ const investmentSchema = z.strictObject({
   name: z.string().min(1),
   notes: z.string().optional(),
   updatedAt: timestampSchema,
-  contributions: z.array(contributionSchema).min(1),
-  ratePeriods: z.array(ratePeriodSchema).min(1),
-  lifecyclePeriods: z.array(lifecyclePeriodSchema).min(1),
+  contributionEvents: z.array(contributionEventSchema).min(1),
+  rateEvents: z.array(rateEventSchema).min(1),
+  lifecycleEvents: z.array(lifecycleEventSchema).min(1),
 })
 
 const investmentsStorageSchema = z.array(investmentSchema)

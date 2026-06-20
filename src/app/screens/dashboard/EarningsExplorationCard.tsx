@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react"
-import type { PortfolioEarningsSnapshot } from "@/domain/investments"
+import type { PortfolioEarningsSnapshot } from "@/app/screens/earnings/earnings-view-model"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatMxn } from "@/lib/formatters"

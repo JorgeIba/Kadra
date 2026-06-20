@@ -69,7 +69,7 @@ const FORM_FIELD_IDS = {
   institutionName: "institution-name",
   investmentType: "investment-type",
   name: "investment-name",
-  originalAmount: "original-amount",
+  contributionAmount: "contribution-amount",
   paymentFrequency: "payment-frequency",
   reinvestmentBehavior: "reinvestment",
 } as const
@@ -296,21 +296,21 @@ export function InvestmentForm({
 
             <div className="grid grid-cols-2 gap-3">
               <Field
-                error={errors.originalAmount?.message}
-                label="Original amount"
-                htmlFor={FORM_FIELD_IDS.originalAmount}
+                error={errors.contributionAmount?.message}
+                label="Contribution amount"
+                htmlFor={FORM_FIELD_IDS.contributionAmount}
               >
                 <Input
-                  id={FORM_FIELD_IDS.originalAmount}
+                  id={FORM_FIELD_IDS.contributionAmount}
                   type="number"
                   inputMode="decimal"
                   min="0"
                   placeholder="10000"
                   {...getFieldAccessibilityProps(
-                    FORM_FIELD_IDS.originalAmount,
-                    errors.originalAmount?.message,
+                    FORM_FIELD_IDS.contributionAmount,
+                    errors.contributionAmount?.message,
                   )}
-                  {...register("originalAmount", { valueAsNumber: true })}
+                  {...register("contributionAmount", { valueAsNumber: true })}
                 />
               </Field>
 

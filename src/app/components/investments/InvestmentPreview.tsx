@@ -1,6 +1,6 @@
 import {
-  getEstimatedMonthlyReturn,
-  getEstimatedYearlyReturn,
+  DAY_COUNTS,
+  getUpcomingInvestmentProjectedEarningsForDays,
   INVESTMENT_TYPES,
   resolveInvestment,
   type Investment,
@@ -37,11 +37,23 @@ export function InvestmentPreview({
         <div className="grid grid-cols-2 gap-3">
           <PreviewMetric
             label="Estimated monthly return"
-            value={formatMxn(getEstimatedMonthlyReturn(investment))}
+            value={formatMxn(
+              getUpcomingInvestmentProjectedEarningsForDays(
+                investment,
+                DAY_COUNTS.month,
+                asOfDate,
+              ),
+            )}
           />
           <PreviewMetric
             label="Estimated yearly return"
-            value={formatMxn(getEstimatedYearlyReturn(investment))}
+            value={formatMxn(
+              getUpcomingInvestmentProjectedEarningsForDays(
+                investment,
+                DAY_COUNTS.year,
+                asOfDate,
+              ),
+            )}
           />
         </div>
 
