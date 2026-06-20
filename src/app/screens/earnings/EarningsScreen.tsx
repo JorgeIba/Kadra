@@ -1,13 +1,11 @@
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
-import type {
-  EarningsPeriod,
-  InvestmentEarningsBreakdown,
-  PortfolioEarningsView,
-} from "@/app/screens/earnings/earnings-view-model"
 import {
   EARNINGS_PERIODS,
   getPortfolioEarningsSnapshot,
+  type EarningsPeriod,
+  type InvestmentEarningsBreakdown,
+  type PortfolioEarningsView,
 } from "@/app/screens/earnings/earnings-view-model"
 import type { Investment } from "@/domain/investments"
 import { Button } from "@/components/ui/button"

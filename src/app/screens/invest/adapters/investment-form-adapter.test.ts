@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   CURRENCIES,
   INVESTMENT_TYPES,
@@ -23,6 +23,15 @@ const metadata = {
 const asOfDate = new Date(metadata.now)
 
 describe("investment form adapter", () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-05-19T12:00:00.000Z"))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it("maps a fixed-term form draft to a fixed-term investment", () => {
     const investment = mapInvestmentFormToInvestment(
       {
@@ -302,10 +311,10 @@ describe("investment form adapter", () => {
     const preview = getInvestmentFormPreview(
       {
         ...baseFormValues,
-        endDate: metadata.startDate,
+        endDate: "2026-05-20",
         investmentType: INVESTMENT_TYPES.fixedTerm,
       },
-      { asOfDate },
+      { asOfDate: new Date("2026-05-22T12:00:00.000Z") },
     )
 
     expect(preview).toBeNull()
