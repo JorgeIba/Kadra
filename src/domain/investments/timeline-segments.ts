@@ -1,47 +1,50 @@
 import {
   compareCalendarDatesAscending,
-  isCalendarDateWithinRange,
   toDateString,
 } from "@/domain/investments/dates"
+import { getContributionStateAtDate } from "@/domain/investments/contribution-state"
+import {
+  deriveLifecyclePeriods,
+  getActiveLifecyclePeriodAtDate,
+} from "@/domain/investments/lifecycle-periods"
+import {
+  deriveRatePeriods,
+  getActiveRatePeriodAtDate,
+} from "@/domain/investments/rate-periods"
 import type {
   CalendarDateString,
   Investment,
+  InvestmentContributionState,
   InvestmentLifecyclePeriod,
   InvestmentRatePeriod,
-  InvestmentType,
-  PaymentFrequency,
-  ReinvestmentBehavior,
 } from "@/domain/investments/types"
 
-export interface InvestmentTimelineSegment {
+export interface InvestmentTermsSegment {
   startDate: CalendarDateString
   endDate: CalendarDateString | null
-  totalContributedAmount: number
-  annualRate: number
-  lifecycleType: InvestmentType
-  paymentFrequency: PaymentFrequency
-  reinvestmentBehavior: ReinvestmentBehavior
+  contributionState: InvestmentContributionState
+  ratePeriod: InvestmentRatePeriod
+  lifecyclePeriod: InvestmentLifecyclePeriod
 }
 
 interface TimelinePeriod {
   startDate: CalendarDateString
-  endDate?: CalendarDateString
+  endDate?: CalendarDateString | null
 }
 
 /**
- * Builds structural timeline segments up to `asOfDate`.
+ * Builds the ordered terms timeline up to `asOfDate`.
  *
- * Each segment represents a period where contributed capital, active rate, and
- * lifecycle settings stay constant. `endDate: null` means the current active
- * segment continues indefinitely and should be clipped by callers to their
- * calculation date. `totalContributedAmount` is raw contributed capital at the
- * segment start, not a compounded balance.
+ * Each segment composes the contribution state, active rate period, and active
+ * lifecycle period that are stable from `startDate` until `endDate`.
+ * `endDate: null` means the current active segment continues indefinitely and
+ * should be clipped by callers to their calculation date.
  */
-export function getInvestmentTimelineSegments(
+export function getInvestmentTermsTimeline(
   investment: Investment,
   asOfDate: Date,
-): InvestmentTimelineSegment[] {
-  const boundaries = getInvestmentTimelineBoundaries(
+): InvestmentTermsSegment[] {
+  const boundaries = getInvestmentTermsTimelineBoundaries(
     investment,
     toDateString(asOfDate),
   )
@@ -65,27 +68,24 @@ export function getInvestmentTimelineSegments(
       {
         startDate: boundary,
         endDate: nextBoundary,
-        totalContributedAmount: getTotalContributedAmountAtDate(
-          investment,
-          boundary,
-        ),
-        annualRate: ratePeriod.annualRate,
-        lifecycleType: lifecyclePeriod.type,
-        paymentFrequency: lifecyclePeriod.paymentFrequency,
-        reinvestmentBehavior: lifecyclePeriod.reinvestmentBehavior,
+        contributionState: getContributionStateAtDate(investment, boundary),
+        ratePeriod,
+        lifecyclePeriod,
       },
     ]
   })
 }
 
-export function getInvestmentTimelineBoundaries(
+export function getInvestmentTermsTimelineBoundaries(
   investment: Investment,
   asOfDate: CalendarDateString,
 ): CalendarDateString[] {
+  const ratePeriods = deriveRatePeriods(investment)
+  const lifecyclePeriods = deriveLifecyclePeriods(investment)
   const rawBoundaries = [
-    ...getContributionBoundaryDates(investment),
-    ...getPeriodBoundaryDates(investment.ratePeriods),
-    ...getPeriodBoundaryDates(investment.lifecyclePeriods),
+    ...getContributionEventBoundaryDates(investment),
+    ...getPeriodBoundaryDates(ratePeriods),
+    ...getPeriodBoundaryDates(lifecyclePeriods),
     asOfDate,
   ]
 
@@ -96,81 +96,22 @@ export function getInvestmentTimelineBoundaries(
     .sort(compareCalendarDatesAscending)
 }
 
-function getContributionBoundaryDates(
-  investment: Investment,
-): CalendarDateString[] {
-  return investment.contributions.map(
-    (contribution) => contribution.contributionDate,
-  )
-}
-
 function getPeriodBoundaryDates(
   periods: TimelinePeriod[],
 ): CalendarDateString[] {
   return periods.flatMap((period) => {
-    return period.endDate === undefined
+    return period.endDate === undefined || period.endDate === null
       ? [period.startDate]
       : [period.startDate, period.endDate]
   })
 }
 
-export function getTotalContributedAmountAtDate(
+function getContributionEventBoundaryDates(
   investment: Investment,
-  asOfDate: CalendarDateString,
-): number {
-  return investment.contributions.reduce((total, contribution) => {
-    if (
-      compareCalendarDatesAscending(contribution.contributionDate, asOfDate) > 0
-    ) {
-      return total
-    }
-
-    return total + contribution.amount
-  }, 0)
-}
-
-/**
- * Returns the rate period that is active at `asOfDate`.
- *
- * `null` means there is no rate period covering that date.
- */
-export function getActiveRatePeriodAtDate(
-  investment: Investment,
-  asOfDate: CalendarDateString,
-): InvestmentRatePeriod | null {
-  return getActivePeriodAtDate(investment.ratePeriods, asOfDate)
-}
-
-/**
- * Returns the lifecycle period that is active at `asOfDate`.
- *
- * `null` means there is no lifecycle period covering that date.
- */
-export function getActiveLifecyclePeriodAtDate(
-  investment: Investment,
-  asOfDate: CalendarDateString,
-): InvestmentLifecyclePeriod | null {
-  return getActivePeriodAtDate(investment.lifecyclePeriods, asOfDate)
-}
-
-function getActivePeriodAtDate<TPeriod extends TimelinePeriod>(
-  periods: TPeriod[],
-  asOfDate: CalendarDateString,
-): TPeriod | null {
-  const sortedPeriods = [...periods].sort((leftPeriod, rightPeriod) =>
-    // More recent start dates first to get the most up-to-date period in case of overlaps
-    // This is defensive only
-    compareCalendarDatesAscending(rightPeriod.startDate, leftPeriod.startDate),
-  )
-
-  return (
-    sortedPeriods.find((period) => isDateWithinPeriod(asOfDate, period)) ?? null
+): CalendarDateString[] {
+  return investment.contributionEvents.map(
+    (contributionEvent) => contributionEvent.effectiveDate,
   )
 }
 
-function isDateWithinPeriod(
-  asOfDate: CalendarDateString,
-  period: TimelinePeriod,
-): boolean {
-  return isCalendarDateWithinRange(asOfDate, period.startDate, period.endDate)
-}
+export { getActiveLifecyclePeriodAtDate, getActiveRatePeriodAtDate }

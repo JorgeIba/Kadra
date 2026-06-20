@@ -27,10 +27,11 @@ describe("portfolio projection", () => {
     ])
   })
 
-  it("projects increasing value for positive-rate investments", () => {
+  it("projects known values for a positive-rate investment", () => {
     const points = getPortfolioProjectionPoints([investment], startDate)
 
-    expect(points[0].estimatedValue).toBeLessThan(points.at(-1)!.estimatedValue)
+    expect(points[0].estimatedValue).toBe(10_000)
+    expect(points.at(-1)?.estimatedValue).toBeCloseTo(11_047.244536)
   })
 })
 
@@ -41,29 +42,29 @@ const investment: Investment = {
   institutionName: "CETES",
   name: "Projection investment",
   updatedAt: "2026-06-05T12:00:00.000Z",
-  contributions: [
+  contributionEvents: [
     {
-      id: "projection-contribution-1",
+      id: "projection-contribution-event-1",
       amount: 10_000,
-      contributionDate: "2026-06-05",
+      effectiveDate: "2026-06-05",
       createdAt: "2026-06-05T12:00:00.000Z",
     },
   ],
-  ratePeriods: [
+  rateEvents: [
     {
-      id: "projection-rate-period-1",
+      id: "projection-rate-event-1",
       annualRate: 10,
-      startDate: "2026-06-05",
+      effectiveDate: "2026-06-05",
       createdAt: "2026-06-05T12:00:00.000Z",
     },
   ],
-  lifecyclePeriods: [
+  lifecycleEvents: [
     {
-      id: "projection-lifecycle-period-1",
+      id: "projection-lifecycle-event-1",
       type: INVESTMENT_TYPES.openEnded,
       paymentFrequency: PAYMENT_FREQUENCIES.monthly,
       reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-      startDate: "2026-06-05",
+      effectiveDate: "2026-06-05",
       createdAt: "2026-06-05T12:00:00.000Z",
     },
   ],

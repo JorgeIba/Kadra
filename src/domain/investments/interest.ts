@@ -1,12 +1,9 @@
-import { getDaysBetween } from "@/domain/investments/dates"
+import { DAY_COUNTS, getDaysBetween } from "@/domain/investments/dates"
 import type {
   CalendarDateString,
   PaymentFrequency,
 } from "@/domain/investments/types"
 import { getPaymentFrequencyDays } from "@/domain/investments/constants"
-
-const YEAR_DAYS = 365
-const MONTH_DAYS = 30
 
 export interface InterestPeriod {
   startingAmount: number
@@ -24,7 +21,7 @@ export function getSimpleInterest(
   annualRate: number,
   days: number,
 ): number {
-  return principal * (annualRate / 100) * (days / YEAR_DAYS)
+  return principal * (annualRate / 100) * (days / DAY_COUNTS.year)
 }
 
 export function getCompoundInterest(
@@ -45,7 +42,7 @@ export function getCompoundInterest(
   const remainingDays = days % compoundingFrequencyDays
 
   const periodicRate =
-    (annualRate / 100) * (compoundingFrequencyDays / YEAR_DAYS)
+    (annualRate / 100) * (compoundingFrequencyDays / DAY_COUNTS.year)
   const compoundedAmount =
     principal * (1 + periodicRate) ** fullCompoundingPeriods
   // Full payment-frequency cycles compound into the balance. Any leftover
@@ -117,14 +114,22 @@ export function getEstimatedMonthlyInterest(
   startingAmount: number,
   annualRate: number,
 ): number {
-  return getEstimatedInterestForDays(startingAmount, annualRate, MONTH_DAYS)
+  return getEstimatedInterestForDays(
+    startingAmount,
+    annualRate,
+    DAY_COUNTS.month,
+  )
 }
 
 export function getEstimatedYearlyInterest(
   startingAmount: number,
   annualRate: number,
 ): number {
-  return getEstimatedInterestForDays(startingAmount, annualRate, YEAR_DAYS)
+  return getEstimatedInterestForDays(
+    startingAmount,
+    annualRate,
+    DAY_COUNTS.year,
+  )
 }
 
 export function getEstimatedInterestForDays(

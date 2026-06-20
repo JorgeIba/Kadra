@@ -2,391 +2,291 @@
 
 This document holds deeper domain-model detail than `project-plan.md`.
 
-## Current MVP Model
+## Current Direction
 
-The current implementation uses one flat investment record with enough data to power the MVP UI and calculations.
+Trafin models one investment as an event-sourced history plus derived read
+models.
 
-Current MVP fields:
+Core distinction:
+
+- `Investment` is the source of truth and is safe to persist.
+- User-entered historical facts are stored as events.
+- Periods are derived internal calculation views, not persisted state.
+- Terms timeline segments compose the derived views into stable intervals.
+- `ResolvedInvestment` is the UI/read model for one investment as of a selected date.
+
+This lets one investment evolve over time without rewriting its past. For
+example, an investment can receive more money, change rate, move from
+`open-ended` to `fixed-term`, then later become `open-ended` again.
+
+## Investment Aggregate
+
+`Investment` represents the whole evolving asset.
+
+Stable fields live directly on the investment:
 
 - `id`
 - `name`
 - `institutionName`
-- `type`
-- `originalAmount`
-- `annualRate`
 - `currency`
-- `paymentFrequency`
-- `reinvestmentBehavior`
-- `startDate`
-- `endDate` for `fixed-term`
 - `notes`
 - `createdAt`
 - `updatedAt`
 
-## Current MVP Rules
+Event histories live inside the investment:
 
-- `name` must not be empty.
-- `institutionName` must not be empty.
-- `originalAmount > 0`.
-- `annualRate >= 0`.
-- `startDate` is required.
-- `currency = MXN` in MVP.
-- `paymentFrequency = at-maturity` is only valid for `fixed-term`.
-- `fixed-term` requires `endDate`.
-- `fixed-term` requires `endDate > startDate`.
-- `open-ended` must not have `endDate`.
+- `contributionEvents`
+- `rateEvents`
+- `lifecycleEvents`
 
-## Derived MVP Values
+Source-of-truth rule:
 
-- `derivedStatus`
-- `daysActive`
-- `estimatedAccruedReturn`
-- `estimatedCurrentValue`
-- `estimatedPeriodicReturn`
-- `projectedValueAtCustomDate`
-- fixed-term-only progress and maturity values
-
-## Long-Term Modeling Vision
-
-The long-term direction is history-based rather than overwrite-based.
-
-High-level idea:
-
-- `Investment` is the full evolving asset and owns the dated records that describe its history.
-- Time-varying behavior should come from dated records inside the investment.
-- UI-friendly current state should be derived from history, not treated as the only source of truth.
-
-The important history families currently in scope are:
-
-- capital history
-- rate history
-- lifecycle history
-
-## History Categories
-
-### Capital History
-
-Purpose:
-
-- represent actual money added to an investment over time
-- allow earnings to start from each capital addition's own date
-
-Current direction:
-
-- treat the original principal as the first capital entry in the long-term model
-- treat later contributions as additional capital entries
-- keep planned contributions separate from real contributions
-
-Important distinction:
-
-- contribution history answers how much raw capital the user has put into the investment
-- that is different from the full value visible at a point in time, which also includes earned returns
-
-### Rate History
-
-Purpose:
-
-- preserve earnings history when rates change over time
-
-Current direction:
-
-- use bounded rate periods instead of a single forever-stable rate
-- split earnings calculations by overlapping capital timing and rate timing
-
-### Lifecycle History
-
-Purpose:
-
-- support investments that change between `open-ended` and `fixed-term`
-- preserve the dates when term behavior, maturity behavior, payout frequency, or reinvestment settings changed
-
-Current direction:
-
-- do not assume current type is immutable forever
-- keep lifecycle changes as dated history rather than rewriting the investment record as if it had always looked that way
-
-## Read Model Direction
-
-The app will still need a simple current-state shape for screens such as Dashboard, Assets, and Investment Detail.
-
-Important distinction:
-
-- `Investment` is the source-of-truth history model.
-- `ResolvedInvestment` is the current state of that investment as of one selected date.
-- A resolved investment should be used for read/UI questions like sorting by current amount, filtering by current status, showing the active rate, or rendering cards.
-- Raw `Investment` should be used when the operation needs the full historical record, such as persistence, editing history, replaying projections, or deriving a new resolved state.
-
-That current-state view should eventually be a derived snapshot that answers questions like:
-
-- what type is this investment right now?
-- what rate is active right now?
-- what invested amount is currently active?
-- is it active or finished?
-- what is the estimated current value?
-
-The important rule is:
-
-- the snapshot is a read model for UI and calculations
-- the underlying dated history remains the source of truth
-
-This should evolve from the current `ResolvedInvestment` style object rather than creating two competing "current state" concepts.
-
-## MVP History-Based Direction
-
-We are not replacing the current flat MVP storage shape immediately, but the domain direction is now clear:
-
-- `Investment` becomes the full domain aggregate for one evolving asset.
-- stable descriptive fields live directly on `Investment`
-- capital changes are modeled as dated contribution records inside `Investment`
-- rate changes are modeled as dated rate periods inside `Investment`
-- lifecycle changes are modeled as dated lifecycle periods inside `Investment`
-- UI-facing current state should be derived from those records
-
-For MVP, this history model should stay intentionally constrained and simpler than the long-term vision.
-
-### Investment Aggregate
-
-`Investment` should represent the whole thing the user owns, not only an identity card.
-
-It should hold stable descriptive fields plus the history records that explain how the investment changed over time.
-
-Current direction:
-
-- keep `id`
-- keep `name`
-- keep `institutionName`
-- keep `currency`
-- keep `notes`
-- keep `createdAt`
-- keep `updatedAt`
+- do not store mutable current fields like `annualRate`, `type`,
+  `paymentFrequency`, `reinvestmentBehavior`, `originalAmount`, or `endDate`
+  directly on `Investment`
+- those values come from resolving the investment for a specific date
 
 Meaning of dates:
 
-- `createdAt` means when the record was created in the app
-- operational start should come from the first lifecycle period, not from `createdAt`
+- `createdAt` means when the record was created in Trafin
+- event `effectiveDate` means when that fact became true in the investment world
+- UI labels may still say "start date", "contribution date", or "maturity date"
+  when that wording is clearer for users
 
-Important source-of-truth rule:
+## Event Histories
 
-- do not store direct mutable current fields like `annualRate`, `type`, `paymentFrequency`, `reinvestmentBehavior`, `originalAmount`, or `endDate` on `Investment` beside the histories
-- those values should come from `ResolvedInvestment` for a specific date
+Events are single facts at a date. They are what we persist and edit.
 
-### Contribution Records
+### Contribution Events
 
 Purpose:
 
 - represent actual money added to an investment
+- let the app distinguish contributed capital from earned return
 
-Current direction:
+Shape:
 
-- keep `id` on each contribution so individual entries can be referenced later
-- require `amount > 0`
-- require a valid contribution date
-- do not add contribution `kind` yet in MVP
+- `id`
+- `amount`
+- `effectiveDate`
+- `notes`
+- `createdAt`
+
+Rules:
+
+- `amount > 0`
+- an investment must have at least one contribution event
+- the earliest contribution acts as the initial principal for MVP
 
 Future extension:
 
-- `kind` can be added later if we need to distinguish things like initial funding, contributions, withdrawals, or manual adjustments
+- add a `kind` only when we need withdrawals, manual adjustments, or other
+  contribution-like facts
 
-MVP rule:
-
-- the earliest contribution acts as the initial principal
-
-Naming update:
-
-- use `currentInvestedAmount` for the resolved investment-level amount currently allocated to the investment
-- use `totalContributedAmount` inside timeline segments when we mean cumulative contributed capital by the start of that segment
-
-### Rate Periods
+### Rate Events
 
 Purpose:
 
-- represent which annual rate was active during which period
+- represent the annual rate that became true on a date
+- preserve earnings history when rates change over time
 
-Current direction:
+Shape:
 
-- keep `id` on each rate period so individual periods can be referenced later
-- require `annualRate >= 0`
-- use one bounded or open-ended period at a time
-- do not allow overlapping rate periods for the same investment
+- `id`
+- `annualRate`
+- `effectiveDate`
+- `createdAt`
 
-MVP simplification:
+Rules:
 
-- treat rate history as continuous
-- if a new rate period starts, it replaces the previous active period at that boundary
-- date-only precision is acceptable for MVP, even though richer time precision may be needed later
-
-### Lifecycle Periods
-
-Purpose:
-
-- represent whether the investment is behaving as `open-ended` or `fixed-term` during a given period
-- carry behavior-level fields such as payout frequency and reinvestment behavior
-
-Current direction:
-
-- keep `id` on each lifecycle period so individual periods can be referenced later
-- keep `type`
-- keep `paymentFrequency`
-- keep `reinvestmentBehavior`
-- keep `startDate`
-- keep `endDate` when needed
-
-MVP simplifications:
-
-- do not add a separate `maturityDate` yet
-- for MVP, `endDate` on a fixed-term lifecycle period also acts as its maturity boundary
-- keep lifecycle periods continuous
-- do not allow lifecycle overlaps
-- do not allow lifecycle gaps in MVP
-
-Important behavior rule:
-
-- if an investment changes from `open-ended` to `fixed-term`, or the reverse, it remains the same investment with a new lifecycle period
-
-## MVP Invariants
-
-These are the constraints we currently want the implementation to follow.
-
-### Shared Timeline Anchor
-
-For MVP, the first important dates should align:
-
-- first lifecycle `startDate`
-- first contribution date
-- first rate period `startDate`
-
-MVP rule:
-
-- those three dates must be the same
-
-Why:
-
-- it keeps earnings and status logic easier to validate
-- it avoids ambiguous "investment existed but was not yet funded" cases in the first pass
-
-### Contribution Invariants
-
-- every contribution belongs to exactly one investment
-- every contribution must have its own `id`
-- the parent relationship comes from being nested inside `Investment`
-- contribution `amount` must be positive
-- contribution date must be a valid calendar date
-- an investment must have at least one contribution in the history-based model
-- contribution dates must not be before the first lifecycle period starts
-- for MVP, contributions should happen only while lifecycle coverage exists
-
-### Rate Period Invariants
-
-- every rate period belongs to exactly one investment
-- every rate period must have its own `id`
-- the parent relationship comes from being nested inside `Investment`
 - `annualRate >= 0`
-- rate periods for the same investment must not overlap
-- for MVP, rate periods should form one continuous timeline
-- at any point in the MVP timeline, there should be at most one active rate period
+- an investment must have at least one rate event
 
-### Lifecycle Period Invariants
+### Lifecycle Events
 
-- every lifecycle period belongs to exactly one investment
-- every lifecycle period must have its own `id`
-- the parent relationship comes from being nested inside `Investment`
+Purpose:
+
+- represent lifecycle behavior that became true on a date
+- support transitions between `open-ended` and `fixed-term`
+- carry payout frequency and reinvestment behavior
+
+Common fields:
+
+- `id`
+- `type`
+- `paymentFrequency`
+- `reinvestmentBehavior`
+- `effectiveDate`
+- `createdAt`
+
+Fixed-term lifecycle events also require:
+
+- `maturityDate`
+
+Rules:
+
 - `type` must be `open-ended` or `fixed-term`
-- `paymentFrequency = at-maturity` is valid only for `fixed-term`
-- `fixed-term` requires `endDate`
-- the currently active `open-ended` lifecycle period may omit `endDate`
-- lifecycle periods for the same investment must not overlap
-- for MVP, lifecycle periods must be continuous with no gaps
-- at any point in the MVP timeline, there should be at most one active lifecycle period
+- `fixed-term` requires `maturityDate > effectiveDate`
+- `open-ended` must not include `maturityDate`
+- an investment must have at least one lifecycle event
 
-## Derived Current State
+## Derived Internal Views
 
-The future `ResolvedInvestment` object should be the evolution of the current resolved investment model.
+Derived views are calculation helpers. They should not be persisted or treated as
+the main public API for UI features.
 
-It acts like a snapshot of one `Investment` at a selected date.
+### Rate Period
 
-For any date, the app should be able to answer:
+Derived from `rateEvents`.
 
-- which lifecycle period is active?
-- which rate period is active?
-- what contributions have already happened?
+Shape:
 
-From that, the current derived state can answer:
+- `startDate`
+- `endDate | null`
+- `annualRate`
 
-- investment identity fields such as name and institution
-- current type
-- current payment frequency
-- current reinvestment behavior
-- current annual rate
-- current invested amount
-- derived status
-- estimated accrued return
-- estimated current value
+Interpretation:
 
-Important source-of-truth rule:
+- `[startDate, endDate)` means inclusive start and exclusive end
+- `endDate = null` means open-ended
+- a later rate event closes the previous derived rate period
+- same-day zero-length derived periods are skipped deterministically
 
-- `ResolvedInvestment` is computed from `Investment`
-- it should not be persisted as the source of truth
-- if the active rate period has `annualRate = 10` at a given date, then `ResolvedInvestment.annualRate` for that date is `10`
+### Lifecycle Period
 
-### Derived Current Invested Amount
+Derived from `lifecycleEvents`.
 
-For MVP:
+Shape:
 
-- `currentInvestedAmount` at date `D` = sum of all contributions with date `<= D`
+- `startDate`
+- `endDate | null`
+- lifecycle behavior fields
+- optional `maturityDate` for fixed-term periods
 
-### Derived Current Value
+Interpretation:
 
-For MVP:
+- `[startDate, endDate)` means inclusive start and exclusive end
+- `endDate = null` means open-ended
+- a later lifecycle event closes or replaces the previous derived lifecycle
+  period
+- a fixed-term lifecycle period ends at the earlier of its `maturityDate` or the
+  next lifecycle event
+- deleting later lifecycle events naturally re-expands the previous open-ended
+  event into an open-ended derived period
 
-- `estimatedCurrentValue = currentInvestedAmount + estimatedAccruedReturn`
+### Contribution State
 
-### Derived Status
+Derived from `contributionEvents` at a date.
 
-For MVP:
+Minimum shape:
 
-- `active` means there is an active lifecycle period covering the current date
-- `finished` means the latest lifecycle period is fixed-term, its `endDate` is in the past, and no later lifecycle period replaced it
+- `totalContributedAmount`
 
-Non-MVP note:
+Interpretation:
 
-- later, we may need a broader lifecycle/status discussion for cases like an open-ended investment that the user has exited or closed
+- `totalContributedAmount` is cumulative contributed capital with
+  `effectiveDate <= date`
+- it does not include earned return
 
-## Timeline Segments
+## Terms Timeline
 
-Timeline segments are the recommended foundation for derived calculations.
+A segment is one date interval. A timeline is the ordered list of those
+segments.
 
-Idea:
+The terms timeline is the backbone for derived calculations.
 
-- split one investment timeline into contiguous intervals where contributed capital, annual rate, and lifecycle behavior stay constant
-- calculate returns from those stable intervals
+It splits one investment history into contiguous terms segments where
+contribution state, active rate period, and active lifecycle period stay stable.
 
-Current direction:
-
-- timeline segment `endDate` is exclusive in MVP
-- a fixed-term investment earns up to, but not including, its `endDate`
-- this keeps timeline behavior consistent across lifecycle types and simplifies segment composition
-
-Suggested segment shape:
+Current terms segment shape:
 
 - `startDate`
 - `endDate`
-- `totalContributedAmount`
-- `annualRate`
-- `lifecycleType`
-- `paymentFrequency`
-- `reinvestmentBehavior`
+- `contributionState`
+- `ratePeriod`
+- `lifecyclePeriod`
 
-Current interpretation:
+Rules:
 
-- segment `totalContributedAmount` is the cumulative capital contributed and active at the start of the segment
-- the structural segment does not yet include the propagated earning base
+- segments use `[startDate, endDate)` semantics
+- `endDate = null` means the current open-ended segment continues beyond the
+  query date
+- segment boundaries come from contribution event dates, rate event dates,
+  lifecycle event dates, fixed-term maturity dates, and the selected `asOfDate`
+- zero elapsed time still produces the current segment
+- terms segments compose derived views instead of flattening every field
+  directly onto the segment
 
-Calculated segment direction:
+## Balance Timeline
 
-- a later calculated segment shape can extend the structural segment with fields such as `segmentStartingValue`
-- when automatic reinvestment is modeled more fully, `segmentStartingValue` may exceed `totalContributedAmount` because prior earnings can roll forward into later segments
+The balance timeline is the ordered list of balance segments.
 
-## Modeling Questions Still Open
+A balance segment extends one terms segment with money calculations.
 
-- Should the first history implementation use narrow record types first, or a broader unified event model?
-- When planned contributions arrive, how should reusable assumptions be stored separately from real balance history?
+It adds fields such as:
+
+- `startingBalance`
+- `interestEarned`
+- `endingBalance`
+
+Important distinction:
+
+- `totalContributedAmount` answers "how much raw capital has the user added?"
+- `startingBalance` answers "how much money is working at the start of this
+  segment?"
+- with automatic reinvestment, `startingBalance` may include prior earned return
+
+## Investment Calculation Context And Balance State
+
+`InvestmentCalculationContext` is the lightweight as-of-date context used to
+build calculations.
+
+It contains date boundaries and `termsSegments`, the ordered terms segments from
+the investment start through `timelineEndDate`.
+
+`InvestmentBalanceState` extends that context with money results, such as the
+balance timeline, current balance segment, estimated accrued return, and
+estimated current value.
+
+State date fields use `CalendarDateString` so there is one domain date
+representation in the returned object:
+
+- `requestedDate` is the calendar date the caller asked about
+- `timelineEndDate` is the exclusive boundary used to build the terms and
+  balance timelines
+
+For active investments, `requestedDate` and `timelineEndDate` usually match.
+For finished fixed-term investments, `timelineEndDate` snaps back to the
+investment end boundary so calculations do not continue past maturity.
+
+## Resolved Investment
+
+`ResolvedInvestment` is the read model for UI and portfolio queries.
+
+It is computed from one raw `Investment` and one selected date.
+
+Use it for questions like:
+
+- what type is this investment right now?
+- what rate is active right now?
+- what lifecycle status is active right now?
+- how much money has been contributed?
+- how much has been earned?
+- what is the estimated current value?
+- should this investment appear in a current dashboard, asset list, or portfolio
+  calculation?
+
+Rules:
+
+- `ResolvedInvestment` should not be persisted as source truth
+- portfolio calculations should generally depend on resolved investments because
+  portfolio value is inherently date-dependent
+- raw `Investment` should be used for persistence, editing history, and deriving
+  a new resolved state
+
+## Open Questions
+
+- How should the UI distinguish "fix this existing event" from "add a new event
+  on top of history"?
+- When planned contributions arrive, how should assumptions be stored separately
+  from real contribution events?

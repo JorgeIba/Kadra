@@ -1,11 +1,18 @@
 import {
   getPortfolioEstimatedCurrentValue,
+  DAY_COUNTS,
   resolveInvestment,
   toDateString,
   type Investment,
 } from "@/domain/investments"
 
-const PROJECTION_DAY_OFFSETS = [0, 30, 90, 180, 365] as const
+const PROJECTION_DAY_OFFSETS = [
+  0,
+  DAY_COUNTS.month,
+  DAY_COUNTS.month * 3,
+  DAY_COUNTS.month * 6,
+  DAY_COUNTS.year,
+] as const
 
 export interface PortfolioProjectionPoint {
   date: string
@@ -43,7 +50,7 @@ function getProjectionLabel(dayOffset: number) {
     return "Today"
   }
 
-  if (dayOffset === 365) {
+  if (dayOffset === DAY_COUNTS.year) {
     return "1 year"
   }
 

@@ -4,21 +4,21 @@ import {
 } from "@/domain/investments/interest"
 import { toDateString } from "@/domain/investments/dates"
 import {
-  getInvestmentTimelineSegments,
-  type InvestmentTimelineSegment,
+  getInvestmentTermsTimeline,
+  type InvestmentTermsSegment,
 } from "@/domain/investments/timeline-segments"
 import { REINVESTMENT_BEHAVIORS } from "@/domain/investments/constants"
 import type { Investment } from "@/domain/investments/types"
 import { getPaymentFrequencyDays } from "@/domain/investments/constants"
 
-export interface InvestmentBalanceTimelineSegment extends InvestmentTimelineSegment {
+export interface InvestmentBalanceSegment extends InvestmentTermsSegment {
   startingBalance: number
   interestEarned: number
   endingBalance: number
 }
 
 /**
- * Builds balance-aware segments from the structural investment timeline.
+ * Builds balance-aware segments from the investment terms timeline.
  *
  * `startingBalance` is the amount invested at the segment start after adding
  * any previously reinvested earnings. `interestEarned` is the interest accrued
@@ -28,35 +28,41 @@ export interface InvestmentBalanceTimelineSegment extends InvestmentTimelineSegm
 export function getInvestmentBalanceTimeline(
   investment: Investment,
   asOfDate: Date,
-): InvestmentBalanceTimelineSegment[] {
+): InvestmentBalanceSegment[] {
   let carriedReinvestedEarnings = 0
   const asOfDateString = toDateString(asOfDate)
 
-  return getInvestmentTimelineSegments(investment, asOfDate).map((segment) => {
+  return getInvestmentTermsTimeline(investment, asOfDate).map((segment) => {
     const startingBalance =
-      segment.totalContributedAmount + carriedReinvestedEarnings
+      segment.contributionState.totalContributedAmount +
+      carriedReinvestedEarnings
     const calculationEndDate = segment.endDate ?? asOfDateString
     const interestPeriod = {
       startingAmount: startingBalance,
-      annualRate: segment.annualRate,
+      annualRate: segment.ratePeriod.annualRate,
       startDate: segment.startDate,
       endDate: calculationEndDate,
     }
     const interestEarned =
-      segment.reinvestmentBehavior === REINVESTMENT_BEHAVIORS.automatic
+      segment.lifecyclePeriod.reinvestmentBehavior ===
+      REINVESTMENT_BEHAVIORS.automatic
         ? getCompoundInterestForPeriod({
             ...interestPeriod,
             compoundingFrequencyDays: getPaymentFrequencyDays(
-              segment.paymentFrequency,
+              segment.lifecyclePeriod.paymentFrequency,
             ),
           })
         : getInterestForPeriod(interestPeriod)
     const endingBalance =
-      segment.reinvestmentBehavior === REINVESTMENT_BEHAVIORS.automatic
+      segment.lifecyclePeriod.reinvestmentBehavior ===
+      REINVESTMENT_BEHAVIORS.automatic
         ? startingBalance + interestEarned
         : startingBalance
 
-    if (segment.reinvestmentBehavior === REINVESTMENT_BEHAVIORS.automatic) {
+    if (
+      segment.lifecyclePeriod.reinvestmentBehavior ===
+      REINVESTMENT_BEHAVIORS.automatic
+    ) {
       carriedReinvestedEarnings += interestEarned
     }
 
@@ -72,6 +78,6 @@ export function getInvestmentBalanceTimeline(
 export function getCurrentBalanceTimelineSegment(
   investment: Investment,
   asOfDate: Date,
-): InvestmentBalanceTimelineSegment | null {
+): InvestmentBalanceSegment | null {
   return getInvestmentBalanceTimeline(investment, asOfDate).at(-1) ?? null
 }

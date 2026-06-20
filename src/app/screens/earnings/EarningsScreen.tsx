@@ -4,12 +4,12 @@ import type {
   EarningsPeriod,
   InvestmentEarningsBreakdown,
   PortfolioEarningsView,
-  Investment,
-} from "@/domain/investments"
+} from "@/app/screens/earnings/earnings-view-model"
 import {
   EARNINGS_PERIODS,
   getPortfolioEarningsSnapshot,
-} from "@/domain/investments"
+} from "@/app/screens/earnings/earnings-view-model"
+import type { Investment } from "@/domain/investments"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatMxn, formatPercentage } from "@/lib/formatters"

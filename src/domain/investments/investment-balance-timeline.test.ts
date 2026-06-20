@@ -18,14 +18,14 @@ describe("investment balance timeline", () => {
     expect(balanceTimeline).toHaveLength(4)
 
     expect(balanceTimeline[0]).toMatchObject({
-      totalContributedAmount: 10_000,
+      contributionState: { totalContributedAmount: 10_000 },
       startingBalance: 10_000,
     })
     expect(balanceTimeline[0].interestEarned).toBeCloseTo(84.95402514543093)
     expect(balanceTimeline[0].endingBalance).toBeCloseTo(10_084.954025)
 
     expect(balanceTimeline[1]).toMatchObject({
-      totalContributedAmount: 15_000,
+      contributionState: { totalContributedAmount: 15_000 },
     })
     expect(balanceTimeline[1].startingBalance).toBeCloseTo(15_084.954025)
     expect(balanceTimeline[1].interestEarned).toBeCloseTo(115.72019526139047)
@@ -38,7 +38,7 @@ describe("investment balance timeline", () => {
     expect(balanceTimeline[3]).toMatchObject({
       startDate: "2026-03-15",
       endDate: null,
-      totalContributedAmount: 15_000,
+      contributionState: { totalContributedAmount: 15_000 },
       interestEarned: 0,
     })
     expect(balanceTimeline[3].startingBalance).toBeCloseTo(15_270.638968)
@@ -72,7 +72,7 @@ describe("investment balance timeline", () => {
     expect(currentBalanceSegment).toMatchObject({
       startDate: "2026-01-01",
       endDate: null,
-      totalContributedAmount: 36_500,
+      contributionState: { totalContributedAmount: 36_500 },
       startingBalance: 36_500,
       interestEarned: 0,
       endingBalance: 36_500,

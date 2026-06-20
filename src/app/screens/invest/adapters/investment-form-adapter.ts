@@ -1,9 +1,10 @@
 import {
   INVESTMENT_TYPES,
   toDateString,
-  type InvestmentContribution,
-  type InvestmentLifecyclePeriod,
-  type InvestmentRatePeriod,
+  getInvestmentBalanceState,
+  type InvestmentContributionEvent,
+  type InvestmentLifecycleEvent,
+  type InvestmentRateEvent,
   type Investment,
 } from "@/domain/investments"
 import {
@@ -45,9 +46,9 @@ export function buildUpdatedInvestmentFromFormValues(
   options: { asOfDate: Date },
 ): Investment {
   const now = options.asOfDate.toISOString()
-  const latestContribution = getLatestContributionOrThrow(investment)
-  const latestRatePeriod = getLatestRatePeriodOrThrow(investment)
-  const latestLifecyclePeriod = getLatestLifecyclePeriodOrThrow(investment)
+  const latestContributionEvent = getLatestContributionEventOrThrow(investment)
+  const latestRateEvent = getLatestRateEventOrThrow(investment)
+  const latestLifecycleEvent = getLatestLifecycleEventOrThrow(investment)
 
   return {
     ...investment,
@@ -56,17 +57,17 @@ export function buildUpdatedInvestmentFromFormValues(
     name: values.name,
     notes: values.notes === "" ? undefined : values.notes,
     updatedAt: now,
-    contributions: replaceLastHistoryEntry(investment.contributions, {
-      ...latestContribution,
-      amount: values.originalAmount,
+    contributionEvents: replaceLastHistoryEntry(investment.contributionEvents, {
+      ...latestContributionEvent,
+      amount: values.contributionAmount,
     }),
-    ratePeriods: replaceLastHistoryEntry(investment.ratePeriods, {
-      ...latestRatePeriod,
+    rateEvents: replaceLastHistoryEntry(investment.rateEvents, {
+      ...latestRateEvent,
       annualRate: values.annualRate,
     }),
-    lifecyclePeriods: replaceLastHistoryEntry(
-      investment.lifecyclePeriods,
-      buildUpdatedLifecyclePeriod(values, latestLifecyclePeriod),
+    lifecycleEvents: replaceLastHistoryEntry(
+      investment.lifecycleEvents,
+      buildUpdatedLifecycleEvent(values, latestLifecycleEvent),
     ),
   }
 }
@@ -74,25 +75,25 @@ export function buildUpdatedInvestmentFromFormValues(
 export function mapInvestmentToFormValues(
   investment: Investment,
 ): InvestmentFormValues {
-  const latestContribution = getLatestContributionOrThrow(investment)
-  const latestRatePeriod = getLatestRatePeriodOrThrow(investment)
-  const latestLifecyclePeriod = getLatestLifecyclePeriodOrThrow(investment)
+  const latestContributionEvent = getLatestContributionEventOrThrow(investment)
+  const latestRateEvent = getLatestRateEventOrThrow(investment)
+  const latestLifecycleEvent = getLatestLifecycleEventOrThrow(investment)
   const commonFormValues = {
-    annualRate: latestRatePeriod.annualRate,
+    annualRate: latestRateEvent.annualRate,
     currency: investment.currency,
     institutionName: investment.institutionName,
-    investmentType: latestLifecyclePeriod.type,
+    investmentType: latestLifecycleEvent.type,
     name: investment.name,
     notes: investment.notes ?? "",
-    originalAmount: latestContribution.amount,
-    paymentFrequency: latestLifecyclePeriod.paymentFrequency,
-    reinvestmentBehavior: latestLifecyclePeriod.reinvestmentBehavior,
+    contributionAmount: latestContributionEvent.amount,
+    paymentFrequency: latestLifecycleEvent.paymentFrequency,
+    reinvestmentBehavior: latestLifecycleEvent.reinvestmentBehavior,
   }
 
-  if (latestLifecyclePeriod.type === INVESTMENT_TYPES.fixedTerm) {
+  if (latestLifecycleEvent.type === INVESTMENT_TYPES.fixedTerm) {
     return {
       ...commonFormValues,
-      endDate: latestLifecyclePeriod.endDate,
+      endDate: latestLifecycleEvent.maturityDate,
       investmentType: INVESTMENT_TYPES.fixedTerm,
     }
   }
@@ -114,10 +115,16 @@ export function getInvestmentFormPreview(
   }
 
   const asOfDate = options.asOfDate ?? new Date()
-  return buildInvestmentFromFormValues(parsedValues.data, {
+  const previewInvestment = buildInvestmentFromFormValues(parsedValues.data, {
     asOfDate,
     id: PREVIEW_INVESTMENT_ID,
   })
+
+  if (!canResolveInvestmentPreview(previewInvestment, asOfDate)) {
+    return null
+  }
+
+  return previewInvestment
 }
 
 export function mapInvestmentFormToInvestment(
@@ -130,24 +137,24 @@ export function mapInvestmentFormToInvestment(
     currency: values.currency,
     id: metadata.id,
     institutionName: values.institutionName,
-    contributions: [
+    contributionEvents: [
       {
-        id: `${metadata.id}-contribution-1`,
-        amount: values.originalAmount,
-        contributionDate: metadata.startDate,
+        id: `${metadata.id}-contribution-event-1`,
+        amount: values.contributionAmount,
+        effectiveDate: metadata.startDate,
         createdAt: metadata.now,
       },
     ],
     name: values.name,
-    ratePeriods: [
+    rateEvents: [
       {
-        id: `${metadata.id}-rate-period-1`,
+        id: `${metadata.id}-rate-event-1`,
         annualRate: values.annualRate,
-        startDate: metadata.startDate,
+        effectiveDate: metadata.startDate,
         createdAt: metadata.now,
       },
     ],
-    lifecyclePeriods: [buildInitialLifecyclePeriod(values, metadata)],
+    lifecycleEvents: [buildInitialLifecycleEvent(values, metadata)],
     updatedAt: metadata.now,
     ...(notes === undefined ? {} : { notes }),
   }
@@ -155,91 +162,91 @@ export function mapInvestmentFormToInvestment(
   return investment
 }
 
-function buildInitialLifecyclePeriod(
+function buildInitialLifecycleEvent(
   values: InvestmentFormValues,
   metadata: InvestmentFormAdapterMetadata,
-): InvestmentLifecyclePeriod {
-  const baseLifecyclePeriod = {
-    id: `${metadata.id}-lifecycle-period-1`,
+): InvestmentLifecycleEvent {
+  const baseLifecycleEvent = {
+    id: `${metadata.id}-lifecycle-event-1`,
     paymentFrequency: values.paymentFrequency,
     reinvestmentBehavior: values.reinvestmentBehavior,
-    startDate: metadata.startDate,
+    effectiveDate: metadata.startDate,
     createdAt: metadata.now,
   }
 
   if (values.investmentType === INVESTMENT_TYPES.fixedTerm) {
     return {
-      ...baseLifecyclePeriod,
+      ...baseLifecycleEvent,
       type: INVESTMENT_TYPES.fixedTerm,
-      endDate: values.endDate,
+      maturityDate: values.endDate,
     }
   }
 
   return {
-    ...baseLifecyclePeriod,
+    ...baseLifecycleEvent,
     type: INVESTMENT_TYPES.openEnded,
   }
 }
 
-function buildUpdatedLifecyclePeriod(
+function buildUpdatedLifecycleEvent(
   values: InvestmentFormValues,
-  latestLifecyclePeriod: InvestmentLifecyclePeriod,
-): InvestmentLifecyclePeriod {
-  const baseLifecyclePeriod = {
-    id: latestLifecyclePeriod.id,
-    createdAt: latestLifecyclePeriod.createdAt,
+  latestLifecycleEvent: InvestmentLifecycleEvent,
+): InvestmentLifecycleEvent {
+  const baseLifecycleEvent = {
+    id: latestLifecycleEvent.id,
+    createdAt: latestLifecycleEvent.createdAt,
     paymentFrequency: values.paymentFrequency,
     reinvestmentBehavior: values.reinvestmentBehavior,
-    startDate: latestLifecyclePeriod.startDate,
+    effectiveDate: latestLifecycleEvent.effectiveDate,
   }
 
   if (values.investmentType === INVESTMENT_TYPES.fixedTerm) {
     return {
-      ...baseLifecyclePeriod,
+      ...baseLifecycleEvent,
       type: INVESTMENT_TYPES.fixedTerm,
-      endDate: values.endDate,
+      maturityDate: values.endDate,
     }
   }
 
   return {
-    ...baseLifecyclePeriod,
+    ...baseLifecycleEvent,
     type: INVESTMENT_TYPES.openEnded,
   }
 }
-function getLatestContributionOrThrow(
+function getLatestContributionEventOrThrow(
   investment: Investment,
-): InvestmentContribution {
-  const latestContribution = investment.contributions.at(-1)
+): InvestmentContributionEvent {
+  const latestContributionEvent = investment.contributionEvents.at(-1)
 
-  if (latestContribution === undefined) {
-    throw new Error(`Investment ${investment.id} has no contributions`)
+  if (latestContributionEvent === undefined) {
+    throw new Error(`Investment ${investment.id} has no contribution events`)
   }
 
-  return latestContribution
+  return latestContributionEvent
 }
 
-function getLatestRatePeriodOrThrow(
+function getLatestRateEventOrThrow(
   investment: Investment,
-): InvestmentRatePeriod {
-  const latestRatePeriod = investment.ratePeriods.at(-1)
+): InvestmentRateEvent {
+  const latestRateEvent = investment.rateEvents.at(-1)
 
-  if (latestRatePeriod === undefined) {
-    throw new Error(`Investment ${investment.id} has no rate periods`)
+  if (latestRateEvent === undefined) {
+    throw new Error(`Investment ${investment.id} has no rate events`)
   }
 
-  return latestRatePeriod
+  return latestRateEvent
 }
 
-function getLatestLifecyclePeriodOrThrow(
+function getLatestLifecycleEventOrThrow(
   investment: Investment,
-): InvestmentLifecyclePeriod {
-  const latestLifecyclePeriod = investment.lifecyclePeriods.at(-1)
+): InvestmentLifecycleEvent {
+  const latestLifecycleEvent = investment.lifecycleEvents.at(-1)
 
-  if (latestLifecyclePeriod === undefined) {
-    throw new Error(`Investment ${investment.id} has no lifecycle periods`)
+  if (latestLifecycleEvent === undefined) {
+    throw new Error(`Investment ${investment.id} has no lifecycle events`)
   }
 
-  return latestLifecyclePeriod
+  return latestLifecycleEvent
 }
 
 function replaceLastHistoryEntry<TEntry>(
@@ -247,4 +254,16 @@ function replaceLastHistoryEntry<TEntry>(
   nextEntry: TEntry,
 ): TEntry[] {
   return [...historyEntries.slice(0, -1), nextEntry]
+}
+
+function canResolveInvestmentPreview(
+  investment: Investment,
+  asOfDate: Date,
+): boolean {
+  const balanceState = getInvestmentBalanceState(investment, asOfDate)
+
+  return (
+    balanceState.currentLifecyclePeriod !== null &&
+    balanceState.currentBalanceSegment !== null
+  )
 }

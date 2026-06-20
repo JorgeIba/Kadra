@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   CURRENCIES,
   INVESTMENT_TYPES,
@@ -8,6 +8,15 @@ import {
 import { investmentFormSchema } from "@/app/screens/invest/investment-form-schema"
 
 describe("investment form schema", () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-06-20T12:00:00.000Z"))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it("accepts a valid fixed-term investment draft", () => {
     const result = investmentFormSchema.safeParse({
       ...baseDraft,
@@ -47,6 +56,16 @@ describe("investment form schema", () => {
     expect(result.success).toBe(false)
   })
 
+  it("rejects fixed-term investment drafts that end today", () => {
+    const result = investmentFormSchema.safeParse({
+      ...baseDraft,
+      investmentType: INVESTMENT_TYPES.fixedTerm,
+      endDate: "2026-06-20",
+    })
+
+    expect(result.success).toBe(false)
+  })
+
   it("accepts an open-ended investment draft without an end date", () => {
     const result = investmentFormSchema.safeParse({
       ...baseDraft,
@@ -73,7 +92,7 @@ const baseDraft = {
   institutionName: "CETES Directo",
   name: "CETES 6 months",
   notes: "",
-  originalAmount: 10_000,
+  contributionAmount: 10_000,
   paymentFrequency: PAYMENT_FREQUENCIES.monthly,
   reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
 }
