@@ -25,8 +25,8 @@ Supporting docs:
 | Area | Status | Notes |
 | --- | --- | --- |
 | Product direction | Active | Privacy-first, local-only PWA remains the core direction |
-| Domain direction | Evolving | Current MVP model works, but long-term history-based modeling is now the preferred direction |
-| MVP app foundation | In progress | App shell, persistence, dashboard, assets, invest, detail, and earnings work are already underway in code |
+| Domain direction | Active | Event-history investments and resolved read models are now the working product model |
+| MVP app foundation | In progress | App shell, persistence, dashboard, assets, invest, detail, earnings, edit, and record-change flows are already underway in code |
 | Planning structure | Updated | `project-plan.md` is now the high-level hub with linked supporting docs |
 
 ## Vision
@@ -58,19 +58,21 @@ The product should help users understand:
 
 ### Investment Vision
 
-- `Investment` is the stable identity of an asset.
+- `Investment` is the full persisted asset record and stable identity.
 - Investments can change over time.
 - The app should preserve that history instead of rewriting the past.
-- The latest state shown in the UI should eventually be derived from dated history.
+- The latest state shown in the UI is derived from dated history.
 - Important change families include capital changes, rate changes, and lifecycle changes such as moving between `open-ended` and `fixed-term`.
 
 ### MVP Working Model
 
-- The current MVP still uses a flatter investment record so we can keep building product value without blocking on the full history model.
+- MVP persists investments as event histories with contribution, rate, and lifecycle events.
+- `ResolvedInvestment` is the main read model for current-date UI and portfolio calculations.
 - MVP supports `fixed-term` and `open-ended` investments.
 - `status` is derived, not stored.
-- `paymentFrequency = at-maturity` is valid only for `fixed-term`.
-- `fixed-term` requires an `endDate`; `open-ended` does not.
+- `paymentFrequency = at-maturity` is valid only for `fixed-term` lifecycle states.
+- `fixed-term` lifecycle states require a `maturityDate`; `open-ended` states do not.
+- Editing fixes the latest stored facts, while recording a change appends new dated events.
 
 ## Roadmap
 
@@ -79,21 +81,19 @@ This order reflects current priority, not a strict commitment to implementation 
 ### Current Foundation
 
 - Continue strengthening the existing local-first MVP flows.
-- Keep the current app usable while evolving the domain model deliberately.
+- Keep the current app usable while extending the event-history model deliberately.
 
 ### Next Product Directions
 
 1. Earnings exploration
-2. Actual contributions / capital history
-3. Planned contributions for projection scenarios
-4. Rate history
-5. Lifecycle history, including transitions between `open-ended` and `fixed-term`
-6. Assets grouping and richer portfolio exploration
+2. Planned contributions for projection scenarios
+3. Assets grouping and richer portfolio exploration
+4. Event-history management beyond the current latest-edit and append-only record-change flows
+5. More explicit payout and cash-handling modeling
 
 ## Open Questions
 
-- How narrow should the first history model be: separate contribution/rate/lifecycle records, or a broader event model?
-- Should lifecycle history use its own dedicated concept, or be folded into a broader event system later?
+- How should planned contributions be modeled separately from real recorded events?
 - Do payouts happen into a tracked cash balance, or stay conceptual unless reinvestment is disabled?
 - Do we need separate concepts for principal, current balance, and accumulated unpaid returns?
 - Should personal loans and institutional products keep sharing the same schema in V1?
