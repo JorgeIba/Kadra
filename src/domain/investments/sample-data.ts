@@ -104,7 +104,7 @@ export const sampleInvestments: Investment[] = [
     currency: CURRENCIES.mxn,
     notes: "Sample flexible account with promotional rate changes over time.",
     createdAt: "2026-05-03T12:10:00.000Z",
-    updatedAt: "2026-06-10T08:45:00.000Z",
+    updatedAt: "2026-06-20T08:00:00.000Z",
     contributionEvents: [
       {
         id: "contribution-klar-flex-1",
@@ -135,8 +135,8 @@ export const sampleInvestments: Investment[] = [
       {
         id: "rate-event-klar-flex-3",
         annualRate: 10.8,
-        effectiveDate: "2026-07-10",
-        createdAt: "2026-07-10T08:00:00.000Z",
+        effectiveDate: "2026-06-20",
+        createdAt: "2026-06-20T08:00:00.000Z",
       },
     ],
     lifecycleEvents: [
