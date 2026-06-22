@@ -13,7 +13,12 @@ This document holds future ideas and deferred work that are worth remembering, b
 
 ## Deferred Ideas
 
-- manual adjustments such as top-ups and partial withdrawals
+- withdrawals / negative capital movements; MVP money events should stay
+  positive-only contributions until we deliberately design subtraction rules,
+  validation, and storage shape
+- backdated record changes that insert events between existing history; current
+  MVP record changes should only append on or after the latest stored event date
+- manual adjustments such as top-ups and correction entries
 - edit-history flow that lets the user choose which contribution, rate period, or lifecycle period to edit or remove instead of only editing the latest event
 - explicit same-day event ordering with timestamps or sequence numbers when date-only precision is not enough
 - per-investment earnings breakdowns beyond the current first pass

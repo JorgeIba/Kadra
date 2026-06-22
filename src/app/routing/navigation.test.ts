@@ -5,6 +5,7 @@ import {
   getEarningsPath,
   getInvestmentDetailPath,
   getInvestmentEditPath,
+  getInvestmentRecordChangePath,
   getSectionPath,
 } from "@/app/routing/navigation"
 
@@ -27,6 +28,12 @@ describe("app navigation helpers", () => {
     )
   })
 
+  it("builds investment record change paths from investment ids", () => {
+    expect(getInvestmentRecordChangePath("investment-1")).toBe(
+      "/investments/investment-1/record-change",
+    )
+  })
+
   it("builds the earnings path", () => {
     expect(getEarningsPath()).toBe(APP_PATHS.earnings)
   })
@@ -37,6 +44,9 @@ describe("app navigation helpers", () => {
     )
     expect(getInvestmentEditPath("my investment/2026")).toBe(
       "/investments/my%20investment%2F2026/edit",
+    )
+    expect(getInvestmentRecordChangePath("my investment/2026")).toBe(
+      "/investments/my%20investment%2F2026/record-change",
     )
   })
 })

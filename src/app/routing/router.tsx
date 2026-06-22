@@ -17,6 +17,7 @@ import {
   getEarningsPath,
   getInvestmentDetailPath,
   getInvestmentEditPath,
+  getInvestmentRecordChangePath,
   getSectionPath,
 } from "@/app/routing/navigation"
 import { getPreviousSectionFromLocation } from "@/app/routing/active-section"
@@ -26,6 +27,7 @@ import { EditInvestmentScreen } from "@/app/screens/edit-investment/EditInvestme
 import { EarningsScreen } from "@/app/screens/earnings/EarningsScreen"
 import { InvestScreen } from "@/app/screens/invest/InvestScreen"
 import { InvestmentDetailScreen } from "@/app/screens/investment-detail/InvestmentDetailScreen"
+import { RecordChangeScreen } from "@/app/screens/record-change/RecordChangeScreen"
 import {
   loadInvestmentsFromStorage,
   saveInvestmentsToStorage,
@@ -101,6 +103,15 @@ export function AppRouter() {
             path={APP_ROUTE_PATHS.investmentEdit}
             element={
               <EditInvestmentRoute
+                investments={investments}
+                updateInvestment={updateInvestment}
+              />
+            }
+          />
+          <Route
+            path={APP_ROUTE_PATHS.investmentRecordChange}
+            element={
+              <RecordChangeRoute
                 investments={investments}
                 updateInvestment={updateInvestment}
               />
@@ -250,12 +261,19 @@ function InvestmentDetailRoute({
     })
   }
 
+  function handleRecordChange() {
+    navigate(getInvestmentRecordChangePath(investment.id), {
+      state: { fromSection: previousSection },
+    })
+  }
+
   return (
     <InvestmentDetailScreen
       investment={investment}
       onBack={handleBack}
       onDelete={handleDelete}
       onEdit={handleEdit}
+      onRecordChange={handleRecordChange}
     />
   )
 }
@@ -300,6 +318,53 @@ function EditInvestmentRoute({
 
   return (
     <EditInvestmentScreen
+      investment={investment}
+      onCancel={handleCancel}
+      onInvestmentUpdate={handleInvestmentUpdate}
+    />
+  )
+}
+
+function RecordChangeRoute({
+  investments,
+  updateInvestment,
+}: {
+  investments: Investment[]
+  updateInvestment: (investment: Investment) => void
+}) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { investmentId } = useParams()
+  const previousSection = getPreviousSectionFromLocation(location)
+  const selectedInvestment = investments.find((investment) => {
+    return investment.id === investmentId
+  })
+
+  function handleBack() {
+    navigate(getSectionPath(previousSection))
+  }
+
+  if (selectedInvestment === undefined) {
+    return <InvestmentNotFound onBack={handleBack} />
+  }
+
+  const investment = selectedInvestment
+
+  function handleInvestmentUpdate(updatedInvestment: Investment) {
+    updateInvestment(updatedInvestment)
+    navigate(getInvestmentDetailPath(updatedInvestment.id), {
+      state: { fromSection: previousSection },
+    })
+  }
+
+  function handleCancel() {
+    navigate(getInvestmentDetailPath(investment.id), {
+      state: { fromSection: previousSection },
+    })
+  }
+
+  return (
+    <RecordChangeScreen
       investment={investment}
       onCancel={handleCancel}
       onInvestmentUpdate={handleInvestmentUpdate}

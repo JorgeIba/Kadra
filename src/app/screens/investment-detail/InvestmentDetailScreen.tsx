@@ -4,6 +4,7 @@ import {
   Landmark,
   Pencil,
   Percent,
+  PlusCircle,
   Trash2,
   WalletCards,
 } from "lucide-react"
@@ -26,6 +27,7 @@ interface InvestmentDetailScreenProps {
   onBack: () => void
   onDelete: () => void
   onEdit: () => void
+  onRecordChange: () => void
 }
 
 export function InvestmentDetailScreen({
@@ -33,6 +35,7 @@ export function InvestmentDetailScreen({
   onBack,
   onDelete,
   onEdit,
+  onRecordChange,
 }: InvestmentDetailScreenProps) {
   const resolvedInvestment = resolveInvestment(investment, new Date())
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -49,10 +52,26 @@ export function InvestmentDetailScreen({
           eyebrow={investment.institutionName}
           title={investment.name}
           action={
-            <Button type="button" variant="outline" size="sm" onClick={onEdit}>
-              <Pencil className="size-4" aria-hidden="true" />
-              Edit
-            </Button>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onRecordChange}
+              >
+                <PlusCircle className="size-4" aria-hidden="true" />
+                Record change
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+              >
+                <Pencil className="size-4" aria-hidden="true" />
+                Edit
+              </Button>
+            </div>
           }
         />
       </div>
