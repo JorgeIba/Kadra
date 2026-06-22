@@ -14,8 +14,8 @@ import {
 import {
   fixedInvestment,
   openEndedInvestment,
-} from "@/domain/investments/investment-test-fixtures"
-import type { Investment } from "@/domain/investments/types"
+} from "@/domain/investments/dev/investment-test-fixtures"
+import type { Investment } from "@/domain/investments/model/types"
 
 const maturedFixedInvestment = {
   ...fixedInvestment,

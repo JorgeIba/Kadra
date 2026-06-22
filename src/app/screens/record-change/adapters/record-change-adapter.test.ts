@@ -5,7 +5,7 @@ import {
   REINVESTMENT_BEHAVIORS,
   resolveInvestment,
 } from "@/domain/investments"
-import { evolvingInvestment } from "@/domain/investments/investment-test-fixtures"
+import { evolvingInvestment } from "@/domain/investments/dev/investment-test-fixtures"
 import {
   buildInvestmentWithRecordedChangeFromFormValues,
   getLatestInvestmentEventDate,

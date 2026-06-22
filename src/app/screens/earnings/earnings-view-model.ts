@@ -1,11 +1,17 @@
-import { DERIVED_STATUSES } from "@/domain/investments/constants"
-import { getDerivedStatus } from "@/domain/investments/derived-values"
-import { addCalendarDays, DAY_COUNTS } from "@/domain/investments/dates"
+import { DERIVED_STATUSES } from "@/domain/investments/model/constants"
+import { getDerivedStatus } from "@/domain/investments/events/lifecycle-periods"
+import {
+  addCalendarDays,
+  DAY_COUNTS,
+} from "@/domain/investments/calculations/dates"
 import {
   getPeriodInvestmentProjectedEarningsForDays,
   getUpcomingInvestmentProjectedEarningsForDays,
-} from "@/domain/investments/investment-projections"
-import type { CalendarDateString, Investment } from "@/domain/investments/types"
+} from "@/domain/investments/calculations/investment-projections"
+import type {
+  CalendarDateString,
+  Investment,
+} from "@/domain/investments/model/types"
 
 export const EARNINGS_PERIODS = {
   daily: "daily",
