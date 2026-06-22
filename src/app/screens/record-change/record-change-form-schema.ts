@@ -6,13 +6,12 @@ import {
   REINVESTMENT_BEHAVIORS,
   compareCalendarDatesAscending,
   isCalendarDateString,
-  toDateString,
   type CalendarDateString,
 } from "@/domain/investments"
 
 interface RecordChangeFormSchemaOptions {
   latestEventDate?: CalendarDateString
-  today?: CalendarDateString
+  today: CalendarDateString
 }
 
 interface RecordChangeEffectiveDateValidationOptions {
@@ -61,8 +60,8 @@ const commonRecordChangeFormSchema = z.object({
 
 export function createRecordChangeFormSchema({
   latestEventDate,
-  today = toDateString(new Date()),
-}: RecordChangeFormSchemaOptions = {}) {
+  today,
+}: RecordChangeFormSchemaOptions) {
   return z
     .discriminatedUnion("investmentType", [
       commonRecordChangeFormSchema.extend({
@@ -137,7 +136,6 @@ export function createRecordChangeFormSchema({
       }
     })
 }
-
-export const recordChangeFormSchema = createRecordChangeFormSchema()
-
-export type RecordChangeFormValues = z.infer<typeof recordChangeFormSchema>
+export type RecordChangeFormValues = z.infer<
+  ReturnType<typeof createRecordChangeFormSchema>
+>

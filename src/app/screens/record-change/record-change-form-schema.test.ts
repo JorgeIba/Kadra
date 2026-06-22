@@ -1,33 +1,19 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import {
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments"
-import {
-  createRecordChangeFormSchema,
-  recordChangeFormSchema,
-} from "@/app/screens/record-change/record-change-form-schema"
+import { createRecordChangeFormSchema } from "@/app/screens/record-change/record-change-form-schema"
 
 describe("record change form schema", () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date("2026-06-21T12:00:00.000Z"))
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
   it("accepts a no-money fixed-term record draft", () => {
-    expect(recordChangeFormSchema.safeParse(baseFixedTermValues).success).toBe(
-      true,
-    )
+    expect(buildSchema().safeParse(baseFixedTermValues).success).toBe(true)
   })
 
   it("requires a positive amount when adding money", () => {
     expect(
-      recordChangeFormSchema.safeParse({
+      buildSchema().safeParse({
         ...baseFixedTermValues,
         hasContribution: true,
         contributionAmount: 0,
@@ -37,7 +23,7 @@ describe("record change form schema", () => {
 
   it("requires an amount when adding money", () => {
     expect(
-      recordChangeFormSchema.safeParse({
+      buildSchema().safeParse({
         ...baseFixedTermValues,
         hasContribution: true,
       }).success,
@@ -45,14 +31,12 @@ describe("record change form schema", () => {
   })
 
   it("allows omitted amount when no money is being added", () => {
-    expect(recordChangeFormSchema.safeParse(baseFixedTermValues).success).toBe(
-      true,
-    )
+    expect(buildSchema().safeParse(baseFixedTermValues).success).toBe(true)
   })
 
   it("rejects fixed-term maturity on the effective date", () => {
     expect(
-      recordChangeFormSchema.safeParse({
+      buildSchema().safeParse({
         ...baseFixedTermValues,
         effectiveDate: "2026-06-15",
         maturityDate: "2026-06-15",
@@ -61,7 +45,7 @@ describe("record change form schema", () => {
   })
 
   it("rejects future effective dates", () => {
-    const parsedValues = recordChangeFormSchema.safeParse({
+    const parsedValues = buildSchema().safeParse({
       ...baseFixedTermValues,
       effectiveDate: "2026-06-22",
       maturityDate: "2026-12-31",
@@ -71,12 +55,9 @@ describe("record change form schema", () => {
   })
 
   it("rejects effective dates before the latest stored event date when provided", () => {
-    const schema = createRecordChangeFormSchema({
+    const parsedValues = buildSchema({
       latestEventDate: "2026-06-10",
-      today: "2026-06-21",
-    })
-
-    const parsedValues = schema.safeParse({
+    }).safeParse({
       ...baseFixedTermValues,
       effectiveDate: "2026-06-09",
     })
@@ -86,7 +67,7 @@ describe("record change form schema", () => {
 
   it("rejects at-maturity frequency for open-ended terms", () => {
     expect(
-      recordChangeFormSchema.safeParse({
+      buildSchema().safeParse({
         ...baseFixedTermValues,
         investmentType: INVESTMENT_TYPES.openEnded,
         paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
@@ -96,7 +77,7 @@ describe("record change form schema", () => {
 
   it("rejects invalid open-ended maturity dates when they are present", () => {
     expect(
-      recordChangeFormSchema.safeParse({
+      buildSchema().safeParse({
         ...baseFixedTermValues,
         investmentType: INVESTMENT_TYPES.openEnded,
         maturityDate: "not-a-date",
@@ -113,4 +94,17 @@ const baseFixedTermValues = {
   paymentFrequency: PAYMENT_FREQUENCIES.monthly,
   reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
   maturityDate: "2026-12-31",
+}
+
+function buildSchema({
+  latestEventDate,
+  today = "2026-06-21",
+}: {
+  latestEventDate?: string
+  today?: string
+} = {}) {
+  return createRecordChangeFormSchema({
+    latestEventDate,
+    today,
+  })
 }
