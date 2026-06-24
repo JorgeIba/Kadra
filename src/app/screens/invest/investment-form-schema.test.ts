@@ -66,6 +66,28 @@ describe("investment form schema", () => {
     expect(result.success).toBe(false)
   })
 
+  it("rejects drafts with a future start date", () => {
+    const result = investmentFormSchema.safeParse({
+      ...baseDraft,
+      startDate: "2026-06-21",
+      investmentType: INVESTMENT_TYPES.fixedTerm,
+      endDate: "2026-12-31",
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it("accepts a fixed-term draft that ended before today when it ends after the start date", () => {
+    const result = investmentFormSchema.safeParse({
+      ...baseDraft,
+      startDate: "2026-01-01",
+      investmentType: INVESTMENT_TYPES.fixedTerm,
+      endDate: "2026-03-01",
+    })
+
+    expect(result.success).toBe(true)
+  })
+
   it("accepts an open-ended investment draft without an end date", () => {
     const result = investmentFormSchema.safeParse({
       ...baseDraft,
@@ -92,6 +114,7 @@ const baseDraft = {
   institutionName: "CETES Directo",
   name: "CETES 6 months",
   notes: "",
+  startDate: "2026-06-20",
   contributionAmount: 10_000,
   paymentFrequency: PAYMENT_FREQUENCIES.monthly,
   reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,

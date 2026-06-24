@@ -1,6 +1,5 @@
 import {
   INVESTMENT_TYPES,
-  toDateString,
   getInvestmentBalanceState,
   type InvestmentContributionEvent,
   type InvestmentLifecycleEvent,
@@ -15,7 +14,6 @@ import {
 interface InvestmentFormAdapterMetadata {
   id: string
   now: string
-  startDate: string
 }
 
 interface BuildInvestmentFromFormOptions {
@@ -36,7 +34,6 @@ export function buildInvestmentFromFormValues(
   return mapInvestmentFormToInvestment(values, {
     id: options.id,
     now: options.asOfDate.toISOString(),
-    startDate: toDateString(options.asOfDate),
   })
 }
 
@@ -49,6 +46,9 @@ export function buildUpdatedInvestmentFromFormValues(
   const latestContributionEvent = getLatestContributionEventOrThrow(investment)
   const latestRateEvent = getLatestRateEventOrThrow(investment)
   const latestLifecycleEvent = getLatestLifecycleEventOrThrow(investment)
+  const editableStartDate = canEditInvestmentStartDate(investment)
+    ? values.startDate
+    : undefined
 
   return {
     ...investment,
@@ -60,14 +60,18 @@ export function buildUpdatedInvestmentFromFormValues(
     contributionEvents: replaceLastHistoryEntry(investment.contributionEvents, {
       ...latestContributionEvent,
       amount: values.contributionAmount,
+      effectiveDate: editableStartDate ?? latestContributionEvent.effectiveDate,
     }),
     rateEvents: replaceLastHistoryEntry(investment.rateEvents, {
       ...latestRateEvent,
       annualRate: values.annualRate,
+      effectiveDate: editableStartDate ?? latestRateEvent.effectiveDate,
     }),
     lifecycleEvents: replaceLastHistoryEntry(
       investment.lifecycleEvents,
-      buildUpdatedLifecycleEvent(values, latestLifecycleEvent),
+      buildUpdatedLifecycleEvent(values, latestLifecycleEvent, {
+        effectiveDate: editableStartDate ?? latestLifecycleEvent.effectiveDate,
+      }),
     ),
   }
 }
@@ -85,6 +89,7 @@ export function mapInvestmentToFormValues(
     investmentType: latestLifecycleEvent.type,
     name: investment.name,
     notes: investment.notes ?? "",
+    startDate: latestLifecycleEvent.effectiveDate,
     contributionAmount: latestContributionEvent.amount,
     paymentFrequency: latestLifecycleEvent.paymentFrequency,
     reinvestmentBehavior: latestLifecycleEvent.reinvestmentBehavior,
@@ -102,6 +107,26 @@ export function mapInvestmentToFormValues(
     ...commonFormValues,
     investmentType: INVESTMENT_TYPES.openEnded,
   }
+}
+
+export function canEditInvestmentStartDate(investment: Investment): boolean {
+  if (
+    investment.contributionEvents.length !== 1 ||
+    investment.rateEvents.length !== 1 ||
+    investment.lifecycleEvents.length !== 1
+  ) {
+    return false
+  }
+
+  const contributionStartDate = investment.contributionEvents[0]?.effectiveDate
+  const rateStartDate = investment.rateEvents[0]?.effectiveDate
+  const lifecycleStartDate = investment.lifecycleEvents[0]?.effectiveDate
+
+  return (
+    contributionStartDate !== undefined &&
+    contributionStartDate === rateStartDate &&
+    contributionStartDate === lifecycleStartDate
+  )
 }
 
 export function getInvestmentFormPreview(
@@ -141,7 +166,7 @@ export function mapInvestmentFormToInvestment(
       {
         id: `${metadata.id}-contribution-event-1`,
         amount: values.contributionAmount,
-        effectiveDate: metadata.startDate,
+        effectiveDate: values.startDate,
         createdAt: metadata.now,
       },
     ],
@@ -150,7 +175,7 @@ export function mapInvestmentFormToInvestment(
       {
         id: `${metadata.id}-rate-event-1`,
         annualRate: values.annualRate,
-        effectiveDate: metadata.startDate,
+        effectiveDate: values.startDate,
         createdAt: metadata.now,
       },
     ],
@@ -170,7 +195,7 @@ function buildInitialLifecycleEvent(
     id: `${metadata.id}-lifecycle-event-1`,
     paymentFrequency: values.paymentFrequency,
     reinvestmentBehavior: values.reinvestmentBehavior,
-    effectiveDate: metadata.startDate,
+    effectiveDate: values.startDate,
     createdAt: metadata.now,
   }
 
@@ -191,13 +216,14 @@ function buildInitialLifecycleEvent(
 function buildUpdatedLifecycleEvent(
   values: InvestmentFormValues,
   latestLifecycleEvent: InvestmentLifecycleEvent,
+  options: { effectiveDate: string },
 ): InvestmentLifecycleEvent {
   const baseLifecycleEvent = {
     id: latestLifecycleEvent.id,
     createdAt: latestLifecycleEvent.createdAt,
     paymentFrequency: values.paymentFrequency,
     reinvestmentBehavior: values.reinvestmentBehavior,
-    effectiveDate: latestLifecycleEvent.effectiveDate,
+    effectiveDate: options.effectiveDate,
   }
 
   if (values.investmentType === INVESTMENT_TYPES.fixedTerm) {

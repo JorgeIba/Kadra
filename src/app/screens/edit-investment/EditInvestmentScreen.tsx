@@ -1,7 +1,8 @@
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
-  mapInvestmentToFormValues,
   buildUpdatedInvestmentFromFormValues,
+  canEditInvestmentStartDate,
+  mapInvestmentToFormValues,
 } from "@/app/screens/invest/adapters/investment-form-adapter"
 import { InvestmentForm } from "@/app/screens/invest/InvestmentForm"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
@@ -41,6 +42,7 @@ export function EditInvestmentScreen({
       <InvestmentForm
         cancelLabel="Back to detail"
         initialValues={mapInvestmentToFormValues(investment)}
+        isStartDateEditable={canEditInvestmentStartDate(investment)}
         onCancel={onCancel}
         submitLabel="Save changes"
         successMessage="Changes saved."

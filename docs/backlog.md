@@ -19,9 +19,15 @@ This document holds future ideas and deferred work that are worth remembering, b
   MVP record changes should only append on or after the latest stored event date
 - manual adjustments such as top-ups and correction entries
 - edit-history flow that lets the user choose which contribution, rate period, or lifecycle period to edit or remove instead of only editing the latest event
+- when full or in-between event-history editing is added, keep an edited event's
+  `effectiveDate` between its previous and next event dates for that same event history:
+  `previous event date <= edited effectiveDate <= next event date`
 - explicit same-day event ordering with timestamps or sequence numbers when date-only precision is not enough
 - per-investment earnings breakdowns beyond the current first pass
-- user-editable investment start dates with safe validation
+- future-dated investment starts, where `startDate` can be after today and the
+  UI treats the investment as promised or starting soon instead of active
+- fully historical investments where both `startDate` and `endDate` are before
+  today, so Trafin can record past investments and calculate total money earned
 - form draft restore so a screen crash does not risk losing in-progress user input
 - more detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
 - custom production domain after the free Vercel URL is validated on iPhone

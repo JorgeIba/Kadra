@@ -7,20 +7,21 @@ import {
 } from "@/domain/investments"
 import {
   buildInvestmentFromFormValues,
+  buildUpdatedInvestmentFromFormValues,
+  canEditInvestmentStartDate,
   getInvestmentFormPreview,
   mapInvestmentToFormValues,
   mapInvestmentFormToInvestment,
-  buildUpdatedInvestmentFromFormValues,
 } from "@/app/screens/invest/adapters/investment-form-adapter"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
 
 const metadata = {
   id: "investment-1",
   now: "2026-05-19T18:00:00.000Z",
-  startDate: "2026-05-19",
 }
 
 const asOfDate = new Date(metadata.now)
+const startDate = "2026-05-01"
 
 describe("investment form adapter", () => {
   beforeEach(() => {
@@ -53,7 +54,7 @@ describe("investment form adapter", () => {
         {
           id: `${metadata.id}-contribution-event-1`,
           amount: 10_000,
-          effectiveDate: metadata.startDate,
+          effectiveDate: startDate,
           createdAt: metadata.now,
         },
       ],
@@ -61,7 +62,7 @@ describe("investment form adapter", () => {
         {
           id: `${metadata.id}-rate-event-1`,
           annualRate: 11.25,
-          effectiveDate: metadata.startDate,
+          effectiveDate: startDate,
           createdAt: metadata.now,
         },
       ],
@@ -71,7 +72,7 @@ describe("investment form adapter", () => {
           type: INVESTMENT_TYPES.fixedTerm,
           paymentFrequency: PAYMENT_FREQUENCIES.monthly,
           reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
-          effectiveDate: metadata.startDate,
+          effectiveDate: startDate,
           maturityDate: "2026-12-31",
           createdAt: metadata.now,
         },
@@ -117,9 +118,7 @@ describe("investment form adapter", () => {
 
     expect(investment.createdAt).toBe(metadata.now)
     expect(investment.updatedAt).toBe(metadata.now)
-    expect(investment.lifecycleEvents[0]?.effectiveDate).toBe(
-      metadata.startDate,
-    )
+    expect(investment.lifecycleEvents[0]?.effectiveDate).toBe(startDate)
   })
 
   it("maps an existing investment back to form values", () => {
@@ -187,12 +186,13 @@ describe("investment form adapter", () => {
       endDate: "2026-12-31",
       investmentType: INVESTMENT_TYPES.fixedTerm,
       contributionAmount: 2_000,
+      startDate: "2026-06-01",
       paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
       reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
     })
   })
 
-  it("updates the latest history entries while preserving earlier history", () => {
+  it("updates the latest history entries while preserving event dates after recorded changes", () => {
     const existingInvestment = {
       ...mapInvestmentFormToInvestment(
         {
@@ -262,6 +262,7 @@ describe("investment form adapter", () => {
         name: "Updated CETES",
         paymentFrequency: PAYMENT_FREQUENCIES.monthly,
         reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+        startDate: "2026-06-05",
       },
       existingInvestment,
       { asOfDate: updatedAt },
@@ -301,13 +302,106 @@ describe("investment form adapter", () => {
     })
   })
 
+  it("updates the shared start date when the investment still has only initial history", () => {
+    const existingInvestment = mapInvestmentFormToInvestment(
+      {
+        ...baseFormValues,
+        endDate: "2026-12-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+      },
+      metadata,
+    )
+    const updatedInvestment = buildUpdatedInvestmentFromFormValues(
+      {
+        ...baseFormValues,
+        endDate: "2026-12-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+        startDate: "2026-05-05",
+      },
+      existingInvestment,
+      { asOfDate: new Date("2026-06-15T15:30:00.000Z") },
+    )
+
+    expect(updatedInvestment.contributionEvents[0]?.effectiveDate).toBe(
+      "2026-05-05",
+    )
+    expect(updatedInvestment.rateEvents[0]?.effectiveDate).toBe("2026-05-05")
+    expect(updatedInvestment.lifecycleEvents[0]?.effectiveDate).toBe(
+      "2026-05-05",
+    )
+  })
+
+  it("allows editing the start date only when the investment still has aligned initial history", () => {
+    const initialInvestment = mapInvestmentFormToInvestment(
+      {
+        ...baseFormValues,
+        endDate: "2026-12-31",
+        investmentType: INVESTMENT_TYPES.fixedTerm,
+      },
+      metadata,
+    )
+    const investment = {
+      ...initialInvestment,
+      contributionEvents: [
+        {
+          id: "investment-1-contribution-event-1",
+          amount: 10_000,
+          effectiveDate: "2026-05-10",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-contribution-event-2",
+          amount: 2_000,
+          effectiveDate: "2026-06-01",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+      rateEvents: [
+        {
+          id: "investment-1-rate-event-1",
+          annualRate: 11.25,
+          effectiveDate: "2026-05-15",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-rate-event-2",
+          annualRate: 12,
+          effectiveDate: "2026-06-01",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+      lifecycleEvents: [
+        {
+          id: "investment-1-lifecycle-event-1",
+          type: INVESTMENT_TYPES.openEnded,
+          paymentFrequency: PAYMENT_FREQUENCIES.monthly,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+          effectiveDate: "2026-05-20",
+          createdAt: metadata.now,
+        },
+        {
+          id: "investment-1-lifecycle-event-2",
+          type: INVESTMENT_TYPES.fixedTerm,
+          paymentFrequency: PAYMENT_FREQUENCIES.atMaturity,
+          reinvestmentBehavior: REINVESTMENT_BEHAVIORS.toCash,
+          effectiveDate: "2026-06-01",
+          maturityDate: "2026-12-31",
+          createdAt: "2026-06-01T15:30:00.000Z",
+        },
+      ],
+    }
+
+    expect(canEditInvestmentStartDate(initialInvestment)).toBe(true)
+    expect(canEditInvestmentStartDate(investment)).toBe(false)
+  })
+
   it("returns an incomplete preview for invalid form drafts", () => {
     const preview = getInvestmentFormPreview({}, { asOfDate })
 
     expect(preview).toBeNull()
   })
 
-  it("returns an incomplete preview when the fixed-term draft has no active lifecycle", () => {
+  it("returns an investment preview for a matured fixed-term draft", () => {
     const preview = getInvestmentFormPreview(
       {
         ...baseFormValues,
@@ -317,7 +411,13 @@ describe("investment form adapter", () => {
       { asOfDate: new Date("2026-05-22T12:00:00.000Z") },
     )
 
-    expect(preview).toBeNull()
+    expect(preview).toMatchObject({
+      id: "investment-preview",
+    })
+    expect(preview?.lifecycleEvents[0]).toMatchObject({
+      effectiveDate: startDate,
+      maturityDate: "2026-05-20",
+    })
   })
 
   it("returns an investment preview for valid fixed-term form drafts", () => {
@@ -343,6 +443,7 @@ const baseFormValues = {
   institutionName: "CETES Directo",
   name: "CETES 6 months",
   notes: "",
+  startDate,
   contributionAmount: 10_000,
   paymentFrequency: PAYMENT_FREQUENCIES.monthly,
   reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
