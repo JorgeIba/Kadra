@@ -5,18 +5,23 @@ import {
   Pencil,
   Percent,
   PlusCircle,
+  TrendingUp,
   Trash2,
   WalletCards,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
+  DAY_COUNTS,
   INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIOR_LABELS,
+  getUpcomingInvestmentProjectedEarningsForDays,
   resolveInvestment,
   type Investment,
+  type InvestmentType,
 } from "@/domain/investments"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -37,7 +42,9 @@ export function InvestmentDetailScreen({
   onEdit,
   onRecordChange,
 }: InvestmentDetailScreenProps) {
-  const resolvedInvestment = resolveInvestment(investment, new Date())
+  const asOfDate = new Date()
+  const resolvedInvestment = resolveInvestment(investment, asOfDate)
+  const upcomingReturnMetrics = getUpcomingReturnMetrics(investment, asOfDate)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   return (
@@ -98,9 +105,50 @@ export function InvestmentDetailScreen({
             />
             <DetailMetric
               icon={Landmark}
-              label="Original amount"
-              value={formatMxn(resolvedInvestment.originalAmount)}
+              label="Started on"
+              value={resolvedInvestment.startDate}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg">
+        <CardContent className="space-y-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-base font-bold leading-tight text-foreground">
+                Returns
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {getReturnsDescription(resolvedInvestment.type)}
+              </p>
+            </div>
+            <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary/70 text-primary">
+              <TrendingUp className="size-5" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-secondary/60 px-3 py-3">
+            <p className="text-xs text-muted-foreground">Earned so far</p>
+            <p className="mt-2 font-ledger text-2xl leading-none text-foreground tabular-nums">
+              {formatMxn(resolvedInvestment.estimatedAccruedReturn)}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
+            {upcomingReturnMetrics.map((metric) => (
+              <div
+                key={metric.label}
+                className="min-w-0 rounded-lg bg-secondary/45 p-3"
+              >
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {metric.label}
+                </p>
+                <p className="mt-2 font-ledger text-sm leading-none text-foreground tabular-nums">
+                  {formatMxn(metric.value)}
+                </p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -136,8 +184,8 @@ export function InvestmentDetailScreen({
             </>
           ) : null}
           <DetailRow
-            label="Accrued return"
-            value={formatMxn(resolvedInvestment.estimatedAccruedReturn)}
+            label="Original amount"
+            value={formatMxn(resolvedInvestment.originalAmount)}
           />
         </CardContent>
       </Card>
@@ -177,12 +225,49 @@ export function InvestmentDetailScreen({
   )
 }
 
+function getUpcomingReturnMetrics(investment: Investment, asOfDate: Date) {
+  return [
+    {
+      label: "Next day",
+      value: getUpcomingInvestmentProjectedEarningsForDays(
+        investment,
+        DAY_COUNTS.day,
+        asOfDate,
+      ),
+    },
+    {
+      label: "Next week",
+      value: getUpcomingInvestmentProjectedEarningsForDays(
+        investment,
+        DAY_COUNTS.week,
+        asOfDate,
+      ),
+    },
+    {
+      label: "Next year",
+      value: getUpcomingInvestmentProjectedEarningsForDays(
+        investment,
+        DAY_COUNTS.year,
+        asOfDate,
+      ),
+    },
+  ]
+}
+
+function getReturnsDescription(investmentType: InvestmentType) {
+  if (investmentType === INVESTMENT_TYPES.fixedTerm) {
+    return "Estimates start today and stop at maturity."
+  }
+
+  return "Estimates start today and continue while the investment stays active."
+}
+
 function DetailMetric({
   icon: Icon,
   label,
   value,
 }: {
-  icon: typeof Percent
+  icon: LucideIcon
   label: string
   value: string
 }) {
