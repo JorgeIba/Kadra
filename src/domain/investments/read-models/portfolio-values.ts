@@ -19,6 +19,16 @@ export function getActiveInvestmentCount(
   return analyzePortfolio(investments).activeInvestmentCount
 }
 
+export function getFinishedInvestmentCount(
+  investments: ResolvedInvestment[],
+): number {
+  return analyzePortfolio(investments).finishedInvestmentCount
+}
+
+export function getInvestmentCount(investments: ResolvedInvestment[]): number {
+  return analyzePortfolio(investments).investmentCount
+}
+
 export function getPortfolioEstimatedDailyReturn(
   investments: ResolvedInvestment[],
 ): number {

@@ -8,9 +8,11 @@ import type { ResolvedInvestment } from "@/domain/investments/model/types"
 
 export interface PortfolioAnalysis {
   investments: ResolvedInvestment[]
+  investmentCount: number
   totalEstimatedCurrentValue: number
   totalEstimatedAccruedReturn: number
   activeInvestmentCount: number
+  finishedInvestmentCount: number
   totalEstimatedDailyReturn: number
   totalEstimatedMonthlyReturn: number
   totalEstimatedYearlyReturn: number
@@ -21,6 +23,7 @@ export function analyzePortfolio(
 ): PortfolioAnalysis {
   return {
     investments,
+    investmentCount: investments.length,
     totalEstimatedCurrentValue: investments.reduce((total, investment) => {
       return total + investment.estimatedCurrentValue
     }, 0),
@@ -29,6 +32,9 @@ export function analyzePortfolio(
     }, 0),
     activeInvestmentCount: investments.filter((investment) => {
       return investment.derivedStatus === DERIVED_STATUSES.active
+    }).length,
+    finishedInvestmentCount: investments.filter((investment) => {
+      return investment.derivedStatus === DERIVED_STATUSES.finished
     }).length,
     totalEstimatedDailyReturn: investments.reduce((total, investment) => {
       return (

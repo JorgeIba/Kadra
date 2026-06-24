@@ -16,7 +16,7 @@ import { PortfolioBreakdownCard } from "@/app/screens/dashboard/PortfolioBreakdo
 import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
 import { PortfolioProjectionChart } from "@/app/screens/dashboard/PortfolioProjectionChart"
 import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCard"
-import { getPortfolioEarningsSnapshot } from "@/app/screens/earnings/earnings-view-model"
+import { getPortfolioEarnedMoneySnapshot } from "@/app/screens/earnings/earnings-view-model"
 
 interface DashboardScreenProps {
   investments: Investment[]
@@ -40,7 +40,10 @@ export function DashboardScreen({
   const activeInvestments = getActiveInvestmentCount(resolvedInvestments)
   const earnedSoFar = getPortfolioEstimatedAccruedReturn(resolvedInvestments)
   const totalValue = getPortfolioEstimatedCurrentValue(resolvedInvestments)
-  const earningsSnapshot = getPortfolioEarningsSnapshot(investments, asOfDate)
+  const earningsSnapshot = getPortfolioEarnedMoneySnapshot(
+    investments,
+    asOfDate,
+  )
   const portfolioBreakdown = getPortfolioBreakdown(resolvedInvestments)
   const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
   const maturityTimelineItems = getMaturityTimelineItems(
