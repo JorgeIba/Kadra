@@ -1,8 +1,6 @@
 import {
-  getPortfolioEstimatedCurrentValue,
   DAY_COUNTS,
-  resolveInvestment,
-  toDateString,
+  projectPortfolioAtDate,
   type Investment,
 } from "@/domain/investments"
 
@@ -18,6 +16,7 @@ export interface PortfolioProjectionPoint {
   date: string
   label: string
   estimatedValue: number
+  projectedEarnings: number
 }
 
 export function getPortfolioProjectionPoints(
@@ -26,14 +25,17 @@ export function getPortfolioProjectionPoints(
 ): PortfolioProjectionPoint[] {
   return PROJECTION_DAY_OFFSETS.map((dayOffset) => {
     const projectionDate = addDays(startDate, dayOffset)
-    const resolvedInvestments = investments.map((investment) =>
-      resolveInvestment(investment, projectionDate),
+    const projection = projectPortfolioAtDate(
+      investments,
+      projectionDate,
+      startDate,
     )
 
     return {
-      date: toDateString(projectionDate),
+      date: projection.projectionDate,
       label: getProjectionLabel(dayOffset),
-      estimatedValue: getPortfolioEstimatedCurrentValue(resolvedInvestments),
+      estimatedValue: projection.estimatedValue,
+      projectedEarnings: projection.projectedEarnings,
     }
   })
 }

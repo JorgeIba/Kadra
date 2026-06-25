@@ -31,6 +31,14 @@ const EARNED_MONEY_SORT_CHOICES = [
   EARNED_MONEY_SORT_OPTIONS.status,
 ] as const satisfies ReadonlyArray<EarnedMoneySortOption>
 
+function isEarnedMoneySortOption(
+  value: string | null,
+): value is EarnedMoneySortOption {
+  return EARNED_MONEY_SORT_CHOICES.some((option) => {
+    return option === value
+  })
+}
+
 export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
   const [sortBy, setSortBy] = useState<EarnedMoneySortOption>(
     EARNED_MONEY_SORT_OPTIONS.highestEarned,
@@ -100,19 +108,13 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
               <Select
                 value={sortBy}
                 onValueChange={(value) => {
-                  if (value !== null) {
+                  if (isEarnedMoneySortOption(value)) {
                     setSortBy(value)
                   }
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue>
-                    {(value: EarnedMoneySortOption | null) =>
-                      value === null
-                        ? "Sort by"
-                        : getEarnedMoneySortLabel(value)
-                    }
-                  </SelectValue>
+                  <SelectValue>{getEarnedMoneySortLabel(sortBy)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {EARNED_MONEY_SORT_CHOICES.map((option) => (

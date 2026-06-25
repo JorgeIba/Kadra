@@ -22,6 +22,7 @@ interface DashboardScreenProps {
   investments: Investment[]
   onAddInvestment: () => void
   onOpenEarnings: () => void
+  onOpenProjection: () => void
   onInvestmentSelect: (investmentId: string) => void
 }
 
@@ -31,6 +32,7 @@ export function DashboardScreen({
   investments,
   onAddInvestment,
   onOpenEarnings,
+  onOpenProjection,
   onInvestmentSelect,
 }: DashboardScreenProps) {
   const asOfDate = new Date()
@@ -76,7 +78,10 @@ export function DashboardScreen({
             onOpenDetails={onOpenEarnings}
           />
           <PortfolioBreakdownCard breakdown={portfolioBreakdown} />
-          <PortfolioProjectionChart points={projectionPoints} />
+          <PortfolioProjectionChart
+            points={projectionPoints}
+            onOpenDetails={onOpenProjection}
+          />
           <MaturityTimelineSection
             maturityTimelineItems={maturityTimelineItems}
             onInvestmentSelect={onInvestmentSelect}
