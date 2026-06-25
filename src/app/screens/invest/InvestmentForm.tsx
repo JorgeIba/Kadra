@@ -10,6 +10,7 @@ import {
   PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIORS,
   REINVESTMENT_BEHAVIOR_LABELS,
+  toDateString,
   type Currency,
   type InvestmentType,
   type PaymentFrequency,
@@ -72,10 +73,12 @@ const FORM_FIELD_IDS = {
   contributionAmount: "contribution-amount",
   paymentFrequency: "payment-frequency",
   reinvestmentBehavior: "reinvestment",
+  startDate: "start-date",
 } as const
 
 interface InvestmentFormProps {
   initialValues?: InvestmentFormValues
+  isStartDateEditable?: boolean
   onCancel?: () => void
   cancelLabel?: string
   onSubmit: (values: InvestmentFormValues) => void
@@ -85,6 +88,7 @@ interface InvestmentFormProps {
 
 export function InvestmentForm({
   initialValues,
+  isStartDateEditable = true,
   onCancel,
   cancelLabel = "Cancel",
   onSubmit,
@@ -104,6 +108,7 @@ export function InvestmentForm({
       notes: "",
       paymentFrequency: PAYMENT_FREQUENCIES.monthly,
       reinvestmentBehavior: REINVESTMENT_BEHAVIORS.automatic,
+      startDate: toDateString(new Date()),
       investmentType: INVESTMENT_TYPES.fixedTerm,
     },
     mode: "onChange",
@@ -334,6 +339,27 @@ export function InvestmentForm({
                 />
               </Field>
             </div>
+
+            {isStartDateEditable ? (
+              <Field
+                error={errors.startDate?.message}
+                label="Start date"
+                htmlFor={FORM_FIELD_IDS.startDate}
+              >
+                <Input
+                  id={FORM_FIELD_IDS.startDate}
+                  type="date"
+                  max={toDateString(new Date())}
+                  {...getFieldAccessibilityProps(
+                    FORM_FIELD_IDS.startDate,
+                    errors.startDate?.message,
+                  )}
+                  {...register("startDate")}
+                />
+              </Field>
+            ) : (
+              <input type="hidden" {...register("startDate")} />
+            )}
 
             {investmentType === INVESTMENT_TYPES.fixedTerm ? (
               <Field

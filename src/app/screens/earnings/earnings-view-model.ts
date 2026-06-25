@@ -1,245 +1,143 @@
-import { DERIVED_STATUSES } from "@/domain/investments/constants"
-import { getDerivedStatus } from "@/domain/investments/derived-values"
-import { addCalendarDays, DAY_COUNTS } from "@/domain/investments/dates"
 import {
-  getPeriodInvestmentProjectedEarningsForDays,
-  getUpcomingInvestmentProjectedEarningsForDays,
-} from "@/domain/investments/investment-projections"
-import type { CalendarDateString, Investment } from "@/domain/investments/types"
+  DERIVED_STATUS_LABELS,
+  DERIVED_STATUSES,
+  analyzePortfolio,
+  resolveInvestment,
+  type DerivedStatus,
+  type Investment,
+} from "@/domain/investments"
 
-export const EARNINGS_PERIODS = {
-  daily: "daily",
-  weekly: "weekly",
-  monthly: "monthly",
-  yearly: "yearly",
+export const EARNED_MONEY_SORT_OPTIONS = {
+  highestEarned: "highest-earned",
+  lowestEarned: "lowest-earned",
+  name: "name",
+  status: "status",
 } as const
 
-export type EarningsPeriod =
-  (typeof EARNINGS_PERIODS)[keyof typeof EARNINGS_PERIODS]
+export type EarnedMoneySortOption =
+  (typeof EARNED_MONEY_SORT_OPTIONS)[keyof typeof EARNED_MONEY_SORT_OPTIONS]
 
-export interface EarningsSummary {
-  daily: number
-  weekly: number
-  monthly: number
-  yearly: number
-}
-
-export interface InvestmentEarningsBreakdownItem {
+export interface InvestmentEarnedMoneyBreakdownItem {
   investmentId: string
   name: string
   institutionName: string
-  estimatedEarnings: number
+  derivedStatus: DerivedStatus
+  earnedAmount: number
   percentage: number
 }
 
-export type InvestmentEarningsBreakdown = InvestmentEarningsBreakdownItem[]
+export type InvestmentEarnedMoneyBreakdown =
+  InvestmentEarnedMoneyBreakdownItem[]
 
-export interface PortfolioEarningsView {
-  totals: EarningsSummary
-  breakdownPeriod: EarningsPeriod
-  breakdown: InvestmentEarningsBreakdown
+export interface PortfolioEarnedMoneySnapshot {
+  totalEarnedAmount: number
+  activeInvestmentCount: number
+  finishedInvestmentCount: number
+  investmentCount: number
+  breakdown: InvestmentEarnedMoneyBreakdown
 }
 
-export interface PortfolioEarningsSnapshot {
-  upcoming: PortfolioEarningsView
-  period: PortfolioEarningsView
-}
-
-const EARNINGS_PERIOD_DAYS = {
-  [EARNINGS_PERIODS.daily]: DAY_COUNTS.day,
-  [EARNINGS_PERIODS.weekly]: DAY_COUNTS.week,
-  [EARNINGS_PERIODS.monthly]: DAY_COUNTS.month,
-  [EARNINGS_PERIODS.yearly]: DAY_COUNTS.year,
-} as const satisfies Record<EarningsPeriod, number>
-
-export function getUpcomingPortfolioEarningsSummary(
+export function getPortfolioEarnedMoneySnapshot(
   investments: Investment[],
   asOfDate = new Date(),
-): EarningsSummary {
-  return {
-    daily: getUpcomingPortfolioEarningsForDays(
-      investments,
-      DAY_COUNTS.day,
-      asOfDate,
-    ),
-    weekly: getUpcomingPortfolioEarningsForDays(
-      investments,
-      DAY_COUNTS.week,
-      asOfDate,
-    ),
-    monthly: getUpcomingPortfolioEarningsForDays(
-      investments,
-      DAY_COUNTS.month,
-      asOfDate,
-    ),
-    yearly: getUpcomingPortfolioEarningsForDays(
-      investments,
-      DAY_COUNTS.year,
-      asOfDate,
-    ),
-  }
-}
-
-export function getPeriodPortfolioEarningsSummary(
-  investments: Investment[],
-  asOfDate = new Date(),
-): EarningsSummary {
-  const activeInvestments = getActiveInvestments(investments, asOfDate)
-
-  return {
-    daily: getPeriodPortfolioEarningsForDays(
-      activeInvestments,
-      DAY_COUNTS.day,
-      asOfDate,
-    ),
-    weekly: getPeriodPortfolioEarningsForDays(
-      activeInvestments,
-      DAY_COUNTS.week,
-      asOfDate,
-    ),
-    monthly: getPeriodPortfolioEarningsForDays(
-      activeInvestments,
-      DAY_COUNTS.month,
-      asOfDate,
-    ),
-    yearly: getPeriodPortfolioEarningsForDays(
-      activeInvestments,
-      DAY_COUNTS.year,
-      asOfDate,
-    ),
-  }
-}
-
-export function getPortfolioEarningsSnapshot(
-  investments: Investment[],
-  asOfDate = new Date(),
-  breakdownPeriod: EarningsPeriod = EARNINGS_PERIODS.monthly,
-): PortfolioEarningsSnapshot {
-  return {
-    upcoming: {
-      totals: getUpcomingPortfolioEarningsSummary(investments, asOfDate),
-      breakdownPeriod,
-      breakdown: getUpcomingInvestmentEarningsBreakdown(
-        investments,
-        breakdownPeriod,
-        asOfDate,
-      ),
-    },
-    period: {
-      totals: getPeriodPortfolioEarningsSummary(investments, asOfDate),
-      breakdownPeriod,
-      breakdown: getPeriodInvestmentEarningsBreakdown(
-        investments,
-        breakdownPeriod,
-        asOfDate,
-      ),
-    },
-  }
-}
-
-export function getUpcomingInvestmentEarningsBreakdown(
-  investments: Investment[],
-  period: EarningsPeriod,
-  asOfDate = new Date(),
-): InvestmentEarningsBreakdown {
-  const days = EARNINGS_PERIOD_DAYS[period]
-  const activeInvestments = getActiveInvestments(investments, asOfDate)
-  const portfolioEstimatedEarnings = getUpcomingPortfolioEarningsForDays(
-    activeInvestments,
-    days,
-    asOfDate,
-  )
-
-  return buildInvestmentEarningsBreakdown(
-    activeInvestments,
-    (investment) =>
-      getUpcomingInvestmentProjectedEarningsForDays(investment, days, asOfDate),
-    portfolioEstimatedEarnings,
-  )
-}
-
-export function getPeriodInvestmentEarningsBreakdown(
-  investments: Investment[],
-  period: EarningsPeriod,
-  asOfDate = new Date(),
-): InvestmentEarningsBreakdown {
-  const activeInvestments = getActiveInvestments(investments, asOfDate)
-  const days = EARNINGS_PERIOD_DAYS[period]
-  const portfolioEstimatedEarnings = getPeriodPortfolioEarningsForDays(
-    activeInvestments,
-    days,
-    asOfDate,
-  )
-
-  return buildInvestmentEarningsBreakdown(
-    activeInvestments,
-    (investment) =>
-      getPeriodInvestmentProjectedEarningsForDays(investment, days, asOfDate),
-    portfolioEstimatedEarnings,
-  )
-}
-
-export function getCustomDateEarningsTarget(
-  asOfDate = new Date(),
-  daysFromAsOfDate: number,
-): CalendarDateString {
-  return addCalendarDays(asOfDate, daysFromAsOfDate)
-}
-
-function getUpcomingPortfolioEarningsForDays(
-  investments: Investment[],
-  days: number,
-  asOfDate: Date,
-): number {
-  return investments.reduce((total, investment) => {
-    return (
-      total +
-      getUpcomingInvestmentProjectedEarningsForDays(investment, days, asOfDate)
-    )
-  }, 0)
-}
-
-function getPeriodPortfolioEarningsForDays(
-  investments: Investment[],
-  days: number,
-  asOfDate: Date,
-): number {
-  return investments.reduce((total, investment) => {
-    return (
-      total +
-      getPeriodInvestmentProjectedEarningsForDays(investment, days, asOfDate)
-    )
-  }, 0)
-}
-
-function buildInvestmentEarningsBreakdown(
-  investments: Investment[],
-  getInvestmentEarnings: (investment: Investment) => number,
-  portfolioEstimatedEarnings: number,
-): InvestmentEarningsBreakdown {
-  return investments
+  sortBy: EarnedMoneySortOption = EARNED_MONEY_SORT_OPTIONS.highestEarned,
+): PortfolioEarnedMoneySnapshot {
+  const resolvedInvestments = investments.map((investment) => {
+    return resolveInvestment(investment, asOfDate)
+  })
+  const portfolioAnalysis = analyzePortfolio(resolvedInvestments)
+  const totalEarnedAmount = portfolioAnalysis.totalEstimatedAccruedReturn
+  const breakdown = resolvedInvestments
     .map((investment) => {
-      const estimatedEarnings = getInvestmentEarnings(investment)
-
       return {
         investmentId: investment.id,
         name: investment.name,
         institutionName: investment.institutionName,
-        estimatedEarnings,
+        derivedStatus: investment.derivedStatus,
+        earnedAmount: investment.estimatedAccruedReturn,
         percentage:
-          portfolioEstimatedEarnings === 0
+          totalEarnedAmount === 0
             ? 0
-            : (estimatedEarnings / portfolioEstimatedEarnings) * 100,
+            : (investment.estimatedAccruedReturn / totalEarnedAmount) * 100,
       }
     })
-    .sort((left, right) => right.estimatedEarnings - left.estimatedEarnings)
+    .sort(createEarnedMoneyComparator(sortBy))
+
+  return {
+    totalEarnedAmount,
+    activeInvestmentCount: portfolioAnalysis.activeInvestmentCount,
+    finishedInvestmentCount: portfolioAnalysis.finishedInvestmentCount,
+    investmentCount: portfolioAnalysis.investmentCount,
+    breakdown,
+  }
 }
 
-function getActiveInvestments(
-  investments: Investment[],
-  asOfDate: Date,
-): Investment[] {
-  return investments.filter((investment) => {
-    return getDerivedStatus(investment, asOfDate) === DERIVED_STATUSES.active
-  })
+function createEarnedMoneyComparator(sortBy: EarnedMoneySortOption) {
+  switch (sortBy) {
+    case EARNED_MONEY_SORT_OPTIONS.lowestEarned:
+      return (
+        left: InvestmentEarnedMoneyBreakdownItem,
+        right: InvestmentEarnedMoneyBreakdownItem,
+      ) => {
+        return (
+          left.earnedAmount - right.earnedAmount ||
+          left.name.localeCompare(right.name)
+        )
+      }
+    case EARNED_MONEY_SORT_OPTIONS.name:
+      return (
+        left: InvestmentEarnedMoneyBreakdownItem,
+        right: InvestmentEarnedMoneyBreakdownItem,
+      ) => {
+        return (
+          left.name.localeCompare(right.name) ||
+          right.earnedAmount - left.earnedAmount
+        )
+      }
+    case EARNED_MONEY_SORT_OPTIONS.status:
+      return (
+        left: InvestmentEarnedMoneyBreakdownItem,
+        right: InvestmentEarnedMoneyBreakdownItem,
+      ) => {
+        return (
+          getStatusSortOrder(left.derivedStatus) -
+            getStatusSortOrder(right.derivedStatus) ||
+          right.earnedAmount - left.earnedAmount ||
+          left.name.localeCompare(right.name)
+        )
+      }
+    case EARNED_MONEY_SORT_OPTIONS.highestEarned:
+    default:
+      return (
+        left: InvestmentEarnedMoneyBreakdownItem,
+        right: InvestmentEarnedMoneyBreakdownItem,
+      ) => {
+        return (
+          right.earnedAmount - left.earnedAmount ||
+          left.name.localeCompare(right.name)
+        )
+      }
+  }
+}
+
+function getStatusSortOrder(status: DerivedStatus) {
+  switch (status) {
+    case DERIVED_STATUSES.active:
+      return 0
+    case DERIVED_STATUSES.finished:
+      return 1
+  }
+}
+
+export function getEarnedMoneySortLabel(sortBy: EarnedMoneySortOption): string {
+  switch (sortBy) {
+    case EARNED_MONEY_SORT_OPTIONS.highestEarned:
+      return "Highest earned"
+    case EARNED_MONEY_SORT_OPTIONS.lowestEarned:
+      return "Lowest earned"
+    case EARNED_MONEY_SORT_OPTIONS.name:
+      return "Name"
+    case EARNED_MONEY_SORT_OPTIONS.status:
+      return `Status (${DERIVED_STATUS_LABELS[DERIVED_STATUSES.active]} first)`
+  }
 }

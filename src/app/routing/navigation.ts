@@ -20,6 +20,7 @@ export const APP_ROUTE_PATHS = {
   assets: "assets",
   invest: "invest",
   earnings: "earnings",
+  projection: "projection",
   investmentDetail: "investments/:investmentId",
   investmentEdit: "investments/:investmentId/edit",
   investmentRecordChange: "investments/:investmentId/record-change",
@@ -30,6 +31,7 @@ export const APP_PATHS = {
   assets: `/${APP_ROUTE_PATHS.assets}`,
   invest: `/${APP_ROUTE_PATHS.invest}`,
   earnings: `/${APP_ROUTE_PATHS.earnings}`,
+  projection: `/${APP_ROUTE_PATHS.projection}`,
 } as const
 
 export function getInvestmentDetailPath(investmentId: string) {
@@ -55,6 +57,10 @@ export function getInvestmentRecordChangePath(investmentId: string) {
 
 export function getEarningsPath() {
   return APP_PATHS.earnings
+}
+
+export function getProjectionPath() {
+  return APP_PATHS.projection
 }
 
 export function getSectionPath(section: AppSection) {

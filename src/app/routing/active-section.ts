@@ -21,7 +21,7 @@ export function getActiveSectionFromPathname(
     return APP_SECTIONS.invest
   }
 
-  if (pathname === APP_PATHS.earnings) {
+  if (pathname === APP_PATHS.earnings || pathname === APP_PATHS.projection) {
     return APP_SECTIONS.dashboard
   }
 

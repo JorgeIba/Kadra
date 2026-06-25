@@ -286,7 +286,5 @@ Rules:
 
 ## Open Questions
 
-- How should the UI distinguish "fix this existing event" from "add a new event
-  on top of history"?
 - When planned contributions arrive, how should assumptions be stored separately
   from real contribution events?

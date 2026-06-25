@@ -49,3 +49,46 @@ Why:
 - It avoids replaying the same investment history repeatedly inside small UI helpers.
 - It makes function signatures describe the real question being answered.
 - It keeps raw history operations separate from current-state presentation logic.
+
+## 2026-06-20
+
+### Event histories as the main domain backbone
+
+Decision:
+
+- Treat contribution events, rate events, and lifecycle events as the persistent source of truth for changing investment behavior.
+- Derive periods, terms timelines, balance timelines, projections, and current read models from those event histories.
+- Keep lifecycle periods as derived calculation views instead of a separately persisted lifecycle-state concept.
+
+Why:
+
+- It gives the domain one clearer calculation backbone.
+- It reduces fragile intermediate states across projections, previews, and screen helpers.
+- It keeps persisted history small while letting calculations express richer date-based behavior.
+
+### App-level recovery for render failures
+
+Decision:
+
+- Wrap the app in a global error boundary so unexpected render failures degrade gracefully instead of crashing the whole experience without context.
+
+Why:
+
+- The product is local-first, so preserving user trust during bad states matters.
+- A friendly recovery path is safer while the investment model and flows are still evolving.
+
+## 2026-06-22
+
+### Edit vs. record-change workflow split
+
+Decision:
+
+- Keep investment edit focused on correcting the latest stored facts.
+- Use a separate record-change flow to append new dated contribution, rate, or lifecycle events.
+- Keep the first record-change flow append-only by requiring the effective date to be on or after the latest stored event date.
+
+Why:
+
+- Editing and recording mean different things in a history-based model.
+- The split makes user intent clearer and avoids silently rewriting the past when the user meant to add new history.
+- The append-only MVP rule gives safer behavior until backdated insertion and richer event-history management are deliberately designed.

@@ -18,6 +18,7 @@ import {
   getInvestmentDetailPath,
   getInvestmentEditPath,
   getInvestmentRecordChangePath,
+  getProjectionPath,
   getSectionPath,
 } from "@/app/routing/navigation"
 import { getPreviousSectionFromLocation } from "@/app/routing/active-section"
@@ -27,6 +28,7 @@ import { EditInvestmentScreen } from "@/app/screens/edit-investment/EditInvestme
 import { EarningsScreen } from "@/app/screens/earnings/EarningsScreen"
 import { InvestScreen } from "@/app/screens/invest/InvestScreen"
 import { InvestmentDetailScreen } from "@/app/screens/investment-detail/InvestmentDetailScreen"
+import { ProjectionScreen } from "@/app/screens/projection/ProjectionScreen"
 import { RecordChangeScreen } from "@/app/screens/record-change/RecordChangeScreen"
 import {
   loadInvestmentsFromStorage,
@@ -91,6 +93,10 @@ export function AppRouter() {
             element={<EarningsRoute investments={investments} />}
           />
           <Route
+            path={APP_ROUTE_PATHS.projection}
+            element={<ProjectionRoute investments={investments} />}
+          />
+          <Route
             path={APP_ROUTE_PATHS.investmentDetail}
             element={
               <InvestmentDetailRoute
@@ -145,11 +151,18 @@ function DashboardRoute({ investments }: { investments: Investment[] }) {
     })
   }
 
+  function handleOpenProjection() {
+    navigate(getProjectionPath(), {
+      state: { fromSection: APP_SECTIONS.dashboard },
+    })
+  }
+
   return (
     <DashboardScreen
       investments={investments}
       onAddInvestment={handleAddInvestment}
       onOpenEarnings={handleOpenEarnings}
+      onOpenProjection={handleOpenProjection}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )
@@ -168,6 +181,21 @@ function EarningsRoute({ investments }: { investments: Investment[] }) {
   }
 
   return <EarningsScreen investments={investments} onBack={handleBack} />
+}
+
+function ProjectionRoute({ investments }: { investments: Investment[] }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const previousSection = getPreviousSectionFromLocation(
+    location,
+    APP_SECTIONS.dashboard,
+  )
+
+  function handleBack() {
+    navigate(getSectionPath(previousSection))
+  }
+
+  return <ProjectionScreen investments={investments} onBack={handleBack} />
 }
 
 function AssetsRoute({ investments }: { investments: Investment[] }) {

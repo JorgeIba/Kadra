@@ -17,6 +17,7 @@ const dateOnlySchema = z.string().refine(isCalendarDateString, {
 const commonInvestmentFormSchema = z.object({
   name: z.string().trim().min(1, "Investment name is required."),
   institutionName: z.string().trim().min(1, "Institution is required."),
+  startDate: dateOnlySchema,
   contributionAmount: z
     .number()
     .positive("Contribution amount must be greater than zero."),
@@ -48,13 +49,25 @@ export const investmentFormSchema = z
   ])
   .superRefine((values, context) => {
     if (
-      values.investmentType === INVESTMENT_TYPES.fixedTerm &&
-      compareCalendarDatesAscending(values.endDate, toDateString(new Date())) <=
-        0
+      compareCalendarDatesAscending(
+        values.startDate,
+        toDateString(new Date()),
+      ) > 0
     ) {
       context.addIssue({
         code: "custom",
-        message: "End date must be after today.",
+        message: "Start date cannot be in the future.",
+        path: ["startDate"],
+      })
+    }
+
+    if (
+      values.investmentType === INVESTMENT_TYPES.fixedTerm &&
+      compareCalendarDatesAscending(values.endDate, values.startDate) <= 0
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "End date must be after the start date.",
         path: ["endDate"],
       })
     }
