@@ -28,6 +28,9 @@ This document holds future ideas and deferred work that are worth remembering, b
   UI treats the investment as promised or starting soon instead of active
 - fully historical investments where both `startDate` and `endDate` are before
   today, so Trafin can record past investments and calculate total money earned
+- replace silent date clamping before an investment's `startDate` with a clearer
+  user-facing behavior, such as an error message or another explicit state; this
+  needs product discussion before implementation
 - form draft restore so a screen crash does not risk losing in-progress user input
 - more detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
 - custom production domain after the free Vercel URL is validated on iPhone
