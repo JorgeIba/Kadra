@@ -13,7 +13,10 @@ import { getMaturityTimelineItems } from "@/app/screens/dashboard/maturity-timel
 import { MaturityTimelineSection } from "@/app/screens/dashboard/MaturityTimelineSection"
 import { getPortfolioBreakdown } from "@/app/screens/dashboard/portfolio-breakdown"
 import { PortfolioBreakdownCard } from "@/app/screens/dashboard/PortfolioBreakdownCard"
-import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
+import {
+  getPortfolioProjectionEarningPace,
+  getPortfolioProjectionPoints,
+} from "@/app/screens/dashboard/portfolio-projection"
 import { PortfolioProjectionChart } from "@/app/screens/dashboard/PortfolioProjectionChart"
 import { PortfolioSummaryCard } from "@/app/screens/dashboard/PortfolioSummaryCard"
 import { getPortfolioEarnedMoneySnapshot } from "@/app/screens/earnings/earnings-view-model"
@@ -48,6 +51,10 @@ export function DashboardScreen({
   )
   const portfolioBreakdown = getPortfolioBreakdown(resolvedInvestments)
   const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
+  const projectionEarningPace = getPortfolioProjectionEarningPace(
+    investments,
+    asOfDate,
+  )
   const maturityTimelineItems = getMaturityTimelineItems(
     resolvedInvestments,
     asOfDate,
@@ -79,6 +86,7 @@ export function DashboardScreen({
           />
           <PortfolioBreakdownCard breakdown={portfolioBreakdown} />
           <PortfolioProjectionChart
+            earningPace={projectionEarningPace}
             points={projectionPoints}
             onOpenDetails={onOpenProjection}
           />

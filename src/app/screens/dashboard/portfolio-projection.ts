@@ -2,6 +2,7 @@ import {
   DAY_COUNTS,
   projectPortfolioAtDate,
   type Investment,
+  type PortfolioProjectionEarningPaceReadModel,
 } from "@/domain/investments"
 
 const PROJECTION_DAY_OFFSETS = [
@@ -38,6 +39,13 @@ export function getPortfolioProjectionPoints(
       projectedEarnings: projection.projectedEarnings,
     }
   })
+}
+
+export function getPortfolioProjectionEarningPace(
+  investments: Investment[],
+  startDate: Date,
+): PortfolioProjectionEarningPaceReadModel {
+  return projectPortfolioAtDate(investments, startDate, startDate).earningPace
 }
 
 function addDays(date: Date, days: number) {

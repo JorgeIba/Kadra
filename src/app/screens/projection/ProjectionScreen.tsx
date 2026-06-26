@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { ArrowLeft, CalendarDays } from "lucide-react"
+import { PortfolioEarningPaceMetrics } from "@/app/components/PortfolioEarningPaceMetrics"
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
 import {
   compareCalendarDatesAscending,
@@ -121,6 +122,12 @@ export function ProjectionScreen({
           <PortfolioProjectionLineChart
             className="h-64"
             points={snapshot.points}
+          />
+
+          <PortfolioEarningPaceMetrics
+            title="Estimated earning pace"
+            description="Based on investments still active on the target date."
+            pace={snapshot.earningPace}
           />
         </CardContent>
       </Card>

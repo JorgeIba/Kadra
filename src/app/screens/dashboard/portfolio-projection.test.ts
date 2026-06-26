@@ -6,7 +6,10 @@ import {
   REINVESTMENT_BEHAVIORS,
   type Investment,
 } from "@/domain/investments"
-import { getPortfolioProjectionPoints } from "@/app/screens/dashboard/portfolio-projection"
+import {
+  getPortfolioProjectionEarningPace,
+  getPortfolioProjectionPoints,
+} from "@/app/screens/dashboard/portfolio-projection"
 
 const startDate = new Date("2026-06-05T12:00:00.000Z")
 
@@ -32,6 +35,14 @@ describe("portfolio projection", () => {
 
     expect(points[0].estimatedValue).toBe(10_000)
     expect(points.at(-1)?.estimatedValue).toBeCloseTo(11_047.244536)
+  })
+
+  it("builds current earning pace for the projection card", () => {
+    const pace = getPortfolioProjectionEarningPace([investment], startDate)
+
+    expect(pace.daily).toBeCloseTo(2.739726)
+    expect(pace.monthly).toBeCloseTo(82.191781)
+    expect(pace.yearly).toBe(1_000)
   })
 })
 

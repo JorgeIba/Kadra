@@ -20,6 +20,9 @@ describe("portfolio projections", () => {
     expect(projection.projectionDate).toBe("2026-01-21")
     expect(projection.estimatedValue).toBeCloseTo(46_740.076091)
     expect(projection.projectedEarnings).toBeCloseTo(60.034055)
+    expect(projection.earningPace.daily).toBeCloseTo(12.010973)
+    expect(projection.earningPace.monthly).toBeCloseTo(360.240457)
+    expect(projection.earningPace.yearly).toBeCloseTo(4_382.925555)
     expect(projection.investmentCount).toBe(2)
   })
 
@@ -32,6 +35,7 @@ describe("portfolio projections", () => {
 
     expect(projection.activeInvestmentCount).toBe(1)
     expect(projection.finishedInvestmentCount).toBe(1)
+    expect(projection.earningPace.daily).toBeLessThan(3)
     expect(projection.investments[0]).toMatchObject({
       investmentId: fixedInvestment.id,
       projectedEarnings: 150,

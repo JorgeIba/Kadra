@@ -26,6 +26,7 @@ describe("projection view model", () => {
     expect(snapshot.currentValue).toBeCloseTo(46_680.042036)
     expect(snapshot.projectedValue).toBeCloseTo(46_740.076091)
     expect(snapshot.projectedEarnings).toBeCloseTo(60.034055)
+    expect(snapshot.earningPace.daily).toBeCloseTo(12.010973)
     expect(snapshot.investmentCount).toBe(2)
   })
 
@@ -38,6 +39,7 @@ describe("projection view model", () => {
 
     expect(snapshot.activeInvestmentCount).toBe(1)
     expect(snapshot.finishedInvestmentCount).toBe(1)
+    expect(snapshot.earningPace.daily).toBeLessThan(3)
     expect(snapshot.breakdown[0]).toMatchObject({
       investmentId: fixedInvestment.id,
       projectedEarnings: 150,

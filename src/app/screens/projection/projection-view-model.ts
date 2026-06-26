@@ -7,6 +7,7 @@ import {
   toDateString,
   type CalendarDateString,
   type Investment,
+  type PortfolioProjectionEarningPaceReadModel,
 } from "@/domain/investments"
 
 export interface PortfolioProjectionPoint {
@@ -33,6 +34,7 @@ export interface PortfolioProjectionSnapshot {
   investmentCount: number
   activeInvestmentCount: number
   finishedInvestmentCount: number
+  earningPace: PortfolioProjectionEarningPaceReadModel
   points: PortfolioProjectionPoint[]
   breakdown: InvestmentProjectionBreakdownItem[]
 }
@@ -95,6 +97,7 @@ export function getPortfolioProjectionSnapshot(
     investmentCount: targetProjection.investmentCount,
     activeInvestmentCount: targetProjection.activeInvestmentCount,
     finishedInvestmentCount: targetProjection.finishedInvestmentCount,
+    earningPace: targetProjection.earningPace,
     points: getProjectionPoints(investments, asOfDate, resolvedTargetDate),
     breakdown,
   }

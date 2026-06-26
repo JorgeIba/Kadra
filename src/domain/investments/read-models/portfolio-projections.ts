@@ -1,6 +1,7 @@
 import { analyzePortfolio } from "@/domain/investments/read-models/portfolio-analysis"
 import { resolveInvestment } from "@/domain/investments/read-models/resolved-investment"
 import { toDateString } from "@/domain/investments/calculations/dates"
+import { DERIVED_STATUSES } from "@/domain/investments/model/constants"
 import type {
   CalendarDateString,
   Investment,
@@ -15,7 +16,14 @@ export interface PortfolioProjectionReadModel {
   investmentCount: number
   activeInvestmentCount: number
   finishedInvestmentCount: number
+  earningPace: PortfolioProjectionEarningPaceReadModel
   investments: InvestmentProjectionReadModel[]
+}
+
+export interface PortfolioProjectionEarningPaceReadModel {
+  daily: number
+  monthly: number
+  yearly: number
 }
 
 export interface InvestmentProjectionReadModel {
@@ -45,6 +53,11 @@ export function projectPortfolioAtDate(
   })
   const baselinePortfolio = analyzePortfolio(baselineInvestments)
   const projectedPortfolio = analyzePortfolio(projectedInvestments)
+  const activeProjectedPortfolio = analyzePortfolio(
+    projectedInvestments.filter((investment) => {
+      return investment.derivedStatus === DERIVED_STATUSES.active
+    }),
+  )
 
   return {
     baselineDate: toDateString(baselineDate),
@@ -57,6 +70,11 @@ export function projectPortfolioAtDate(
     investmentCount: projectedPortfolio.investmentCount,
     activeInvestmentCount: projectedPortfolio.activeInvestmentCount,
     finishedInvestmentCount: projectedPortfolio.finishedInvestmentCount,
+    earningPace: {
+      daily: activeProjectedPortfolio.totalEstimatedDailyReturn,
+      monthly: activeProjectedPortfolio.totalEstimatedMonthlyReturn,
+      yearly: activeProjectedPortfolio.totalEstimatedYearlyReturn,
+    },
     investments: resolvedInvestments.map(({ baseline, projected }) => {
       return {
         investmentId: projected.id,
