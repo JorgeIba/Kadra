@@ -7,6 +7,7 @@ import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjecti
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { PortfolioProjectionPoint } from "@/app/screens/dashboard/portfolio-projection"
 import { Card, CardContent } from "@/components/ui/card"
+import { formatMxn } from "@/lib/formatters"
 
 interface PortfolioProjectionChartProps {
   earningPace: PortfolioEarningPace
@@ -19,6 +20,8 @@ export function PortfolioProjectionChart({
   onOpenDetails,
   points,
 }: PortfolioProjectionChartProps) {
+  const targetPoint = points.at(-1)
+
   return (
     <Card
       role={onOpenDetails === undefined ? undefined : "button"}
@@ -42,7 +45,7 @@ export function PortfolioProjectionChart({
       <CardContent className="space-y-5">
         <div className="flex items-start justify-between gap-4">
           <DashboardSectionHeader
-            title="Growth forecast"
+            title="1-year projection"
             description="Estimate future value from the current portfolio."
           />
           {onOpenDetails === undefined ? null : (
@@ -52,6 +55,17 @@ export function PortfolioProjectionChart({
             />
           )}
         </div>
+
+        {targetPoint === undefined ? null : (
+          <div className="space-y-1">
+            <p className="font-ledger text-2xl leading-none text-foreground tabular-nums">
+              {formatMxn(targetPoint.estimatedValue)}
+            </p>
+            <p className="text-xs leading-5 text-muted-foreground">
+              {formatMxn(targetPoint.projectedEarnings)} projected earnings
+            </p>
+          </div>
+        )}
 
         <div
           className="cursor-default"

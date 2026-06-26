@@ -79,22 +79,24 @@ export function AssetsScreen({
         />
       ) : (
         <div className="space-y-5">
-          <div className="rounded-lg bg-secondary/60 px-4 py-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">
-                  Current total value
-                </p>
-                <p className="font-ledger text-[2rem] leading-none">
-                  {formatMxn(totalValue)}
-                </p>
+          <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
+            <div className="px-4 py-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1.5">
+                  <p className="text-xs leading-none text-muted-foreground">
+                    Current value across all investments
+                  </p>
+                  <p className="font-ledger text-4xl leading-none tabular-nums">
+                    {formatMxn(totalValue)}
+                  </p>
+                </div>
+                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[0.68rem] font-medium text-primary">
+                  {shownCountLabel}
+                </span>
               </div>
-              <span className="rounded-full bg-background/70 px-2.5 py-1 text-[0.68rem] font-medium tracking-[0.08em] text-muted-foreground">
-                {shownCountLabel}
-              </span>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border/70 pt-4">
+            <div className="grid grid-cols-2 gap-3 border-t border-border/70 px-4 py-4">
               <AssetsSelectControl
                 ariaLabel="Filter investments"
                 fallbackLabel="Select filter"

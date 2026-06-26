@@ -36,13 +36,16 @@ export function PortfolioEarningPaceMetrics({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
+      <div className="divide-y divide-border/65 rounded-lg border border-border/70 bg-background/30">
         {EARNING_PACE_ITEMS.map((item) => (
-          <div key={item.key} className="rounded-lg bg-secondary/45 px-3 py-3">
+          <div
+            key={item.key}
+            className="flex items-baseline justify-between gap-4 px-3 py-2.5"
+          >
             <p className="text-xs leading-none text-muted-foreground">
               {item.label}
             </p>
-            <p className="mt-2 font-ledger text-base leading-none text-foreground tabular-nums">
+            <p className="font-ledger text-base leading-none text-foreground tabular-nums">
               {formatMxn(pace[item.key])}
             </p>
           </div>

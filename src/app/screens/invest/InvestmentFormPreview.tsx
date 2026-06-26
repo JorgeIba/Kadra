@@ -11,9 +11,9 @@ export function InvestmentFormPreview({
 }: InvestmentFormPreviewProps) {
   if (investment === null) {
     return (
-      <Card className="border-dashed bg-secondary/40">
+      <Card className="border-dashed border-primary/20 bg-primary/5">
         <CardContent className="space-y-2">
-          <p className="text-sm font-medium">Projection preview</p>
+          <p className="text-sm font-bold">Projection preview</p>
           <p className="text-sm leading-6 text-muted-foreground">
             Complete the required fields to unlock projection values.
           </p>

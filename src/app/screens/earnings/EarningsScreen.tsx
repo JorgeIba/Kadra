@@ -9,7 +9,6 @@ import {
   type InvestmentEarnedMoneyBreakdown,
 } from "@/app/screens/earnings/earnings-view-model"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -50,7 +49,7 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
   )
 
   return (
-    <section className="space-y-7">
+    <section className="space-y-6">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
         <ArrowLeft className="size-4" aria-hidden="true" />
         Back
@@ -61,46 +60,47 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
           Earned money
         </p>
         <h1 className="font-ledger text-3xl font-normal tracking-normal text-foreground">
-          See how much your portfolio has already produced.
+          Earned by the portfolio.
         </h1>
       </div>
 
-      <Card className="rounded-lg bg-secondary/55">
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
+      <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
+        <div className="space-y-4 px-4 py-5">
+          <div className="space-y-1.5">
             <p className="text-xs text-muted-foreground">Total earned so far</p>
             <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
               {formatMxn(snapshot.totalEarnedAmount)}
             </p>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Includes active and finished investments using earnings produced
+              through today.
+            </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <SummaryMetric
-              label="Investments"
-              value={String(snapshot.investmentCount)}
-            />
-            <SummaryMetric
-              label="Active"
-              value={String(snapshot.activeInvestmentCount)}
-            />
-            <SummaryMetric
-              label="Finished"
-              value={String(snapshot.finishedInvestmentCount)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+        <div className="grid grid-cols-3 border-t border-border/70">
+          <SummaryMetric
+            label="Investments"
+            value={String(snapshot.investmentCount)}
+          />
+          <SummaryMetric
+            label="Active"
+            value={String(snapshot.activeInvestmentCount)}
+          />
+          <SummaryMetric
+            label="Finished"
+            value={String(snapshot.finishedInvestmentCount)}
+          />
+        </div>
 
-      <Card className="rounded-lg">
-        <CardContent className="space-y-6">
+        <div className="space-y-6 border-t border-border/70 px-4 py-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
               <h2 className="text-base font-bold leading-tight text-foreground">
                 Breakdown by investment
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                Includes active and finished investments using the earnings each
-                one has produced so far.
+                Ranked by the money each investment has already produced.
               </p>
             </div>
 
@@ -128,15 +128,15 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
           </div>
 
           <EarningsBreakdownList breakdown={snapshot.breakdown} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </section>
   )
 }
 
 function SummaryMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-background/55 px-3 py-3">
+    <div className="border-r border-border/70 px-3 py-3 last:border-r-0">
       <p className="text-xs leading-none text-muted-foreground">{label}</p>
       <p className="mt-2 font-ledger text-lg leading-none text-foreground tabular-nums">
         {value}

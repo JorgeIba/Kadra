@@ -7,7 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { formatMxn } from "@/lib/formatters"
+import { formatDisplayDate, formatMxn } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 export interface PortfolioProjectionLineChartPoint {
@@ -50,7 +50,15 @@ export function PortfolioProjectionLineChart({
             tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
             dy={14}
           />
-          <YAxis hide domain={["dataMin", "dataMax"]} />
+          <YAxis
+            width={54}
+            domain={["dataMin", "dataMax"]}
+            tickCount={3}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
+            tickFormatter={formatCompactMxn}
+          />
           <Tooltip content={<ProjectionTooltip />} />
           <Line
             type="monotone"
@@ -66,6 +74,18 @@ export function PortfolioProjectionLineChart({
   )
 }
 
+function formatCompactMxn(value: number) {
+  if (Math.abs(value) >= 1_000_000) {
+    return `$${(value / 1_000_000).toFixed(1)}M`
+  }
+
+  if (Math.abs(value) >= 1_000) {
+    return `$${Math.round(value / 1_000)}k`
+  }
+
+  return `$${Math.round(value)}`
+}
+
 function ProjectionTooltip({ active, payload }: ProjectionTooltipProps) {
   const point = payload?.[0]?.payload
 
@@ -75,7 +95,9 @@ function ProjectionTooltip({ active, payload }: ProjectionTooltipProps) {
 
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2 text-card-foreground shadow-none">
-      <p className="text-xs text-muted-foreground">{point.date}</p>
+      <p className="text-xs text-muted-foreground">
+        {formatDisplayDate(point.date)}
+      </p>
       <p className="mt-2 text-sm font-medium text-foreground">
         {formatMxn(point.estimatedValue)}
       </p>

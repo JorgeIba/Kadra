@@ -24,13 +24,6 @@ import {
   type InvestmentFormValues,
 } from "@/app/screens/invest/investment-form-schema"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -70,6 +63,7 @@ const FORM_FIELD_IDS = {
   institutionName: "institution-name",
   investmentType: "investment-type",
   name: "investment-name",
+  notes: "investment-notes",
   contributionAmount: "contribution-amount",
   paymentFrequency: "payment-frequency",
   reinvestmentBehavior: "reinvestment",
@@ -147,14 +141,11 @@ export function InvestmentForm({
   return (
     <>
       <form className="space-y-4" onSubmit={handleSubmit(handleValidSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic information</CardTitle>
-            <CardDescription>
-              Name the investment and where the money lives.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
+          <FormSection
+            title="Basic information"
+            description="Name the investment and where the money lives."
+          >
             <Field
               error={errors.name?.message}
               label="Investment name"
@@ -186,17 +177,12 @@ export function InvestmentForm({
                 {...register("institutionName")}
               />
             </Field>
-          </CardContent>
-        </Card>
+          </FormSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Terms</CardTitle>
-            <CardDescription>
-              These values drive the future projection.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <FormSection
+            title="Terms"
+            description="These values drive the future projection."
+          >
             <div className="grid grid-cols-2 gap-3">
               <Field
                 error={errors.investmentType?.message}
@@ -381,17 +367,12 @@ export function InvestmentForm({
                 </p>
               </Field>
             ) : null}
-          </CardContent>
-        </Card>
+          </FormSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Returns</CardTitle>
-            <CardDescription>
-              Define how often returns are paid and where they go.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <FormSection
+            title="Returns"
+            description="Define how often returns are paid and where they go."
+          >
             <Field
               error={errors.paymentFrequency?.message}
               label="Payment frequency"
@@ -475,21 +456,21 @@ export function InvestmentForm({
                 )}
               />
             </Field>
-          </CardContent>
-        </Card>
+          </FormSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Notes</CardTitle>
-            <CardDescription>Optional context for future you.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Example: rate renewal expected after maturity."
-              {...register("notes")}
-            />
-          </CardContent>
-        </Card>
+          <FormSection
+            title="Notes"
+            description="Optional context for future you."
+          >
+            <Field htmlFor={FORM_FIELD_IDS.notes} label="Notes">
+              <Textarea
+                id={FORM_FIELD_IDS.notes}
+                placeholder="Example: rate renewal expected after maturity."
+                {...register("notes")}
+              />
+            </Field>
+          </FormSection>
+        </div>
 
         <InvestmentFormPreview investment={previewInvestment} />
 
@@ -527,6 +508,28 @@ export function InvestmentForm({
         onConfirm={() => onCancel?.()}
       />
     </>
+  )
+}
+
+function FormSection({
+  children,
+  description,
+  title,
+}: {
+  children: ReactNode
+  description: string
+  title: string
+}) {
+  return (
+    <section className="space-y-4 border-t border-border/70 px-4 py-4 first:border-t-0">
+      <div className="space-y-1">
+        <h2 className="text-base font-bold leading-tight text-foreground">
+          {title}
+        </h2>
+        <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
   )
 }
 

@@ -14,10 +14,13 @@ import {
   type InvestmentProjectionBreakdownItem,
 } from "@/app/screens/projection/projection-view-model"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { formatMxn, formatPercentage } from "@/lib/formatters"
+import {
+  formatDisplayDate,
+  formatMxn,
+  formatPercentage,
+} from "@/lib/formatters"
 
 interface ProjectionScreenProps {
   investments: Investment[]
@@ -42,8 +45,10 @@ export function ProjectionScreen({
     isTargetDateValid ? targetDate : today,
   )
 
+  const targetPoint = snapshot.points.at(-1)
+
   return (
-    <section className="space-y-7">
+    <section className="space-y-6">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
         <ArrowLeft className="size-4" aria-hidden="true" />
         Back
@@ -52,12 +57,32 @@ export function ProjectionScreen({
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">Projection</p>
         <h1 className="font-ledger text-3xl font-normal tracking-normal text-foreground">
-          Estimate what the current portfolio could make.
+          Projected portfolio value.
         </h1>
       </div>
 
-      <Card className="rounded-lg bg-secondary/55">
-        <CardContent className="space-y-5">
+      <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
+        <div className="space-y-4 px-4 py-5">
+          <div className="space-y-2">
+            <p className="text-xs leading-none text-muted-foreground">
+              By {formatDisplayDate(snapshot.targetDate)}, this portfolio is
+              projected to earn
+            </p>
+            <p className="font-ledger text-3xl leading-none text-foreground tabular-nums">
+              {formatMxn(snapshot.projectedEarnings)}
+            </p>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {formatInvestmentCount(
+                snapshot.activeInvestmentCount,
+                "active investment",
+                "active investments",
+              )}{" "}
+              · {snapshot.finishedInvestmentCount} finished by target
+            </p>
+          </div>
+        </div>
+
+        <div className="border-t border-border/70 px-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="projection-target-date">Target date</Label>
             <div className="flex items-center gap-2">
@@ -85,30 +110,9 @@ export function ProjectionScreen({
               </p>
             )}
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
-            <ProjectionMetric
-              label="Projected earnings"
-              value={formatMxn(snapshot.projectedEarnings)}
-            />
-            <ProjectionMetric
-              label="Projected value"
-              value={formatMxn(snapshot.projectedValue)}
-            />
-            <ProjectionMetric
-              label="Current value"
-              value={formatMxn(snapshot.currentValue)}
-            />
-            <ProjectionMetric
-              label="Investments"
-              value={String(snapshot.investmentCount)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-lg">
-        <CardContent className="space-y-5">
+        <div className="space-y-5 border-t border-border/70 px-4 py-5">
           <div className="space-y-2">
             <h2 className="text-base font-bold leading-tight text-foreground">
               Value path
@@ -119,21 +123,29 @@ export function ProjectionScreen({
             </p>
           </div>
 
-          <PortfolioProjectionLineChart
-            className="h-64"
-            points={snapshot.points}
-          />
+          <div>
+            <PortfolioProjectionLineChart
+              className="h-64"
+              points={snapshot.points}
+            />
+            {targetPoint === undefined ? null : (
+              <div className="mt-3 flex items-center justify-between gap-4 text-xs text-muted-foreground">
+                <span>Today {formatMxn(snapshot.currentValue)}</span>
+                <span className="text-right">
+                  Target {formatMxn(targetPoint.estimatedValue)}
+                </span>
+              </div>
+            )}
+          </div>
 
           <PortfolioEarningPaceMetrics
-            title="Estimated earning pace"
+            title="Pace on target date"
             description="Based on investments still active on the target date."
             pace={snapshot.earningPace}
           />
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card className="rounded-lg">
-        <CardContent className="space-y-5">
+        <div className="space-y-5 border-t border-border/70 px-4 py-5">
           <div className="space-y-2">
             <h2 className="text-base font-bold leading-tight text-foreground">
               Projected earnings by investment
@@ -144,21 +156,18 @@ export function ProjectionScreen({
           </div>
 
           <ProjectionBreakdown breakdown={snapshot.breakdown} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </section>
   )
 }
 
-function ProjectionMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-background/55 px-3 py-3">
-      <p className="text-xs leading-none text-muted-foreground">{label}</p>
-      <p className="mt-2 font-ledger text-lg leading-none text-foreground tabular-nums">
-        {value}
-      </p>
-    </div>
-  )
+function formatInvestmentCount(
+  count: number,
+  singularLabel: string,
+  pluralLabel: string,
+) {
+  return `${count} ${count === 1 ? singularLabel : pluralLabel}`
 }
 
 function ProjectionBreakdown({
