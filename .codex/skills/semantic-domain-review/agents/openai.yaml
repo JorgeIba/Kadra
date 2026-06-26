@@ -1,4 +1,0 @@
-interface:
-  display_name: "Semantic Domain Review"
-  short_description: "Review tests against domain truth"
-  default_prompt: "Use $semantic-domain-review to review whether a change and its tests preserve domain truth."
