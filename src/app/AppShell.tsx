@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useLocation, useOutlet } from "react-router"
+import { useLayoutEffect, useState } from "react"
+import { motion, useReducedMotion } from "motion/react"
+import { useLocation, useNavigationType, useOutlet } from "react-router"
 import { BottomNav } from "@/app/BottomNav"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import { usePwaUpdate } from "@/app/pwa/usePwaUpdate"
@@ -31,20 +31,28 @@ function getScreenMotionProps(prefersReducedMotion: boolean) {
 
 function AnimatedOutlet() {
   const location = useLocation()
+  const navigationType = useNavigationType()
   const outlet = useOutlet()
   const prefersReducedMotion = useReducedMotion() ?? false
   const screenMotionProps = getScreenMotionProps(prefersReducedMotion)
+  const shouldAnimateScreen = !prefersReducedMotion && navigationType !== "POP"
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
+  if (!shouldAnimateScreen) {
+    return <div className="w-full">{outlet}</div>
+  }
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        className="w-full"
-        {...screenMotionProps}
-      >
-        {outlet}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={location.pathname}
+      className="w-full"
+      {...screenMotionProps}
+    >
+      {outlet}
+    </motion.div>
   )
 }
 
