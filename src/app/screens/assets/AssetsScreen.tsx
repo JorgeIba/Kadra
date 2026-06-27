@@ -90,7 +90,7 @@ export function AssetsScreen({
                     {formatMxn(totalValue)}
                   </p>
                 </div>
-                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[0.68rem] font-medium text-primary">
+                <span className="rounded-full border border-info-border bg-info-surface px-2.5 py-1 text-[0.68rem] font-medium text-info">
                   {shownCountLabel}
                 </span>
               </div>

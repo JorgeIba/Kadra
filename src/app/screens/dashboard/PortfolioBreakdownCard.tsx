@@ -2,10 +2,13 @@ import type {
   PortfolioBreakdown,
   PortfolioBreakdownItem,
 } from "@/app/screens/dashboard/portfolio-breakdown"
-import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
+import {
+  AnimatedProgressBar,
+  type ProgressTone,
+} from "@/app/components/AnimatedProgressBar"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
-import { Card, CardContent } from "@/components/ui/card"
 import { formatMxn, formatPercentage } from "@/lib/formatters"
+import { cn } from "@/lib/utils"
 
 interface PortfolioBreakdownCardProps {
   breakdown: PortfolioBreakdown
@@ -15,17 +18,15 @@ export function PortfolioBreakdownCard({
   breakdown,
 }: PortfolioBreakdownCardProps) {
   return (
-    <Card className="rounded-lg">
-      <CardContent className="space-y-6">
-        <DashboardSectionHeader
-          title="Distribution"
-          description="Allocation of your active capital assets."
-        />
+    <section className="space-y-6 border-y border-border/70 py-5">
+      <DashboardSectionHeader
+        title="Distribution"
+        description="Allocation of active capital by investment type and status."
+      />
 
-        <BreakdownSection title="By type" items={breakdown.byType} />
-        <BreakdownSection title="By status" items={breakdown.byStatus} />
-      </CardContent>
-    </Card>
+      <BreakdownSection title="By type" items={breakdown.byType} />
+      <BreakdownSection title="By status" items={breakdown.byStatus} />
+    </section>
   )
 }
 
@@ -43,19 +44,35 @@ function BreakdownSection({
       </h3>
       <div className="space-y-5">
         {items.map((item) => (
-          <BreakdownRow key={item.label} item={item} />
+          <BreakdownRow key={item.label} item={item} sectionTitle={title} />
         ))}
       </div>
     </div>
   )
 }
 
-function BreakdownRow({ item }: { item: PortfolioBreakdownItem }) {
+function BreakdownRow({
+  item,
+  sectionTitle,
+}: {
+  item: PortfolioBreakdownItem
+  sectionTitle: string
+}) {
+  const tone = getBreakdownTone(sectionTitle, item.label)
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-ledger text-base text-foreground">{item.label}</p>
+          <div className="flex items-center gap-2">
+            <span
+              className={cn("size-2 rounded-full", getToneDotClassName(tone))}
+              aria-hidden="true"
+            />
+            <p className="font-ledger text-base text-foreground">
+              {item.label}
+            </p>
+          </div>
           <p className="mt-2 text-xs text-muted-foreground">
             {item.count} investment{item.count === 1 ? "" : "s"}
           </p>
@@ -69,7 +86,30 @@ function BreakdownRow({ item }: { item: PortfolioBreakdownItem }) {
           </p>
         </div>
       </div>
-      <AnimatedProgressBar value={item.percentage} />
+      <AnimatedProgressBar tone={tone} value={item.percentage} />
     </div>
   )
+}
+
+function getBreakdownTone(
+  sectionTitle: string,
+  itemLabel: string,
+): ProgressTone {
+  if (sectionTitle === "By type") {
+    return itemLabel === "Open ended" ? "info" : "warning"
+  }
+
+  return itemLabel === "Active" ? "success" : "neutral"
+}
+
+const TONE_DOT_CLASS_NAMES: Record<ProgressTone, string> = {
+  info: "bg-info",
+  neutral: "bg-status-neutral",
+  primary: "bg-primary",
+  success: "bg-success",
+  warning: "bg-warning",
+}
+
+function getToneDotClassName(tone: ProgressTone) {
+  return TONE_DOT_CLASS_NAMES[tone]
 }

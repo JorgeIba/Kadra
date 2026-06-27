@@ -6,8 +6,8 @@ import {
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { PortfolioProjectionPoint } from "@/app/screens/dashboard/portfolio-projection"
-import { Card, CardContent } from "@/components/ui/card"
 import { formatMxn } from "@/lib/formatters"
+import { cn } from "@/lib/utils"
 
 interface PortfolioProjectionChartProps {
   earningPace: PortfolioEarningPace
@@ -23,14 +23,14 @@ export function PortfolioProjectionChart({
   const targetPoint = points.at(-1)
 
   return (
-    <Card
+    <section
       role={onOpenDetails === undefined ? undefined : "button"}
       tabIndex={onOpenDetails === undefined ? undefined : 0}
-      className={
-        onOpenDetails === undefined
-          ? "rounded-lg"
-          : "group/projection-card cursor-pointer rounded-lg border border-transparent transition-[transform,background-color,border-color,box-shadow] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/40 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px active:border-primary/10 active:bg-secondary/55 motion-reduce:transform-none motion-reduce:transition-none"
-      }
+      className={cn(
+        "border-y border-border/70 py-5",
+        onOpenDetails !== undefined &&
+          "group/projection-card -mx-3 w-[calc(100%+1.5rem)] cursor-pointer rounded-lg px-3 transition-[background-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/25 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:bg-secondary/40",
+      )}
       onClick={onOpenDetails}
       onKeyDown={(event) => {
         if (
@@ -42,17 +42,20 @@ export function PortfolioProjectionChart({
         }
       }}
     >
-      <CardContent className="space-y-5">
+      <div className="space-y-5">
         <div className="flex items-start justify-between gap-4">
           <DashboardSectionHeader
             title="1-year projection"
-            description="Estimate future value from the current portfolio."
+            description="Based on current investments and rates, with no future contributions."
           />
           {onOpenDetails === undefined ? null : (
-            <ArrowRight
-              className="mt-1 size-4 shrink-0 text-muted-foreground transition-[color,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/projection-card:translate-x-0.5 group-hover/projection-card:text-primary group-active/projection-card:translate-x-0.5 group-active/projection-card:text-primary motion-reduce:transform-none"
-              aria-hidden="true"
-            />
+            <span className="mt-1 inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
+              Open projection
+              <ArrowRight
+                className="size-4 transition-transform duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/projection-card:translate-x-0.5 group-active/projection-card:translate-x-0.5 motion-reduce:transform-none"
+                aria-hidden="true"
+              />
+            </span>
           )}
         </div>
 
@@ -78,7 +81,7 @@ export function PortfolioProjectionChart({
           title="Earning pace today"
           pace={earningPace}
         />
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

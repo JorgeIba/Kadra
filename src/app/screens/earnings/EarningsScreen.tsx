@@ -1,6 +1,11 @@
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
-import { DERIVED_STATUS_LABELS, type Investment } from "@/domain/investments"
+import {
+  DERIVED_STATUSES,
+  DERIVED_STATUS_LABELS,
+  type DerivedStatus,
+  type Investment,
+} from "@/domain/investments"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import {
   EARNED_MONEY_SORT_OPTIONS,
@@ -18,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { formatMxn, formatPercentage } from "@/lib/formatters"
+import { cn } from "@/lib/utils"
 
 interface EarningsScreenProps {
   investments: Investment[]
@@ -58,22 +64,22 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
-          Earned money
+          Earned return
         </p>
         <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
-          Earned by the portfolio.
+          Return earned by the portfolio.
         </h1>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
         <div className="space-y-4 px-4 py-5">
           <div className="space-y-1.5">
-            <p className="text-xs text-muted-foreground">Total earned so far</p>
+            <p className="text-xs text-muted-foreground">Total earned return</p>
             <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
               {formatMxn(snapshot.totalEarnedAmount)}
             </p>
             <p className="text-pretty text-sm leading-6 text-muted-foreground">
-              Includes active and finished investments using earnings produced
+              Includes estimated return from active and finished investments
               through today.
             </p>
           </div>
@@ -101,7 +107,7 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
                 Breakdown by investment
               </h2>
               <p className="text-pretty text-sm leading-6 text-muted-foreground">
-                Ranked by the money each investment has already produced.
+                Ranked by the estimated return each investment has produced.
               </p>
             </div>
 
@@ -154,7 +160,7 @@ function EarningsBreakdownList({
   if (breakdown.length === 0) {
     return (
       <p className="text-pretty text-sm leading-6 text-muted-foreground">
-        Add investments to start tracking earned money.
+        Add investments to start tracking earned return.
       </p>
     )
   }
@@ -169,7 +175,12 @@ function EarningsBreakdownList({
                 <p className="truncate font-ledger text-base text-foreground">
                   {investment.name}
                 </p>
-                <span className="rounded-full bg-secondary px-2 py-1 text-[0.68rem] font-medium text-primary">
+                <span
+                  className={cn(
+                    "rounded-full border px-2 py-1 text-[0.68rem] font-medium",
+                    getStatusBadgeClassName(investment.derivedStatus),
+                  )}
+                >
                   {DERIVED_STATUS_LABELS[investment.derivedStatus]}
                 </span>
               </div>
@@ -193,4 +204,13 @@ function EarningsBreakdownList({
       ))}
     </div>
   )
+}
+
+function getStatusBadgeClassName(status: DerivedStatus) {
+  switch (status) {
+    case DERIVED_STATUSES.active:
+      return "border-success-border bg-success-surface text-success"
+    case DERIVED_STATUSES.finished:
+      return "border-status-neutral-border bg-status-neutral-surface text-status-neutral"
+  }
 }

@@ -29,7 +29,7 @@ export function PortfolioSummaryCard({
             <p className="text-xs leading-none text-muted-foreground">
               Active investments
             </p>
-            <p className="font-ledger text-xl leading-none text-primary tabular-nums">
+            <p className="font-ledger text-xl leading-none text-success tabular-nums">
               {activeInvestments}
             </p>
           </div>

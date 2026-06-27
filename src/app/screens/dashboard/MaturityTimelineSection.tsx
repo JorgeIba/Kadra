@@ -2,6 +2,7 @@ import { CalendarClock } from "lucide-react"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { MaturityTimelineItem } from "@/app/screens/dashboard/maturity-timeline"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface MaturityTimelineSectionProps {
   maturityTimelineItems: MaturityTimelineItem[]
@@ -41,7 +42,12 @@ export function MaturityTimelineSection({
                 {item.institutionName} · Ends {item.endDate}
               </span>
             </span>
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-primary transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/timeline:bg-primary/12 group-active/timeline:bg-primary/14">
+            <span
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-xs font-bold transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                getMaturityBadgeClassName(item.daysRemaining),
+              )}
+            >
               In {item.daysRemaining} days
             </span>
           </Button>
@@ -49,4 +55,16 @@ export function MaturityTimelineSection({
       </div>
     </section>
   )
+}
+
+function getMaturityBadgeClassName(daysRemaining: number) {
+  if (daysRemaining <= 30) {
+    return "border-warning-border bg-warning-surface text-warning group-hover/timeline:bg-warning-surface/80 group-active/timeline:bg-warning-surface/70"
+  }
+
+  if (daysRemaining <= 90) {
+    return "border-info-border bg-info-surface text-info group-hover/timeline:bg-info-surface/80 group-active/timeline:bg-info-surface/70"
+  }
+
+  return "border-status-neutral-border bg-status-neutral-surface text-status-neutral group-hover/timeline:bg-status-neutral-surface/80 group-active/timeline:bg-status-neutral-surface/70"
 }

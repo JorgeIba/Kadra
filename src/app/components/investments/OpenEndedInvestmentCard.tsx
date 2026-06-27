@@ -51,7 +51,7 @@ export function OpenEndedInvestmentCard({
         <p className="font-ledger text-lg leading-none text-foreground tabular-nums">
           {formatMxn(investment.estimatedCurrentValue)}
         </p>
-        <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs text-primary">
+        <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-info-border bg-info-surface px-2 py-1 text-xs text-info">
           Liquid{" "}
           <ArrowUpRight
             className="size-3 transition-transform duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/investment:translate-x-0.5 group-hover/investment:-translate-y-0.5 group-active/investment:translate-x-0.5 group-active/investment:-translate-y-0.5 motion-reduce:transform-none"
