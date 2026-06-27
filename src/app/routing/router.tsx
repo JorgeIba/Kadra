@@ -23,6 +23,7 @@ import {
 } from "@/app/routing/navigation"
 import { getPreviousSectionFromLocation } from "@/app/routing/active-section"
 import { AssetsScreen } from "@/app/screens/assets/AssetsScreen"
+import type { AssetFilterOption } from "@/app/screens/assets/assets-filtering"
 import { DashboardScreen } from "@/app/screens/dashboard/DashboardScreen"
 import { EditInvestmentScreen } from "@/app/screens/edit-investment/EditInvestmentScreen"
 import { EarningsScreen } from "@/app/screens/earnings/EarningsScreen"
@@ -145,6 +146,15 @@ function DashboardRoute({ investments }: { investments: Investment[] }) {
     })
   }
 
+  function handleOpenDistributionFilter(filterOption: AssetFilterOption) {
+    navigate(getSectionPath(APP_SECTIONS.assets), {
+      state: {
+        fromSection: APP_SECTIONS.dashboard,
+        selectedAssetFilter: filterOption,
+      },
+    })
+  }
+
   function handleOpenEarnings() {
     navigate(getEarningsPath(), {
       state: { fromSection: APP_SECTIONS.dashboard },
@@ -161,6 +171,7 @@ function DashboardRoute({ investments }: { investments: Investment[] }) {
     <DashboardScreen
       investments={investments}
       onAddInvestment={handleAddInvestment}
+      onOpenDistributionFilter={handleOpenDistributionFilter}
       onOpenEarnings={handleOpenEarnings}
       onOpenProjection={handleOpenProjection}
       onInvestmentSelect={handleInvestmentSelect}
@@ -200,6 +211,10 @@ function ProjectionRoute({ investments }: { investments: Investment[] }) {
 
 function AssetsRoute({ investments }: { investments: Investment[] }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const selectedAssetFilter = (
+    location.state as { selectedAssetFilter?: AssetFilterOption } | null
+  )?.selectedAssetFilter
 
   function handleAddInvestment() {
     navigate(getSectionPath(APP_SECTIONS.invest), {
@@ -215,6 +230,7 @@ function AssetsRoute({ investments }: { investments: Investment[] }) {
 
   return (
     <AssetsScreen
+      initialFilterOption={selectedAssetFilter}
       investments={investments}
       onAddInvestment={handleAddInvestment}
       onInvestmentSelect={handleInvestmentSelect}

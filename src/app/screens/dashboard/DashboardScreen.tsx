@@ -9,6 +9,7 @@ import {
 import { EarningsExplorationCard } from "@/app/screens/dashboard/EarningsExplorationCard"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
+import type { AssetFilterOption } from "@/app/screens/assets/assets-filtering"
 import { getMaturityTimelineItems } from "@/app/screens/dashboard/maturity-timeline"
 import { MaturityTimelineSection } from "@/app/screens/dashboard/MaturityTimelineSection"
 import { getPortfolioBreakdown } from "@/app/screens/dashboard/portfolio-breakdown"
@@ -24,6 +25,7 @@ import { getPortfolioEarnedMoneySnapshot } from "@/app/screens/earnings/earnings
 interface DashboardScreenProps {
   investments: Investment[]
   onAddInvestment: () => void
+  onOpenDistributionFilter: (filterOption: AssetFilterOption) => void
   onOpenEarnings: () => void
   onOpenProjection: () => void
   onInvestmentSelect: (investmentId: string) => void
@@ -34,6 +36,7 @@ const DASHBOARD_INVESTMENT_PREVIEW_LIMIT = 3
 export function DashboardScreen({
   investments,
   onAddInvestment,
+  onOpenDistributionFilter,
   onOpenEarnings,
   onOpenProjection,
   onInvestmentSelect,
@@ -84,7 +87,10 @@ export function DashboardScreen({
             snapshot={earningsSnapshot}
             onOpenDetails={onOpenEarnings}
           />
-          <PortfolioBreakdownCard breakdown={portfolioBreakdown} />
+          <PortfolioBreakdownCard
+            breakdown={portfolioBreakdown}
+            onOpenFilter={onOpenDistributionFilter}
+          />
           <PortfolioProjectionChart
             earningPace={projectionEarningPace}
             points={projectionPoints}

@@ -32,18 +32,20 @@ import {
 import { formatMxn } from "@/lib/formatters"
 
 interface AssetsScreenProps {
+  initialFilterOption?: AssetFilterOption
   investments: Investment[]
   onAddInvestment: () => void
   onInvestmentSelect: (investmentId: string) => void
 }
 
 export function AssetsScreen({
+  initialFilterOption,
   investments,
   onAddInvestment,
   onInvestmentSelect,
 }: AssetsScreenProps) {
   const [filterOption, setFilterOption] = useState<AssetFilterOption>(
-    ASSET_FILTER_OPTIONS.all,
+    initialFilterOption ?? ASSET_FILTER_OPTIONS.all,
   )
   const [sortOption, setSortOption] = useState<AssetSortOption>(
     ASSET_SORT_OPTIONS.newest,
