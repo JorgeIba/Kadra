@@ -1,3 +1,4 @@
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { formatMxn } from "@/lib/formatters"
 
 export interface PortfolioEarningPace {
@@ -23,14 +24,16 @@ export function PortfolioEarningPaceMetrics({
   pace,
   title,
 }: PortfolioEarningPaceMetricsProps) {
+  const prefersReducedMotion = useReducedMotion() ?? false
+
   return (
     <div className="space-y-3 border-t border-border/70 pt-4">
       <div className="space-y-1">
-        <h3 className="text-sm font-bold leading-tight text-foreground">
+        <h3 className="text-balance text-base font-bold leading-tight text-foreground">
           {title}
         </h3>
         {description === undefined ? null : (
-          <p className="text-xs leading-5 text-muted-foreground">
+          <p className="text-pretty text-sm leading-6 text-muted-foreground">
             {description}
           </p>
         )}
@@ -45,12 +48,48 @@ export function PortfolioEarningPaceMetrics({
             <p className="text-xs leading-none text-muted-foreground">
               {item.label}
             </p>
-            <p className="font-ledger text-base leading-none text-foreground tabular-nums">
-              {formatMxn(pace[item.key])}
-            </p>
+            <AnimatedPaceValue
+              prefersReducedMotion={prefersReducedMotion}
+              value={pace[item.key]}
+            />
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function AnimatedPaceValue({
+  prefersReducedMotion,
+  value,
+}: {
+  prefersReducedMotion: boolean
+  value: number
+}) {
+  const formattedValue = formatMxn(value)
+
+  if (prefersReducedMotion) {
+    return (
+      <p className="font-ledger text-lg leading-none text-foreground tabular-nums">
+        {formattedValue}
+      </p>
+    )
+  }
+
+  return (
+    <div className="relative min-h-5 overflow-hidden">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.p
+          key={formattedValue}
+          className="font-ledger text-lg leading-none text-foreground tabular-nums"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {formattedValue}
+        </motion.p>
+      </AnimatePresence>
     </div>
   )
 }

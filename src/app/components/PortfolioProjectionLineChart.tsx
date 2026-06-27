@@ -1,3 +1,4 @@
+import { useReducedMotion } from "motion/react"
 import {
   CartesianGrid,
   Line,
@@ -31,6 +32,8 @@ export function PortfolioProjectionLineChart({
   className,
   points,
 }: PortfolioProjectionLineChartProps) {
+  const prefersReducedMotion = useReducedMotion() ?? false
+
   return (
     <div className={cn("h-56", className)}>
       <ResponsiveContainer width="100%" height="100%">
@@ -63,6 +66,9 @@ export function PortfolioProjectionLineChart({
           <Line
             type="monotone"
             dataKey="estimatedValue"
+            isAnimationActive={!prefersReducedMotion}
+            animationDuration={360}
+            animationEasing="ease-out"
             stroke="var(--primary)"
             strokeWidth={2}
             dot={{ fill: "var(--primary)", r: 2 }}

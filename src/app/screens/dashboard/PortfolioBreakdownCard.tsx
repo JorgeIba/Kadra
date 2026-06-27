@@ -2,6 +2,7 @@ import type {
   PortfolioBreakdown,
   PortfolioBreakdownItem,
 } from "@/app/screens/dashboard/portfolio-breakdown"
+import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatMxn, formatPercentage } from "@/lib/formatters"
@@ -68,12 +69,7 @@ function BreakdownRow({ item }: { item: PortfolioBreakdownItem }) {
           </p>
         </div>
       </div>
-      <div className="h-1 overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-primary/70"
-          style={{ width: `${item.percentage}%` }}
-        />
-      </div>
+      <AnimatedProgressBar value={item.percentage} />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { ArrowLeft, CalendarDays } from "lucide-react"
+import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { PortfolioEarningPaceMetrics } from "@/app/components/PortfolioEarningPaceMetrics"
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
 import {
@@ -56,7 +57,7 @@ export function ProjectionScreen({
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">Projection</p>
-        <h1 className="font-ledger text-3xl font-normal tracking-normal text-foreground">
+        <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
           Projected portfolio value.
         </h1>
       </div>
@@ -64,11 +65,11 @@ export function ProjectionScreen({
       <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
         <div className="space-y-4 px-4 py-5">
           <div className="space-y-2">
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-pretty text-sm leading-6 text-muted-foreground">
               By {formatDisplayDate(snapshot.targetDate)}, this portfolio is
               projected to earn
             </p>
-            <p className="font-ledger text-3xl leading-none text-foreground tabular-nums">
+            <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
               {formatMxn(snapshot.projectedEarnings)}
             </p>
             <p className="text-sm leading-6 text-muted-foreground">
@@ -114,10 +115,10 @@ export function ProjectionScreen({
 
         <div className="space-y-5 border-t border-border/70 px-4 py-5">
           <div className="space-y-2">
-            <h2 className="text-base font-bold leading-tight text-foreground">
+            <h2 className="text-balance text-base font-bold leading-tight text-foreground">
               Value path
             </h2>
-            <p className="text-sm leading-6 text-muted-foreground">
+            <p className="text-pretty text-sm leading-6 text-muted-foreground">
               Assumes no future contributions or renewals. Fixed-term
               investments stop earning at maturity.
             </p>
@@ -147,10 +148,10 @@ export function ProjectionScreen({
 
         <div className="space-y-5 border-t border-border/70 px-4 py-5">
           <div className="space-y-2">
-            <h2 className="text-base font-bold leading-tight text-foreground">
+            <h2 className="text-balance text-base font-bold leading-tight text-foreground">
               Projected earnings by investment
             </h2>
-            <p className="text-sm leading-6 text-muted-foreground">
+            <p className="text-pretty text-sm leading-6 text-muted-foreground">
               Ranked by expected earnings between today and the target date.
             </p>
           </div>
@@ -177,7 +178,7 @@ function ProjectionBreakdown({
 }) {
   if (breakdown.length === 0) {
     return (
-      <p className="text-sm leading-6 text-muted-foreground">
+      <p className="text-pretty text-sm leading-6 text-muted-foreground">
         Add investments to start projecting future earnings.
       </p>
     )
@@ -207,12 +208,7 @@ function ProjectionBreakdown({
             </div>
           </div>
 
-          <div className="h-1 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary/70"
-              style={{ width: `${investment.percentage}%` }}
-            />
-          </div>
+          <AnimatedProgressBar value={investment.percentage} />
         </div>
       ))}
     </div>

@@ -15,11 +15,11 @@ export function DashboardSectionHeader({
         </p>
       )}
       <div className="space-y-1">
-        <h2 className="text-base font-bold leading-tight text-foreground">
+        <h2 className="text-balance text-base font-bold leading-tight text-foreground">
           {title}
         </h2>
         {description === undefined ? null : (
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-pretty text-sm leading-6 text-muted-foreground">
             {description}
           </p>
         )}

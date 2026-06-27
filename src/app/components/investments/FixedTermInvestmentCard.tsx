@@ -1,5 +1,6 @@
 import { Landmark } from "lucide-react"
 import type { FixedTermInvestmentSummary } from "@/domain/investments"
+import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { formatMxn, formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
@@ -52,11 +53,8 @@ export function FixedTermInvestmentCard({
           {formatMxn(investment.estimatedCurrentValue)}
         </p>
         <div className="mt-3 flex items-center gap-2">
-          <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary/70"
-              style={{ width: `${investment.progressPercentage}%` }}
-            />
+          <div className="flex-1">
+            <AnimatedProgressBar value={investment.progressPercentage} />
           </div>
           <p className="text-xs text-muted-foreground">
             {Math.round(investment.progressPercentage)}%

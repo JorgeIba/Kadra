@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { DERIVED_STATUS_LABELS, type Investment } from "@/domain/investments"
+import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import {
   EARNED_MONEY_SORT_OPTIONS,
   getEarnedMoneySortLabel,
@@ -59,7 +60,7 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
         <p className="text-sm font-medium text-muted-foreground">
           Earned money
         </p>
-        <h1 className="font-ledger text-3xl font-normal tracking-normal text-foreground">
+        <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
           Earned by the portfolio.
         </h1>
       </div>
@@ -71,7 +72,7 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
             <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
               {formatMxn(snapshot.totalEarnedAmount)}
             </p>
-            <p className="text-sm leading-6 text-muted-foreground">
+            <p className="text-pretty text-sm leading-6 text-muted-foreground">
               Includes active and finished investments using earnings produced
               through today.
             </p>
@@ -96,10 +97,10 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
         <div className="space-y-6 border-t border-border/70 px-4 py-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
-              <h2 className="text-base font-bold leading-tight text-foreground">
+              <h2 className="text-balance text-base font-bold leading-tight text-foreground">
                 Breakdown by investment
               </h2>
-              <p className="text-sm leading-6 text-muted-foreground">
+              <p className="text-pretty text-sm leading-6 text-muted-foreground">
                 Ranked by the money each investment has already produced.
               </p>
             </div>
@@ -152,7 +153,7 @@ function EarningsBreakdownList({
 }) {
   if (breakdown.length === 0) {
     return (
-      <p className="text-sm leading-6 text-muted-foreground">
+      <p className="text-pretty text-sm leading-6 text-muted-foreground">
         Add investments to start tracking earned money.
       </p>
     )
@@ -187,12 +188,7 @@ function EarningsBreakdownList({
             </div>
           </div>
 
-          <div className="h-1 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary/70"
-              style={{ width: `${investment.percentage}%` }}
-            />
-          </div>
+          <AnimatedProgressBar value={investment.percentage} />
         </div>
       ))}
     </div>

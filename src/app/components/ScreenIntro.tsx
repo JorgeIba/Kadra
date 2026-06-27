@@ -30,11 +30,11 @@ export function ScreenIntro({
             {eyebrow}
           </p>
         )}
-        <h1 className="font-ledger text-3xl font-normal tracking-normal">
+        <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal">
           {title}
         </h1>
         {description === undefined ? null : (
-          <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+          <p className="max-w-sm text-pretty text-sm leading-6 text-muted-foreground">
             {description}
           </p>
         )}
