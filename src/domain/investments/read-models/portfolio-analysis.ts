@@ -21,22 +21,27 @@ export interface PortfolioAnalysis {
 export function analyzePortfolio(
   investments: ResolvedInvestment[],
 ): PortfolioAnalysis {
+  const activeInvestments = investments.filter((investment) => {
+    return investment.derivedStatus === DERIVED_STATUSES.active
+  })
+
   return {
     investments,
     investmentCount: investments.length,
-    totalEstimatedCurrentValue: investments.reduce((total, investment) => {
-      return total + investment.estimatedCurrentValue
-    }, 0),
+    totalEstimatedCurrentValue: activeInvestments.reduce(
+      (total, investment) => {
+        return total + investment.estimatedCurrentValue
+      },
+      0,
+    ),
     totalEstimatedAccruedReturn: investments.reduce((total, investment) => {
       return total + investment.estimatedAccruedReturn
     }, 0),
-    activeInvestmentCount: investments.filter((investment) => {
-      return investment.derivedStatus === DERIVED_STATUSES.active
-    }).length,
+    activeInvestmentCount: activeInvestments.length,
     finishedInvestmentCount: investments.filter((investment) => {
       return investment.derivedStatus === DERIVED_STATUSES.finished
     }).length,
-    totalEstimatedDailyReturn: investments.reduce((total, investment) => {
+    totalEstimatedDailyReturn: activeInvestments.reduce((total, investment) => {
       return (
         total +
         getEstimatedInterestForDays(
@@ -46,23 +51,29 @@ export function analyzePortfolio(
         )
       )
     }, 0),
-    totalEstimatedMonthlyReturn: investments.reduce((total, investment) => {
-      return (
-        total +
-        getEstimatedMonthlyInterest(
-          investment.currentInvestedAmount,
-          investment.annualRate,
+    totalEstimatedMonthlyReturn: activeInvestments.reduce(
+      (total, investment) => {
+        return (
+          total +
+          getEstimatedMonthlyInterest(
+            investment.currentInvestedAmount,
+            investment.annualRate,
+          )
         )
-      )
-    }, 0),
-    totalEstimatedYearlyReturn: investments.reduce((total, investment) => {
-      return (
-        total +
-        getEstimatedYearlyInterest(
-          investment.currentInvestedAmount,
-          investment.annualRate,
+      },
+      0,
+    ),
+    totalEstimatedYearlyReturn: activeInvestments.reduce(
+      (total, investment) => {
+        return (
+          total +
+          getEstimatedYearlyInterest(
+            investment.currentInvestedAmount,
+            investment.annualRate,
+          )
         )
-      )
-    }, 0),
+      },
+      0,
+    ),
   }
 }

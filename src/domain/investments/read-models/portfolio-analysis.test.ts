@@ -24,4 +24,29 @@ describe("portfolio analysis", () => {
     expect(analysis.totalEstimatedMonthlyReturn).toBeCloseTo(360.18)
     expect(analysis.totalEstimatedYearlyReturn).toBeCloseTo(4_382.19)
   })
+
+  it("excludes finished investments from current totals and earning pace", () => {
+    const asOfDate = new Date("2026-06-05T12:00:00.000Z")
+    const resolvedInvestments = [fixedInvestment, openEndedInvestment].map(
+      (investment) => resolveInvestment(investment, asOfDate),
+    )
+    const analysis = analyzePortfolio(resolvedInvestments)
+
+    expect(analysis.investmentCount).toBe(2)
+    expect(analysis.activeInvestmentCount).toBe(1)
+    expect(analysis.finishedInvestmentCount).toBe(1)
+    expect(analysis.totalEstimatedAccruedReturn).toBeGreaterThan(0)
+    expect(analysis.totalEstimatedCurrentValue).toBeCloseTo(
+      resolvedInvestments[1]!.estimatedCurrentValue,
+    )
+    expect(analysis.totalEstimatedDailyReturn).toBeCloseTo(
+      getExpectedActiveOnlyDailyReturn(
+        resolvedInvestments[1]!.currentInvestedAmount,
+      ),
+    )
+  })
 })
+
+function getExpectedActiveOnlyDailyReturn(currentInvestedAmount: number) {
+  return (currentInvestedAmount * 7.3) / 100 / 365
+}

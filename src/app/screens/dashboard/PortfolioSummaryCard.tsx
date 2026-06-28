@@ -16,7 +16,7 @@ export function PortfolioSummaryCard({
     <Card className="rounded-lg bg-secondary/70">
       <CardHeader>
         <CardTitle className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Total portfolio value
+          Active portfolio value
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-7">

@@ -86,7 +86,7 @@ export function AssetsScreen({
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1.5">
                   <p className="text-xs leading-none text-muted-foreground">
-                    Current value across all investments
+                    Current value across active investments
                   </p>
                   <p className="font-ledger text-4xl leading-none tabular-nums">
                     {formatMxn(totalValue)}

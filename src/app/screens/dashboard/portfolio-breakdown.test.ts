@@ -44,15 +44,15 @@ describe("portfolio breakdown", () => {
     expect(breakdown.byType).toEqual([
       expect.objectContaining({
         count: 2,
-        estimatedValue: expect.closeTo(20_753.424657),
+        estimatedValue: expect.closeTo(10_424.657534),
         label: "Fixed term",
-        percentage: expect.closeTo(66.73352469619994),
+        percentage: expect.closeTo(50.190497664767406),
       }),
       expect.objectContaining({
         count: 1,
         estimatedValue: expect.closeTo(10_345.524112),
         label: "Open ended",
-        percentage: expect.closeTo(33.26647530380005),
+        percentage: expect.closeTo(49.809502335232594),
       }),
     ])
     expect(breakdown.byStatus).toEqual([
@@ -60,13 +60,13 @@ describe("portfolio breakdown", () => {
         count: 2,
         estimatedValue: expect.closeTo(20_770.181646),
         label: "Active",
-        percentage: expect.closeTo(66.78740751093414),
+        percentage: expect.closeTo(100),
       }),
       expect.objectContaining({
         count: 1,
-        estimatedValue: expect.closeTo(10_328.767123),
+        estimatedValue: 0,
         label: "Finished",
-        percentage: expect.closeTo(33.21259248906585),
+        percentage: 0,
       }),
     ])
   })

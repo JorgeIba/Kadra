@@ -58,7 +58,7 @@ export function ProjectionScreen({
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">Projection</p>
         <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
-          Projected portfolio value.
+          Projected active portfolio value.
         </h1>
       </div>
 
@@ -66,8 +66,8 @@ export function ProjectionScreen({
         <div className="space-y-4 px-4 py-5">
           <div className="space-y-2">
             <p className="text-pretty text-sm leading-6 text-muted-foreground">
-              By {formatDisplayDate(snapshot.targetDate)}, this portfolio is
-              projected to earn
+              By {formatDisplayDate(snapshot.targetDate)}, active investments
+              are projected to earn
             </p>
             <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
               {formatMxn(snapshot.projectedEarnings)}
@@ -120,7 +120,7 @@ export function ProjectionScreen({
             </h2>
             <p className="text-pretty text-sm leading-6 text-muted-foreground">
               Assumes no future contributions or renewals. Fixed-term
-              investments stop earning at maturity.
+              investments stop earning and leave the active total at maturity.
             </p>
           </div>
 
