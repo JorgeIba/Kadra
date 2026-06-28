@@ -189,6 +189,13 @@ body {
       animation-name: app-view-enter;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+    }
+  }
 }
 
 @keyframes app-view-enter {
