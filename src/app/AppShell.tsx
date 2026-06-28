@@ -1,9 +1,9 @@
 import { useLayoutEffect, useState } from "react"
-import { motion, useReducedMotion } from "motion/react"
 import { useLocation, useNavigationType, useOutlet } from "react-router"
 import { BottomNav } from "@/app/BottomNav"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import { usePwaUpdate } from "@/app/pwa/usePwaUpdate"
+import { NavigationAnimationContext } from "@/app/routing/navigation-animation"
 import { TopBar } from "@/app/TopBar"
 import { useActiveAppSection } from "@/app/routing/useActiveAppSection"
 
@@ -11,48 +11,20 @@ interface AppShellProps {
   onResetLocalData: () => void
 }
 
-function getScreenMotionProps(prefersReducedMotion: boolean) {
-  if (prefersReducedMotion) {
-    return {
-      initial: { opacity: 1 },
-      animate: { opacity: 1 },
-      exit: { opacity: 1 },
-      transition: { duration: 0 },
-    }
-  }
-
-  return {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -4 },
-    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const },
-  }
-}
-
 function AnimatedOutlet() {
   const location = useLocation()
   const navigationType = useNavigationType()
   const outlet = useOutlet()
-  const prefersReducedMotion = useReducedMotion() ?? false
-  const screenMotionProps = getScreenMotionProps(prefersReducedMotion)
-  const shouldAnimateScreen = !prefersReducedMotion && navigationType !== "POP"
+  const shouldAnimateOnMount = navigationType !== "POP"
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
   }, [location.pathname])
 
-  if (!shouldAnimateScreen) {
-    return <div className="w-full">{outlet}</div>
-  }
-
   return (
-    <motion.div
-      key={location.pathname}
-      className="w-full"
-      {...screenMotionProps}
-    >
-      {outlet}
-    </motion.div>
+    <NavigationAnimationContext.Provider value={shouldAnimateOnMount}>
+      <div className="w-full">{outlet}</div>
+    </NavigationAnimationContext.Provider>
   )
 }
 

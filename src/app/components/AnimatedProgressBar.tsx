@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "motion/react"
+import { useShouldAnimateOnMount } from "@/app/routing/navigation-animation"
 import { cn } from "@/lib/utils"
 
 const PROGRESS_TONE_CLASSES = {
@@ -21,6 +22,7 @@ export function AnimatedProgressBar({
   value,
 }: AnimatedProgressBarProps) {
   const prefersReducedMotion = useReducedMotion() ?? false
+  const shouldAnimateOnMount = useShouldAnimateOnMount()
   const boundedValue = Math.min(Math.max(value, 0), 100)
 
   return (
@@ -30,7 +32,9 @@ export function AnimatedProgressBar({
           "h-full origin-left rounded-full",
           PROGRESS_TONE_CLASSES[tone],
         )}
-        initial={prefersReducedMotion ? false : { scaleX: 0 }}
+        initial={
+          prefersReducedMotion || !shouldAnimateOnMount ? false : { scaleX: 0 }
+        }
         animate={{ scaleX: boundedValue / 100 }}
         transition={{
           duration: prefersReducedMotion ? 0 : 0.38,

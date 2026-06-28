@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { useShouldAnimateOnMount } from "@/app/routing/navigation-animation"
 import { formatDisplayDate, formatMxn } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
@@ -33,6 +34,8 @@ export function PortfolioProjectionLineChart({
   points,
 }: PortfolioProjectionLineChartProps) {
   const prefersReducedMotion = useReducedMotion() ?? false
+  const shouldAnimateOnMount = useShouldAnimateOnMount()
+  const shouldAnimateChart = !prefersReducedMotion && shouldAnimateOnMount
 
   return (
     <div className={cn("h-56", className)}>
@@ -66,7 +69,7 @@ export function PortfolioProjectionLineChart({
           <Line
             type="monotone"
             dataKey="estimatedValue"
-            isAnimationActive={!prefersReducedMotion}
+            isAnimationActive={shouldAnimateChart}
             animationDuration={360}
             animationEasing="ease-out"
             stroke="var(--primary)"
