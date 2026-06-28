@@ -4,8 +4,10 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  useRouteError,
 } from "react-router"
 import { AppShell } from "@/app/AppShell"
+import { AppErrorFallback } from "@/app/components/AppErrorBoundary"
 import { InvestmentsProvider } from "@/app/context/InvestmentsProvider"
 import { useInvestments } from "@/app/context/investments-context"
 import { APP_PATHS, APP_ROUTE_PATHS } from "@/app/routing/navigation"
@@ -22,7 +24,7 @@ import {
 
 const appRouter = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<AppShellRoute />}>
+    <Route element={<AppShellRoute />} errorElement={<AppRouteError />}>
       <Route index element={<DashboardRoute />} />
       <Route path={APP_ROUTE_PATHS.assets} element={<AssetsRoute />} />
       <Route path={APP_ROUTE_PATHS.invest} element={<InvestRoute />} />
@@ -57,4 +59,20 @@ function AppShellRoute() {
   const { resetLocalData } = useInvestments()
 
   return <AppShell onResetLocalData={resetLocalData} />
+}
+
+function AppRouteError() {
+  const routeError = useRouteError()
+  const error =
+    routeError instanceof Error
+      ? routeError
+      : new Error("Unknown route rendering error")
+
+  return (
+    <AppErrorFallback
+      error={error}
+      primaryActionLabel="Go home"
+      onPrimaryAction={() => window.location.assign(APP_PATHS.dashboard)}
+    />
+  )
 }
