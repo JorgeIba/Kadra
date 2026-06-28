@@ -35,6 +35,9 @@ This document holds future ideas and deferred work that are worth remembering, b
 - more detailed payout schedule anchoring, such as weekly-on-Tuesday or monthly-on-specific-day
 - custom production domain after the free Vercel URL is validated on iPhone
 - Vercel Speed Insights or similar real-user performance monitoring after MVP usage starts
+- if route transitions ever make the top bar, bottom nav, or app shell flicker,
+  investigate the root-level View Transition as a likely cause; the fix may be
+  scoping the transition to the routed screen/outlet instead of `root`
 
 ## Notes
 

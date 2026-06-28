@@ -22,6 +22,7 @@ export function BottomNav({ activeSection }: BottomNavProps) {
             <Link
               key={item.value}
               to={item.path}
+              viewTransition
               state={
                 item.value === APP_SECTIONS.invest
                   ? { fromSection: activeSection }

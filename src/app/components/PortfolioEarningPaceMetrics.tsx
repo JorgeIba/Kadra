@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useShouldAnimateOnMount } from "@/app/routing/navigation-animation"
 import { formatMxn } from "@/lib/formatters"
 
 export interface PortfolioEarningPace {
@@ -25,6 +26,7 @@ export function PortfolioEarningPaceMetrics({
   title,
 }: PortfolioEarningPaceMetricsProps) {
   const prefersReducedMotion = useReducedMotion() ?? false
+  const shouldAnimateOnMount = useShouldAnimateOnMount()
 
   return (
     <div className="space-y-3 border-t border-border/70 pt-4">
@@ -50,6 +52,7 @@ export function PortfolioEarningPaceMetrics({
             </p>
             <AnimatedPaceValue
               prefersReducedMotion={prefersReducedMotion}
+              shouldAnimateOnMount={shouldAnimateOnMount}
               value={pace[item.key]}
             />
           </div>
@@ -61,9 +64,11 @@ export function PortfolioEarningPaceMetrics({
 
 function AnimatedPaceValue({
   prefersReducedMotion,
+  shouldAnimateOnMount,
   value,
 }: {
   prefersReducedMotion: boolean
+  shouldAnimateOnMount: boolean
   value: number
 }) {
   const formattedValue = formatMxn(value)
@@ -78,7 +83,7 @@ function AnimatedPaceValue({
 
   return (
     <div className="relative min-h-5 overflow-hidden">
-      <AnimatePresence mode="popLayout" initial={false}>
+      <AnimatePresence mode="popLayout" initial={shouldAnimateOnMount}>
         <motion.p
           key={formattedValue}
           className="font-ledger text-lg leading-none text-foreground tabular-nums"
