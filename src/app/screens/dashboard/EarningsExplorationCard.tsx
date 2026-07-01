@@ -1,5 +1,5 @@
-import { ArrowRight } from "lucide-react"
 import type { PortfolioEarnedMoneySnapshot } from "@/app/screens/earnings/earnings-view-model"
+import { DashboardActionHint } from "@/app/screens/dashboard/DashboardActionHint"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import { formatMxn } from "@/lib/formatters"
 
@@ -24,13 +24,12 @@ export function EarningsExplorationCard({
             title="Accrued earnings"
             description="Estimated return produced through today, including finished investments."
           />
-          <span className="mt-1 inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
-            Review earnings
-            <ArrowRight
-              className="size-4 transition-transform duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/earnings-card:translate-x-0.5 group-active/earnings-card:translate-x-0.5 motion-reduce:transform-none"
-              aria-hidden="true"
-            />
-          </span>
+          <DashboardActionHint
+            className="mt-1"
+            iconClassName="group-hover/earnings-card:translate-x-0.5 group-active/earnings-card:translate-x-0.5"
+          >
+            Open report
+          </DashboardActionHint>
         </div>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-5">

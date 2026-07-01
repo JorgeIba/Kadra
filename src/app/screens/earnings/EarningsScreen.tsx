@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpDown, Building2 } from "lucide-react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
+import { TrustNotesPopover } from "@/app/components/TrustNotes"
 import {
   DERIVED_STATUSES,
   DERIVED_STATUS_LABELS,
@@ -42,6 +43,11 @@ const EARNED_MONEY_SORT_CHOICES = [
   EARNED_MONEY_SORT_OPTIONS.status,
 ] as const satisfies ReadonlyArray<EarnedMoneySortOption>
 
+const EARNINGS_TRUST_NOTES = [
+  "Estimated from the investments saved on this device.",
+  "Historical total includes active and finished investments.",
+]
+
 export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
   const [sortBy, setSortBy] = useState<EarnedMoneySortOption>(
     EARNED_MONEY_SORT_OPTIONS.highestEarned,
@@ -64,59 +70,65 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
     <section className="space-y-6">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
         <ArrowLeft className="size-4" aria-hidden="true" />
-        Back
+        Dashboard
       </Button>
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
-          Earned return
+          Dashboard report
         </p>
         <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
           Return earned by the portfolio.
         </h1>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
-        <div className="space-y-4 px-4 py-5">
-          <div className="space-y-1.5">
-            <p className="text-xs text-muted-foreground">Total earned return</p>
-            <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
-              {formatMxn(snapshot.totalEarnedAmount)}
-            </p>
-            <p className="text-pretty text-sm leading-6 text-muted-foreground">
-              Includes estimated return from active and finished investments
-              through today.
-            </p>
+      <div className="space-y-6">
+        <section className="overflow-hidden border-y border-border/70">
+          <div className="py-5">
+            <div className="space-y-1.5">
+              <p className="text-xs text-muted-foreground">
+                Total earned return
+              </p>
+              <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
+                {formatMxn(snapshot.totalEarnedAmount)}
+              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-pretty text-sm leading-6 text-muted-foreground">
+                  Estimated return produced through today.
+                </p>
+                <TrustNotesPopover
+                  label="Earned return notes"
+                  notes={EARNINGS_TRUST_NOTES}
+                />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-3 border-t border-border/70">
-          <SummaryMetric
-            label="Investments"
-            value={String(snapshot.investmentCount)}
-          />
-          <SummaryMetric
-            label="Active"
-            value={String(snapshot.activeInvestmentCount)}
-          />
-          <SummaryMetric
-            label="Finished"
-            value={String(snapshot.finishedInvestmentCount)}
-          />
-        </div>
+          <div className="grid grid-cols-3 border-t border-border/70 bg-background/20">
+            <SummaryMetric
+              label="Investments"
+              value={String(snapshot.investmentCount)}
+            />
+            <SummaryMetric
+              label="Active"
+              value={String(snapshot.activeInvestmentCount)}
+            />
+            <SummaryMetric
+              label="Finished"
+              value={String(snapshot.finishedInvestmentCount)}
+            />
+          </div>
+        </section>
 
-        <div className="space-y-6 border-t border-border/70 px-4 py-5">
+        <section className="space-y-6 border-t border-border/70 pt-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
               <h2 className="text-balance text-base font-bold leading-tight text-foreground">
                 Breakdown by investment
               </h2>
-              <p className="text-pretty text-sm leading-6 text-muted-foreground">
-                Ranked by the estimated return each investment has produced.
-              </p>
             </div>
 
-            <div className="grid w-full min-w-0 grid-cols-2 gap-2 rounded-lg border border-border/70 bg-background/35 p-2 sm:w-auto sm:min-w-96">
+            <div className="grid w-full min-w-0 grid-cols-2 gap-2 rounded-lg border border-border/70 bg-card/45 p-2.5 sm:w-auto sm:min-w-96">
               <LabeledSelectControl
                 ariaLabel="Sort earned return breakdown"
                 fallbackLabel="Select sort"
@@ -148,7 +160,7 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
               totalEarnedAmount={snapshot.totalEarnedAmount}
             />
           </AnimatedListSurface>
-        </div>
+        </section>
       </div>
     </section>
   )

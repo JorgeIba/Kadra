@@ -94,8 +94,8 @@ export function AssetsScreen({
         />
       ) : (
         <div className="space-y-5">
-          <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
-            <div className="px-4 py-5">
+          <div className="space-y-3">
+            <div className="rounded-lg border border-border bg-card px-4 py-5 text-card-foreground">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1.5">
                   <p className="text-xs leading-none text-muted-foreground">
@@ -111,40 +111,44 @@ export function AssetsScreen({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 border-t border-border/70 bg-background/25 px-4 py-4 sm:grid-cols-3">
-              <LabeledSelectControl
-                ariaLabel="Filter investments"
-                fallbackLabel="Select filter"
-                icon={<Filter className="size-3.5" aria-hidden="true" />}
-                label="Filter"
-                options={ASSET_FILTER_OPTION_VALUES}
-                value={filterOption}
-                getOptionLabel={(option) => ASSET_FILTER_OPTION_LABELS[option]}
-                onValueChange={setFilterOption}
-              />
+            <div className="rounded-lg border border-border/70 bg-card/45 p-3">
+              <div className="grid grid-cols-2 gap-2">
+                <LabeledSelectControl
+                  ariaLabel="Filter investments"
+                  fallbackLabel="Select filter"
+                  icon={<Filter className="size-3.5" aria-hidden="true" />}
+                  label="Filter"
+                  options={ASSET_FILTER_OPTION_VALUES}
+                  value={filterOption}
+                  getOptionLabel={(option) =>
+                    ASSET_FILTER_OPTION_LABELS[option]
+                  }
+                  onValueChange={setFilterOption}
+                />
 
-              <LabeledSelectControl
-                ariaLabel="Sort investments"
-                fallbackLabel="Select sort"
-                icon={<ArrowUpDown className="size-3.5" aria-hidden="true" />}
-                label="Sort by"
-                options={ASSET_SORT_OPTION_VALUES}
-                value={sortOption}
-                getOptionLabel={(option) => ASSET_SORT_OPTION_LABELS[option]}
-                onValueChange={setSortOption}
-              />
+                <LabeledSelectControl
+                  ariaLabel="Sort investments"
+                  fallbackLabel="Select sort"
+                  icon={<ArrowUpDown className="size-3.5" aria-hidden="true" />}
+                  label="Sort by"
+                  options={ASSET_SORT_OPTION_VALUES}
+                  value={sortOption}
+                  getOptionLabel={(option) => ASSET_SORT_OPTION_LABELS[option]}
+                  onValueChange={setSortOption}
+                />
 
-              <LabeledSelectControl
-                ariaLabel="Group investments"
-                className="col-span-2 sm:col-span-1"
-                fallbackLabel="Select grouping"
-                icon={<Building2 className="size-3.5" aria-hidden="true" />}
-                label="Group by"
-                options={ASSET_GROUP_BY_OPTION_VALUES}
-                value={groupByOption}
-                getOptionLabel={(option) => ASSET_GROUP_BY_LABELS[option]}
-                onValueChange={setGroupByOption}
-              />
+                <LabeledSelectControl
+                  ariaLabel="Change asset list view"
+                  className="col-span-2"
+                  fallbackLabel="Select view"
+                  icon={<Building2 className="size-3.5" aria-hidden="true" />}
+                  label="View"
+                  options={ASSET_GROUP_BY_OPTION_VALUES}
+                  value={groupByOption}
+                  getOptionLabel={(option) => ASSET_GROUP_BY_LABELS[option]}
+                  onValueChange={setGroupByOption}
+                />
+              </div>
             </div>
           </div>
 

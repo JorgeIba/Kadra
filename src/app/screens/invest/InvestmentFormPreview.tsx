@@ -11,11 +11,12 @@ export function InvestmentFormPreview({
 }: InvestmentFormPreviewProps) {
   if (investment === null) {
     return (
-      <Card className="border-dashed border-primary/20 bg-primary/5">
+      <Card className="border-dashed border-border/80 bg-card/45">
         <CardContent className="space-y-2">
           <p className="text-sm font-bold">Projection preview</p>
           <p className="text-sm leading-6 text-muted-foreground">
-            Complete the required fields to unlock projection values.
+            Add the required terms and Trafin will estimate value, return, and
+            maturity progress before you save.
           </p>
         </CardContent>
       </Card>

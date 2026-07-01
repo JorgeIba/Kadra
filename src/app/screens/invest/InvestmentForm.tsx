@@ -72,6 +72,25 @@ const FORM_FIELD_IDS = {
   startDate: "start-date",
 } as const
 
+const SAVE_REQUIREMENTS = [
+  { field: "name", label: "name" },
+  { field: "institutionName", label: "institution" },
+  { field: "contributionAmount", label: "amount" },
+  { field: "annualRate", label: "annual rate" },
+  { field: "startDate", label: "start date" },
+  {
+    field: "endDate",
+    investmentType: INVESTMENT_TYPES.fixedTerm,
+    label: "end date",
+  },
+] as const satisfies ReadonlyArray<SaveRequirement>
+
+type SaveRequirement = {
+  field: keyof InvestmentFormValues
+  investmentType?: InvestmentType
+  label: string
+}
+
 interface InvestmentFormProps {
   institutionSuggestions?: string[]
   initialValues?: InvestmentFormValues
@@ -141,13 +160,16 @@ export function InvestmentForm({
           return frequency !== PAYMENT_FREQUENCIES.atMaturity
         })
       : PAYMENT_FREQUENCY_OPTIONS
+  const submitGuidance = isValid
+    ? undefined
+    : getSubmitGuidance(previewValues, investmentType)
 
   return (
     <>
-      <form className="space-y-4" onSubmit={handleSubmit(handleValidSubmit)}>
-        <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
+      <form className="space-y-6" onSubmit={handleSubmit(handleValidSubmit)}>
+        <div className="border-y border-border/70">
           <FormSection
-            title="Basic information"
+            title="Identity"
             description="Name the investment and where the money lives."
           >
             <Field
@@ -475,8 +497,9 @@ export function InvestmentForm({
           <FormSection
             title="Notes"
             description="Optional context for future you."
+            isOptional
           >
-            <Field htmlFor={FORM_FIELD_IDS.notes} label="Notes">
+            <Field htmlFor={FORM_FIELD_IDS.notes} label="Private note">
               <Textarea
                 id={FORM_FIELD_IDS.notes}
                 placeholder="Example: rate renewal expected after maturity."
@@ -488,8 +511,18 @@ export function InvestmentForm({
 
         <InvestmentFormPreview investment={previewInvestment} />
 
-        <div className="grid gap-2">
-          <Button type="submit" className="w-full" disabled={!isValid}>
+        <div className="space-y-3">
+          {submitGuidance === undefined ? null : (
+            <p className="rounded-lg border border-border/70 bg-card/45 px-3 py-2 text-xs leading-5 text-muted-foreground">
+              {submitGuidance}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full disabled:border-border disabled:bg-muted/45 disabled:text-muted-foreground disabled:shadow-none"
+            disabled={!isValid}
+          >
             {submitLabel}
           </Button>
 
@@ -604,18 +637,32 @@ function InstitutionCombobox({
 function FormSection({
   children,
   description,
+  isOptional = false,
   title,
 }: {
   children: ReactNode
   description: string
+  isOptional?: boolean
   title: string
 }) {
   return (
-    <section className="space-y-4 border-t border-border/70 px-4 py-4 first:border-t-0">
-      <div className="space-y-1">
-        <h2 className="text-base font-bold leading-tight text-foreground">
-          {title}
-        </h2>
+    <section
+      className={cn(
+        "space-y-4 border-t border-border/70 py-5 first:border-t-0",
+        isOptional && "pb-4",
+      )}
+    >
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold leading-tight text-foreground">
+            {title}
+          </h2>
+          {isOptional ? (
+            <span className="rounded-full border border-border/70 px-2 py-0.5 text-[0.68rem] font-medium text-muted-foreground">
+              Optional
+            </span>
+          ) : null}
+        </div>
         <p className="text-sm leading-6 text-muted-foreground">{description}</p>
       </div>
       <div className="space-y-4">{children}</div>
@@ -656,4 +703,52 @@ function getFieldAccessibilityProps(fieldId: string, error?: string) {
     "aria-describedby": error === undefined ? undefined : `${fieldId}-error`,
     "aria-invalid": error !== undefined,
   }
+}
+
+function getSubmitGuidance(
+  values: Partial<InvestmentFormValues>,
+  investmentType: InvestmentType | undefined,
+) {
+  const missingFields = SAVE_REQUIREMENTS.filter((requirement) =>
+    isRequirementMissing(requirement, values, investmentType),
+  ).map((requirement) => requirement.label)
+
+  if (missingFields.length > 0) {
+    return `Complete ${formatInlineList(missingFields)} to save this investment.`
+  }
+
+  return "Review the highlighted fields to save this investment."
+}
+
+function isRequirementMissing(
+  requirement: SaveRequirement,
+  values: Partial<InvestmentFormValues>,
+  investmentType: InvestmentType | undefined,
+) {
+  if (
+    requirement.investmentType !== undefined &&
+    requirement.investmentType !== investmentType
+  ) {
+    return false
+  }
+
+  const value = values[requirement.field]
+
+  if (typeof value === "number") {
+    return !Number.isFinite(value)
+  }
+
+  return typeof value !== "string" || value.trim() === ""
+}
+
+function formatInlineList(items: string[]) {
+  if (items.length === 1) {
+    return items[0]
+  }
+
+  if (items.length === 2) {
+    return `${items[0]} and ${items[1]}`
+  }
+
+  return `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`
 }

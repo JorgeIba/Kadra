@@ -6,6 +6,7 @@ import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
 import { PortfolioEarningPaceMetrics } from "@/app/components/PortfolioEarningPaceMetrics"
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
+import { TrustNotesPopover } from "@/app/components/TrustNotes"
 import {
   compareCalendarDatesAscending,
   isCalendarDateString,
@@ -39,6 +40,12 @@ interface ProjectionScreenProps {
   onBack: () => void
 }
 
+const PROJECTION_TRUST_NOTES = [
+  "Uses the investments, contributions, and rates saved on this device.",
+  "Assumes no future contributions, renewals, or transfers.",
+  "Finished fixed-term investments leave active value at maturity.",
+]
+
 export function ProjectionScreen({
   investments,
   onBack,
@@ -71,75 +78,86 @@ export function ProjectionScreen({
     <section className="space-y-6">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
         <ArrowLeft className="size-4" aria-hidden="true" />
-        Back
+        Dashboard
       </Button>
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">Projection</p>
+        <p className="text-sm font-medium text-muted-foreground">
+          Dashboard report
+        </p>
         <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
           Projected active portfolio value.
         </h1>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
-        <div className="space-y-4 px-4 py-5">
-          <div className="space-y-2">
-            <p className="text-pretty text-sm leading-6 text-muted-foreground">
-              By {formatDisplayDate(snapshot.targetDate)}, active investments
-              are projected to earn
-            </p>
-            <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
-              {formatMxn(snapshot.projectedEarnings)}
-            </p>
-            <p className="text-sm leading-6 text-muted-foreground">
-              {formatInvestmentCount(
-                snapshot.activeInvestmentCount,
-                "active investment",
-                "active investments",
-              )}{" "}
-              · {snapshot.finishedInvestmentCount} finished by target
-            </p>
-          </div>
-        </div>
-
-        <div className="border-t border-border/70 px-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="projection-target-date">Target date</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="projection-target-date"
-                type="date"
-                min={today}
-                value={targetDate}
-                aria-invalid={!isTargetDateValid}
-                aria-describedby={
-                  isTargetDateValid ? undefined : "projection-target-date-error"
-                }
-                onChange={(event) => setTargetDate(event.target.value)}
-              />
-              <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-background/60 text-primary">
-                <CalendarDays className="size-4" aria-hidden="true" />
+      <div className="space-y-6">
+        <section className="overflow-hidden border-y border-border/70">
+          <div className="py-5">
+            <div className="space-y-2">
+              <p className="text-pretty text-sm leading-6 text-muted-foreground">
+                By {formatDisplayDate(snapshot.targetDate)}, active investments
+                are projected to earn
+              </p>
+              <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
+                {formatMxn(snapshot.projectedEarnings)}
+              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm leading-6 text-muted-foreground">
+                  {formatInvestmentCount(
+                    snapshot.activeInvestmentCount,
+                    "active investment",
+                    "active investments",
+                  )}{" "}
+                  · {snapshot.finishedInvestmentCount} finished by target
+                </p>
+                <TrustNotesPopover
+                  label="Projection assumptions"
+                  notes={PROJECTION_TRUST_NOTES}
+                />
               </div>
             </div>
-            {isTargetDateValid ? null : (
-              <p
-                id="projection-target-date-error"
-                className="text-xs leading-5 text-destructive"
-              >
-                Choose today or a future date.
-              </p>
-            )}
           </div>
-        </div>
 
-        <div className="space-y-5 border-t border-border/70 px-4 py-5">
+          <div className="border-t border-border/70 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="projection-target-date">Target date</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="projection-target-date"
+                  type="date"
+                  min={today}
+                  value={targetDate}
+                  aria-invalid={!isTargetDateValid}
+                  aria-describedby={
+                    isTargetDateValid
+                      ? undefined
+                      : "projection-target-date-error"
+                  }
+                  onChange={(event) => setTargetDate(event.target.value)}
+                />
+                <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-background/60 text-primary">
+                  <CalendarDays className="size-4" aria-hidden="true" />
+                </div>
+              </div>
+              {isTargetDateValid ? null : (
+                <p
+                  id="projection-target-date-error"
+                  className="text-xs leading-5 text-destructive"
+                >
+                  Choose today or a future date.
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-5 border-t border-border/70 pt-5">
           <div className="space-y-2">
             <h2 className="text-balance text-base font-bold leading-tight text-foreground">
               Value path
             </h2>
             <p className="text-pretty text-sm leading-6 text-muted-foreground">
-              Assumes no future contributions or renewals. Fixed-term
-              investments stop earning and leave the active total at maturity.
+              Active value changes as fixed-term investments reach maturity.
             </p>
           </div>
 
@@ -163,20 +181,17 @@ export function ProjectionScreen({
             description="Based on investments still active on the target date."
             pace={snapshot.earningPace}
           />
-        </div>
+        </section>
 
-        <div className="space-y-5 border-t border-border/70 px-4 py-5">
+        <section className="space-y-5 border-t border-border/70 pt-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
               <h2 className="text-balance text-base font-bold leading-tight text-foreground">
                 Projected earnings by investment
               </h2>
-              <p className="text-pretty text-sm leading-6 text-muted-foreground">
-                Ranked by expected earnings between today and the target date.
-              </p>
             </div>
 
-            <div className="w-full min-w-0 rounded-lg border border-border/70 bg-background/35 p-2">
+            <div className="w-full min-w-0 rounded-lg border border-border/70 bg-card/45 p-2.5">
               <LabeledSelectControl
                 ariaLabel="Group investments"
                 fallbackLabel="Select grouping"
@@ -197,7 +212,7 @@ export function ProjectionScreen({
               projectedEarnings={snapshot.projectedEarnings}
             />
           </AnimatedListSurface>
-        </div>
+        </section>
       </div>
     </section>
   )
