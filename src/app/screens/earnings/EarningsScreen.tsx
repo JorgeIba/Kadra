@@ -1,5 +1,8 @@
 import { useState } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ArrowUpDown, Building2 } from "lucide-react"
+import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
+import { GroupedMetricList } from "@/app/components/GroupedMetricList"
+import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
 import {
   DERIVED_STATUSES,
   DERIVED_STATUS_LABELS,
@@ -8,20 +11,22 @@ import {
 } from "@/domain/investments"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import {
+  EARNINGS_GROUP_BY_LABELS,
+  EARNINGS_GROUP_BY_OPTION_VALUES,
+  EARNINGS_GROUP_BY_OPTIONS,
+  type EarningsGroupByOption,
+} from "@/app/screens/earnings/earnings-grouping"
+import {
   EARNED_MONEY_SORT_OPTIONS,
   getEarnedMoneySortLabel,
   getPortfolioEarnedMoneySnapshot,
   type EarnedMoneySortOption,
   type InvestmentEarnedMoneyBreakdown,
+  type InvestmentEarnedMoneyBreakdownItem,
 } from "@/app/screens/earnings/earnings-view-model"
+import { createGroups } from "@/app/shared/grouping"
+import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { formatMxn, formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
@@ -37,23 +42,23 @@ const EARNED_MONEY_SORT_CHOICES = [
   EARNED_MONEY_SORT_OPTIONS.status,
 ] as const satisfies ReadonlyArray<EarnedMoneySortOption>
 
-function isEarnedMoneySortOption(
-  value: string | null,
-): value is EarnedMoneySortOption {
-  return EARNED_MONEY_SORT_CHOICES.some((option) => {
-    return option === value
-  })
-}
-
 export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
   const [sortBy, setSortBy] = useState<EarnedMoneySortOption>(
     EARNED_MONEY_SORT_OPTIONS.highestEarned,
+  )
+  const [groupByOption, setGroupByOption] = useState<EarningsGroupByOption>(
+    EARNINGS_GROUP_BY_OPTIONS.none,
   )
   const snapshot = getPortfolioEarnedMoneySnapshot(
     investments,
     new Date(),
     sortBy,
   )
+  const breakdownTransitionKey = [
+    sortBy,
+    groupByOption,
+    snapshot.breakdown.length,
+  ].join(":")
 
   return (
     <section className="space-y-6">
@@ -111,30 +116,38 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
               </p>
             </div>
 
-            <div className="w-full min-w-0 sm:w-52">
-              <Select
+            <div className="grid w-full min-w-0 grid-cols-2 gap-2 rounded-lg border border-border/70 bg-background/35 p-2 sm:w-auto sm:min-w-96">
+              <LabeledSelectControl
+                ariaLabel="Sort earned return breakdown"
+                fallbackLabel="Select sort"
+                icon={<ArrowUpDown className="size-3.5" aria-hidden="true" />}
+                label="Sort by"
+                options={EARNED_MONEY_SORT_CHOICES}
                 value={sortBy}
-                onValueChange={(value) => {
-                  if (isEarnedMoneySortOption(value)) {
-                    setSortBy(value)
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue>{getEarnedMoneySortLabel(sortBy)}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {EARNED_MONEY_SORT_CHOICES.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {getEarnedMoneySortLabel(option)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                getOptionLabel={getEarnedMoneySortLabel}
+                onValueChange={setSortBy}
+              />
+
+              <LabeledSelectControl
+                ariaLabel="Group investments"
+                fallbackLabel="Select grouping"
+                icon={<Building2 className="size-3.5" aria-hidden="true" />}
+                label="Group by"
+                options={EARNINGS_GROUP_BY_OPTION_VALUES}
+                value={groupByOption}
+                getOptionLabel={(option) => EARNINGS_GROUP_BY_LABELS[option]}
+                onValueChange={setGroupByOption}
+              />
             </div>
           </div>
 
-          <EarningsBreakdownList breakdown={snapshot.breakdown} />
+          <AnimatedListSurface transitionKey={breakdownTransitionKey}>
+            <EarningsBreakdownList
+              breakdown={snapshot.breakdown}
+              groupByOption={groupByOption}
+              totalEarnedAmount={snapshot.totalEarnedAmount}
+            />
+          </AnimatedListSurface>
         </div>
       </div>
     </section>
@@ -154,8 +167,12 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 
 function EarningsBreakdownList({
   breakdown,
+  groupByOption,
+  totalEarnedAmount,
 }: {
   breakdown: InvestmentEarnedMoneyBreakdown
+  groupByOption: EarningsGroupByOption
+  totalEarnedAmount: number
 }) {
   if (breakdown.length === 0) {
     return (
@@ -165,43 +182,105 @@ function EarningsBreakdownList({
     )
   }
 
+  if (groupByOption === EARNINGS_GROUP_BY_OPTIONS.institution) {
+    return (
+      <EarningsInstitutionGroups
+        breakdown={breakdown}
+        totalEarnedAmount={totalEarnedAmount}
+      />
+    )
+  }
+
   return (
     <div className="space-y-5">
       {breakdown.map((investment) => (
-        <div key={investment.investmentId} className="space-y-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="truncate font-ledger text-base text-foreground">
-                  {investment.name}
-                </p>
-                <span
-                  className={cn(
-                    "rounded-full border px-2 py-1 text-[0.68rem] font-medium",
-                    getStatusBadgeClassName(investment.derivedStatus),
-                  )}
-                >
-                  {DERIVED_STATUS_LABELS[investment.derivedStatus]}
-                </span>
-              </div>
-              <p className="mt-2 truncate text-xs text-muted-foreground">
-                {investment.institutionName}
-              </p>
-            </div>
-
-            <div className="shrink-0 text-right">
-              <p className="font-ledger text-sm font-bold text-foreground tabular-nums">
-                {formatMxn(investment.earnedAmount)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {formatPercentage(investment.percentage)}
-              </p>
-            </div>
-          </div>
-
-          <AnimatedProgressBar value={investment.percentage} />
-        </div>
+        <EarningsBreakdownRow
+          key={investment.investmentId}
+          investment={investment}
+        />
       ))}
+    </div>
+  )
+}
+
+function EarningsInstitutionGroups({
+  breakdown,
+  totalEarnedAmount,
+}: {
+  breakdown: InvestmentEarnedMoneyBreakdown
+  totalEarnedAmount: number
+}) {
+  const groups = createGroups(breakdown, {
+    getGroup: (investment) => getInstitutionGroup(investment.institutionName),
+    metric: {
+      key: "earned",
+      label: "Earned",
+      getValue: (investment) => investment.earnedAmount,
+      totalValue: totalEarnedAmount,
+    },
+  })
+
+  return (
+    <GroupedMetricList
+      groups={groups}
+      formatMetric={formatMxn}
+      itemListClassName="divide-y divide-border/60 p-0"
+      itemNoun="investment"
+      showShareOfTotal
+      renderItem={(item) => (
+        <div key={item.source.investmentId} className="px-3 py-4">
+          <EarningsBreakdownRow
+            investment={item.source}
+            percentage={item.contributionMetric.shareOfGroup}
+          />
+        </div>
+      )}
+    />
+  )
+}
+
+function EarningsBreakdownRow({
+  investment,
+  percentage,
+}: {
+  investment: InvestmentEarnedMoneyBreakdownItem
+  percentage?: number
+}) {
+  const displayedPercentage = percentage ?? investment.percentage
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate font-ledger text-base text-foreground">
+              {investment.name}
+            </p>
+            <span
+              className={cn(
+                "rounded-full border px-2 py-1 text-[0.68rem] font-medium",
+                getStatusBadgeClassName(investment.derivedStatus),
+              )}
+            >
+              {DERIVED_STATUS_LABELS[investment.derivedStatus]}
+            </span>
+          </div>
+          <p className="mt-2 truncate text-xs text-muted-foreground">
+            {investment.institutionName}
+          </p>
+        </div>
+
+        <div className="shrink-0 text-right">
+          <p className="font-ledger text-sm font-bold text-foreground tabular-nums">
+            {formatMxn(investment.earnedAmount)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {formatPercentage(displayedPercentage)}
+          </p>
+        </div>
+      </div>
+
+      <AnimatedProgressBar value={displayedPercentage} />
     </div>
   )
 }

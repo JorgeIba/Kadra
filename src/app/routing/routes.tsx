@@ -21,6 +21,7 @@ import { InvestScreen } from "@/app/screens/invest/InvestScreen"
 import { InvestmentDetailScreen } from "@/app/screens/investment-detail/InvestmentDetailScreen"
 import { ProjectionScreen } from "@/app/screens/projection/ProjectionScreen"
 import { RecordChangeScreen } from "@/app/screens/record-change/RecordChangeScreen"
+import { getInstitutionSuggestions } from "@/app/shared/institution-grouping"
 import type { Investment } from "@/domain/investments"
 
 export function DashboardRoute() {
@@ -103,7 +104,7 @@ export function AssetsRoute() {
 }
 
 export function InvestRoute() {
-  const { addInvestment } = useInvestments()
+  const { addInvestment, investments } = useInvestments()
   const navigate = useAnimatedNavigate()
   const location = useLocation()
   const previousSection = getPreviousSectionFromLocation(
@@ -124,6 +125,7 @@ export function InvestRoute() {
 
   return (
     <InvestScreen
+      institutionSuggestions={getInstitutionSuggestions(investments)}
       onCancel={handleCancel}
       onInvestmentCreate={handleInvestmentCreate}
     />
@@ -245,6 +247,7 @@ export function EditInvestmentRoute() {
 
   return (
     <EditInvestmentScreen
+      institutionSuggestions={getInstitutionSuggestions(investments)}
       investment={selectedInvestment}
       onCancel={handleCancel}
       onInvestmentUpdate={handleInvestmentUpdate}

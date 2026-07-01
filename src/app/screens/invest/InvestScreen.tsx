@@ -5,11 +5,13 @@ import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-
 import type { Investment } from "@/domain/investments"
 
 interface InvestScreenProps {
+  institutionSuggestions?: string[]
   onCancel: () => void
   onInvestmentCreate: (investment: Investment) => void
 }
 
 export function InvestScreen({
+  institutionSuggestions = [],
   onCancel,
   onInvestmentCreate,
 }: InvestScreenProps) {
@@ -30,7 +32,11 @@ export function InvestScreen({
         description="Capture the terms once so Trafin can track value, estimated income, and maturity progress from the moment you save it."
       />
 
-      <InvestmentForm onCancel={onCancel} onSubmit={handleInvestmentSubmit} />
+      <InvestmentForm
+        institutionSuggestions={institutionSuggestions}
+        onCancel={onCancel}
+        onSubmit={handleInvestmentSubmit}
+      />
     </section>
   )
 }

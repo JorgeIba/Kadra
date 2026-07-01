@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react"
+import { Combobox } from "@base-ui/react/combobox"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -34,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 // UI order for dropdown fields; domain constants still own the allowed values.
 const INVESTMENT_TYPE_OPTIONS = [
@@ -71,6 +73,7 @@ const FORM_FIELD_IDS = {
 } as const
 
 interface InvestmentFormProps {
+  institutionSuggestions?: string[]
   initialValues?: InvestmentFormValues
   isStartDateEditable?: boolean
   onCancel?: () => void
@@ -81,6 +84,7 @@ interface InvestmentFormProps {
 }
 
 export function InvestmentForm({
+  institutionSuggestions = [],
   initialValues,
   isStartDateEditable = true,
   onCancel,
@@ -167,14 +171,24 @@ export function InvestmentForm({
               label="Institution"
               htmlFor={FORM_FIELD_IDS.institutionName}
             >
-              <Input
-                id={FORM_FIELD_IDS.institutionName}
-                placeholder="CETES Directo"
-                {...getFieldAccessibilityProps(
-                  FORM_FIELD_IDS.institutionName,
-                  errors.institutionName?.message,
+              <Controller
+                control={control}
+                name="institutionName"
+                render={({ field: institutionNameField }) => (
+                  <InstitutionCombobox
+                    id={FORM_FIELD_IDS.institutionName}
+                    name={institutionNameField.name}
+                    placeholder="CETES Directo"
+                    suggestions={institutionSuggestions}
+                    value={institutionNameField.value ?? ""}
+                    onBlur={institutionNameField.onBlur}
+                    onValueChange={institutionNameField.onChange}
+                    {...getFieldAccessibilityProps(
+                      FORM_FIELD_IDS.institutionName,
+                      errors.institutionName?.message,
+                    )}
+                  />
                 )}
-                {...register("institutionName")}
               />
             </Field>
           </FormSection>
@@ -508,6 +522,82 @@ export function InvestmentForm({
         onConfirm={() => onCancel?.()}
       />
     </>
+  )
+}
+
+function InstitutionCombobox({
+  id,
+  name,
+  onBlur,
+  onValueChange,
+  placeholder,
+  suggestions,
+  value,
+  ...accessibilityProps
+}: {
+  id: string
+  name: string
+  placeholder: string
+  suggestions: string[]
+  value: string
+  onBlur: () => void
+  onValueChange: (value: string) => void
+  "aria-describedby"?: string
+  "aria-invalid"?: boolean
+}) {
+  return (
+    <Combobox.Root<string>
+      items={suggestions}
+      inputValue={value}
+      limit={6}
+      autoHighlight
+      autoComplete="off"
+      filter={(suggestion, query) => {
+        return suggestion
+          .toLocaleLowerCase()
+          .includes(query.trim().toLocaleLowerCase())
+      }}
+      onInputValueChange={onValueChange}
+      onValueChange={(selectedInstitution) => {
+        if (selectedInstitution !== null) {
+          onValueChange(selectedInstitution)
+        }
+      }}
+    >
+      <Combobox.Input
+        id={id}
+        name={name}
+        placeholder={placeholder}
+        className={cn(
+          "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        )}
+        value={value}
+        onBlur={onBlur}
+        {...accessibilityProps}
+      />
+
+      <Combobox.Portal>
+        <Combobox.Positioner
+          sideOffset={4}
+          align="start"
+          className="isolate z-50"
+        >
+          <Combobox.Popup className="relative isolate z-50 max-h-48 w-(--anchor-width) min-w-48 origin-(--transform-origin) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
+            <Combobox.List>
+              {(suggestion: string) => (
+                <Combobox.Item
+                  key={suggestion}
+                  value={suggestion}
+                  className="block w-full cursor-default rounded-md px-2 py-1.5 text-left text-sm outline-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-accent data-selected:text-accent-foreground"
+                >
+                  {suggestion}
+                </Combobox.Item>
+              )}
+            </Combobox.List>
+          </Combobox.Popup>
+        </Combobox.Positioner>
+      </Combobox.Portal>
+    </Combobox.Root>
   )
 }
 

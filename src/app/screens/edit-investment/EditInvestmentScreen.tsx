@@ -9,12 +9,14 @@ import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-
 import type { Investment } from "@/domain/investments"
 
 interface EditInvestmentScreenProps {
+  institutionSuggestions?: string[]
   investment: Investment
   onCancel: () => void
   onInvestmentUpdate: (investment: Investment) => void
 }
 
 export function EditInvestmentScreen({
+  institutionSuggestions = [],
   investment,
   onCancel,
   onInvestmentUpdate,
@@ -41,6 +43,7 @@ export function EditInvestmentScreen({
 
       <InvestmentForm
         cancelLabel="Back to detail"
+        institutionSuggestions={institutionSuggestions}
         initialValues={mapInvestmentToFormValues(investment)}
         isStartDateEditable={canEditInvestmentStartDate(investment)}
         onCancel={onCancel}

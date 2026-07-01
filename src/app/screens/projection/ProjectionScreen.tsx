@@ -1,6 +1,9 @@
 import { useState } from "react"
-import { ArrowLeft, CalendarDays } from "lucide-react"
+import { ArrowLeft, Building2, CalendarDays } from "lucide-react"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
+import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
+import { GroupedMetricList } from "@/app/components/GroupedMetricList"
+import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
 import { PortfolioEarningPaceMetrics } from "@/app/components/PortfolioEarningPaceMetrics"
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
 import {
@@ -10,10 +13,18 @@ import {
   type Investment,
 } from "@/domain/investments"
 import {
+  PROJECTION_GROUP_BY_LABELS,
+  PROJECTION_GROUP_BY_OPTION_VALUES,
+  PROJECTION_GROUP_BY_OPTIONS,
+  type ProjectionGroupByOption,
+} from "@/app/screens/projection/projection-grouping"
+import {
   getDefaultProjectionTargetDate,
   getPortfolioProjectionSnapshot,
   type InvestmentProjectionBreakdownItem,
 } from "@/app/screens/projection/projection-view-model"
+import { createGroups } from "@/app/shared/grouping"
+import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,6 +48,9 @@ export function ProjectionScreen({
   const [targetDate, setTargetDate] = useState(() => {
     return getDefaultProjectionTargetDate(asOfDate)
   })
+  const [groupByOption, setGroupByOption] = useState<ProjectionGroupByOption>(
+    PROJECTION_GROUP_BY_OPTIONS.none,
+  )
   const isTargetDateValid =
     isCalendarDateString(targetDate) &&
     compareCalendarDatesAscending(targetDate, today) >= 0
@@ -47,6 +61,11 @@ export function ProjectionScreen({
   )
 
   const targetPoint = snapshot.points.at(-1)
+  const breakdownTransitionKey = [
+    targetDate,
+    groupByOption,
+    snapshot.breakdown.length,
+  ].join(":")
 
   return (
     <section className="space-y-6">
@@ -147,16 +166,37 @@ export function ProjectionScreen({
         </div>
 
         <div className="space-y-5 border-t border-border/70 px-4 py-5">
-          <div className="space-y-2">
-            <h2 className="text-balance text-base font-bold leading-tight text-foreground">
-              Projected earnings by investment
-            </h2>
-            <p className="text-pretty text-sm leading-6 text-muted-foreground">
-              Ranked by expected earnings between today and the target date.
-            </p>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="space-y-2">
+              <h2 className="text-balance text-base font-bold leading-tight text-foreground">
+                Projected earnings by investment
+              </h2>
+              <p className="text-pretty text-sm leading-6 text-muted-foreground">
+                Ranked by expected earnings between today and the target date.
+              </p>
+            </div>
+
+            <div className="w-full min-w-0 rounded-lg border border-border/70 bg-background/35 p-2">
+              <LabeledSelectControl
+                ariaLabel="Group investments"
+                fallbackLabel="Select grouping"
+                icon={<Building2 className="size-3.5" aria-hidden="true" />}
+                label="Group by"
+                options={PROJECTION_GROUP_BY_OPTION_VALUES}
+                value={groupByOption}
+                getOptionLabel={(option) => PROJECTION_GROUP_BY_LABELS[option]}
+                onValueChange={setGroupByOption}
+              />
+            </div>
           </div>
 
-          <ProjectionBreakdown breakdown={snapshot.breakdown} />
+          <AnimatedListSurface transitionKey={breakdownTransitionKey}>
+            <ProjectionBreakdown
+              breakdown={snapshot.breakdown}
+              groupByOption={groupByOption}
+              projectedEarnings={snapshot.projectedEarnings}
+            />
+          </AnimatedListSurface>
         </div>
       </div>
     </section>
@@ -173,8 +213,12 @@ function formatInvestmentCount(
 
 function ProjectionBreakdown({
   breakdown,
+  groupByOption,
+  projectedEarnings,
 }: {
   breakdown: InvestmentProjectionBreakdownItem[]
+  groupByOption: ProjectionGroupByOption
+  projectedEarnings: number
 }) {
   if (breakdown.length === 0) {
     return (
@@ -184,33 +228,95 @@ function ProjectionBreakdown({
     )
   }
 
+  if (groupByOption === PROJECTION_GROUP_BY_OPTIONS.institution) {
+    return (
+      <ProjectionInstitutionGroups
+        breakdown={breakdown}
+        projectedEarnings={projectedEarnings}
+      />
+    )
+  }
+
   return (
     <div className="space-y-5">
       {breakdown.map((investment) => (
-        <div key={investment.investmentId} className="space-y-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="truncate font-ledger text-base text-foreground">
-                {investment.name}
-              </p>
-              <p className="mt-2 truncate text-xs text-muted-foreground">
-                {investment.institutionName}
-              </p>
-            </div>
-
-            <div className="shrink-0 text-right">
-              <p className="font-ledger text-sm font-bold text-foreground tabular-nums">
-                {formatMxn(investment.projectedEarnings)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {formatPercentage(investment.percentage)}
-              </p>
-            </div>
-          </div>
-
-          <AnimatedProgressBar value={investment.percentage} />
-        </div>
+        <ProjectionBreakdownRow
+          key={investment.investmentId}
+          investment={investment}
+        />
       ))}
+    </div>
+  )
+}
+
+function ProjectionInstitutionGroups({
+  breakdown,
+  projectedEarnings,
+}: {
+  breakdown: InvestmentProjectionBreakdownItem[]
+  projectedEarnings: number
+}) {
+  const groups = createGroups(breakdown, {
+    getGroup: (investment) => getInstitutionGroup(investment.institutionName),
+    metric: {
+      key: "projected",
+      label: "Projected",
+      getValue: (investment) => investment.projectedEarnings,
+      totalValue: projectedEarnings,
+    },
+  })
+
+  return (
+    <GroupedMetricList
+      groups={groups}
+      formatMetric={formatMxn}
+      itemListClassName="divide-y divide-border/60 p-0"
+      itemNoun="investment"
+      showShareOfTotal
+      renderItem={(item) => (
+        <div key={item.source.investmentId} className="px-3 py-4">
+          <ProjectionBreakdownRow
+            investment={item.source}
+            percentage={item.contributionMetric.shareOfGroup}
+          />
+        </div>
+      )}
+    />
+  )
+}
+
+function ProjectionBreakdownRow({
+  investment,
+  percentage,
+}: {
+  investment: InvestmentProjectionBreakdownItem
+  percentage?: number
+}) {
+  const displayedPercentage = percentage ?? investment.percentage
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="truncate font-ledger text-base text-foreground">
+            {investment.name}
+          </p>
+          <p className="mt-2 truncate text-xs text-muted-foreground">
+            {investment.institutionName}
+          </p>
+        </div>
+
+        <div className="shrink-0 text-right">
+          <p className="font-ledger text-sm font-bold text-foreground tabular-nums">
+            {formatMxn(investment.projectedEarnings)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {formatPercentage(displayedPercentage)}
+          </p>
+        </div>
+      </div>
+
+      <AnimatedProgressBar value={displayedPercentage} />
     </div>
   )
 }

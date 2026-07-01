@@ -6,17 +6,20 @@ import { cn } from "@/lib/utils"
 
 interface FixedTermInvestmentCardProps {
   investment: FixedTermInvestmentSummary
+  density?: "default" | "relaxed"
   onSelect?: (investmentId: string) => void
 }
 
 export function FixedTermInvestmentCard({
+  density = "default",
   investment,
   onSelect,
 }: FixedTermInvestmentCardProps) {
   return (
     <article
       className={cn(
-        "-mx-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 rounded-lg border border-transparent px-3 py-4 transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transform-none motion-reduce:transition-none",
+        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 rounded-lg border border-transparent transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transform-none motion-reduce:transition-none",
+        density === "relaxed" ? "gap-y-4 px-3 py-5" : "-mx-3 gap-y-3 px-3 py-4",
         onSelect === undefined
           ? "cursor-default"
           : "group/investment cursor-pointer hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/45 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-px active:border-primary/10 active:bg-secondary/60",
@@ -43,7 +46,7 @@ export function FixedTermInvestmentCard({
         <p className="font-ledger truncate text-base text-foreground">
           {investment.name}
         </p>
-        <p className="mt-1 truncate text-xs text-muted-foreground">
+        <p className="mt-1.5 truncate text-xs text-muted-foreground">
           {investment.institutionName} · Annual rate{" "}
           {formatPercentage(investment.annualRate)}
         </p>
@@ -52,7 +55,7 @@ export function FixedTermInvestmentCard({
         <p className="font-ledger text-lg leading-none text-foreground tabular-nums">
           {formatMxn(investment.estimatedCurrentValue)}
         </p>
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-4 flex items-center gap-2">
           <div className="flex-1">
             <AnimatedProgressBar value={investment.progressPercentage} />
           </div>

@@ -30,7 +30,7 @@ export function analyzePortfolio(
     investmentCount: investments.length,
     totalEstimatedCurrentValue: activeInvestments.reduce(
       (total, investment) => {
-        return total + investment.estimatedCurrentValue
+        return total + getInvestmentEstimatedActiveCurrentValue(investment)
       },
       0,
     ),
@@ -76,4 +76,14 @@ export function analyzePortfolio(
       0,
     ),
   }
+}
+
+export function getInvestmentEstimatedActiveCurrentValue(
+  investment: ResolvedInvestment,
+): number {
+  if (investment.derivedStatus === DERIVED_STATUSES.finished) {
+    return 0
+  }
+
+  return investment.estimatedCurrentValue
 }
