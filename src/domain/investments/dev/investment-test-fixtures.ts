@@ -6,7 +6,7 @@ import {
 } from "@/domain/investments/model/constants"
 import type { Investment } from "@/domain/investments/model/types"
 
-export const fixedInvestment = {
+export const fixedInvestment: Investment = {
   id: "investment-1",
   name: "Fixed test",
   institutionName: "Test institution",
@@ -19,6 +19,7 @@ export const fixedInvestment = {
       amount: 36_500,
       effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
+      kind: "contribution",
     },
   ],
   rateEvents: [
@@ -40,9 +41,9 @@ export const fixedInvestment = {
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
-} satisfies Investment
+}
 
-export const openEndedInvestment = {
+export const openEndedInvestment: Investment = {
   id: "investment-2",
   name: "Open test",
   institutionName: "Test institution",
@@ -55,6 +56,7 @@ export const openEndedInvestment = {
       amount: 10_000,
       effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
+      kind: "contribution",
     },
   ],
   rateEvents: [
@@ -75,9 +77,9 @@ export const openEndedInvestment = {
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
-} satisfies Investment
+}
 
-export const evolvingInvestment = {
+export const evolvingInvestment: Investment = {
   id: "investment-3",
   name: "Evolving test",
   institutionName: "Test institution",
@@ -90,12 +92,14 @@ export const evolvingInvestment = {
       amount: 10_000,
       effectiveDate: "2026-01-01",
       createdAt: "2026-01-01T18:00:00.000Z",
+      kind: "contribution",
     },
     {
       id: "contribution-event-2",
       amount: 5_000,
       effectiveDate: "2026-02-01",
       createdAt: "2026-02-01T18:00:00.000Z",
+      kind: "contribution",
     },
   ],
   rateEvents: [
@@ -122,4 +126,4 @@ export const evolvingInvestment = {
       createdAt: "2026-01-01T18:00:00.000Z",
     },
   ],
-} satisfies Investment
+}

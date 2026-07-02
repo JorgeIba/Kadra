@@ -25,12 +25,14 @@ const fallbackInvestments: Investment[] = [
         amount: 1_000,
         effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T12:00:00.000Z",
+        kind: "contribution",
       },
       {
         id: "contribution-event-2",
         amount: 500,
         effectiveDate: "2026-06-01",
         createdAt: "2026-06-01T08:30:00.000Z",
+        kind: "contribution",
       },
     ],
     rateEvents: [
@@ -75,12 +77,14 @@ const storedInvestments: Investment[] = [
         amount: 2_000,
         effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T13:00:00.000Z",
+        kind: "contribution",
       },
       {
         id: "contribution-event-2",
         amount: 750,
         effectiveDate: "2026-06-15",
         createdAt: "2026-06-15T10:00:00.000Z",
+        kind: "contribution",
       },
     ],
     rateEvents: [

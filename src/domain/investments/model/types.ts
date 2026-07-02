@@ -25,12 +25,15 @@ export type CalendarDateString = string
  */
 export type IsoDateTimeString = string
 
+export type ContributionEventKind = "contribution" | "withdrawal"
+
 export interface InvestmentContributionEvent {
   id: string
   amount: number
   effectiveDate: CalendarDateString
   notes?: string
   createdAt: IsoDateTimeString
+  kind?: ContributionEventKind
 }
 
 export interface InvestmentRateEvent {

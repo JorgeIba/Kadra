@@ -18,6 +18,10 @@ const contributionEventSchema = z.strictObject({
   amount: z.number().positive(),
   effectiveDate: calendarDateSchema,
   notes: z.string().optional(),
+  kind: z
+    .enum(["contribution", "withdrawal"])
+    .optional()
+    .default("contribution"),
 })
 
 const rateEventSchema = z.strictObject({

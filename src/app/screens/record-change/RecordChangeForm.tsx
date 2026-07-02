@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useWatch } from "react-hook-form"
+import { useForm, useWatch, type Resolver } from "react-hook-form"
 import {
   isCalendarDateString,
   toDateString,
@@ -8,6 +8,7 @@ import {
 } from "@/domain/investments"
 import {
   getAvailableContributionAmountAtDate,
+  getActiveBalanceAtDate,
   getLatestInvestmentEventDate,
   mapInvestmentToRecordChangeFormValues,
 } from "@/app/screens/record-change/adapters/record-change-adapter"
@@ -39,9 +40,24 @@ export function RecordChangeForm({
 }: RecordChangeFormProps) {
   const latestEventDate = getLatestInvestmentEventDate(investment)
   const today = toDateString(new Date())
-  const formSchema = useMemo(() => {
-    return createRecordChangeFormSchema({ latestEventDate, today })
-  }, [latestEventDate, today])
+
+  const resolver: Resolver<RecordChangeFormValues> = useMemo(() => {
+    return (values, context, options) => {
+      const activeBalance =
+        isCalendarDateString(values.effectiveDate) === true
+          ? getActiveBalanceAtDate(investment, values.effectiveDate)
+          : 0
+
+      return zodResolver(
+        createRecordChangeFormSchema({
+          latestEventDate,
+          today,
+          activeBalance,
+        }),
+      )(values, context, options)
+    }
+  }, [investment, latestEventDate, today])
+
   const {
     control,
     formState: { errors, isValid },
@@ -52,17 +68,29 @@ export function RecordChangeForm({
   } = useForm<RecordChangeFormValues>({
     defaultValues: mapInvestmentToRecordChangeFormValues(investment),
     mode: "onChange",
-    resolver: zodResolver(formSchema),
+    resolver,
     shouldUnregister: true,
   })
 
-  const effectiveDate = useWatch({ control, name: "effectiveDate" })
-  const hasContribution = useWatch({ control, name: "hasContribution" })
-  const investmentType = useWatch({ control, name: "investmentType" })
-  const paymentFrequency = useWatch({ control, name: "paymentFrequency" })
+  const [effectiveDate, transactionType, investmentType, paymentFrequency] =
+    useWatch({
+      control,
+      name: [
+        "effectiveDate",
+        "transactionType",
+        "investmentType",
+        "paymentFrequency",
+      ],
+    })
+
   const availableContribution =
     isCalendarDateString(effectiveDate) === true
       ? getAvailableContributionAmountAtDate(investment, effectiveDate)
+      : 0
+
+  const activeBalance =
+    isCalendarDateString(effectiveDate) === true
+      ? getActiveBalanceAtDate(investment, effectiveDate)
       : 0
 
   // Resolve the investment state at this date so the form starts from the
@@ -106,8 +134,9 @@ export function RecordChangeForm({
 
       <MoneyMovementSection
         availableContribution={availableContribution}
+        activeBalance={activeBalance}
         errors={errors}
-        hasContribution={hasContribution}
+        transactionType={transactionType}
         register={register}
       />
 

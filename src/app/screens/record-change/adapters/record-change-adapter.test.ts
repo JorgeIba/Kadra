@@ -23,7 +23,7 @@ describe("record change adapter", () => {
       }),
     ).toEqual({
       effectiveDate: "2026-02-15",
-      hasContribution: false,
+      transactionType: "none",
       annualRate: 10,
       investmentType: INVESTMENT_TYPES.openEnded,
       paymentFrequency: PAYMENT_FREQUENCIES.monthly,
@@ -41,7 +41,7 @@ describe("record change adapter", () => {
     const updatedInvestment = buildInvestmentWithRecordedChangeFromFormValues(
       {
         ...baseRecordValues,
-        hasContribution: true,
+        transactionType: "contribution",
         contributionAmount: 2_500,
       },
       evolvingInvestment,
@@ -58,6 +58,29 @@ describe("record change adapter", () => {
       id: "investment-3-contribution-event-3",
       amount: 2_500,
       effectiveDate: "2026-06-15",
+      kind: "contribution",
+      createdAt: asOfDate.toISOString(),
+    })
+  })
+
+  it("appends a withdrawal event when a withdrawal is recorded", () => {
+    const updatedInvestment = buildInvestmentWithRecordedChangeFromFormValues(
+      {
+        ...baseRecordValues,
+        transactionType: "withdrawal",
+        contributionAmount: 1_500,
+      },
+      evolvingInvestment,
+      { asOfDate },
+    )
+
+    expect(updatedInvestment.updatedAt).toBe(asOfDate.toISOString())
+    expect(updatedInvestment.contributionEvents).toHaveLength(3)
+    expect(updatedInvestment.contributionEvents[2]).toMatchObject({
+      id: "investment-3-contribution-event-3",
+      amount: 1_500,
+      effectiveDate: "2026-06-15",
+      kind: "withdrawal",
       createdAt: asOfDate.toISOString(),
     })
   })
@@ -167,7 +190,7 @@ describe("record change adapter", () => {
     const updatedInvestment = buildInvestmentWithRecordedChangeFromFormValues(
       {
         ...baseRecordValues,
-        hasContribution: true,
+        transactionType: "contribution",
         contributionAmount: 1_000,
         annualRate: 13,
         investmentType: INVESTMENT_TYPES.fixedTerm,
@@ -197,7 +220,7 @@ describe("record change adapter", () => {
 
 const baseRecordValues = {
   effectiveDate: "2026-06-15",
-  hasContribution: false,
+  transactionType: "none",
   annualRate: 12,
   investmentType: INVESTMENT_TYPES.openEnded,
   paymentFrequency: PAYMENT_FREQUENCIES.monthly,

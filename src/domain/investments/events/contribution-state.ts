@@ -21,7 +21,8 @@ export function getContributionStateAtDate(
           return total
         }
 
-        return total + contributionEvent.amount
+        const multiplier = contributionEvent.kind === "withdrawal" ? -1 : 1
+        return total + contributionEvent.amount * multiplier
       },
       0,
     ),

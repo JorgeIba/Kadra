@@ -21,12 +21,14 @@ const validInvestments: Investment[] = [
         amount: 10_000,
         effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T12:00:00.000Z",
+        kind: "contribution",
       },
       {
         id: "contribution-event-2",
         amount: 2_500,
         effectiveDate: "2026-06-01",
         createdAt: "2026-06-01T10:30:00.000Z",
+        kind: "contribution",
       },
     ],
     rateEvents: [
@@ -69,12 +71,14 @@ const validInvestments: Investment[] = [
         amount: 25_000,
         effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
+        kind: "contribution",
       },
       {
         id: "contribution-event-2",
         amount: 5_000,
         effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T10:00:00.000Z",
+        kind: "contribution",
       },
     ],
     rateEvents: [

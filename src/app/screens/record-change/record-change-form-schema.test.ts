@@ -15,7 +15,7 @@ describe("record change form schema", () => {
     expect(
       buildSchema().safeParse({
         ...baseFixedTermValues,
-        hasContribution: true,
+        transactionType: "contribution",
         contributionAmount: 0,
       }).success,
     ).toBe(false)
@@ -25,12 +25,61 @@ describe("record change form schema", () => {
     expect(
       buildSchema().safeParse({
         ...baseFixedTermValues,
-        hasContribution: true,
+        transactionType: "contribution",
       }).success,
     ).toBe(false)
   })
 
-  it("allows omitted amount when no money is being added", () => {
+  it("requires a positive amount when withdrawing money", () => {
+    expect(
+      buildSchema().safeParse({
+        ...baseFixedTermValues,
+        transactionType: "withdrawal",
+        contributionAmount: 0,
+      }).success,
+    ).toBe(false)
+  })
+
+  it("requires an amount when withdrawing money", () => {
+    expect(
+      buildSchema().safeParse({
+        ...baseFixedTermValues,
+        transactionType: "withdrawal",
+      }).success,
+    ).toBe(false)
+  })
+
+  it("allows withdrawals within active balance limit", () => {
+    expect(
+      buildSchema({ activeBalance: 10_000 }).safeParse({
+        ...baseFixedTermValues,
+        transactionType: "withdrawal",
+        contributionAmount: 5_000,
+      }).success,
+    ).toBe(true)
+  })
+
+  it("rejects withdrawals exceeding active balance limit", () => {
+    expect(
+      buildSchema({ activeBalance: 10_000 }).safeParse({
+        ...baseFixedTermValues,
+        transactionType: "withdrawal",
+        contributionAmount: 12_000,
+      }).success,
+    ).toBe(false)
+  })
+
+  it("rejects withdrawals when active balance is undefined", () => {
+    expect(
+      buildSchema({ activeBalance: undefined }).safeParse({
+        ...baseFixedTermValues,
+        transactionType: "withdrawal",
+        contributionAmount: 5_000,
+      }).success,
+    ).toBe(false)
+  })
+
+  it("allows omitted amount when no money is being moved", () => {
     expect(buildSchema().safeParse(baseFixedTermValues).success).toBe(true)
   })
 
@@ -88,7 +137,7 @@ describe("record change form schema", () => {
 
 const baseFixedTermValues = {
   effectiveDate: "2026-06-15",
-  hasContribution: false,
+  transactionType: "none",
   annualRate: 11.25,
   investmentType: INVESTMENT_TYPES.fixedTerm,
   paymentFrequency: PAYMENT_FREQUENCIES.monthly,
@@ -99,12 +148,15 @@ const baseFixedTermValues = {
 function buildSchema({
   latestEventDate,
   today = "2026-06-21",
+  activeBalance,
 }: {
   latestEventDate?: string
   today?: string
+  activeBalance?: number
 } = {}) {
   return createRecordChangeFormSchema({
     latestEventDate,
     today,
+    activeBalance,
   })
 }

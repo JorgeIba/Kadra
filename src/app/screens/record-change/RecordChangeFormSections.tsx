@@ -17,6 +17,7 @@ import {
   type ReinvestmentBehavior,
 } from "@/domain/investments"
 import type { RecordChangeFormValues } from "@/app/screens/record-change/record-change-form-schema"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -58,7 +59,7 @@ const FORM_FIELD_IDS = {
   annualRate: "record-change-annual-rate",
   contributionAmount: "record-change-contribution-amount",
   effectiveDate: "record-change-effective-date",
-  hasContribution: "record-change-has-contribution",
+  transactionType: "record-change-transaction-type",
   investmentType: "record-change-investment-type",
   maturityDate: "record-change-maturity-date",
   paymentFrequency: "record-change-payment-frequency",
@@ -111,13 +112,15 @@ export function EffectiveDateSection({
 
 interface MoneyMovementSectionProps extends RecordChangeSectionProps {
   availableContribution: number
-  hasContribution: boolean
+  activeBalance: number
+  transactionType: "none" | "contribution" | "withdrawal"
 }
 
 export function MoneyMovementSection({
   availableContribution,
+  activeBalance,
   errors,
-  hasContribution,
+  transactionType,
   register,
 }: MoneyMovementSectionProps) {
   return (
@@ -125,35 +128,101 @@ export function MoneyMovementSection({
       <CardHeader>
         <CardTitle>Money movement</CardTitle>
         <CardDescription>
-          Optional. For now this only records additional money.
+          Optional. Record money deposit or withdrawal on this date.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <label
-          htmlFor={FORM_FIELD_IDS.hasContribution}
-          className="flex items-start gap-3 rounded-lg border border-border/70 bg-secondary/40 p-3 text-sm"
-        >
-          <input
-            id={FORM_FIELD_IDS.hasContribution}
-            type="checkbox"
-            className="mt-1 size-4 accent-primary"
-            {...register("hasContribution")}
-          />
-          <span>
-            <span className="block font-medium text-foreground">
-              Added money to this investment
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <label
+            className={cn(
+              "flex flex-col gap-1 cursor-pointer rounded-lg border border-border/70 p-3 transition-colors hover:bg-muted/30 focus-within:ring-2 focus-within:ring-ring focus-within:outline-none",
+              transactionType === "none" &&
+                "border-primary bg-primary/5 ring-1 ring-primary",
+            )}
+          >
+            <input
+              type="radio"
+              value="none"
+              className="sr-only"
+              {...register("transactionType")}
+            />
+            <span className="text-sm font-semibold text-foreground">
+              No movement
             </span>
-            <span className="mt-1 block leading-5 text-muted-foreground">
-              Available contributed capital on this date:{" "}
+            <span className="text-xs text-muted-foreground leading-4">
+              Just adjust rate or terms.
+            </span>
+          </label>
+
+          <label
+            className={cn(
+              "flex flex-col gap-1 cursor-pointer rounded-lg border border-border/70 p-3 transition-colors hover:bg-muted/30 focus-within:ring-2 focus-within:ring-ring focus-within:outline-none",
+              transactionType === "contribution" &&
+                "border-primary bg-primary/5 ring-1 ring-primary",
+            )}
+          >
+            <input
+              type="radio"
+              value="contribution"
+              className="sr-only"
+              {...register("transactionType")}
+            />
+            <span className="text-sm font-semibold text-foreground">
+              Deposit
+            </span>
+            <span className="text-xs text-muted-foreground leading-4">
+              Add new capital.
+            </span>
+          </label>
+
+          <label
+            className={cn(
+              "flex flex-col gap-1 cursor-pointer rounded-lg border border-border/70 p-3 transition-colors hover:bg-muted/30 focus-within:ring-2 focus-within:ring-ring focus-within:outline-none",
+              transactionType === "withdrawal" &&
+                "border-primary bg-primary/5 ring-1 ring-primary",
+            )}
+          >
+            <input
+              type="radio"
+              value="withdrawal"
+              className="sr-only"
+              {...register("transactionType")}
+            />
+            <span className="text-sm font-semibold text-foreground">
+              Withdrawal
+            </span>
+            <span className="text-xs text-muted-foreground leading-4">
+              Take money out.
+            </span>
+          </label>
+        </div>
+
+        {transactionType === "contribution" && (
+          <div className="text-xs text-muted-foreground bg-muted/40 border border-border/50 rounded-lg p-3">
+            Net capital contributed on this date:{" "}
+            <span className="font-semibold text-foreground">
               {formatMxn(availableContribution)}
             </span>
-          </span>
-        </label>
+          </div>
+        )}
 
-        {hasContribution ? (
+        {transactionType === "withdrawal" && (
+          <div className="text-xs text-muted-foreground bg-muted/40 border border-border/50 rounded-lg p-3">
+            Available active balance to withdraw on this date:{" "}
+            <span className="font-semibold text-foreground">
+              {formatMxn(activeBalance)}
+            </span>
+          </div>
+        )}
+
+        {transactionType !== "none" ? (
           <Field
             error={errors.contributionAmount?.message}
-            label="Added amount"
+            label={
+              transactionType === "contribution"
+                ? "Added amount"
+                : "Withdrawn amount"
+            }
             htmlFor={FORM_FIELD_IDS.contributionAmount}
           >
             <Input

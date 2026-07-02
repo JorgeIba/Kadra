@@ -8,6 +8,8 @@ import {
   type InvestmentContributionEvent,
   type InvestmentLifecycleEvent,
   type InvestmentRateEvent,
+  getInvestmentBalanceState,
+  parseCalendarDate,
 } from "@/domain/investments"
 import {
   getRecordChangeEffectiveDateError,
@@ -44,7 +46,7 @@ export function buildInvestmentWithRecordedChangeFromFormValues(
     investment,
     effectiveDate,
   )
-  const contributionEvents = hasContributionAmount(values)
+  const contributionEvents = hasMoneyMovement(values)
     ? [
         ...investment.contributionEvents,
         buildContributionEvent(values, investment, now),
@@ -94,7 +96,7 @@ export function mapInvestmentToRecordChangeFormValues(
   )
   const commonValues = {
     effectiveDate,
-    hasContribution: false as const,
+    transactionType: "none" as const,
     annualRate: activeRateEvent.annualRate,
     investmentType: activeLifecycleEvent.type,
     paymentFrequency: activeLifecycleEvent.paymentFrequency,
@@ -123,6 +125,14 @@ export function getAvailableContributionAmountAtDate(
     .totalContributedAmount
 }
 
+export function getActiveBalanceAtDate(
+  investment: Investment,
+  effectiveDate: CalendarDateString,
+): number {
+  return getInvestmentBalanceState(investment, parseCalendarDate(effectiveDate))
+    .currentInvestedAmount
+}
+
 export function getLatestInvestmentEventDate(
   investment: Investment,
 ): CalendarDateString {
@@ -144,7 +154,7 @@ export function getLatestInvestmentEventDate(
 
 function buildContributionEvent(
   values: RecordChangeFormValues & {
-    hasContribution: true
+    transactionType: "contribution" | "withdrawal"
     contributionAmount: number
   },
   investment: Investment,
@@ -158,17 +168,20 @@ function buildContributionEvent(
     ),
     amount: values.contributionAmount,
     effectiveDate: values.effectiveDate,
+    kind: values.transactionType,
     createdAt: now,
   }
 }
 
-function hasContributionAmount(
+function hasMoneyMovement(
   values: RecordChangeFormValues,
 ): values is RecordChangeFormValues & {
-  hasContribution: true
+  transactionType: "contribution" | "withdrawal"
   contributionAmount: number
 } {
-  return values.hasContribution && values.contributionAmount !== undefined
+  return (
+    values.transactionType !== "none" && values.contributionAmount !== undefined
+  )
 }
 
 function buildRateEvent(

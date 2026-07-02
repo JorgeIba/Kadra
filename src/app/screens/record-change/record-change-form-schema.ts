@@ -9,9 +9,12 @@ import {
   type CalendarDateString,
 } from "@/domain/investments"
 
+import { formatMxn } from "@/lib/formatters"
+
 interface RecordChangeFormSchemaOptions {
   latestEventDate?: CalendarDateString
   today: CalendarDateString
+  activeBalance?: number
 }
 
 interface RecordChangeEffectiveDateValidationOptions {
@@ -43,7 +46,7 @@ const dateOnlySchema = z.string().refine(isCalendarDateString, {
 
 const commonRecordChangeFormSchema = z.object({
   effectiveDate: dateOnlySchema,
-  hasContribution: z.boolean(),
+  transactionType: z.enum(["none", "contribution", "withdrawal"]),
   contributionAmount: z.number().optional(),
   annualRate: z.number().min(0, "Annual rate cannot be negative."),
   paymentFrequency: z.enum([
@@ -61,6 +64,7 @@ const commonRecordChangeFormSchema = z.object({
 export function createRecordChangeFormSchema({
   latestEventDate,
   today,
+  activeBalance,
 }: RecordChangeFormSchemaOptions) {
   return z
     .discriminatedUnion("investmentType", [
@@ -91,7 +95,7 @@ export function createRecordChangeFormSchema({
       }
 
       if (
-        values.hasContribution &&
+        values.transactionType === "contribution" &&
         (values.contributionAmount === undefined ||
           values.contributionAmount <= 0)
       ) {
@@ -102,10 +106,54 @@ export function createRecordChangeFormSchema({
         })
       }
 
-      if (!values.hasContribution && values.contributionAmount !== undefined) {
+      if (
+        values.transactionType === "withdrawal" &&
+        (values.contributionAmount === undefined ||
+          values.contributionAmount <= 0)
+      ) {
         context.addIssue({
           code: "custom",
-          message: "Added amount is only available when adding money.",
+          message: "Withdrawn amount must be greater than zero.",
+          path: ["contributionAmount"],
+        })
+      }
+
+      if (
+        values.transactionType === "withdrawal" &&
+        values.contributionAmount !== undefined &&
+        values.contributionAmount > 0 &&
+        activeBalance === undefined
+      ) {
+        context.addIssue({
+          code: "custom",
+          message:
+            "Cannot validate a withdrawal without an active balance for this date.",
+          path: ["contributionAmount"],
+        })
+      }
+
+      if (
+        values.transactionType === "withdrawal" &&
+        values.contributionAmount !== undefined &&
+        activeBalance !== undefined &&
+        values.contributionAmount > activeBalance
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: `Withdrawn amount cannot exceed the active balance of ${formatMxn(
+            activeBalance,
+          )} on this date.`,
+          path: ["contributionAmount"],
+        })
+      }
+
+      if (
+        values.transactionType === "none" &&
+        values.contributionAmount !== undefined
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "Amount is only available when moving money.",
           path: ["contributionAmount"],
         })
       }

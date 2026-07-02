@@ -21,6 +21,7 @@ export const sampleInvestments: Investment[] = [
         amount: 50000,
         effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:00:00.000Z",
+        kind: "contribution",
       },
       {
         id: "contribution-nu-90-2",
@@ -28,6 +29,7 @@ export const sampleInvestments: Investment[] = [
         effectiveDate: "2026-06-02",
         notes: "Additional funds after first payout estimate review.",
         createdAt: "2026-06-02T09:15:00.000Z",
+        kind: "contribution",
       },
     ],
     rateEvents: [
@@ -69,6 +71,7 @@ export const sampleInvestments: Investment[] = [
         amount: 35000,
         effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:05:00.000Z",
+        kind: "contribution",
       },
     ],
     rateEvents: [
@@ -111,12 +114,14 @@ export const sampleInvestments: Investment[] = [
         amount: 25000,
         effectiveDate: "2026-05-03",
         createdAt: "2026-05-03T12:10:00.000Z",
+        kind: "contribution",
       },
       {
         id: "contribution-klar-flex-2",
         amount: 5000,
         effectiveDate: "2026-05-20",
         createdAt: "2026-05-20T10:00:00.000Z",
+        kind: "contribution",
       },
     ],
     rateEvents: [
