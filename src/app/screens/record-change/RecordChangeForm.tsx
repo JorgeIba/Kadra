@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch, type Resolver } from "react-hook-form"
 import {
@@ -6,6 +6,7 @@ import {
   toDateString,
   type Investment,
 } from "@/domain/investments"
+import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import {
   getAvailableContributionAmountAtDate,
   getActiveBalanceAtDate,
@@ -17,11 +18,13 @@ import {
   EffectiveDateSection,
   MoneyMovementSection,
   RecordChangeFormActions,
+  RecordChangeSummary,
 } from "@/app/screens/record-change/RecordChangeFormSections"
 import {
   createRecordChangeFormSchema,
   type RecordChangeFormValues,
 } from "@/app/screens/record-change/record-change-form-schema"
+import { getRecordChangeSaveState } from "@/app/screens/record-change/record-change-form-view-model"
 
 interface RecordChangeFormProps {
   investment: Investment
@@ -38,6 +41,7 @@ export function RecordChangeForm({
   onChange,
   onSubmit,
 }: RecordChangeFormProps) {
+  const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false)
   const latestEventDate = getLatestInvestmentEventDate(investment)
   const today = toDateString(new Date())
 
@@ -60,7 +64,7 @@ export function RecordChangeForm({
 
   const {
     control,
-    formState: { errors, isValid },
+    formState: { errors, isDirty, isValid },
     handleSubmit,
     register,
     setValue,
@@ -72,16 +76,28 @@ export function RecordChangeForm({
     shouldUnregister: true,
   })
 
-  const [effectiveDate, transactionType, investmentType, paymentFrequency] =
-    useWatch({
-      control,
-      name: [
-        "effectiveDate",
-        "transactionType",
-        "investmentType",
-        "paymentFrequency",
-      ],
-    })
+  const [
+    effectiveDate,
+    transactionType,
+    contributionAmount,
+    investmentType,
+    annualRate,
+    maturityDate,
+    paymentFrequency,
+    reinvestmentBehavior,
+  ] = useWatch({
+    control,
+    name: [
+      "effectiveDate",
+      "transactionType",
+      "contributionAmount",
+      "investmentType",
+      "annualRate",
+      "maturityDate",
+      "paymentFrequency",
+      "reinvestmentBehavior",
+    ],
+  })
 
   const availableContribution =
     isCalendarDateString(effectiveDate) === true
@@ -109,6 +125,34 @@ export function RecordChangeForm({
     }
   }, [effectiveDate, investment])
 
+  const saveState = getRecordChangeSaveState({
+    baseline: investmentStateAtEffectiveDate,
+    draft: {
+      annualRate,
+      contributionAmount,
+      effectiveDate,
+      investmentType,
+      maturityDate,
+      paymentFrequency,
+      reinvestmentBehavior,
+      transactionType,
+    },
+  })
+  const canSubmit = isValid && saveState.canSave
+  const submitGuidance = getSubmitGuidance({
+    isValid,
+    saveState,
+  })
+
+  function handleCancelRequest() {
+    if (!isDirty) {
+      onCancel()
+      return
+    }
+
+    setIsDiscardDialogOpen(true)
+  }
+
   useEffect(() => {
     if (onChange === undefined) {
       return
@@ -122,40 +166,85 @@ export function RecordChangeForm({
     })
   }, [onChange, subscribe])
 
-  const canSubmit = isValid && investmentStateAtEffectiveDate !== null
-
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-      <EffectiveDateSection
-        maxEffectiveDate={today}
-        errors={errors}
-        register={register}
+    <>
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <div className="border-y border-border/70">
+          <EffectiveDateSection
+            maxEffectiveDate={today}
+            errors={errors}
+            register={register}
+          />
+
+          <MoneyMovementSection
+            availableContribution={availableContribution}
+            activeBalance={activeBalance}
+            errors={errors}
+            transactionType={transactionType}
+            register={register}
+          />
+
+          <CurrentTermsSection
+            control={control}
+            errors={errors}
+            investmentType={investmentType}
+            paymentFrequency={paymentFrequency}
+            register={register}
+            setValue={setValue}
+          />
+        </div>
+
+        <RecordChangeSummary
+          activeBalance={activeBalance}
+          annualRate={annualRate}
+          contributionAmount={contributionAmount}
+          effectiveDate={effectiveDate}
+          investmentType={investmentType}
+          maturityDate={maturityDate}
+          paymentFrequency={paymentFrequency}
+          transactionType={transactionType}
+        />
+
+        {errorMessage === undefined ? null : (
+          <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm leading-6 text-destructive">
+            {errorMessage}
+          </p>
+        )}
+
+        <RecordChangeFormActions
+          isValid={canSubmit}
+          submitGuidance={submitGuidance}
+          onCancelRequest={handleCancelRequest}
+        />
+      </form>
+
+      <ConfirmDialog
+        open={isDiscardDialogOpen}
+        title="Discard record?"
+        description="You have unsaved changes. If you leave now, this record will not be saved."
+        confirmLabel="Discard record"
+        variant="destructive"
+        onRequestOpenChange={setIsDiscardDialogOpen}
+        onConfirm={onCancel}
       />
-
-      <MoneyMovementSection
-        availableContribution={availableContribution}
-        activeBalance={activeBalance}
-        errors={errors}
-        transactionType={transactionType}
-        register={register}
-      />
-
-      <CurrentTermsSection
-        control={control}
-        errors={errors}
-        investmentType={investmentType}
-        paymentFrequency={paymentFrequency}
-        register={register}
-        setValue={setValue}
-      />
-
-      {errorMessage === undefined ? null : (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm leading-6 text-destructive">
-          {errorMessage}
-        </p>
-      )}
-
-      <RecordChangeFormActions isValid={canSubmit} onCancel={onCancel} />
-    </form>
+    </>
   )
+}
+
+function getSubmitGuidance({
+  isValid,
+  saveState,
+}: {
+  isValid: boolean
+  saveState: ReturnType<typeof getRecordChangeSaveState>
+}) {
+  if (!saveState.canSave) {
+    return saveState.guidance
+  }
+
+  if (!isValid) {
+    return "Review the highlighted fields to save this record."
+  }
+
+  return saveState.guidance
 }

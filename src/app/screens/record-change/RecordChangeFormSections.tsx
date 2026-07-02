@@ -12,20 +12,15 @@ import {
   PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIORS,
   REINVESTMENT_BEHAVIOR_LABELS,
+  isCalendarDateString,
   type InvestmentType,
   type PaymentFrequency,
   type ReinvestmentBehavior,
 } from "@/domain/investments"
 import type { RecordChangeFormValues } from "@/app/screens/record-change/record-change-form-schema"
 import { cn } from "@/lib/utils"
+import { ArrowDownLeft, ArrowUpRight, Ban, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -35,7 +30,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { formatMxn } from "@/lib/formatters"
+import {
+  formatDisplayDate,
+  formatMxn,
+  formatPercentage,
+} from "@/lib/formatters"
 import type { ReactNode } from "react"
 
 const INVESTMENT_TYPE_OPTIONS = [
@@ -54,6 +53,32 @@ const REINVESTMENT_BEHAVIOR_OPTIONS = [
   REINVESTMENT_BEHAVIORS.automatic,
   REINVESTMENT_BEHAVIORS.toCash,
 ] as const satisfies ReadonlyArray<ReinvestmentBehavior>
+
+const MONEY_MOVEMENT_TONE_STYLES = {
+  destructive: {
+    check: "border-destructive bg-destructive text-background",
+    icon: "border-destructive/35 bg-destructive/10 text-destructive",
+    option: "border-destructive/35 bg-destructive/10",
+  },
+  primary: {
+    check: "border-primary bg-primary text-primary-foreground",
+    icon: "border-primary/55 bg-primary/15 text-primary",
+    option: "border-primary/55 bg-primary/10",
+  },
+  success: {
+    check: "border-success bg-success text-success-foreground",
+    icon: "border-success-border bg-success-surface text-success",
+    option: "border-success-border bg-success-surface/65",
+  },
+} as const satisfies Record<MoneyMovementTone, MoneyMovementToneStyle>
+
+type MoneyMovementTone = "primary" | "success" | "destructive"
+
+interface MoneyMovementToneStyle {
+  check: string
+  icon: string
+  option: string
+}
 
 const FORM_FIELD_IDS = {
   annualRate: "record-change-annual-rate",
@@ -81,32 +106,27 @@ export function EffectiveDateSection({
   register,
 }: EffectiveDateSectionProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>When did this change happen?</CardTitle>
-        <CardDescription>
-          Trafin will append new history from this date onward.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Field
-          error={errors.effectiveDate?.message}
-          label="Effective date"
-          htmlFor={FORM_FIELD_IDS.effectiveDate}
-        >
-          <Input
-            id={FORM_FIELD_IDS.effectiveDate}
-            max={maxEffectiveDate}
-            type="date"
-            {...getFieldAccessibilityProps(
-              FORM_FIELD_IDS.effectiveDate,
-              errors.effectiveDate?.message,
-            )}
-            {...register("effectiveDate")}
-          />
-        </Field>
-      </CardContent>
-    </Card>
+    <FormSection
+      title="Effective date"
+      description="Trafin will append new history from this date onward."
+    >
+      <Field
+        error={errors.effectiveDate?.message}
+        label="When did this change happen?"
+        htmlFor={FORM_FIELD_IDS.effectiveDate}
+      >
+        <Input
+          id={FORM_FIELD_IDS.effectiveDate}
+          max={maxEffectiveDate}
+          type="date"
+          {...getFieldAccessibilityProps(
+            FORM_FIELD_IDS.effectiveDate,
+            errors.effectiveDate?.message,
+          )}
+          {...register("effectiveDate")}
+        />
+      </Field>
+    </FormSection>
   )
 }
 
@@ -124,123 +144,89 @@ export function MoneyMovementSection({
   register,
 }: MoneyMovementSectionProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Money movement</CardTitle>
-        <CardDescription>
-          Optional. Record money deposit or withdrawal on this date.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <label
-            className={cn(
-              "flex flex-col gap-1 cursor-pointer rounded-lg border border-border/70 p-3 transition-colors hover:bg-muted/30 focus-within:ring-2 focus-within:ring-ring focus-within:outline-none",
-              transactionType === "none" &&
-                "border-primary bg-primary/5 ring-1 ring-primary",
-            )}
-          >
-            <input
-              type="radio"
-              value="none"
-              className="sr-only"
-              {...register("transactionType")}
-            />
-            <span className="text-sm font-semibold text-foreground">
-              No movement
-            </span>
-            <span className="text-xs text-muted-foreground leading-4">
-              Just adjust rate or terms.
-            </span>
-          </label>
+    <FormSection
+      title="Money movement"
+      description="Optional. Record a deposit or withdrawal on this date."
+    >
+      <div className="grid gap-2">
+        <MoneyMovementOption
+          description="Only record rate or term changes."
+          icon={<Ban className="h-4 w-4" />}
+          isSelected={transactionType === "none"}
+          label="No movement"
+          tone="primary"
+          value="none"
+          register={register}
+        />
+        <MoneyMovementOption
+          description="Add new capital to this investment."
+          icon={<ArrowDownLeft className="h-4 w-4" />}
+          isSelected={transactionType === "contribution"}
+          label="Deposit"
+          tone="success"
+          value="contribution"
+          register={register}
+        />
+        <MoneyMovementOption
+          description="Take capital out of this investment."
+          icon={<ArrowUpRight className="h-4 w-4" />}
+          isSelected={transactionType === "withdrawal"}
+          label="Withdrawal"
+          tone="destructive"
+          value="withdrawal"
+          register={register}
+        />
+      </div>
 
-          <label
-            className={cn(
-              "flex flex-col gap-1 cursor-pointer rounded-lg border border-border/70 p-3 transition-colors hover:bg-muted/30 focus-within:ring-2 focus-within:ring-ring focus-within:outline-none",
-              transactionType === "contribution" &&
-                "border-primary bg-primary/5 ring-1 ring-primary",
-            )}
-          >
-            <input
-              type="radio"
-              value="contribution"
-              className="sr-only"
-              {...register("transactionType")}
-            />
-            <span className="text-sm font-semibold text-foreground">
-              Deposit
-            </span>
-            <span className="text-xs text-muted-foreground leading-4">
-              Add new capital.
-            </span>
-          </label>
+      {transactionType === "contribution" && (
+        <InlineNotice tone="success">
+          Net capital contributed on this date:{" "}
+          <span className="font-semibold text-foreground">
+            {formatMxn(availableContribution)}
+          </span>
+        </InlineNotice>
+      )}
 
-          <label
-            className={cn(
-              "flex flex-col gap-1 cursor-pointer rounded-lg border border-border/70 p-3 transition-colors hover:bg-muted/30 focus-within:ring-2 focus-within:ring-ring focus-within:outline-none",
-              transactionType === "withdrawal" &&
-                "border-primary bg-primary/5 ring-1 ring-primary",
-            )}
-          >
-            <input
-              type="radio"
-              value="withdrawal"
-              className="sr-only"
-              {...register("transactionType")}
-            />
-            <span className="text-sm font-semibold text-foreground">
-              Withdrawal
-            </span>
-            <span className="text-xs text-muted-foreground leading-4">
-              Take money out.
-            </span>
-          </label>
-        </div>
+      {transactionType === "withdrawal" && (
+        <InlineNotice tone="destructive">
+          Available active balance to withdraw on this date:{" "}
+          <span className="font-semibold text-foreground">
+            {formatMxn(activeBalance)}
+          </span>
+        </InlineNotice>
+      )}
 
-        {transactionType === "contribution" && (
-          <div className="text-xs text-muted-foreground bg-muted/40 border border-border/50 rounded-lg p-3">
-            Net capital contributed on this date:{" "}
-            <span className="font-semibold text-foreground">
-              {formatMxn(availableContribution)}
+      {transactionType !== "none" ? (
+        <Field
+          error={errors.contributionAmount?.message}
+          label={
+            transactionType === "contribution"
+              ? "Added amount"
+              : "Withdrawn amount"
+          }
+          htmlFor={FORM_FIELD_IDS.contributionAmount}
+        >
+          <div className="relative flex items-center">
+            <span className="absolute left-3.5 border-r py-1 pr-3 text-xs font-semibold text-muted-foreground select-none">
+              MXN $
             </span>
-          </div>
-        )}
-
-        {transactionType === "withdrawal" && (
-          <div className="text-xs text-muted-foreground bg-muted/40 border border-border/50 rounded-lg p-3">
-            Available active balance to withdraw on this date:{" "}
-            <span className="font-semibold text-foreground">
-              {formatMxn(activeBalance)}
-            </span>
-          </div>
-        )}
-
-        {transactionType !== "none" ? (
-          <Field
-            error={errors.contributionAmount?.message}
-            label={
-              transactionType === "contribution"
-                ? "Added amount"
-                : "Withdrawn amount"
-            }
-            htmlFor={FORM_FIELD_IDS.contributionAmount}
-          >
             <Input
               id={FORM_FIELD_IDS.contributionAmount}
               type="number"
               inputMode="decimal"
               min="0"
               placeholder="2500"
+              className="h-12 pl-20 text-lg font-semibold"
               {...getFieldAccessibilityProps(
                 FORM_FIELD_IDS.contributionAmount,
                 errors.contributionAmount?.message,
               )}
               {...register("contributionAmount", { valueAsNumber: true })}
             />
-          </Field>
-        ) : null}
-      </CardContent>
-    </Card>
+          </div>
+        </Field>
+      ) : null}
+    </FormSection>
   )
 }
 
@@ -267,224 +253,483 @@ export function CurrentTermsSection({
       : PAYMENT_FREQUENCY_OPTIONS
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Current terms</CardTitle>
-        <CardDescription>
-          Leave values unchanged unless the current rate or terms changed.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Field
-            error={errors.investmentType?.message}
-            label="Type"
-            htmlFor={FORM_FIELD_IDS.investmentType}
-          >
-            <Controller
-              control={control}
-              name="investmentType"
-              render={({ field: investmentTypeField }) => (
-                <Select
-                  name={investmentTypeField.name}
-                  value={investmentTypeField.value}
-                  onValueChange={(value) => {
-                    investmentTypeField.onChange(value)
+    <FormSection
+      title="Current terms"
+      description="Leave values unchanged unless the current rate or terms changed."
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <Field
+          error={errors.investmentType?.message}
+          label="Type"
+          htmlFor={FORM_FIELD_IDS.investmentType}
+        >
+          <Controller
+            control={control}
+            name="investmentType"
+            render={({ field: investmentTypeField }) => (
+              <Select
+                name={investmentTypeField.name}
+                value={investmentTypeField.value}
+                onValueChange={(value) => {
+                  investmentTypeField.onChange(value)
 
-                    if (
-                      value === INVESTMENT_TYPES.openEnded &&
-                      paymentFrequency === PAYMENT_FREQUENCIES.atMaturity
-                    ) {
-                      setValue(
-                        "paymentFrequency",
-                        PAYMENT_FREQUENCIES.monthly,
-                        {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        },
-                      )
-                    }
-                  }}
+                  if (
+                    value === INVESTMENT_TYPES.openEnded &&
+                    paymentFrequency === PAYMENT_FREQUENCIES.atMaturity
+                  ) {
+                    setValue("paymentFrequency", PAYMENT_FREQUENCIES.monthly, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                }}
+              >
+                <SelectTrigger
+                  id={FORM_FIELD_IDS.investmentType}
+                  className="w-full"
+                  {...getFieldAccessibilityProps(
+                    FORM_FIELD_IDS.investmentType,
+                    errors.investmentType?.message,
+                  )}
                 >
-                  <SelectTrigger
-                    id={FORM_FIELD_IDS.investmentType}
-                    className="w-full"
-                    {...getFieldAccessibilityProps(
-                      FORM_FIELD_IDS.investmentType,
-                      errors.investmentType?.message,
-                    )}
-                  >
-                    <SelectValue>
-                      {(value: InvestmentType | null) =>
-                        value === null
-                          ? "Select type"
-                          : INVESTMENT_TYPE_LABELS[value]
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {INVESTMENT_TYPE_OPTIONS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {INVESTMENT_TYPE_LABELS[option]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </Field>
+                  <SelectValue>
+                    {(value: InvestmentType | null) =>
+                      value === null
+                        ? "Select type"
+                        : INVESTMENT_TYPE_LABELS[value]
+                    }
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {INVESTMENT_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {INVESTMENT_TYPE_LABELS[option]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </Field>
 
-          <Field
-            error={errors.annualRate?.message}
-            label="Annual rate"
-            htmlFor={FORM_FIELD_IDS.annualRate}
-          >
-            <Input
-              id={FORM_FIELD_IDS.annualRate}
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="0.01"
-              placeholder="11.25"
-              {...getFieldAccessibilityProps(
-                FORM_FIELD_IDS.annualRate,
-                errors.annualRate?.message,
-              )}
-              {...register("annualRate", { valueAsNumber: true })}
-            />
-          </Field>
-        </div>
+        <Field
+          error={errors.annualRate?.message}
+          label="Annual rate"
+          htmlFor={FORM_FIELD_IDS.annualRate}
+        >
+          <Input
+            id={FORM_FIELD_IDS.annualRate}
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="0.01"
+            placeholder="11.25"
+            {...getFieldAccessibilityProps(
+              FORM_FIELD_IDS.annualRate,
+              errors.annualRate?.message,
+            )}
+            {...register("annualRate", { valueAsNumber: true })}
+          />
+        </Field>
+      </div>
 
+      {investmentType === INVESTMENT_TYPES.fixedTerm ? (
+        <Field
+          error={errors.maturityDate?.message}
+          label="Maturity date"
+          htmlFor={FORM_FIELD_IDS.maturityDate}
+        >
+          <Input
+            id={FORM_FIELD_IDS.maturityDate}
+            type="date"
+            {...getFieldAccessibilityProps(
+              FORM_FIELD_IDS.maturityDate,
+              errors.maturityDate?.message,
+            )}
+            {...register("maturityDate")}
+          />
+        </Field>
+      ) : null}
+
+      <Field
+        error={errors.paymentFrequency?.message}
+        label="Payment frequency"
+        htmlFor={FORM_FIELD_IDS.paymentFrequency}
+      >
+        <Controller
+          control={control}
+          name="paymentFrequency"
+          render={({ field: paymentFrequencyField }) => (
+            <Select
+              name={paymentFrequencyField.name}
+              value={paymentFrequencyField.value}
+              onValueChange={paymentFrequencyField.onChange}
+            >
+              <SelectTrigger
+                id={FORM_FIELD_IDS.paymentFrequency}
+                className="w-full"
+                {...getFieldAccessibilityProps(
+                  FORM_FIELD_IDS.paymentFrequency,
+                  errors.paymentFrequency?.message,
+                )}
+              >
+                <SelectValue>
+                  {(value: PaymentFrequency | null) =>
+                    value === null
+                      ? "Select payment frequency"
+                      : PAYMENT_FREQUENCY_LABELS[value]
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {paymentFrequencyOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {PAYMENT_FREQUENCY_LABELS[option]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </Field>
+
+      <Field
+        error={errors.reinvestmentBehavior?.message}
+        label="Reinvestment"
+        htmlFor={FORM_FIELD_IDS.reinvestmentBehavior}
+      >
+        <Controller
+          control={control}
+          name="reinvestmentBehavior"
+          render={({ field: reinvestmentBehaviorField }) => (
+            <Select
+              name={reinvestmentBehaviorField.name}
+              value={reinvestmentBehaviorField.value}
+              onValueChange={reinvestmentBehaviorField.onChange}
+            >
+              <SelectTrigger
+                id={FORM_FIELD_IDS.reinvestmentBehavior}
+                className="w-full"
+                {...getFieldAccessibilityProps(
+                  FORM_FIELD_IDS.reinvestmentBehavior,
+                  errors.reinvestmentBehavior?.message,
+                )}
+              >
+                <SelectValue>
+                  {(value: ReinvestmentBehavior | null) =>
+                    value === null
+                      ? "Select reinvestment"
+                      : REINVESTMENT_BEHAVIOR_LABELS[value]
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {REINVESTMENT_BEHAVIOR_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {REINVESTMENT_BEHAVIOR_LABELS[option]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </Field>
+    </FormSection>
+  )
+}
+
+interface RecordChangeSummaryProps {
+  activeBalance: number
+  annualRate: number | undefined
+  contributionAmount: number | undefined
+  effectiveDate: string | undefined
+  investmentType: InvestmentType | undefined
+  maturityDate: string | undefined
+  paymentFrequency: PaymentFrequency | undefined
+  transactionType: "none" | "contribution" | "withdrawal" | undefined
+}
+
+export function RecordChangeSummary({
+  activeBalance,
+  annualRate,
+  contributionAmount,
+  effectiveDate,
+  investmentType,
+  maturityDate,
+  paymentFrequency,
+  transactionType,
+}: RecordChangeSummaryProps) {
+  const hasMoneyMovement =
+    transactionType !== undefined &&
+    transactionType !== "none" &&
+    isFinitePositiveNumber(contributionAmount)
+  const resultingBalance =
+    transactionType === "contribution" && hasMoneyMovement
+      ? activeBalance + contributionAmount
+      : transactionType === "withdrawal" && hasMoneyMovement
+        ? activeBalance - contributionAmount
+        : activeBalance
+
+  return (
+    <section className="rounded-lg border border-border/70 bg-card/45 p-4">
+      <div className="space-y-1">
+        <h2 className="text-base font-bold leading-tight text-foreground">
+          Record summary
+        </h2>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Review what this dated record will append before saving.
+        </p>
+      </div>
+
+      <dl className="mt-4 grid grid-cols-2 gap-3">
+        <SummaryItem
+          label="Effective date"
+          value={
+            effectiveDate === undefined || !isCalendarDateString(effectiveDate)
+              ? "Select date"
+              : formatDisplayDate(effectiveDate)
+          }
+        />
+        <SummaryItem
+          label="Movement"
+          value={getMovementSummary(transactionType, contributionAmount)}
+        />
+        <SummaryItem
+          label="Resulting balance"
+          value={formatMxn(resultingBalance)}
+        />
+        <SummaryItem
+          label="Annual rate"
+          value={
+            typeof annualRate === "number" && Number.isFinite(annualRate)
+              ? formatPercentage(annualRate)
+              : "Enter rate"
+          }
+        />
+        <SummaryItem
+          label="Type"
+          value={
+            investmentType === undefined
+              ? "Select type"
+              : INVESTMENT_TYPE_LABELS[investmentType]
+          }
+        />
+        <SummaryItem
+          label="Payout"
+          value={
+            paymentFrequency === undefined
+              ? "Select payout"
+              : PAYMENT_FREQUENCY_LABELS[paymentFrequency]
+          }
+        />
         {investmentType === INVESTMENT_TYPES.fixedTerm ? (
-          <Field
-            error={errors.maturityDate?.message}
-            label="Maturity date"
-            htmlFor={FORM_FIELD_IDS.maturityDate}
-          >
-            <Input
-              id={FORM_FIELD_IDS.maturityDate}
-              type="date"
-              {...getFieldAccessibilityProps(
-                FORM_FIELD_IDS.maturityDate,
-                errors.maturityDate?.message,
-              )}
-              {...register("maturityDate")}
-            />
-          </Field>
+          <SummaryItem
+            label="Maturity"
+            value={
+              maturityDate === undefined || !isCalendarDateString(maturityDate)
+                ? "Select date"
+                : formatDisplayDate(maturityDate)
+            }
+          />
         ) : null}
-
-        <Field
-          error={errors.paymentFrequency?.message}
-          label="Payment frequency"
-          htmlFor={FORM_FIELD_IDS.paymentFrequency}
-        >
-          <Controller
-            control={control}
-            name="paymentFrequency"
-            render={({ field: paymentFrequencyField }) => (
-              <Select
-                name={paymentFrequencyField.name}
-                value={paymentFrequencyField.value}
-                onValueChange={paymentFrequencyField.onChange}
-              >
-                <SelectTrigger
-                  id={FORM_FIELD_IDS.paymentFrequency}
-                  className="w-full"
-                  {...getFieldAccessibilityProps(
-                    FORM_FIELD_IDS.paymentFrequency,
-                    errors.paymentFrequency?.message,
-                  )}
-                >
-                  <SelectValue>
-                    {(value: PaymentFrequency | null) =>
-                      value === null
-                        ? "Select payment frequency"
-                        : PAYMENT_FREQUENCY_LABELS[value]
-                    }
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {paymentFrequencyOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {PAYMENT_FREQUENCY_LABELS[option]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </Field>
-
-        <Field
-          error={errors.reinvestmentBehavior?.message}
-          label="Reinvestment"
-          htmlFor={FORM_FIELD_IDS.reinvestmentBehavior}
-        >
-          <Controller
-            control={control}
-            name="reinvestmentBehavior"
-            render={({ field: reinvestmentBehaviorField }) => (
-              <Select
-                name={reinvestmentBehaviorField.name}
-                value={reinvestmentBehaviorField.value}
-                onValueChange={reinvestmentBehaviorField.onChange}
-              >
-                <SelectTrigger
-                  id={FORM_FIELD_IDS.reinvestmentBehavior}
-                  className="w-full"
-                  {...getFieldAccessibilityProps(
-                    FORM_FIELD_IDS.reinvestmentBehavior,
-                    errors.reinvestmentBehavior?.message,
-                  )}
-                >
-                  <SelectValue>
-                    {(value: ReinvestmentBehavior | null) =>
-                      value === null
-                        ? "Select reinvestment"
-                        : REINVESTMENT_BEHAVIOR_LABELS[value]
-                    }
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {REINVESTMENT_BEHAVIOR_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {REINVESTMENT_BEHAVIOR_LABELS[option]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </Field>
-      </CardContent>
-    </Card>
+      </dl>
+    </section>
   )
 }
 
 interface RecordChangeFormActionsProps {
   isValid: boolean
-  onCancel: () => void
+  onCancelRequest: () => void
+  submitGuidance?: string
 }
 
 export function RecordChangeFormActions({
   isValid,
-  onCancel,
+  onCancelRequest,
+  submitGuidance,
 }: RecordChangeFormActionsProps) {
   return (
-    <div className="grid gap-2">
-      <Button type="submit" className="w-full" disabled={!isValid}>
-        Save record
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={onCancel}
-      >
-        Back to detail
-      </Button>
+    <div className="grid gap-3">
+      {submitGuidance === undefined ? null : (
+        <p className="rounded-lg border border-border/70 bg-muted/25 px-3 py-2 text-sm leading-6 text-muted-foreground">
+          {submitGuidance}
+        </p>
+      )}
+
+      <div className="grid gap-2">
+        <Button
+          type="submit"
+          className="w-full disabled:border-border disabled:bg-muted/45 disabled:text-muted-foreground disabled:shadow-none"
+          disabled={!isValid}
+        >
+          Save record
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={onCancelRequest}
+        >
+          Back to detail
+        </Button>
+      </div>
     </div>
   )
+}
+
+function FormSection({
+  children,
+  description,
+  title,
+}: {
+  children: ReactNode
+  description: string
+  title: string
+}) {
+  return (
+    <section className="space-y-4 border-t border-border/70 py-5 first:border-t-0">
+      <div className="space-y-1.5">
+        <h2 className="text-base font-bold leading-tight text-foreground">
+          {title}
+        </h2>
+        <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
+  )
+}
+
+function MoneyMovementOption({
+  description,
+  icon,
+  isSelected,
+  label,
+  register,
+  tone,
+  value,
+}: {
+  description: string
+  icon: ReactNode
+  isSelected: boolean
+  label: string
+  register: UseFormRegister<RecordChangeFormValues>
+  tone: MoneyMovementTone
+  value: "none" | "contribution" | "withdrawal"
+}) {
+  const toneStyles = MONEY_MOVEMENT_TONE_STYLES[tone]
+
+  return (
+    <label
+      className={cn(
+        "flex cursor-pointer items-center gap-3 rounded-lg border border-border/70 bg-card/45 p-3 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:outline-none hover:bg-muted/25",
+        isSelected && toneStyles.option,
+      )}
+    >
+      <input
+        type="radio"
+        value={value}
+        className="sr-only"
+        {...register("transactionType")}
+      />
+
+      <span
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border/70 bg-muted/35 text-muted-foreground",
+          isSelected && toneStyles.icon,
+        )}
+        aria-hidden="true"
+      >
+        {icon}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold leading-5 text-foreground">
+          {label}
+        </span>
+        <span className="block text-xs leading-5 text-muted-foreground">
+          {description}
+        </span>
+      </span>
+
+      <span
+        className={cn(
+          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border/70 text-background",
+          isSelected && toneStyles.check,
+        )}
+        aria-hidden="true"
+      >
+        {isSelected ? <Check className="h-3.5 w-3.5" /> : null}
+      </span>
+    </label>
+  )
+}
+
+function InlineNotice({
+  children,
+  tone,
+}: {
+  children: ReactNode
+  tone: "success" | "destructive"
+}) {
+  return (
+    <p
+      className={cn(
+        "rounded-lg border px-3 py-2 text-xs leading-5",
+        tone === "success" &&
+          "border-success-border bg-success-surface text-success",
+        tone === "destructive" &&
+          "border-destructive/30 bg-destructive/10 text-destructive",
+      )}
+    >
+      {children}
+    </p>
+  )
+}
+
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-border/60 bg-background/35 px-3 py-2">
+      <dt className="text-[0.68rem] font-medium leading-4 text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-1 break-words text-sm font-semibold leading-5 text-foreground">
+        {value}
+      </dd>
+    </div>
+  )
+}
+
+function getMovementSummary(
+  transactionType: RecordChangeSummaryProps["transactionType"],
+  contributionAmount: number | undefined,
+) {
+  if (
+    transactionType === "contribution" &&
+    isFinitePositiveNumber(contributionAmount)
+  ) {
+    return `Deposit ${formatMxn(contributionAmount)}`
+  }
+
+  if (
+    transactionType === "withdrawal" &&
+    isFinitePositiveNumber(contributionAmount)
+  ) {
+    return `Withdraw ${formatMxn(contributionAmount)}`
+  }
+
+  if (transactionType === "contribution") {
+    return "Deposit amount pending"
+  }
+
+  if (transactionType === "withdrawal") {
+    return "Withdrawal amount pending"
+  }
+
+  return "No money movement"
+}
+
+function isFinitePositiveNumber(value: number | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
 }
 
 function Field({

@@ -58,34 +58,15 @@ export function InvestmentDetailScreen({
         Back
       </Button>
 
-      <div className="flex items-start justify-between gap-4">
-        <ScreenIntro
-          eyebrow={investment.institutionName}
-          title={investment.name}
-          action={
-            <div className="flex flex-wrap justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onRecordChange}
-              >
-                <PlusCircle className="size-4" aria-hidden="true" />
-                Record change
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onEdit}
-              >
-                <Pencil className="size-4" aria-hidden="true" />
-                Edit
-              </Button>
-            </div>
-          }
-        />
-      </div>
+      <ScreenIntro
+        eyebrow={investment.institutionName}
+        title={investment.name}
+      />
+
+      <InvestmentDetailActions
+        onEdit={onEdit}
+        onRecordChange={onRecordChange}
+      />
 
       <Card className="rounded-lg bg-secondary/70">
         <CardContent className="space-y-5">
@@ -232,6 +213,44 @@ export function InvestmentDetailScreen({
         onConfirm={onDelete}
       />
     </section>
+  )
+}
+
+function InvestmentDetailActions({
+  onEdit,
+  onRecordChange,
+}: {
+  onEdit: () => void
+  onRecordChange: () => void
+}) {
+  return (
+    <div
+      className="-mt-2 flex gap-2"
+      role="group"
+      aria-label="Investment actions"
+    >
+      <Button
+        type="button"
+        variant="secondary"
+        size="lg"
+        className="min-w-0 flex-1"
+        onClick={onRecordChange}
+      >
+        <PlusCircle className="size-4" aria-hidden="true" />
+        Record update
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        className="min-w-0 flex-1"
+        onClick={onEdit}
+      >
+        <Pencil className="size-4" aria-hidden="true" />
+        Update terms
+      </Button>
+    </div>
   )
 }
 

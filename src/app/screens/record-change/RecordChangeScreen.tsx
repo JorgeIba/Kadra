@@ -47,8 +47,8 @@ export function RecordChangeScreen({
     <section className="space-y-5">
       <ScreenIntro
         eyebrow={investment.institutionName}
-        title="Record change"
-        description="Add dated history for this investment."
+        title={investment.name}
+        description="Append dated history for this investment without rewriting earlier records."
       />
 
       <RecordChangeForm

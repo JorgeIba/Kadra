@@ -36,9 +36,9 @@ export function EditInvestmentScreen({
   return (
     <section className="space-y-5">
       <ScreenIntro
-        eyebrow="Edit investment"
-        title="Update terms"
-        description="Adjust the stored terms so Trafin keeps current value, income, and maturity tracking aligned with the latest details."
+        eyebrow={investment.institutionName}
+        title={investment.name}
+        description="Update the stored profile so current value, income, and maturity tracking stay aligned with the latest details."
       />
 
       <InvestmentForm
