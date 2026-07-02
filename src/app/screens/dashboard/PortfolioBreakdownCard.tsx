@@ -27,18 +27,12 @@ export function PortfolioBreakdownCard({
   return (
     <section className="space-y-6 border-y border-border/70 py-5">
       <DashboardSectionHeader
-        title="Distribution"
-        description="Allocation of active capital by investment type and status."
+        title="Active capital"
+        description="Share of active value by investment type."
       />
 
       <BreakdownSection
-        title="By type"
-        items={breakdown.byType}
-        onOpenFilter={onOpenFilter}
-      />
-      <BreakdownSection
-        title="By status"
-        items={breakdown.byStatus}
+        items={breakdown.activeCapitalByType}
         onOpenFilter={onOpenFilter}
       />
     </section>
@@ -48,27 +42,27 @@ export function PortfolioBreakdownCard({
 function BreakdownSection({
   items,
   onOpenFilter,
-  title,
 }: {
   items: PortfolioBreakdownItem[]
   onOpenFilter: (filterOption: AssetFilterOption) => void
-  title: string
 }) {
+  if (items.length === 0) {
+    return (
+      <p className="text-sm leading-6 text-muted-foreground">
+        No active capital to distribute.
+      </p>
+    )
+  }
+
   return (
-    <div className="space-y-3">
-      <h3 className="border-b border-border/70 pb-3 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-        {title}
-      </h3>
-      <div className="space-y-5">
-        {items.map((item) => (
-          <BreakdownRow
-            key={item.label}
-            item={item}
-            onOpenFilter={onOpenFilter}
-            sectionTitle={title}
-          />
-        ))}
-      </div>
+    <div className="space-y-5">
+      {items.map((item) => (
+        <BreakdownRow
+          key={item.label}
+          item={item}
+          onOpenFilter={onOpenFilter}
+        />
+      ))}
     </div>
   )
 }
@@ -76,14 +70,12 @@ function BreakdownSection({
 function BreakdownRow({
   item,
   onOpenFilter,
-  sectionTitle,
 }: {
   item: PortfolioBreakdownItem
   onOpenFilter: (filterOption: AssetFilterOption) => void
-  sectionTitle: string
 }) {
-  const tone = getBreakdownTone(sectionTitle, item.label)
-  const filterOption = getBreakdownFilterOption(sectionTitle, item.label)
+  const tone = getBreakdownTone(item.label)
+  const filterOption = getBreakdownFilterOption(item.label)
 
   return (
     <Button
@@ -113,7 +105,10 @@ function BreakdownRow({
               {formatMxn(item.estimatedValue)}
             </p>
             <p className="text-xs text-muted-foreground">
-              {formatPercentage(item.percentage)}
+              {formatPercentage(item.percentage, {
+                maximumFractionDigits: 0,
+              })}{" "}
+              of active value
             </p>
           </div>
         </div>
@@ -123,30 +118,14 @@ function BreakdownRow({
   )
 }
 
-function getBreakdownFilterOption(
-  sectionTitle: string,
-  itemLabel: string,
-): AssetFilterOption {
-  if (sectionTitle === "By type") {
-    return itemLabel === "Open ended"
-      ? ASSET_FILTER_OPTIONS.openEnded
-      : ASSET_FILTER_OPTIONS.fixedTerm
-  }
-
-  return itemLabel === "Active"
-    ? ASSET_FILTER_OPTIONS.active
-    : ASSET_FILTER_OPTIONS.finished
+function getBreakdownFilterOption(itemLabel: string): AssetFilterOption {
+  return itemLabel === "Open ended"
+    ? ASSET_FILTER_OPTIONS.openEnded
+    : ASSET_FILTER_OPTIONS.fixedTerm
 }
 
-function getBreakdownTone(
-  sectionTitle: string,
-  itemLabel: string,
-): ProgressTone {
-  if (sectionTitle === "By type") {
-    return itemLabel === "Open ended" ? "info" : "warning"
-  }
-
-  return itemLabel === "Active" ? "success" : "neutral"
+function getBreakdownTone(itemLabel: string): ProgressTone {
+  return itemLabel === "Open ended" ? "info" : "warning"
 }
 
 const TONE_DOT_CLASS_NAMES: Record<ProgressTone, string> = {

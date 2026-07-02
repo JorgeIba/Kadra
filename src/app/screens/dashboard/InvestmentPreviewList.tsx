@@ -3,22 +3,26 @@ import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 
 interface InvestmentPreviewListProps {
+  activeInvestmentCount: number
   investments: InvestmentSummary[]
-  totalInvestmentCount: number
   onInvestmentSelect: (investmentId: string) => void
 }
 
 export function InvestmentPreviewList({
+  activeInvestmentCount,
   investments,
-  totalInvestmentCount,
   onInvestmentSelect,
 }: InvestmentPreviewListProps) {
+  if (investments.length === 0) {
+    return null
+  }
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <DashboardSectionHeader title="Active assets" />
         <span className="text-xs font-medium text-muted-foreground">
-          {totalInvestmentCount} total
+          {activeInvestmentCount} active
         </span>
       </div>
 

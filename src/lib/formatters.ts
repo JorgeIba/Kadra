@@ -9,6 +9,15 @@ const percentageFormatter = new Intl.NumberFormat("es-MX", {
   minimumFractionDigits: 0,
 })
 
+const wholePercentageFormatter = new Intl.NumberFormat("es-MX", {
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+})
+
+interface FormatPercentageOptions {
+  maximumFractionDigits?: number
+}
+
 const displayDateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
   month: "short",
@@ -19,7 +28,14 @@ export function formatMxn(value: number): string {
   return mxnFormatter.format(value)
 }
 
-export function formatPercentage(value: number): string {
+export function formatPercentage(
+  value: number,
+  options?: FormatPercentageOptions,
+): string {
+  if (options?.maximumFractionDigits === 0) {
+    return `${wholePercentageFormatter.format(value)}%`
+  }
+
   return `${percentageFormatter.format(value)}%`
 }
 

@@ -1,5 +1,4 @@
 import {
-  DERIVED_STATUS_LABELS,
   DERIVED_STATUSES,
   INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
@@ -15,46 +14,33 @@ export interface PortfolioBreakdownItem {
 }
 
 export interface PortfolioBreakdown {
-  byType: PortfolioBreakdownItem[]
-  byStatus: PortfolioBreakdownItem[]
+  activeCapitalByType: PortfolioBreakdownItem[]
 }
 
 export function getPortfolioBreakdown(
   investments: ResolvedInvestment[],
 ): PortfolioBreakdown {
-  const totalEstimatedValue = getPortfolioEstimatedCurrentValue(investments)
+  const activeInvestments = investments.filter((investment) => {
+    return investment.derivedStatus === DERIVED_STATUSES.active
+  })
+  const totalEstimatedValue =
+    getPortfolioEstimatedCurrentValue(activeInvestments)
 
   return {
-    byType: [
+    activeCapitalByType: [
       getBreakdownItem({
-        investments,
+        investments: activeInvestments,
         label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.fixedTerm],
         matches: (investment) => investment.type === INVESTMENT_TYPES.fixedTerm,
         totalEstimatedValue,
       }),
       getBreakdownItem({
-        investments,
+        investments: activeInvestments,
         label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.openEnded],
         matches: (investment) => investment.type === INVESTMENT_TYPES.openEnded,
         totalEstimatedValue,
       }),
-    ],
-    byStatus: [
-      getBreakdownItem({
-        investments,
-        label: DERIVED_STATUS_LABELS[DERIVED_STATUSES.active],
-        matches: (investment) =>
-          investment.derivedStatus === DERIVED_STATUSES.active,
-        totalEstimatedValue,
-      }),
-      getBreakdownItem({
-        investments,
-        label: DERIVED_STATUS_LABELS[DERIVED_STATUSES.finished],
-        matches: (investment) =>
-          investment.derivedStatus === DERIVED_STATUSES.finished,
-        totalEstimatedValue,
-      }),
-    ],
+    ].filter((item) => item.count > 0),
   }
 }
 

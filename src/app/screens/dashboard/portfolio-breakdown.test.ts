@@ -12,38 +12,35 @@ import { getPortfolioBreakdown } from "@/app/screens/dashboard/portfolio-breakdo
 const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 
 describe("portfolio breakdown", () => {
-  it("groups investments by type", () => {
+  it("groups active capital by investment type", () => {
     const breakdown = getPortfolioBreakdown(resolvedInvestments)
 
     expect(
-      breakdown.byType.map(({ count, label }) => {
+      breakdown.activeCapitalByType.map(({ count, label }) => {
         return { count, label }
       }),
     ).toEqual([
-      { count: 2, label: "Fixed term" },
+      { count: 1, label: "Fixed term" },
       { count: 1, label: "Open ended" },
     ])
   })
 
-  it("groups investments by derived status", () => {
+  it("excludes finished investments from active capital groups", () => {
     const breakdown = getPortfolioBreakdown(resolvedInvestments)
 
     expect(
-      breakdown.byStatus.map(({ count, label }) => {
-        return { count, label }
+      breakdown.activeCapitalByType.some((item) => {
+        return item.count === 0 || item.estimatedValue === 0
       }),
-    ).toEqual([
-      { count: 2, label: "Active" },
-      { count: 1, label: "Finished" },
-    ])
+    ).toBe(false)
   })
 
-  it("returns percentages that represent each group share of estimated value", () => {
+  it("returns percentages that represent each group share of active value", () => {
     const breakdown = getPortfolioBreakdown(resolvedInvestments)
 
-    expect(breakdown.byType).toEqual([
+    expect(breakdown.activeCapitalByType).toEqual([
       expect.objectContaining({
-        count: 2,
+        count: 1,
         estimatedValue: expect.closeTo(10_424.657534),
         label: "Fixed term",
         percentage: expect.closeTo(50.190497664767406),
@@ -55,38 +52,12 @@ describe("portfolio breakdown", () => {
         percentage: expect.closeTo(49.809502335232594),
       }),
     ])
-    expect(breakdown.byStatus).toEqual([
-      expect.objectContaining({
-        count: 2,
-        estimatedValue: expect.closeTo(20_770.181646),
-        label: "Active",
-        percentage: expect.closeTo(100),
-      }),
-      expect.objectContaining({
-        count: 1,
-        estimatedValue: 0,
-        label: "Finished",
-        percentage: 0,
-      }),
-    ])
   })
 
-  it("returns zero percentages for an empty portfolio", () => {
+  it("returns no active capital groups for an empty portfolio", () => {
     const breakdown = getPortfolioBreakdown([])
 
-    expect([...breakdown.byType, ...breakdown.byStatus]).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ percentage: 0 }),
-        expect.objectContaining({ percentage: 0 }),
-        expect.objectContaining({ percentage: 0 }),
-        expect.objectContaining({ percentage: 0 }),
-      ]),
-    )
-    expect(
-      [...breakdown.byType, ...breakdown.byStatus].every((item) => {
-        return item.percentage === 0
-      }),
-    ).toBe(true)
+    expect(breakdown.activeCapitalByType).toEqual([])
   })
 })
 

@@ -1,4 +1,5 @@
 import {
+  DERIVED_STATUSES,
   getActiveInvestmentCount,
   getPortfolioEstimatedAccruedReturn,
   getPortfolioEstimatedCurrentValue,
@@ -46,6 +47,9 @@ export function DashboardScreen({
     resolveInvestment(investment, asOfDate),
   )
   const activeInvestments = getActiveInvestmentCount(resolvedInvestments)
+  const activeResolvedInvestments = resolvedInvestments.filter((investment) => {
+    return investment.derivedStatus === DERIVED_STATUSES.active
+  })
   const earnedSoFar = getPortfolioEstimatedAccruedReturn(resolvedInvestments)
   const totalValue = getPortfolioEstimatedCurrentValue(resolvedInvestments)
   const earningsSnapshot = getPortfolioEarnedMoneySnapshot(
@@ -62,7 +66,7 @@ export function DashboardScreen({
     resolvedInvestments,
     asOfDate,
   )
-  const investmentSummaries = resolvedInvestments
+  const investmentSummaries = activeResolvedInvestments
     .map((investment) => getResolvedInvestmentSummary(investment))
     .slice(0, DASHBOARD_INVESTMENT_PREVIEW_LIMIT)
 
@@ -102,7 +106,7 @@ export function DashboardScreen({
           />
           <InvestmentPreviewList
             investments={investmentSummaries}
-            totalInvestmentCount={investments.length}
+            activeInvestmentCount={activeResolvedInvestments.length}
             onInvestmentSelect={onInvestmentSelect}
           />
         </>
