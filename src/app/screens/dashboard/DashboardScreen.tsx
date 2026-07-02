@@ -1,3 +1,4 @@
+import { Fragment, type ReactNode } from "react"
 import {
   DERIVED_STATUSES,
   getActiveInvestmentCount,
@@ -7,6 +8,12 @@ import {
   resolveInvestment,
   type Investment,
 } from "@/domain/investments"
+import {
+  DASHBOARD_PANEL_KEYS,
+  getDashboardMaturityPriority,
+  getDashboardPanelOrder,
+  type DashboardPanelKey,
+} from "@/app/screens/dashboard/dashboard-panel-order"
 import { EarningsExplorationCard } from "@/app/screens/dashboard/EarningsExplorationCard"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentPreviewList } from "@/app/screens/dashboard/InvestmentPreviewList"
@@ -66,9 +73,46 @@ export function DashboardScreen({
     resolvedInvestments,
     asOfDate,
   )
+  const panelOrder = getDashboardPanelOrder(
+    getDashboardMaturityPriority(maturityTimelineItems),
+  )
   const investmentSummaries = activeResolvedInvestments
     .map((investment) => getResolvedInvestmentSummary(investment))
     .slice(0, DASHBOARD_INVESTMENT_PREVIEW_LIMIT)
+  const dashboardPanels = {
+    [DASHBOARD_PANEL_KEYS.earnings]: (
+      <EarningsExplorationCard
+        snapshot={earningsSnapshot}
+        onOpenDetails={onOpenEarnings}
+      />
+    ),
+    [DASHBOARD_PANEL_KEYS.projection]: (
+      <PortfolioProjectionChart
+        earningPace={projectionEarningPace}
+        points={projectionPoints}
+        onOpenDetails={onOpenProjection}
+      />
+    ),
+    [DASHBOARD_PANEL_KEYS.activeCapital]: (
+      <PortfolioBreakdownCard
+        breakdown={portfolioBreakdown}
+        onOpenFilter={onOpenDistributionFilter}
+      />
+    ),
+    [DASHBOARD_PANEL_KEYS.maturities]: (
+      <MaturityTimelineSection
+        maturityTimelineItems={maturityTimelineItems}
+        onInvestmentSelect={onInvestmentSelect}
+      />
+    ),
+    [DASHBOARD_PANEL_KEYS.activeAssets]: (
+      <InvestmentPreviewList
+        investments={investmentSummaries}
+        activeInvestmentCount={activeResolvedInvestments.length}
+        onInvestmentSelect={onInvestmentSelect}
+      />
+    ),
+  } satisfies Record<DashboardPanelKey, ReactNode>
 
   return (
     <section className="space-y-9">
@@ -87,28 +131,11 @@ export function DashboardScreen({
         />
       ) : (
         <>
-          <EarningsExplorationCard
-            snapshot={earningsSnapshot}
-            onOpenDetails={onOpenEarnings}
-          />
-          <PortfolioBreakdownCard
-            breakdown={portfolioBreakdown}
-            onOpenFilter={onOpenDistributionFilter}
-          />
-          <PortfolioProjectionChart
-            earningPace={projectionEarningPace}
-            points={projectionPoints}
-            onOpenDetails={onOpenProjection}
-          />
-          <MaturityTimelineSection
-            maturityTimelineItems={maturityTimelineItems}
-            onInvestmentSelect={onInvestmentSelect}
-          />
-          <InvestmentPreviewList
-            investments={investmentSummaries}
-            activeInvestmentCount={activeResolvedInvestments.length}
-            onInvestmentSelect={onInvestmentSelect}
-          />
+          {panelOrder.map((panelKey) => {
+            return (
+              <Fragment key={panelKey}>{dashboardPanels[panelKey]}</Fragment>
+            )
+          })}
         </>
       )}
     </section>
