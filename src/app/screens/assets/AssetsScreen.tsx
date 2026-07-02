@@ -96,23 +96,18 @@ export function AssetsScreen({
         <div className="space-y-5">
           <div className="space-y-3">
             <div className="rounded-lg border border-border bg-card px-4 py-5 text-card-foreground">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1.5">
-                  <p className="text-xs leading-none text-muted-foreground">
-                    Current value across active investments
-                  </p>
-                  <p className="font-ledger text-4xl leading-none tabular-nums">
-                    {formatMxn(totalValue)}
-                  </p>
-                </div>
-                <span className="rounded-full border border-info-border bg-info-surface px-2.5 py-1 text-[0.68rem] font-medium text-info">
-                  {shownCountLabel}
-                </span>
+              <div className="space-y-1.5">
+                <p className="text-xs leading-none text-muted-foreground">
+                  Current value across active investments
+                </p>
+                <p className="font-ledger text-4xl leading-none tabular-nums">
+                  {formatMxn(totalValue)}
+                </p>
               </div>
             </div>
 
             <div className="rounded-lg border border-border/70 bg-card/45 p-3">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2">
                 <LabeledSelectControl
                   ariaLabel="Filter investments"
                   fallbackLabel="Select filter"
@@ -130,7 +125,7 @@ export function AssetsScreen({
                   ariaLabel="Sort investments"
                   fallbackLabel="Select sort"
                   icon={<ArrowUpDown className="size-3.5" aria-hidden="true" />}
-                  label="Sort by"
+                  label="Sort"
                   options={ASSET_SORT_OPTION_VALUES}
                   value={sortOption}
                   getOptionLabel={(option) => ASSET_SORT_OPTION_LABELS[option]}
@@ -139,7 +134,6 @@ export function AssetsScreen({
 
                 <LabeledSelectControl
                   ariaLabel="Change asset list view"
-                  className="col-span-2"
                   fallbackLabel="Select view"
                   icon={<Building2 className="size-3.5" aria-hidden="true" />}
                   label="View"

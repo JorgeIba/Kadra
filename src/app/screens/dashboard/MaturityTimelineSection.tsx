@@ -2,6 +2,7 @@ import { CalendarClock } from "lucide-react"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { MaturityTimelineItem } from "@/app/screens/dashboard/maturity-timeline"
 import { Button } from "@/components/ui/button"
+import { formatDisplayDate } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 interface MaturityTimelineSectionProps {
@@ -39,7 +40,7 @@ export function MaturityTimelineSection({
                 {item.name}
               </span>
               <span className="truncate text-xs text-muted-foreground">
-                {item.institutionName} · Ends {item.endDate}
+                {item.institutionName} · Ends {formatDisplayDate(item.endDate)}
               </span>
             </span>
             <span

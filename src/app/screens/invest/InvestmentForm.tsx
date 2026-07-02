@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react"
-import { Combobox } from "@base-ui/react/combobox"
+import { Autocomplete } from "@base-ui/react/autocomplete"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -579,25 +579,19 @@ function InstitutionCombobox({
   "aria-invalid"?: boolean
 }) {
   return (
-    <Combobox.Root<string>
+    <Autocomplete.Root
       items={suggestions}
-      inputValue={value}
+      value={value}
+      onValueChange={onValueChange}
       limit={6}
       autoHighlight
-      autoComplete="off"
       filter={(suggestion, query) => {
         return suggestion
           .toLocaleLowerCase()
           .includes(query.trim().toLocaleLowerCase())
       }}
-      onInputValueChange={onValueChange}
-      onValueChange={(selectedInstitution) => {
-        if (selectedInstitution !== null) {
-          onValueChange(selectedInstitution)
-        }
-      }}
     >
-      <Combobox.Input
+      <Autocomplete.Input
         id={id}
         name={name}
         placeholder={placeholder}
@@ -609,28 +603,28 @@ function InstitutionCombobox({
         {...accessibilityProps}
       />
 
-      <Combobox.Portal>
-        <Combobox.Positioner
+      <Autocomplete.Portal>
+        <Autocomplete.Positioner
           sideOffset={4}
           align="start"
           className="isolate z-50"
         >
-          <Combobox.Popup className="relative isolate z-50 max-h-48 w-(--anchor-width) min-w-48 origin-(--transform-origin) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
-            <Combobox.List>
+          <Autocomplete.Popup className="relative isolate z-50 max-h-48 w-(--anchor-width) min-w-48 origin-(--transform-origin) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
+            <Autocomplete.List>
               {(suggestion: string) => (
-                <Combobox.Item
+                <Autocomplete.Item
                   key={suggestion}
                   value={suggestion}
                   className="block w-full cursor-default rounded-md px-2 py-1.5 text-left text-sm outline-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-accent data-selected:text-accent-foreground"
                 >
                   {suggestion}
-                </Combobox.Item>
+                </Autocomplete.Item>
               )}
-            </Combobox.List>
-          </Combobox.Popup>
-        </Combobox.Positioner>
-      </Combobox.Portal>
-    </Combobox.Root>
+            </Autocomplete.List>
+          </Autocomplete.Popup>
+        </Autocomplete.Positioner>
+      </Autocomplete.Portal>
+    </Autocomplete.Root>
   )
 }
 

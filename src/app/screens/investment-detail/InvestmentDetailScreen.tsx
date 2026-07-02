@@ -25,7 +25,11 @@ import {
 } from "@/domain/investments"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { formatMxn, formatPercentage } from "@/lib/formatters"
+import {
+  formatDisplayDate,
+  formatMxn,
+  formatPercentage,
+} from "@/lib/formatters"
 
 interface InvestmentDetailScreenProps {
   investment: Investment
@@ -106,7 +110,7 @@ export function InvestmentDetailScreen({
             <DetailMetric
               icon={Landmark}
               label="Started on"
-              value={resolvedInvestment.startDate}
+              value={formatDisplayDate(resolvedInvestment.startDate)}
             />
           </div>
         </CardContent>
@@ -173,10 +177,16 @@ export function InvestmentDetailScreen({
               ]
             }
           />
-          <DetailRow label="Start date" value={resolvedInvestment.startDate} />
+          <DetailRow
+            label="Start date"
+            value={formatDisplayDate(resolvedInvestment.startDate)}
+          />
           {resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm ? (
             <>
-              <DetailRow label="End date" value={resolvedInvestment.endDate} />
+              <DetailRow
+                label="End date"
+                value={formatDisplayDate(resolvedInvestment.endDate)}
+              />
               <DetailRow
                 label="Progress"
                 value={`${Math.round(resolvedInvestment.progressPercentage)}%`}
@@ -197,7 +207,7 @@ export function InvestmentDetailScreen({
               Delete investment
             </h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Remove this investment from your local list. This action cannot be
+              Remove this investment from your portfolio. This action cannot be
               undone.
             </p>
           </div>
@@ -215,7 +225,7 @@ export function InvestmentDetailScreen({
       <ConfirmDialog
         open={isDeleteDialogOpen}
         title="Delete investment?"
-        description={`This removes "${investment.name}" from your local investment list. This action cannot be undone.`}
+        description={`This removes "${investment.name}" from your portfolio. This action cannot be undone.`}
         confirmLabel="Delete investment"
         variant="destructive"
         onRequestOpenChange={setIsDeleteDialogOpen}
