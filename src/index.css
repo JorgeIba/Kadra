@@ -175,6 +175,20 @@ body {
     font-family: var(--font-ledger);
   }
 
+  .money-amount {
+    display: inline-grid;
+    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .money-amount[data-privacy="hidden"] {
+    color: var(--muted-foreground);
+  }
+
+  .money-amount-value {
+    grid-area: 1 / 1;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     .motion-list-surface {
       animation: list-surface-enter var(--motion-state) var(--ease-productive)

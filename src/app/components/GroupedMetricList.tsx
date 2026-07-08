@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils"
 
 interface GroupedMetricListProps<TItem> {
   groups: BreakdownGroup<TItem>[]
-  formatMetric: (value: number) => string
   itemNoun: string
+  renderMetric: (value: number) => ReactNode
   renderItem: (item: BreakdownItem<TItem>) => ReactNode
   itemListClassName?: string
   sectionClassName?: string
@@ -20,10 +20,10 @@ interface GroupedMetricListProps<TItem> {
 }
 
 export function GroupedMetricList<TItem>({
-  formatMetric,
   groups,
   itemListClassName,
   itemNoun,
+  renderMetric,
   renderItem,
   sectionClassName,
   showShareOfTotal = false,
@@ -50,10 +50,10 @@ export function GroupedMetricList<TItem>({
         >
           <GroupedMetricHeader
             count={group.items.length}
-            formatMetric={formatMetric}
             groupLabel={group.label}
             itemNoun={itemNoun}
             metric={group.totalMetric}
+            renderMetric={renderMetric}
             showShareOfTotal={showShareOfTotal}
           />
           <Collapsible.Panel className="grouped-metric-panel border-t border-border/60">
@@ -69,17 +69,17 @@ export function GroupedMetricList<TItem>({
 
 function GroupedMetricHeader({
   count,
-  formatMetric,
   groupLabel,
   itemNoun,
   metric,
+  renderMetric,
   showShareOfTotal,
 }: {
   count: number
-  formatMetric: (value: number) => string
   groupLabel: string
   itemNoun: string
   metric: GroupTotalMetric
+  renderMetric: (value: number) => ReactNode
   showShareOfTotal: boolean
 }) {
   return (
@@ -106,7 +106,7 @@ function GroupedMetricHeader({
           {metric.label}
         </span>
         <span className="block font-ledger text-sm font-bold text-foreground tabular-nums">
-          {formatMetric(metric.value)}
+          {renderMetric(metric.value)}
         </span>
         {showShareOfTotal && metric.shareOfTotal !== undefined ? (
           <span className="block text-xs text-muted-foreground">

@@ -9,8 +9,6 @@ import {
   type CalendarDateString,
 } from "@/domain/investments"
 
-import { formatMxn } from "@/lib/formatters"
-
 interface RecordChangeFormSchemaOptions {
   latestEventDate?: CalendarDateString
   today: CalendarDateString
@@ -140,9 +138,8 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message: `Withdrawn amount cannot exceed the active balance of ${formatMxn(
-            activeBalance,
-          )} on this date.`,
+          message:
+            "Withdrawn amount cannot exceed the active balance on this date.",
           path: ["contributionAmount"],
         })
       }

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import {
   ArrowLeft,
   Landmark,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   DAY_COUNTS,
@@ -25,11 +26,7 @@ import {
 } from "@/domain/investments"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import {
-  formatDisplayDate,
-  formatMxn,
-  formatPercentage,
-} from "@/lib/formatters"
+import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
 
 interface InvestmentDetailScreenProps {
   investment: Investment
@@ -74,7 +71,7 @@ export function InvestmentDetailScreen({
             <div>
               <p className="text-xs text-muted-foreground">Estimated value</p>
               <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
-                {formatMxn(resolvedInvestment.estimatedCurrentValue)}
+                <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
               </p>
             </div>
             <div className="grid size-10 place-items-center rounded-lg bg-background/60 text-primary">
@@ -116,7 +113,7 @@ export function InvestmentDetailScreen({
           <div className="rounded-lg bg-secondary/60 px-3 py-3">
             <p className="text-xs text-muted-foreground">Earned so far</p>
             <p className="mt-2 font-ledger text-2xl leading-none text-foreground tabular-nums">
-              {formatMxn(resolvedInvestment.estimatedAccruedReturn)}
+              <MoneyAmount value={resolvedInvestment.estimatedAccruedReturn} />
             </p>
           </div>
 
@@ -130,7 +127,7 @@ export function InvestmentDetailScreen({
                   {metric.label}
                 </p>
                 <p className="mt-2 font-ledger text-sm leading-none text-foreground tabular-nums">
-                  {formatMxn(metric.value)}
+                  <MoneyAmount value={metric.value} />
                 </p>
               </div>
             ))}
@@ -176,7 +173,7 @@ export function InvestmentDetailScreen({
           ) : null}
           <DetailRow
             label="Original amount"
-            value={formatMxn(resolvedInvestment.originalAmount)}
+            value={<MoneyAmount value={resolvedInvestment.originalAmount} />}
           />
         </CardContent>
       </Card>
@@ -298,7 +295,7 @@ function DetailMetric({
 }: {
   icon: LucideIcon
   label: string
-  value: string
+  value: ReactNode
 }) {
   return (
     <div className="rounded-lg bg-background/60 px-3 py-3">
@@ -309,7 +306,7 @@ function DetailMetric({
   )
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-border/70 pb-3 last:border-b-0 last:pb-0">
       <span className="text-sm text-muted-foreground">{label}</span>
