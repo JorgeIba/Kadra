@@ -85,6 +85,11 @@ describe("earned money view model", () => {
     expect(
       snapshot.breakdown.map((investment) => investment.investmentId),
     ).toEqual(["investment-matured", "investment-fixed", "investment-open"])
+    expect(snapshot.breakdown.map((investment) => investment.type)).toEqual([
+      INVESTMENT_TYPES.fixedTerm,
+      INVESTMENT_TYPES.fixedTerm,
+      INVESTMENT_TYPES.openEnded,
+    ])
     expect(snapshot.breakdown[0]?.earnedAmount).toBeCloseTo(180.82191780821918)
     expect(snapshot.breakdown[1]?.earnedAmount).toBeCloseTo(150)
     expect(snapshot.breakdown[2]?.earnedAmount).toBeCloseTo(30.04203642184619)

@@ -7,6 +7,7 @@ import {
   fixedInvestment,
   openEndedInvestment,
 } from "@/domain/investments/dev/investment-test-fixtures"
+import { INVESTMENT_TYPES } from "@/domain/investments"
 
 const asOfDate = new Date("2026-01-16T12:00:00.000Z")
 const investments = [fixedInvestment, openEndedInvestment]
@@ -42,8 +43,10 @@ describe("projection view model", () => {
     expect(snapshot.earningPace.daily).toBeLessThan(3)
     expect(snapshot.breakdown[0]).toMatchObject({
       investmentId: fixedInvestment.id,
+      type: INVESTMENT_TYPES.fixedTerm,
       projectedEarnings: 150,
     })
+    expect(snapshot.breakdown[1]?.type).toBe(INVESTMENT_TYPES.openEnded)
     expect(snapshot.breakdown[1]?.projectedEarnings).toBeCloseTo(60.355101)
   })
 

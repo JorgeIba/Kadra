@@ -7,6 +7,7 @@ import {
   toDateString,
   type CalendarDateString,
   type Investment,
+  type InvestmentType,
   type PortfolioProjectionEarningPaceReadModel,
 } from "@/domain/investments"
 
@@ -21,6 +22,7 @@ export interface InvestmentProjectionBreakdownItem {
   investmentId: string
   name: string
   institutionName: string
+  type: InvestmentType
   projectedEarnings: number
   projectedValue: number
   percentage: number

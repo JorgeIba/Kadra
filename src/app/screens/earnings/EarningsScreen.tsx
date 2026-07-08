@@ -26,8 +26,9 @@ import {
   type InvestmentEarnedMoneyBreakdown,
   type InvestmentEarnedMoneyBreakdownItem,
 } from "@/app/screens/earnings/earnings-view-model"
-import { createGroups } from "@/app/shared/grouping"
+import { createGroups, type GroupIdentity } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
+import { getInvestmentTypeGroup } from "@/app/shared/investment-type-grouping"
 import { Button } from "@/components/ui/button"
 import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
@@ -205,8 +206,22 @@ function EarningsBreakdownList({
 
   if (groupByOption === EARNINGS_GROUP_BY_OPTIONS.institution) {
     return (
-      <EarningsInstitutionGroups
+      <EarningsBreakdownGroups
         breakdown={breakdown}
+        getGroup={(investment) =>
+          getInstitutionGroup(investment.institutionName)
+        }
+        onInvestmentSelect={onInvestmentSelect}
+        totalEarnedAmount={totalEarnedAmount}
+      />
+    )
+  }
+
+  if (groupByOption === EARNINGS_GROUP_BY_OPTIONS.type) {
+    return (
+      <EarningsBreakdownGroups
+        breakdown={breakdown}
+        getGroup={(investment) => getInvestmentTypeGroup(investment.type)}
         onInvestmentSelect={onInvestmentSelect}
         totalEarnedAmount={totalEarnedAmount}
       />
@@ -226,17 +241,19 @@ function EarningsBreakdownList({
   )
 }
 
-function EarningsInstitutionGroups({
+function EarningsBreakdownGroups({
   breakdown,
+  getGroup,
   onInvestmentSelect,
   totalEarnedAmount,
 }: {
   breakdown: InvestmentEarnedMoneyBreakdown
+  getGroup: (investment: InvestmentEarnedMoneyBreakdownItem) => GroupIdentity
   onInvestmentSelect: (investmentId: string) => void
   totalEarnedAmount: number
 }) {
   const groups = createGroups(breakdown, {
-    getGroup: (investment) => getInstitutionGroup(investment.institutionName),
+    getGroup,
     metric: {
       key: "earned",
       label: "Earned",

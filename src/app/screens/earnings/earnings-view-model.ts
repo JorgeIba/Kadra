@@ -5,6 +5,7 @@ import {
   resolveInvestment,
   type DerivedStatus,
   type Investment,
+  type InvestmentType,
 } from "@/domain/investments"
 
 export const EARNED_MONEY_SORT_OPTIONS = {
@@ -21,6 +22,7 @@ export interface InvestmentEarnedMoneyBreakdownItem {
   investmentId: string
   name: string
   institutionName: string
+  type: InvestmentType
   derivedStatus: DerivedStatus
   earnedAmount: number
   percentage: number
@@ -53,6 +55,7 @@ export function getPortfolioEarnedMoneySnapshot(
         investmentId: investment.id,
         name: investment.name,
         institutionName: investment.institutionName,
+        type: investment.type,
         derivedStatus: investment.derivedStatus,
         earnedAmount: investment.estimatedAccruedReturn,
         percentage:

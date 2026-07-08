@@ -25,8 +25,9 @@ import {
   getPortfolioProjectionSnapshot,
   type InvestmentProjectionBreakdownItem,
 } from "@/app/screens/projection/projection-view-model"
-import { createGroups } from "@/app/shared/grouping"
+import { createGroups, type GroupIdentity } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
+import { getInvestmentTypeGroup } from "@/app/shared/investment-type-grouping"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -249,8 +250,22 @@ function ProjectionBreakdown({
 
   if (groupByOption === PROJECTION_GROUP_BY_OPTIONS.institution) {
     return (
-      <ProjectionInstitutionGroups
+      <ProjectionBreakdownGroups
         breakdown={breakdown}
+        getGroup={(investment) =>
+          getInstitutionGroup(investment.institutionName)
+        }
+        onInvestmentSelect={onInvestmentSelect}
+        projectedEarnings={projectedEarnings}
+      />
+    )
+  }
+
+  if (groupByOption === PROJECTION_GROUP_BY_OPTIONS.type) {
+    return (
+      <ProjectionBreakdownGroups
+        breakdown={breakdown}
+        getGroup={(investment) => getInvestmentTypeGroup(investment.type)}
         onInvestmentSelect={onInvestmentSelect}
         projectedEarnings={projectedEarnings}
       />
@@ -270,17 +285,19 @@ function ProjectionBreakdown({
   )
 }
 
-function ProjectionInstitutionGroups({
+function ProjectionBreakdownGroups({
   breakdown,
+  getGroup,
   onInvestmentSelect,
   projectedEarnings,
 }: {
   breakdown: InvestmentProjectionBreakdownItem[]
+  getGroup: (investment: InvestmentProjectionBreakdownItem) => GroupIdentity
   onInvestmentSelect: (investmentId: string) => void
   projectedEarnings: number
 }) {
   const groups = createGroups(breakdown, {
-    getGroup: (investment) => getInstitutionGroup(investment.institutionName),
+    getGroup,
     metric: {
       key: "projected",
       label: "Projected",

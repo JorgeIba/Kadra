@@ -1,7 +1,10 @@
 import { analyzePortfolio } from "@/domain/investments/read-models/portfolio-analysis"
 import { resolveInvestment } from "@/domain/investments/read-models/resolved-investment"
 import { toDateString } from "@/domain/investments/calculations/dates"
-import { DERIVED_STATUSES } from "@/domain/investments/model/constants"
+import {
+  DERIVED_STATUSES,
+  type InvestmentType,
+} from "@/domain/investments/model/constants"
 import type {
   CalendarDateString,
   Investment,
@@ -30,6 +33,7 @@ export interface InvestmentProjectionReadModel {
   investmentId: string
   name: string
   institutionName: string
+  type: InvestmentType
   projectedEarnings: number
   projectedValue: number
 }
@@ -80,6 +84,7 @@ export function projectPortfolioAtDate(
         investmentId: projected.id,
         name: projected.name,
         institutionName: projected.institutionName,
+        type: projected.type,
         projectedEarnings:
           projected.estimatedAccruedReturn - baseline.estimatedAccruedReturn,
         projectedValue: projected.estimatedCurrentValue,
