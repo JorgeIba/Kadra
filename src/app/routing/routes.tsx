@@ -1,7 +1,10 @@
 import { useLocation, useParams } from "react-router"
 import { InvestmentNotFound } from "@/app/components/InvestmentNotFound"
 import { useInvestments } from "@/app/context/investments-context"
-import { getPreviousSectionFromLocation } from "@/app/routing/active-section"
+import {
+  getActiveNavSectionFromLocation,
+  getReturnPathFromLocation,
+} from "@/app/routing/active-section"
 import { useAnimatedNavigate } from "@/app/routing/navigation-animation"
 import {
   APP_SECTIONS,
@@ -30,20 +33,20 @@ export function DashboardRoute() {
 
   function handleAddInvestment() {
     navigate(getSectionPath(APP_SECTIONS.invest), {
-      state: { fromSection: APP_SECTIONS.dashboard },
+      state: { activeNavSection: APP_SECTIONS.dashboard },
     })
   }
 
   function handleInvestmentSelect(investmentId: string) {
     navigate(getInvestmentDetailPath(investmentId), {
-      state: { fromSection: APP_SECTIONS.dashboard },
+      state: { activeNavSection: APP_SECTIONS.dashboard },
     })
   }
 
   function handleOpenDistributionFilter(filterOption: AssetFilterOption) {
     navigate(getSectionPath(APP_SECTIONS.assets), {
       state: {
-        fromSection: APP_SECTIONS.dashboard,
+        activeNavSection: APP_SECTIONS.dashboard,
         selectedAssetFilter: filterOption,
       },
     })
@@ -51,13 +54,13 @@ export function DashboardRoute() {
 
   function handleOpenEarnings() {
     navigate(getEarningsPath(), {
-      state: { fromSection: APP_SECTIONS.dashboard },
+      state: { activeNavSection: APP_SECTIONS.dashboard },
     })
   }
 
   function handleOpenProjection() {
     navigate(getProjectionPath(), {
-      state: { fromSection: APP_SECTIONS.dashboard },
+      state: { activeNavSection: APP_SECTIONS.dashboard },
     })
   }
 
@@ -83,13 +86,13 @@ export function AssetsRoute() {
 
   function handleAddInvestment() {
     navigate(getSectionPath(APP_SECTIONS.invest), {
-      state: { fromSection: APP_SECTIONS.assets },
+      state: { activeNavSection: APP_SECTIONS.assets },
     })
   }
 
   function handleInvestmentSelect(investmentId: string) {
     navigate(getInvestmentDetailPath(investmentId), {
-      state: { fromSection: APP_SECTIONS.assets },
+      state: { activeNavSection: APP_SECTIONS.assets },
     })
   }
 
@@ -107,7 +110,7 @@ export function InvestRoute() {
   const { addInvestment, investments } = useInvestments()
   const navigate = useAnimatedNavigate()
   const location = useLocation()
-  const previousSection = getPreviousSectionFromLocation(
+  const activeNavSection = getActiveNavSectionFromLocation(
     location,
     APP_SECTIONS.dashboard,
   )
@@ -115,12 +118,12 @@ export function InvestRoute() {
   function handleInvestmentCreate(investment: Investment) {
     addInvestment(investment)
     navigate(getInvestmentDetailPath(investment.id), {
-      state: { fromSection: APP_SECTIONS.assets },
+      state: { activeNavSection: APP_SECTIONS.assets },
     })
   }
 
   function handleCancel() {
-    navigate(getSectionPath(previousSection))
+    navigate(getSectionPath(activeNavSection))
   }
 
   return (
@@ -136,32 +139,62 @@ export function EarningsRoute() {
   const { investments } = useInvestments()
   const navigate = useAnimatedNavigate()
   const location = useLocation()
-  const previousSection = getPreviousSectionFromLocation(
+  const activeNavSection = getActiveNavSectionFromLocation(
     location,
     APP_SECTIONS.dashboard,
   )
 
   function handleBack() {
-    navigate(getSectionPath(previousSection))
+    navigate(getSectionPath(activeNavSection))
   }
 
-  return <EarningsScreen investments={investments} onBack={handleBack} />
+  function handleInvestmentSelect(investmentId: string) {
+    navigate(getInvestmentDetailPath(investmentId), {
+      state: {
+        activeNavSection,
+        returnToPath: getEarningsPath(),
+      },
+    })
+  }
+
+  return (
+    <EarningsScreen
+      investments={investments}
+      onBack={handleBack}
+      onInvestmentSelect={handleInvestmentSelect}
+    />
+  )
 }
 
 export function ProjectionRoute() {
   const { investments } = useInvestments()
   const navigate = useAnimatedNavigate()
   const location = useLocation()
-  const previousSection = getPreviousSectionFromLocation(
+  const activeNavSection = getActiveNavSectionFromLocation(
     location,
     APP_SECTIONS.dashboard,
   )
 
   function handleBack() {
-    navigate(getSectionPath(previousSection))
+    navigate(getSectionPath(activeNavSection))
   }
 
-  return <ProjectionScreen investments={investments} onBack={handleBack} />
+  function handleInvestmentSelect(investmentId: string) {
+    navigate(getInvestmentDetailPath(investmentId), {
+      state: {
+        activeNavSection,
+        returnToPath: getProjectionPath(),
+      },
+    })
+  }
+
+  return (
+    <ProjectionScreen
+      investments={investments}
+      onBack={handleBack}
+      onInvestmentSelect={handleInvestmentSelect}
+    />
+  )
 }
 
 export function InvestmentDetailRoute() {
@@ -169,13 +202,14 @@ export function InvestmentDetailRoute() {
   const navigate = useAnimatedNavigate()
   const location = useLocation()
   const { investmentId } = useParams()
-  const previousSection = getPreviousSectionFromLocation(location)
+  const activeNavSection = getActiveNavSectionFromLocation(location)
+  const returnToPath = getReturnPathFromLocation(location)
   const investment = investments.find((currentInvestment) => {
     return currentInvestment.id === investmentId
   })
 
   function handleBack() {
-    navigate(getSectionPath(previousSection))
+    navigate(returnToPath ?? getSectionPath(activeNavSection))
   }
 
   if (investment === undefined) {
@@ -186,18 +220,18 @@ export function InvestmentDetailRoute() {
 
   function handleDelete() {
     deleteInvestment(selectedInvestment.id)
-    navigate(getSectionPath(previousSection))
+    navigate(returnToPath ?? getSectionPath(activeNavSection))
   }
 
   function handleEdit() {
     navigate(getInvestmentEditPath(selectedInvestment.id), {
-      state: { fromSection: previousSection },
+      state: { activeNavSection, returnToPath },
     })
   }
 
   function handleRecordChange() {
     navigate(getInvestmentRecordChangePath(selectedInvestment.id), {
-      state: { fromSection: previousSection },
+      state: { activeNavSection, returnToPath },
     })
   }
 
@@ -217,13 +251,14 @@ export function EditInvestmentRoute() {
   const navigate = useAnimatedNavigate()
   const location = useLocation()
   const { investmentId } = useParams()
-  const previousSection = getPreviousSectionFromLocation(location)
+  const activeNavSection = getActiveNavSectionFromLocation(location)
+  const returnToPath = getReturnPathFromLocation(location)
   const investment = investments.find((currentInvestment) => {
     return currentInvestment.id === investmentId
   })
 
   function handleBack() {
-    navigate(getSectionPath(previousSection))
+    navigate(returnToPath ?? getSectionPath(activeNavSection))
   }
 
   if (investment === undefined) {
@@ -235,13 +270,13 @@ export function EditInvestmentRoute() {
   function handleInvestmentUpdate(updatedInvestment: Investment) {
     updateInvestment(updatedInvestment)
     navigate(getInvestmentDetailPath(updatedInvestment.id), {
-      state: { fromSection: previousSection },
+      state: { activeNavSection, returnToPath },
     })
   }
 
   function handleCancel() {
     navigate(getInvestmentDetailPath(selectedInvestment.id), {
-      state: { fromSection: previousSection },
+      state: { activeNavSection, returnToPath },
     })
   }
 
@@ -260,13 +295,14 @@ export function RecordChangeRoute() {
   const navigate = useAnimatedNavigate()
   const location = useLocation()
   const { investmentId } = useParams()
-  const previousSection = getPreviousSectionFromLocation(location)
+  const activeNavSection = getActiveNavSectionFromLocation(location)
+  const returnToPath = getReturnPathFromLocation(location)
   const investment = investments.find((currentInvestment) => {
     return currentInvestment.id === investmentId
   })
 
   function handleBack() {
-    navigate(getSectionPath(previousSection))
+    navigate(returnToPath ?? getSectionPath(activeNavSection))
   }
 
   if (investment === undefined) {
@@ -278,13 +314,13 @@ export function RecordChangeRoute() {
   function handleInvestmentUpdate(updatedInvestment: Investment) {
     updateInvestment(updatedInvestment)
     navigate(getInvestmentDetailPath(updatedInvestment.id), {
-      state: { fromSection: previousSection },
+      state: { activeNavSection, returnToPath },
     })
   }
 
   function handleCancel() {
     navigate(getInvestmentDetailPath(selectedInvestment.id), {
-      state: { fromSection: previousSection },
+      state: { activeNavSection, returnToPath },
     })
   }
 

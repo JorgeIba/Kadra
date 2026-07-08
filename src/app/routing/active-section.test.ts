@@ -3,7 +3,8 @@ import type { Location } from "react-router"
 import {
   getActiveSectionFromLocation,
   getActiveSectionFromPathname,
-  getPreviousSectionFromLocation,
+  getActiveNavSectionFromLocation,
+  getReturnPathFromLocation,
 } from "@/app/routing/active-section"
 import { APP_SECTIONS } from "@/app/routing/navigation"
 
@@ -29,50 +30,63 @@ describe("active app section helpers", () => {
     ).toBe(APP_SECTIONS.dashboard)
   })
 
-  it("reads the previous section from router location state", () => {
+  it("reads the active nav section from router location state", () => {
     const location = createLocation({
       pathname: "/investments/investment-1",
-      state: { fromSection: APP_SECTIONS.dashboard },
+      state: { activeNavSection: APP_SECTIONS.dashboard },
     })
 
-    expect(getPreviousSectionFromLocation(location)).toBe(
+    expect(getActiveNavSectionFromLocation(location)).toBe(
       APP_SECTIONS.dashboard,
     )
   })
 
-  it("falls back to assets when no previous section exists", () => {
+  it("reads the return path from router location state", () => {
+    const location = createLocation({
+      pathname: "/investments/investment-1",
+      state: {
+        activeNavSection: APP_SECTIONS.dashboard,
+        returnToPath: "/earnings",
+      },
+    })
+
+    expect(getReturnPathFromLocation(location)).toBe("/earnings")
+  })
+
+  it("falls back to assets when no active nav section exists", () => {
     const location = createLocation({
       pathname: "/investments/investment-1",
       state: null,
     })
 
-    expect(getPreviousSectionFromLocation(location)).toBe(APP_SECTIONS.assets)
+    expect(getActiveNavSectionFromLocation(location)).toBe(APP_SECTIONS.assets)
+    expect(getReturnPathFromLocation(location)).toBeNull()
   })
 
-  it("supports a custom fallback section when no previous section exists", () => {
+  it("supports a custom fallback section when no active nav section exists", () => {
     const location = createLocation({
       pathname: "/invest",
       state: null,
     })
 
     expect(
-      getPreviousSectionFromLocation(location, APP_SECTIONS.dashboard),
+      getActiveNavSectionFromLocation(location, APP_SECTIONS.dashboard),
     ).toBe(APP_SECTIONS.dashboard)
   })
 
-  it("keeps the previous section active on investment detail routes", () => {
+  it("keeps the active nav section on investment detail routes", () => {
     const location = createLocation({
       pathname: "/investments/investment-1",
-      state: { fromSection: APP_SECTIONS.dashboard },
+      state: { activeNavSection: APP_SECTIONS.dashboard },
     })
 
     expect(getActiveSectionFromLocation(location)).toBe(APP_SECTIONS.dashboard)
   })
 
-  it("keeps the previous section active on investment edit routes", () => {
+  it("keeps the active nav section on investment edit routes", () => {
     const location = createLocation({
       pathname: "/investments/investment-1/edit",
-      state: { fromSection: APP_SECTIONS.assets },
+      state: { activeNavSection: APP_SECTIONS.assets },
     })
 
     expect(getActiveSectionFromLocation(location)).toBe(APP_SECTIONS.assets)

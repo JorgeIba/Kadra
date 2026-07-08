@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils"
 interface EarningsScreenProps {
   investments: Investment[]
   onBack: () => void
+  onInvestmentSelect: (investmentId: string) => void
 }
 
 const EARNED_MONEY_SORT_CHOICES = [
@@ -49,7 +50,11 @@ const EARNINGS_TRUST_NOTES = [
   "Historical total includes active and finished investments.",
 ]
 
-export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
+export function EarningsScreen({
+  investments,
+  onBack,
+  onInvestmentSelect,
+}: EarningsScreenProps) {
   const [sortBy, setSortBy] = useState<EarnedMoneySortOption>(
     EARNED_MONEY_SORT_OPTIONS.highestEarned,
   )
@@ -158,6 +163,7 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
             <EarningsBreakdownList
               breakdown={snapshot.breakdown}
               groupByOption={groupByOption}
+              onInvestmentSelect={onInvestmentSelect}
               totalEarnedAmount={snapshot.totalEarnedAmount}
             />
           </AnimatedListSurface>
@@ -181,10 +187,12 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 function EarningsBreakdownList({
   breakdown,
   groupByOption,
+  onInvestmentSelect,
   totalEarnedAmount,
 }: {
   breakdown: InvestmentEarnedMoneyBreakdown
   groupByOption: EarningsGroupByOption
+  onInvestmentSelect: (investmentId: string) => void
   totalEarnedAmount: number
 }) {
   if (breakdown.length === 0) {
@@ -199,6 +207,7 @@ function EarningsBreakdownList({
     return (
       <EarningsInstitutionGroups
         breakdown={breakdown}
+        onInvestmentSelect={onInvestmentSelect}
         totalEarnedAmount={totalEarnedAmount}
       />
     )
@@ -210,6 +219,7 @@ function EarningsBreakdownList({
         <EarningsBreakdownRow
           key={investment.investmentId}
           investment={investment}
+          onSelect={onInvestmentSelect}
         />
       ))}
     </div>
@@ -218,9 +228,11 @@ function EarningsBreakdownList({
 
 function EarningsInstitutionGroups({
   breakdown,
+  onInvestmentSelect,
   totalEarnedAmount,
 }: {
   breakdown: InvestmentEarnedMoneyBreakdown
+  onInvestmentSelect: (investmentId: string) => void
   totalEarnedAmount: number
 }) {
   const groups = createGroups(breakdown, {
@@ -241,12 +253,12 @@ function EarningsInstitutionGroups({
       renderMetric={(value) => <MoneyAmount value={value} />}
       showShareOfTotal
       renderItem={(item) => (
-        <div key={item.source.investmentId} className="px-3 py-4">
-          <EarningsBreakdownRow
-            investment={item.source}
-            percentage={item.contributionMetric.shareOfGroup}
-          />
-        </div>
+        <EarningsBreakdownRow
+          key={item.source.investmentId}
+          investment={item.source}
+          percentage={item.contributionMetric.shareOfGroup}
+          onSelect={onInvestmentSelect}
+        />
       )}
     />
   )
@@ -254,15 +266,21 @@ function EarningsInstitutionGroups({
 
 function EarningsBreakdownRow({
   investment,
+  onSelect,
   percentage,
 }: {
   investment: InvestmentEarnedMoneyBreakdownItem
+  onSelect: (investmentId: string) => void
   percentage?: number
 }) {
   const displayedPercentage = percentage ?? investment.percentage
 
   return (
-    <div className="space-y-3">
+    <button
+      type="button"
+      className="block w-full space-y-3 rounded-lg border border-transparent px-3 py-4 text-left transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/45 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-px active:border-primary/10 active:bg-secondary/60 motion-reduce:transform-none motion-reduce:transition-none"
+      onClick={() => onSelect(investment.investmentId)}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -294,7 +312,7 @@ function EarningsBreakdownRow({
       </div>
 
       <AnimatedProgressBar value={displayedPercentage} />
-    </div>
+    </button>
   )
 }
 

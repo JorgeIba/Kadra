@@ -29,21 +29,28 @@ export function getActiveSectionFromPathname(
 }
 
 interface AppRouterLocationState {
-  fromSection?: AppSection
+  activeNavSection?: AppSection
+  returnToPath?: string
 }
 
-export function getPreviousSectionFromLocation(
+export function getActiveNavSectionFromLocation(
   location: Location,
   fallbackSection: AppSection = APP_SECTIONS.assets,
 ): AppSection {
   const locationState = location.state as AppRouterLocationState | null
 
-  return locationState?.fromSection ?? fallbackSection
+  return locationState?.activeNavSection ?? fallbackSection
+}
+
+export function getReturnPathFromLocation(location: Location): string | null {
+  const locationState = location.state as AppRouterLocationState | null
+
+  return locationState?.returnToPath ?? null
 }
 
 export function getActiveSectionFromLocation(location: Location): AppSection {
   return getActiveSectionFromPathname(
     location.pathname,
-    getPreviousSectionFromLocation(location),
+    getActiveNavSectionFromLocation(location),
   )
 }

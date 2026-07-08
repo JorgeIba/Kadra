@@ -35,6 +35,7 @@ import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
 interface ProjectionScreenProps {
   investments: Investment[]
   onBack: () => void
+  onInvestmentSelect: (investmentId: string) => void
 }
 
 const PROJECTION_TRUST_NOTES = [
@@ -46,6 +47,7 @@ const PROJECTION_TRUST_NOTES = [
 export function ProjectionScreen({
   investments,
   onBack,
+  onInvestmentSelect,
 }: ProjectionScreenProps) {
   const asOfDate = new Date()
   const today = toDateString(asOfDate)
@@ -208,6 +210,7 @@ export function ProjectionScreen({
             <ProjectionBreakdown
               breakdown={snapshot.breakdown}
               groupByOption={groupByOption}
+              onInvestmentSelect={onInvestmentSelect}
               projectedEarnings={snapshot.projectedEarnings}
             />
           </AnimatedListSurface>
@@ -228,10 +231,12 @@ function formatInvestmentCount(
 function ProjectionBreakdown({
   breakdown,
   groupByOption,
+  onInvestmentSelect,
   projectedEarnings,
 }: {
   breakdown: InvestmentProjectionBreakdownItem[]
   groupByOption: ProjectionGroupByOption
+  onInvestmentSelect: (investmentId: string) => void
   projectedEarnings: number
 }) {
   if (breakdown.length === 0) {
@@ -246,6 +251,7 @@ function ProjectionBreakdown({
     return (
       <ProjectionInstitutionGroups
         breakdown={breakdown}
+        onInvestmentSelect={onInvestmentSelect}
         projectedEarnings={projectedEarnings}
       />
     )
@@ -257,6 +263,7 @@ function ProjectionBreakdown({
         <ProjectionBreakdownRow
           key={investment.investmentId}
           investment={investment}
+          onSelect={onInvestmentSelect}
         />
       ))}
     </div>
@@ -265,9 +272,11 @@ function ProjectionBreakdown({
 
 function ProjectionInstitutionGroups({
   breakdown,
+  onInvestmentSelect,
   projectedEarnings,
 }: {
   breakdown: InvestmentProjectionBreakdownItem[]
+  onInvestmentSelect: (investmentId: string) => void
   projectedEarnings: number
 }) {
   const groups = createGroups(breakdown, {
@@ -288,12 +297,12 @@ function ProjectionInstitutionGroups({
       renderMetric={(value) => <MoneyAmount value={value} />}
       showShareOfTotal
       renderItem={(item) => (
-        <div key={item.source.investmentId} className="px-3 py-4">
-          <ProjectionBreakdownRow
-            investment={item.source}
-            percentage={item.contributionMetric.shareOfGroup}
-          />
-        </div>
+        <ProjectionBreakdownRow
+          key={item.source.investmentId}
+          investment={item.source}
+          percentage={item.contributionMetric.shareOfGroup}
+          onSelect={onInvestmentSelect}
+        />
       )}
     />
   )
@@ -301,15 +310,21 @@ function ProjectionInstitutionGroups({
 
 function ProjectionBreakdownRow({
   investment,
+  onSelect,
   percentage,
 }: {
   investment: InvestmentProjectionBreakdownItem
+  onSelect: (investmentId: string) => void
   percentage?: number
 }) {
   const displayedPercentage = percentage ?? investment.percentage
 
   return (
-    <div className="space-y-3">
+    <button
+      type="button"
+      className="block w-full space-y-3 rounded-lg border border-transparent px-3 py-4 text-left transition-[transform,color,background-color,border-color] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-primary/10 hover:bg-secondary/45 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-px active:border-primary/10 active:bg-secondary/60 motion-reduce:transform-none motion-reduce:transition-none"
+      onClick={() => onSelect(investment.investmentId)}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="truncate font-ledger text-base text-foreground">
@@ -331,6 +346,6 @@ function ProjectionBreakdownRow({
       </div>
 
       <AnimatedProgressBar value={displayedPercentage} />
-    </div>
+    </button>
   )
 }

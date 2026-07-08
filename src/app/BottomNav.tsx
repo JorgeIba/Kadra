@@ -25,7 +25,7 @@ export function BottomNav({ activeSection }: BottomNavProps) {
               viewTransition
               state={
                 item.value === APP_SECTIONS.invest
-                  ? { fromSection: activeSection }
+                  ? { activeNavSection: activeSection }
                   : undefined
               }
               className={cn(
