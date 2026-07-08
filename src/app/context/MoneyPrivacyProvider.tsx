@@ -8,14 +8,13 @@ import { formatMxn } from "@/lib/formatters"
 const MONEY_PRIVACY_STORAGE_KEY = "trafin.moneyPrivacyHidden"
 const HIDDEN_MONEY_MASK = "$••••••"
 
+type MoneyPrivacyStorage = Pick<Storage, "getItem" | "setItem">
+
 export function MoneyPrivacyProvider({ children }: { children: ReactNode }) {
   const [isMoneyHidden, setIsMoneyHidden] = useState(readInitialPrivacyState)
 
   useEffect(() => {
-    window.localStorage.setItem(
-      MONEY_PRIVACY_STORAGE_KEY,
-      isMoneyHidden ? "true" : "false",
-    )
+    savePrivacyState(isMoneyHidden)
   }, [isMoneyHidden])
 
   const value = useMemo<MoneyPrivacyContextValue>(
@@ -42,6 +41,41 @@ export function MoneyPrivacyProvider({ children }: { children: ReactNode }) {
   )
 }
 
-function readInitialPrivacyState() {
-  return window.localStorage.getItem(MONEY_PRIVACY_STORAGE_KEY) === "true"
+function readInitialPrivacyState(storage = getBrowserStorage()) {
+  if (storage === null) {
+    return false
+  }
+
+  try {
+    return storage.getItem(MONEY_PRIVACY_STORAGE_KEY) === "true"
+  } catch {
+    return false
+  }
+}
+
+function savePrivacyState(
+  isMoneyHidden: boolean,
+  storage = getBrowserStorage(),
+) {
+  if (storage === null) {
+    return
+  }
+
+  try {
+    storage.setItem(MONEY_PRIVACY_STORAGE_KEY, isMoneyHidden ? "true" : "false")
+  } catch {
+    // Privacy mode still works for the current session if persistence fails.
+  }
+}
+
+function getBrowserStorage(): MoneyPrivacyStorage | null {
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  try {
+    return window.localStorage
+  } catch {
+    return null
+  }
 }
