@@ -2,6 +2,7 @@ import { useLayoutEffect, useState } from "react"
 import { useLocation, useNavigationType, useOutlet } from "react-router"
 import { BottomNav } from "@/app/BottomNav"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
+import { MoneyPrivacyProvider } from "@/app/context/MoneyPrivacyProvider"
 import { usePwaUpdate } from "@/app/pwa/usePwaUpdate"
 import { NavigationAnimationContext } from "@/app/routing/navigation-animation"
 import { TopBar } from "@/app/TopBar"
@@ -53,36 +54,38 @@ export function AppShell({ onResetLocalData }: AppShellProps) {
   }
 
   return (
-    <div className="app-background">
-      <div className="app-frame">
-        <TopBar
-          hasAppUpdate={isUpdateAvailable}
-          isCheckingForUpdate={isCheckingForUpdate}
-          onCheckForUpdates={handleCheckForUpdates}
-          onResetLocalData={() => setIsResetDialogOpen(true)}
+    <MoneyPrivacyProvider>
+      <div className="app-background">
+        <div className="app-frame">
+          <TopBar
+            hasAppUpdate={isUpdateAvailable}
+            isCheckingForUpdate={isCheckingForUpdate}
+            onCheckForUpdates={handleCheckForUpdates}
+            onResetLocalData={() => setIsResetDialogOpen(true)}
+          />
+          <main className="flex-1 px-5 pb-28 pt-6">
+            <AnimatedOutlet />
+          </main>
+          <BottomNav activeSection={activeSection} />
+        </div>
+        <ConfirmDialog
+          open={isResetDialogOpen}
+          title="Clear local data?"
+          description="This removes every investment from your local Trafin portfolio."
+          confirmLabel="Clear local data"
+          variant="destructive"
+          onRequestOpenChange={setIsResetDialogOpen}
+          onConfirm={onResetLocalData}
         />
-        <main className="flex-1 px-5 pb-28 pt-6">
-          <AnimatedOutlet />
-        </main>
-        <BottomNav activeSection={activeSection} />
+        <ConfirmDialog
+          open={isUpdateDialogOpen}
+          title="Update app?"
+          description="A new version of Trafin is ready. Updating will reload the app so the latest changes can take over."
+          confirmLabel="Update now"
+          onRequestOpenChange={setIsUpdateDialogOpen}
+          onConfirm={applyUpdate}
+        />
       </div>
-      <ConfirmDialog
-        open={isResetDialogOpen}
-        title="Clear local data?"
-        description="This removes every investment from your local Trafin portfolio."
-        confirmLabel="Clear local data"
-        variant="destructive"
-        onRequestOpenChange={setIsResetDialogOpen}
-        onConfirm={onResetLocalData}
-      />
-      <ConfirmDialog
-        open={isUpdateDialogOpen}
-        title="Update app?"
-        description="A new version of Trafin is ready. Updating will reload the app so the latest changes can take over."
-        confirmLabel="Update now"
-        onRequestOpenChange={setIsUpdateDialogOpen}
-        onConfirm={applyUpdate}
-      />
-    </div>
+    </MoneyPrivacyProvider>
   )
 }

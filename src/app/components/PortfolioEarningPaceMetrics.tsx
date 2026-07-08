@@ -1,6 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useShouldAnimateOnMount } from "@/app/routing/navigation-animation"
-import { formatMxn } from "@/lib/formatters"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 
 export interface PortfolioEarningPace {
   daily: number
@@ -25,9 +23,6 @@ export function PortfolioEarningPaceMetrics({
   pace,
   title,
 }: PortfolioEarningPaceMetricsProps) {
-  const prefersReducedMotion = useReducedMotion() ?? false
-  const shouldAnimateOnMount = useShouldAnimateOnMount()
-
   return (
     <div className="space-y-3 border-t border-border/70 pt-4">
       <div className="space-y-1">
@@ -50,11 +45,7 @@ export function PortfolioEarningPaceMetrics({
             <p className="text-xs leading-none text-muted-foreground">
               {item.label}
             </p>
-            <AnimatedPaceValue
-              prefersReducedMotion={prefersReducedMotion}
-              shouldAnimateOnMount={shouldAnimateOnMount}
-              value={pace[item.key]}
-            />
+            <AnimatedPaceValue value={pace[item.key]} />
           </div>
         ))}
       </div>
@@ -62,39 +53,10 @@ export function PortfolioEarningPaceMetrics({
   )
 }
 
-function AnimatedPaceValue({
-  prefersReducedMotion,
-  shouldAnimateOnMount,
-  value,
-}: {
-  prefersReducedMotion: boolean
-  shouldAnimateOnMount: boolean
-  value: number
-}) {
-  const formattedValue = formatMxn(value)
-
-  if (prefersReducedMotion) {
-    return (
-      <p className="font-ledger text-lg leading-none text-foreground tabular-nums">
-        {formattedValue}
-      </p>
-    )
-  }
-
+function AnimatedPaceValue({ value }: { value: number }) {
   return (
-    <div className="relative min-h-5 overflow-hidden">
-      <AnimatePresence mode="popLayout" initial={shouldAnimateOnMount}>
-        <motion.p
-          key={formattedValue}
-          className="font-ledger text-lg leading-none text-foreground tabular-nums"
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {formattedValue}
-        </motion.p>
-      </AnimatePresence>
-    </div>
+    <p className="font-ledger text-lg leading-none text-foreground tabular-nums">
+      <MoneyAmount value={value} />
+    </p>
   )
 }

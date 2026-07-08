@@ -4,6 +4,7 @@ import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { PortfolioEarningPaceMetrics } from "@/app/components/PortfolioEarningPaceMetrics"
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
 import { TrustNotesPopover } from "@/app/components/TrustNotes"
@@ -29,11 +30,7 @@ import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  formatDisplayDate,
-  formatMxn,
-  formatPercentage,
-} from "@/lib/formatters"
+import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
 
 interface ProjectionScreenProps {
   investments: Investment[]
@@ -99,7 +96,7 @@ export function ProjectionScreen({
                 are projected to earn
               </p>
               <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
-                {formatMxn(snapshot.projectedEarnings)}
+                <MoneyAmount value={snapshot.projectedEarnings} />
               </p>
               <div className="flex items-center gap-2">
                 <p className="text-sm leading-6 text-muted-foreground">
@@ -168,9 +165,11 @@ export function ProjectionScreen({
             />
             {targetPoint === undefined ? null : (
               <div className="mt-3 flex items-center justify-between gap-4 text-xs text-muted-foreground">
-                <span>Today {formatMxn(snapshot.currentValue)}</span>
+                <span>
+                  Today <MoneyAmount value={snapshot.currentValue} />
+                </span>
                 <span className="text-right">
-                  Target {formatMxn(targetPoint.estimatedValue)}
+                  Target <MoneyAmount value={targetPoint.estimatedValue} />
                 </span>
               </div>
             )}
@@ -284,9 +283,9 @@ function ProjectionInstitutionGroups({
   return (
     <GroupedMetricList
       groups={groups}
-      formatMetric={formatMxn}
       itemListClassName="divide-y divide-border/60 p-0"
       itemNoun="investment"
+      renderMetric={(value) => <MoneyAmount value={value} />}
       showShareOfTotal
       renderItem={(item) => (
         <div key={item.source.investmentId} className="px-3 py-4">
@@ -323,7 +322,7 @@ function ProjectionBreakdownRow({
 
         <div className="shrink-0 text-right">
           <p className="font-ledger text-sm font-bold text-foreground tabular-nums">
-            {formatMxn(investment.projectedEarnings)}
+            <MoneyAmount value={investment.projectedEarnings} />
           </p>
           <p className="text-xs text-muted-foreground">
             {formatPercentage(displayedPercentage)}

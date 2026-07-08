@@ -1,5 +1,13 @@
 import { Menu } from "@base-ui/react/menu"
-import { MoreHorizontal, RefreshCw, Shield, Trash2 } from "lucide-react"
+import {
+  Eye,
+  EyeOff,
+  MoreHorizontal,
+  RefreshCw,
+  Shield,
+  Trash2,
+} from "lucide-react"
+import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -16,6 +24,9 @@ export function TopBar({
   onCheckForUpdates,
   onResetLocalData,
 }: TopBarProps) {
+  const { isMoneyHidden, toggleMoneyVisibility } = useMoneyPrivacy()
+  const MoneyVisibilityIcon = isMoneyHidden ? EyeOff : Eye
+
   return (
     <header className="sticky top-0 z-10 bg-background/95 px-5 pb-3 pt-5 backdrop-blur">
       <div className="flex items-center justify-between gap-3">
@@ -27,6 +38,24 @@ export function TopBar({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={
+              isMoneyHidden ? "Show money amounts" : "Hide money amounts"
+            }
+            aria-pressed={isMoneyHidden}
+            className={cn(
+              "rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground",
+              isMoneyHidden &&
+                "border-primary/55 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+            )}
+            onClick={toggleMoneyVisibility}
+          >
+            <MoneyVisibilityIcon className="size-5" aria-hidden="true" />
+          </Button>
+
           {hasAppUpdate || isCheckingForUpdate ? (
             <Button
               type="button"

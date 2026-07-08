@@ -8,8 +8,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
+import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
 import { useShouldAnimateOnMount } from "@/app/routing/navigation-animation"
-import { formatDisplayDate, formatMxn } from "@/lib/formatters"
+import { formatDisplayDate } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 export interface PortfolioProjectionLineChartPoint {
@@ -35,6 +37,7 @@ export function PortfolioProjectionLineChart({
 }: PortfolioProjectionLineChartProps) {
   const prefersReducedMotion = useReducedMotion() ?? false
   const shouldAnimateOnMount = useShouldAnimateOnMount()
+  const { isMoneyHidden } = useMoneyPrivacy()
   const shouldAnimateChart = !prefersReducedMotion && shouldAnimateOnMount
 
   return (
@@ -63,7 +66,7 @@ export function PortfolioProjectionLineChart({
             tickLine={false}
             axisLine={false}
             tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
-            tickFormatter={formatCompactMxn}
+            tickFormatter={(value) => formatCompactMxn(value, isMoneyHidden)}
           />
           <Tooltip content={<ProjectionTooltip />} />
           <Line
@@ -83,7 +86,11 @@ export function PortfolioProjectionLineChart({
   )
 }
 
-function formatCompactMxn(value: number) {
+function formatCompactMxn(value: number, isMoneyHidden: boolean) {
+  if (isMoneyHidden) {
+    return "$•••"
+  }
+
   if (Math.abs(value) >= 1_000_000) {
     return `$${(value / 1_000_000).toFixed(1)}M`
   }
@@ -108,10 +115,10 @@ function ProjectionTooltip({ active, payload }: ProjectionTooltipProps) {
         {formatDisplayDate(point.date)}
       </p>
       <p className="mt-2 text-sm font-medium text-foreground">
-        {formatMxn(point.estimatedValue)}
+        <MoneyAmount value={point.estimatedValue} />
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Projected earnings {formatMxn(point.projectedEarnings)}
+        Projected earnings <MoneyAmount value={point.projectedEarnings} />
       </p>
     </div>
   )

@@ -3,6 +3,7 @@ import { ArrowUpDown, Building2, Filter } from "lucide-react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   getInvestmentEstimatedActiveCurrentValue,
@@ -36,7 +37,6 @@ import {
 } from "@/app/screens/assets/assets-grouping"
 import { createGroups } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
-import { formatMxn } from "@/lib/formatters"
 
 interface AssetsScreenProps {
   initialFilterOption?: AssetFilterOption
@@ -101,7 +101,7 @@ export function AssetsScreen({
                   Current value across active investments
                 </p>
                 <p className="font-ledger text-4xl leading-none tabular-nums">
-                  {formatMxn(totalValue)}
+                  <MoneyAmount value={totalValue} />
                 </p>
               </div>
             </div>
@@ -224,9 +224,9 @@ function AssetInstitutionGroups({
   return (
     <GroupedMetricList
       groups={groups}
-      formatMetric={formatMxn}
       itemListClassName="divide-y divide-border/70 px-2 py-1"
       itemNoun="investment"
+      renderMetric={(value) => <MoneyAmount value={value} />}
       renderItem={(item) => (
         <InvestmentCard
           key={item.source.id}

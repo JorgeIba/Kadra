@@ -10,9 +10,10 @@ import {
   AnimatedProgressBar,
   type ProgressTone,
 } from "@/app/components/AnimatedProgressBar"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { Button } from "@/components/ui/button"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
-import { formatMxn, formatPercentage } from "@/lib/formatters"
+import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 interface PortfolioBreakdownCardProps {
@@ -102,7 +103,7 @@ function BreakdownRow({
           </div>
           <div className="text-right">
             <p className="font-ledger text-sm font-bold text-foreground tabular-nums">
-              {formatMxn(item.estimatedValue)}
+              <MoneyAmount value={item.estimatedValue} />
             </p>
             <p className="text-xs text-muted-foreground">
               {formatPercentage(item.percentage, {

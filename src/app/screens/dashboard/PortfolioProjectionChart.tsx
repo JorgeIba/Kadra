@@ -2,11 +2,11 @@ import {
   PortfolioEarningPaceMetrics,
   type PortfolioEarningPace,
 } from "@/app/components/PortfolioEarningPaceMetrics"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
 import { DashboardActionHint } from "@/app/screens/dashboard/DashboardActionHint"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { PortfolioProjectionPoint } from "@/app/screens/dashboard/portfolio-projection"
-import { formatMxn } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 interface PortfolioProjectionChartProps {
@@ -61,10 +61,11 @@ export function PortfolioProjectionChart({
         {targetPoint === undefined ? null : (
           <div className="space-y-1">
             <p className="font-ledger text-2xl leading-none text-foreground tabular-nums">
-              {formatMxn(targetPoint.estimatedValue)}
+              <MoneyAmount value={targetPoint.estimatedValue} />
             </p>
             <p className="text-xs leading-5 text-muted-foreground">
-              {formatMxn(targetPoint.projectedEarnings)} projected earnings
+              <MoneyAmount value={targetPoint.projectedEarnings} /> projected
+              earnings
             </p>
           </div>
         )}

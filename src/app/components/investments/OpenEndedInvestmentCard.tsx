@@ -1,6 +1,7 @@
 import { ArrowUpRight, Repeat } from "lucide-react"
 import type { OpenEndedInvestmentSummary } from "@/domain/investments"
-import { formatMxn, formatPercentage } from "@/lib/formatters"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
+import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 interface OpenEndedInvestmentCardProps {
@@ -52,7 +53,7 @@ export function OpenEndedInvestmentCard({
       </div>
       <div className="col-start-2 text-right">
         <p className="font-ledger text-lg leading-none text-foreground tabular-nums">
-          {formatMxn(investment.estimatedCurrentValue)}
+          <MoneyAmount value={investment.estimatedCurrentValue} />
         </p>
         <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-info-border bg-info-surface px-2 py-1 text-xs text-info">
           Liquid{" "}

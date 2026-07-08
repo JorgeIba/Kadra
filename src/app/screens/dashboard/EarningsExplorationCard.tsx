@@ -1,7 +1,8 @@
 import type { PortfolioEarnedMoneySnapshot } from "@/app/screens/earnings/earnings-view-model"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { DashboardActionHint } from "@/app/screens/dashboard/DashboardActionHint"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
-import { formatMxn } from "@/lib/formatters"
+import type { ReactNode } from "react"
 
 interface EarningsExplorationCardProps {
   snapshot: PortfolioEarnedMoneySnapshot
@@ -35,7 +36,7 @@ export function EarningsExplorationCard({
         <div className="grid grid-cols-2 gap-x-4 gap-y-5">
           <PreviewMetric
             label="Earned return"
-            value={formatMxn(snapshot.totalEarnedAmount)}
+            value={<MoneyAmount value={snapshot.totalEarnedAmount} />}
           />
           <PreviewMetric
             label="Tracked investments"
@@ -55,7 +56,7 @@ export function EarningsExplorationCard({
   )
 }
 
-function PreviewMetric({ label, value }: { label: string; value: string }) {
+function PreviewMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="space-y-2 border-t border-border/60 pt-3 nth-child(-n+2):border-t-0 nth-child(-n+2):pt-0">
       <p className="text-xs leading-none text-muted-foreground">{label}</p>

@@ -17,6 +17,7 @@ import {
   type PaymentFrequency,
   type ReinvestmentBehavior,
 } from "@/domain/investments"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import type { RecordChangeFormValues } from "@/app/screens/record-change/record-change-form-schema"
 import { cn } from "@/lib/utils"
 import { ArrowDownLeft, ArrowUpRight, Ban, Check } from "lucide-react"
@@ -30,11 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  formatDisplayDate,
-  formatMxn,
-  formatPercentage,
-} from "@/lib/formatters"
+import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
 import type { ReactNode } from "react"
 
 const INVESTMENT_TYPE_OPTIONS = [
@@ -182,7 +179,7 @@ export function MoneyMovementSection({
         <InlineNotice tone="success">
           Net capital contributed on this date:{" "}
           <span className="font-semibold text-foreground">
-            {formatMxn(availableContribution)}
+            <MoneyAmount value={availableContribution} />
           </span>
         </InlineNotice>
       )}
@@ -191,7 +188,7 @@ export function MoneyMovementSection({
         <InlineNotice tone="destructive">
           Available active balance to withdraw on this date:{" "}
           <span className="font-semibold text-foreground">
-            {formatMxn(activeBalance)}
+            <MoneyAmount value={activeBalance} />
           </span>
         </InlineNotice>
       )}
@@ -492,11 +489,11 @@ export function RecordChangeSummary({
         />
         <SummaryItem
           label="Movement"
-          value={getMovementSummary(transactionType, contributionAmount)}
+          value={getMovementSummary({ contributionAmount, transactionType })}
         />
         <SummaryItem
           label="Resulting balance"
-          value={formatMxn(resultingBalance)}
+          value={<MoneyAmount value={resultingBalance} />}
         />
         <SummaryItem
           label="Annual rate"
@@ -686,7 +683,7 @@ function InlineNotice({
   )
 }
 
-function SummaryItem({ label, value }: { label: string; value: string }) {
+function SummaryItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-md border border-border/60 bg-background/35 px-3 py-2">
       <dt className="text-[0.68rem] font-medium leading-4 text-muted-foreground">
@@ -699,22 +696,33 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
   )
 }
 
-function getMovementSummary(
-  transactionType: RecordChangeSummaryProps["transactionType"],
-  contributionAmount: number | undefined,
-) {
+function getMovementSummary({
+  contributionAmount,
+  transactionType,
+}: {
+  contributionAmount: number | undefined
+  transactionType: RecordChangeSummaryProps["transactionType"]
+}) {
   if (
     transactionType === "contribution" &&
     isFinitePositiveNumber(contributionAmount)
   ) {
-    return `Deposit ${formatMxn(contributionAmount)}`
+    return (
+      <>
+        Deposit <MoneyAmount value={contributionAmount} />
+      </>
+    )
   }
 
   if (
     transactionType === "withdrawal" &&
     isFinitePositiveNumber(contributionAmount)
   ) {
-    return `Withdraw ${formatMxn(contributionAmount)}`
+    return (
+      <>
+        Withdraw <MoneyAmount value={contributionAmount} />
+      </>
+    )
   }
 
   if (transactionType === "contribution") {

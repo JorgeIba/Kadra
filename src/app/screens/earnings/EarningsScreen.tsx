@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpDown, Building2 } from "lucide-react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { TrustNotesPopover } from "@/app/components/TrustNotes"
 import {
   DERIVED_STATUSES,
@@ -28,7 +29,7 @@ import {
 import { createGroups } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 import { Button } from "@/components/ui/button"
-import { formatMxn, formatPercentage } from "@/lib/formatters"
+import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 interface EarningsScreenProps {
@@ -90,7 +91,7 @@ export function EarningsScreen({ investments, onBack }: EarningsScreenProps) {
                 Total earned return
               </p>
               <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
-                {formatMxn(snapshot.totalEarnedAmount)}
+                <MoneyAmount value={snapshot.totalEarnedAmount} />
               </p>
               <div className="flex items-center gap-2">
                 <p className="text-pretty text-sm leading-6 text-muted-foreground">
@@ -235,9 +236,9 @@ function EarningsInstitutionGroups({
   return (
     <GroupedMetricList
       groups={groups}
-      formatMetric={formatMxn}
       itemListClassName="divide-y divide-border/60 p-0"
       itemNoun="investment"
+      renderMetric={(value) => <MoneyAmount value={value} />}
       showShareOfTotal
       renderItem={(item) => (
         <div key={item.source.investmentId} className="px-3 py-4">
@@ -284,7 +285,7 @@ function EarningsBreakdownRow({
 
         <div className="shrink-0 text-right">
           <p className="font-ledger text-sm font-bold text-foreground tabular-nums">
-            {formatMxn(investment.earnedAmount)}
+            <MoneyAmount value={investment.earnedAmount} />
           </p>
           <p className="text-xs text-muted-foreground">
             {formatPercentage(displayedPercentage)}

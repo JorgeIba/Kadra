@@ -5,8 +5,10 @@ import {
   resolveInvestment,
   type Investment,
 } from "@/domain/investments"
+import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { Card, CardContent } from "@/components/ui/card"
-import { formatMxn, formatPercentage } from "@/lib/formatters"
+import { formatPercentage } from "@/lib/formatters"
+import type { ReactNode } from "react"
 
 interface InvestmentPreviewProps {
   investment: Investment
@@ -34,43 +36,53 @@ export function InvestmentPreview({
             Initial contribution
           </p>
           <p className="mt-2 font-ledger text-3xl leading-none text-foreground tabular-nums">
-            {formatMxn(resolvedInvestment.estimatedCurrentValue)}
+            <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
           </p>
         </div>
 
         <div className="grid grid-cols-2 divide-x divide-border/70 border-b border-border/70 pb-4">
           <PreviewMetric
             label="Periodic return"
-            value={formatMxn(resolvedInvestment.estimatedPeriodicReturn)}
+            value={
+              <MoneyAmount value={resolvedInvestment.estimatedPeriodicReturn} />
+            }
           />
           <PreviewMetric
             label="Monthly return"
-            value={formatMxn(
-              getUpcomingInvestmentProjectedEarningsForDays(
-                investment,
-                DAY_COUNTS.month,
-                asOfDate,
-              ),
-            )}
+            value={
+              <MoneyAmount
+                value={getUpcomingInvestmentProjectedEarningsForDays(
+                  investment,
+                  DAY_COUNTS.month,
+                  asOfDate,
+                )}
+              />
+            }
           />
         </div>
 
         <div className="grid grid-cols-2 divide-x divide-border/70">
           <PreviewMetric
             label="Yearly return"
-            value={formatMxn(
-              getUpcomingInvestmentProjectedEarningsForDays(
-                investment,
-                DAY_COUNTS.year,
-                asOfDate,
-              ),
-            )}
+            value={
+              <MoneyAmount
+                value={getUpcomingInvestmentProjectedEarningsForDays(
+                  investment,
+                  DAY_COUNTS.year,
+                  asOfDate,
+                )}
+              />
+            }
           />
 
           {resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm ? (
             <PreviewMetric
               label="Maturity value"
-              value={formatMxn(resolvedInvestment.projectedValueAtEndDate)}
+              value={
+                <MoneyAmount
+                  value={resolvedInvestment.projectedValueAtEndDate}
+                />
+              }
             />
           ) : (
             <PreviewMetric label="Term" value="Open ended" />
@@ -90,7 +102,7 @@ export function InvestmentPreview({
   )
 }
 
-function PreviewMetric({ label, value }: { label: string; value: string }) {
+function PreviewMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0 px-3 first:pl-0 last:pr-0">
       <p className="text-xs leading-5 text-muted-foreground">{label}</p>
