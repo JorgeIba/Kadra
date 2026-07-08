@@ -25,7 +25,6 @@ import {
   type InvestmentType,
 } from "@/domain/investments"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
 
 interface InvestmentDetailScreenProps {
@@ -65,78 +64,77 @@ export function InvestmentDetailScreen({
         onRecordChange={onRecordChange}
       />
 
-      <Card className="rounded-lg bg-secondary/70">
-        <CardContent className="space-y-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs text-muted-foreground">Estimated value</p>
-              <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
-                <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
-              </p>
-            </div>
-            <div className="grid size-10 place-items-center rounded-lg bg-background/60 text-primary">
-              <WalletCards className="size-5" aria-hidden="true" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <DetailMetric
-              icon={Percent}
-              label="Annual rate"
-              value={formatPercentage(resolvedInvestment.annualRate)}
-            />
-            <DetailMetric
-              icon={Landmark}
-              label="Started on"
-              value={formatDisplayDate(resolvedInvestment.startDate)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-lg">
-        <CardContent className="space-y-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h2 className="text-base font-bold leading-tight text-foreground">
-                Returns
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {getReturnsDescription(resolvedInvestment.type)}
-              </p>
-            </div>
-            <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary/70 text-primary">
-              <TrendingUp className="size-5" aria-hidden="true" />
-            </div>
-          </div>
-
-          <div className="rounded-lg bg-secondary/60 px-3 py-3">
-            <p className="text-xs text-muted-foreground">Earned so far</p>
-            <p className="mt-2 font-ledger text-2xl leading-none text-foreground tabular-nums">
-              <MoneyAmount value={resolvedInvestment.estimatedAccruedReturn} />
+      <div className="space-y-6">
+        <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-5">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Estimated value</p>
+            <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
+              <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
             </p>
           </div>
-
-          <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
-            {upcomingReturnMetrics.map((metric) => (
-              <div
-                key={metric.label}
-                className="min-w-0 rounded-lg bg-secondary/45 p-3"
-              >
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {metric.label}
-                </p>
-                <p className="mt-2 font-ledger text-sm leading-none text-foreground tabular-nums">
-                  <MoneyAmount value={metric.value} />
-                </p>
-              </div>
-            ))}
+          <div className="grid size-10 place-items-center rounded-lg bg-secondary/50 text-primary">
+            <WalletCards className="size-5" aria-hidden="true" />
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card className="rounded-lg">
-        <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 border-b border-border/30 pb-5">
+          <DetailMetric
+            icon={Percent}
+            label="Annual rate"
+            value={formatPercentage(resolvedInvestment.annualRate)}
+          />
+          <DetailMetric
+            icon={Landmark}
+            label="Started on"
+            value={formatDisplayDate(resolvedInvestment.startDate)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4 border-b border-border/30 pb-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Returns
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {getReturnsDescription(resolvedInvestment.type)}
+            </p>
+          </div>
+          <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary/50 text-primary">
+            <TrendingUp className="size-5" aria-hidden="true" />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-border/10 pt-3">
+          <span className="text-sm text-muted-foreground">Earned so far</span>
+          <span className="font-ledger text-xl font-medium text-foreground">
+            <MoneyAmount value={resolvedInvestment.estimatedAccruedReturn} />
+          </span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 pt-2">
+          {upcomingReturnMetrics.map((metric) => (
+            <div
+              key={metric.label}
+              className="min-w-0 rounded bg-secondary/30 p-2.5"
+            >
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                {metric.label}
+              </p>
+              <p className="mt-1 font-ledger text-sm text-foreground">
+                <MoneyAmount value={metric.value} />
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-3.5 pb-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+          Investment details
+        </h2>
+        <div className="space-y-3">
           <DetailRow
             label="Type"
             value={INVESTMENT_TYPE_LABELS[resolvedInvestment.type]}
@@ -175,30 +173,20 @@ export function InvestmentDetailScreen({
             label="Original amount"
             value={<MoneyAmount value={resolvedInvestment.originalAmount} />}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="rounded-lg border-destructive/20 bg-destructive/10">
-        <CardContent className="space-y-3">
-          <div>
-            <h2 className="text-base font-semibold text-destructive">
-              Delete investment
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Remove this investment from your portfolio. This action cannot be
-              undone.
-            </p>
-          </div>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setIsDeleteDialogOpen(true)}
-          >
-            <Trash2 className="size-4" aria-hidden="true" />
-            Delete investment
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="pt-8 mt-12 border-t border-border/20 flex justify-center pb-8">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-colors px-4 py-2"
+          onClick={() => setIsDeleteDialogOpen(true)}
+        >
+          <Trash2 className="size-4" aria-hidden="true" />
+          Delete investment
+        </Button>
+      </div>
 
       <ConfirmDialog
         open={isDeleteDialogOpen}
@@ -228,9 +216,9 @@ function InvestmentDetailActions({
     >
       <Button
         type="button"
-        variant="secondary"
+        variant="default"
         size="lg"
-        className="min-w-0 flex-1"
+        className="min-w-0 flex-1 bg-primary text-primary-foreground hover:bg-primary/95"
         onClick={onRecordChange}
       >
         <PlusCircle className="size-4" aria-hidden="true" />
@@ -241,7 +229,7 @@ function InvestmentDetailActions({
         type="button"
         variant="outline"
         size="lg"
-        className="min-w-0 flex-1"
+        className="min-w-0 flex-1 border-border/60 hover:bg-secondary/40 text-foreground"
         onClick={onEdit}
       >
         <Pencil className="size-4" aria-hidden="true" />
