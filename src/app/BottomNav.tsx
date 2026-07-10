@@ -12,7 +12,7 @@ interface BottomNavProps {
 
 export function BottomNav({ activeSection }: BottomNavProps) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-md border-t border-border/60 bg-background/95 px-3 pb-4 pt-2 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-md border-t border-border/60 bg-background/75 px-3 pb-4 pt-2 backdrop-blur-[32px]">
       <div className="grid grid-cols-3 gap-2">
         {APP_NAV_ITEMS.map((item) => {
           const isActive = item.value === activeSection
@@ -22,7 +22,6 @@ export function BottomNav({ activeSection }: BottomNavProps) {
             <Link
               key={item.value}
               to={item.path}
-              viewTransition
               state={
                 item.value === APP_SECTIONS.invest
                   ? { activeNavSection: activeSection }

@@ -1,5 +1,6 @@
 import { Menu } from "@base-ui/react/menu"
 import {
+  ArrowLeft,
   Eye,
   EyeOff,
   MoreHorizontal,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils"
 interface TopBarProps {
   hasAppUpdate: boolean
   isCheckingForUpdate: boolean
+  onBack?: () => void
   onCheckForUpdates: () => void
   onResetLocalData: () => void
 }
@@ -21,6 +23,7 @@ interface TopBarProps {
 export function TopBar({
   hasAppUpdate,
   isCheckingForUpdate,
+  onBack,
   onCheckForUpdates,
   onResetLocalData,
 }: TopBarProps) {
@@ -28,14 +31,27 @@ export function TopBar({
   const MoneyVisibilityIcon = isMoneyHidden ? EyeOff : Eye
 
   return (
-    <header className="sticky top-0 z-10 bg-background/95 px-5 pb-3 pt-5 backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-20 mx-auto min-h-[var(--app-top-bar-height)] w-full max-w-md bg-background/75 px-5 pb-3 pt-[max(1.25rem,env(safe-area-inset-top))] backdrop-blur-[32px]">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Shield className="size-5 text-primary" aria-hidden="true" />
-          <p className="font-ledger text-2xl leading-none text-foreground">
-            Trafin
-          </p>
-        </div>
+        {onBack === undefined ? (
+          <div className="flex items-center gap-3">
+            <Shield className="size-5 text-primary" aria-hidden="true" />
+            <p className="font-ledger text-2xl leading-none text-foreground">
+              Trafin
+            </p>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="-ml-2 rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            onClick={onBack}
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            Back
+          </Button>
+        )}
 
         <div className="flex items-center gap-2">
           <Button

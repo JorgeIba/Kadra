@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, Building2, CalendarDays } from "lucide-react"
+import { Building2, CalendarDays } from "lucide-react"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
@@ -28,14 +28,12 @@ import {
 import { createGroups, type GroupIdentity } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 import { getInvestmentTypeGroup } from "@/app/shared/investment-type-grouping"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
 
 interface ProjectionScreenProps {
   investments: Investment[]
-  onBack: () => void
   onInvestmentSelect: (investmentId: string) => void
 }
 
@@ -47,7 +45,6 @@ const PROJECTION_TRUST_NOTES = [
 
 export function ProjectionScreen({
   investments,
-  onBack,
   onInvestmentSelect,
 }: ProjectionScreenProps) {
   const asOfDate = new Date()
@@ -76,11 +73,6 @@ export function ProjectionScreen({
 
   return (
     <section className="space-y-6">
-      <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Dashboard
-      </Button>
-
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
           Dashboard report

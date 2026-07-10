@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react"
 import {
-  ArrowLeft,
   Landmark,
   Pencil,
   Percent,
@@ -29,7 +28,6 @@ import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
 
 interface InvestmentDetailScreenProps {
   investment: Investment
-  onBack: () => void
   onDelete: () => void
   onEdit: () => void
   onRecordChange: () => void
@@ -37,7 +35,6 @@ interface InvestmentDetailScreenProps {
 
 export function InvestmentDetailScreen({
   investment,
-  onBack,
   onDelete,
   onEdit,
   onRecordChange,
@@ -49,11 +46,6 @@ export function InvestmentDetailScreen({
 
   return (
     <section className="space-y-7">
-      <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Back
-      </Button>
-
       <ScreenIntro
         eyebrow={investment.institutionName}
         title={investment.name}
@@ -67,7 +59,9 @@ export function InvestmentDetailScreen({
       <div className="space-y-6">
         <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-5">
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Estimated value</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+              Estimated value
+            </p>
             <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
               <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
             </p>

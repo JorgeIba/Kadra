@@ -10,7 +10,7 @@ import {
 } from "recharts"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
-import { useShouldAnimateOnMount } from "@/app/routing/navigation-animation"
+import { useShouldAnimateRouteEntry } from "@/app/routing/navigation-animation"
 import { formatDisplayDate } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
@@ -36,9 +36,9 @@ export function PortfolioProjectionLineChart({
   points,
 }: PortfolioProjectionLineChartProps) {
   const prefersReducedMotion = useReducedMotion() ?? false
-  const shouldAnimateOnMount = useShouldAnimateOnMount()
+  const shouldAnimateRouteEntry = useShouldAnimateRouteEntry()
   const { isMoneyHidden } = useMoneyPrivacy()
-  const shouldAnimateChart = !prefersReducedMotion && shouldAnimateOnMount
+  const shouldAnimateChart = !prefersReducedMotion && shouldAnimateRouteEntry
 
   return (
     <div className={cn("h-56", className)}>

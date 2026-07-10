@@ -4,7 +4,8 @@ import {
   getActiveSectionFromLocation,
   getActiveSectionFromPathname,
   getActiveNavSectionFromLocation,
-  getReturnPathFromLocation,
+  getFallbackPathFromLocation,
+  shouldHideBackButtonFromLocation,
 } from "@/app/routing/active-section"
 import { APP_SECTIONS } from "@/app/routing/navigation"
 
@@ -41,18 +42,6 @@ describe("active app section helpers", () => {
     )
   })
 
-  it("reads the return path from router location state", () => {
-    const location = createLocation({
-      pathname: "/investments/investment-1",
-      state: {
-        activeNavSection: APP_SECTIONS.dashboard,
-        returnToPath: "/earnings",
-      },
-    })
-
-    expect(getReturnPathFromLocation(location)).toBe("/earnings")
-  })
-
   it("falls back to assets when no active nav section exists", () => {
     const location = createLocation({
       pathname: "/investments/investment-1",
@@ -60,7 +49,6 @@ describe("active app section helpers", () => {
     })
 
     expect(getActiveNavSectionFromLocation(location)).toBe(APP_SECTIONS.assets)
-    expect(getReturnPathFromLocation(location)).toBeNull()
   })
 
   it("supports a custom fallback section when no active nav section exists", () => {
@@ -90,6 +78,82 @@ describe("active app section helpers", () => {
     })
 
     expect(getActiveSectionFromLocation(location)).toBe(APP_SECTIONS.assets)
+  })
+
+  it("hides the top-bar back button on main screens", () => {
+    expect(
+      shouldHideBackButtonFromLocation(
+        createLocation({ pathname: "/", state: null }),
+      ),
+    ).toBe(true)
+    expect(
+      shouldHideBackButtonFromLocation(
+        createLocation({ pathname: "/assets", state: null }),
+      ),
+    ).toBe(true)
+    expect(
+      shouldHideBackButtonFromLocation(
+        createLocation({ pathname: "/invest", state: null }),
+      ),
+    ).toBe(true)
+  })
+
+  it("keeps the top-bar back button visible on secondary screens", () => {
+    expect(
+      shouldHideBackButtonFromLocation(
+        createLocation({ pathname: "/earnings", state: null }),
+      ),
+    ).toBe(false)
+    expect(
+      shouldHideBackButtonFromLocation(
+        createLocation({ pathname: "/projection", state: null }),
+      ),
+    ).toBe(false)
+    expect(
+      shouldHideBackButtonFromLocation(
+        createLocation({ pathname: "/investments/investment-1", state: null }),
+      ),
+    ).toBe(false)
+  })
+
+  it("uses dashboard as the default fallback path", () => {
+    expect(
+      getFallbackPathFromLocation(
+        createLocation({ pathname: "/", state: null }),
+      ),
+    ).toBe("/")
+    expect(
+      getFallbackPathFromLocation(
+        createLocation({ pathname: "/assets", state: null }),
+      ),
+    ).toBe("/")
+  })
+
+  it("uses dashboard as the direct-entry fallback for dashboard reports", () => {
+    const location = createLocation({
+      pathname: "/earnings",
+      state: null,
+    })
+
+    expect(getFallbackPathFromLocation(location)).toBe("/")
+  })
+
+  it("uses the active nav section as the fallback for investment routes", () => {
+    const location = createLocation({
+      pathname: "/investments/investment-1",
+      state: { activeNavSection: APP_SECTIONS.dashboard },
+    })
+
+    expect(getFallbackPathFromLocation(location)).toBe("/")
+  })
+
+  it("uses assets as the default fallback for investment routes", () => {
+    const location = createLocation({
+      pathname: "/investments/investment-1",
+      state: null,
+    })
+
+    expect(getFallbackPathFromLocation(location)).toBe("/assets")
   })
 })
 

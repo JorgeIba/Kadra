@@ -1,11 +1,11 @@
 import {
   Navigate,
   Route,
-  RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
   useRouteError,
 } from "react-router"
+import { RouterProvider } from "react-router/dom"
 import { AppShell } from "@/app/AppShell"
 import { AppErrorFallback } from "@/app/components/AppErrorBoundary"
 import { InvestmentsProvider } from "@/app/context/InvestmentsProvider"

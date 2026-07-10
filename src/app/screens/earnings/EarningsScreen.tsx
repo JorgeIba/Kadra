@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, ArrowUpDown, Building2 } from "lucide-react"
+import { ArrowUpDown, Building2 } from "lucide-react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
@@ -29,13 +29,11 @@ import {
 import { createGroups, type GroupIdentity } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 import { getInvestmentTypeGroup } from "@/app/shared/investment-type-grouping"
-import { Button } from "@/components/ui/button"
 import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 interface EarningsScreenProps {
   investments: Investment[]
-  onBack: () => void
   onInvestmentSelect: (investmentId: string) => void
 }
 
@@ -53,7 +51,6 @@ const EARNINGS_TRUST_NOTES = [
 
 export function EarningsScreen({
   investments,
-  onBack,
   onInvestmentSelect,
 }: EarningsScreenProps) {
   const [sortBy, setSortBy] = useState<EarnedMoneySortOption>(
@@ -75,11 +72,6 @@ export function EarningsScreen({
 
   return (
     <section className="space-y-6">
-      <Button variant="ghost" size="sm" className="-ml-2" onClick={onBack}>
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Dashboard
-      </Button>
-
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
           Dashboard report

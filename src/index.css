@@ -169,6 +169,14 @@ body {
 
   .app-frame {
     @apply mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background;
+    --app-top-bar-height: calc(
+      max(1.25rem, env(safe-area-inset-top)) + 2.75rem
+    );
+    --app-main-top-padding: calc(var(--app-top-bar-height) + 1.75rem);
+  }
+
+  .app-main {
+    padding-top: var(--app-main-top-padding);
   }
 
   .font-ledger {
@@ -190,6 +198,10 @@ body {
   }
 
   @media (prefers-reduced-motion: no-preference) {
+    .route-entry-surface {
+      animation: route-entry-forward 220ms var(--ease-productive) both;
+    }
+
     .motion-list-surface {
       animation: list-surface-enter var(--motion-state) var(--ease-productive)
         both;
@@ -198,6 +210,12 @@ body {
     .motion-list-item {
       animation: list-item-enter 260ms var(--ease-productive) both;
       animation-delay: calc(var(--motion-index, 0) * 28ms);
+    }
+
+    .motion-list-surface[data-route-entry-animation="disabled"],
+    .motion-list-surface[data-route-entry-animation="disabled"]
+      .motion-list-item {
+      animation: none;
     }
 
     .grouped-metric-panel {
@@ -217,23 +235,10 @@ body {
       opacity: 0;
       transform: translateY(-4px);
     }
-
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
-      animation-duration: 280ms;
-      animation-timing-function: var(--ease-productive);
-    }
-
-    ::view-transition-old(root) {
-      animation-name: app-view-exit;
-    }
-
-    ::view-transition-new(root) {
-      animation-name: app-view-enter;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .route-entry-surface,
     .motion-list-surface,
     .motion-list-item {
       animation: none;
@@ -242,11 +247,18 @@ body {
     .grouped-metric-panel {
       transition: none;
     }
+  }
+}
 
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
-      animation: none;
-    }
+@keyframes route-entry-forward {
+  from {
+    opacity: 0.82;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -273,27 +285,5 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes app-view-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.99);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes app-view-exit {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
   }
 }

@@ -1,11 +1,8 @@
-import { useLocation, useParams } from "react-router"
+import { useLocation, useNavigate, useParams } from "react-router"
 import { InvestmentNotFound } from "@/app/components/InvestmentNotFound"
 import { useInvestments } from "@/app/context/investments-context"
-import {
-  getActiveNavSectionFromLocation,
-  getReturnPathFromLocation,
-} from "@/app/routing/active-section"
-import { useAnimatedNavigate } from "@/app/routing/navigation-animation"
+import { getActiveNavSectionFromLocation } from "@/app/routing/active-section"
+import { useBackOrFallbackNavigation } from "@/app/routing/useBackOrFallbackNavigation"
 import {
   APP_SECTIONS,
   getEarningsPath,
@@ -29,7 +26,7 @@ import type { Investment } from "@/domain/investments"
 
 export function DashboardRoute() {
   const { investments } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigate = useNavigate()
 
   function handleAddInvestment() {
     navigate(getSectionPath(APP_SECTIONS.invest), {
@@ -78,7 +75,7 @@ export function DashboardRoute() {
 
 export function AssetsRoute() {
   const { investments } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigate = useNavigate()
   const location = useLocation()
   const selectedAssetFilter = (
     location.state as { selectedAssetFilter?: AssetFilterOption } | null
@@ -108,7 +105,7 @@ export function AssetsRoute() {
 
 export function InvestRoute() {
   const { addInvestment, investments } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigate = useNavigate()
   const location = useLocation()
   const activeNavSection = getActiveNavSectionFromLocation(
     location,
@@ -137,30 +134,22 @@ export function InvestRoute() {
 
 export function EarningsRoute() {
   const { investments } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigate = useNavigate()
   const location = useLocation()
   const activeNavSection = getActiveNavSectionFromLocation(
     location,
     APP_SECTIONS.dashboard,
   )
 
-  function handleBack() {
-    navigate(getSectionPath(activeNavSection))
-  }
-
   function handleInvestmentSelect(investmentId: string) {
     navigate(getInvestmentDetailPath(investmentId), {
-      state: {
-        activeNavSection,
-        returnToPath: getEarningsPath(),
-      },
+      state: { activeNavSection },
     })
   }
 
   return (
     <EarningsScreen
       investments={investments}
-      onBack={handleBack}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )
@@ -168,30 +157,22 @@ export function EarningsRoute() {
 
 export function ProjectionRoute() {
   const { investments } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigate = useNavigate()
   const location = useLocation()
   const activeNavSection = getActiveNavSectionFromLocation(
     location,
     APP_SECTIONS.dashboard,
   )
 
-  function handleBack() {
-    navigate(getSectionPath(activeNavSection))
-  }
-
   function handleInvestmentSelect(investmentId: string) {
     navigate(getInvestmentDetailPath(investmentId), {
-      state: {
-        activeNavSection,
-        returnToPath: getProjectionPath(),
-      },
+      state: { activeNavSection },
     })
   }
 
   return (
     <ProjectionScreen
       investments={investments}
-      onBack={handleBack}
       onInvestmentSelect={handleInvestmentSelect}
     />
   )
@@ -199,46 +180,41 @@ export function ProjectionRoute() {
 
 export function InvestmentDetailRoute() {
   const { investments, deleteInvestment } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigate = useNavigate()
+  const navigateBackOrFallback = useBackOrFallbackNavigation()
   const location = useLocation()
   const { investmentId } = useParams()
   const activeNavSection = getActiveNavSectionFromLocation(location)
-  const returnToPath = getReturnPathFromLocation(location)
   const investment = investments.find((currentInvestment) => {
     return currentInvestment.id === investmentId
   })
 
-  function handleBack() {
-    navigate(returnToPath ?? getSectionPath(activeNavSection))
-  }
-
   if (investment === undefined) {
-    return <InvestmentNotFound onBack={handleBack} />
+    return <InvestmentNotFound />
   }
 
   const selectedInvestment = investment
 
   function handleDelete() {
     deleteInvestment(selectedInvestment.id)
-    navigate(returnToPath ?? getSectionPath(activeNavSection))
+    navigateBackOrFallback(getSectionPath(activeNavSection))
   }
 
   function handleEdit() {
     navigate(getInvestmentEditPath(selectedInvestment.id), {
-      state: { activeNavSection, returnToPath },
+      state: { activeNavSection },
     })
   }
 
   function handleRecordChange() {
     navigate(getInvestmentRecordChangePath(selectedInvestment.id), {
-      state: { activeNavSection, returnToPath },
+      state: { activeNavSection },
     })
   }
 
   return (
     <InvestmentDetailScreen
       investment={selectedInvestment}
-      onBack={handleBack}
       onDelete={handleDelete}
       onEdit={handleEdit}
       onRecordChange={handleRecordChange}
@@ -248,35 +224,30 @@ export function InvestmentDetailRoute() {
 
 export function EditInvestmentRoute() {
   const { investments, updateInvestment } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigateBackOrFallback = useBackOrFallbackNavigation()
   const location = useLocation()
   const { investmentId } = useParams()
   const activeNavSection = getActiveNavSectionFromLocation(location)
-  const returnToPath = getReturnPathFromLocation(location)
   const investment = investments.find((currentInvestment) => {
     return currentInvestment.id === investmentId
   })
 
-  function handleBack() {
-    navigate(returnToPath ?? getSectionPath(activeNavSection))
-  }
-
   if (investment === undefined) {
-    return <InvestmentNotFound onBack={handleBack} />
+    return <InvestmentNotFound />
   }
 
   const selectedInvestment = investment
 
   function handleInvestmentUpdate(updatedInvestment: Investment) {
     updateInvestment(updatedInvestment)
-    navigate(getInvestmentDetailPath(updatedInvestment.id), {
-      state: { activeNavSection, returnToPath },
+    navigateBackOrFallback(getInvestmentDetailPath(updatedInvestment.id), {
+      state: { activeNavSection },
     })
   }
 
   function handleCancel() {
-    navigate(getInvestmentDetailPath(selectedInvestment.id), {
-      state: { activeNavSection, returnToPath },
+    navigateBackOrFallback(getInvestmentDetailPath(selectedInvestment.id), {
+      state: { activeNavSection },
     })
   }
 
@@ -292,35 +263,30 @@ export function EditInvestmentRoute() {
 
 export function RecordChangeRoute() {
   const { investments, updateInvestment } = useInvestments()
-  const navigate = useAnimatedNavigate()
+  const navigateBackOrFallback = useBackOrFallbackNavigation()
   const location = useLocation()
   const { investmentId } = useParams()
   const activeNavSection = getActiveNavSectionFromLocation(location)
-  const returnToPath = getReturnPathFromLocation(location)
   const investment = investments.find((currentInvestment) => {
     return currentInvestment.id === investmentId
   })
 
-  function handleBack() {
-    navigate(returnToPath ?? getSectionPath(activeNavSection))
-  }
-
   if (investment === undefined) {
-    return <InvestmentNotFound onBack={handleBack} />
+    return <InvestmentNotFound />
   }
 
   const selectedInvestment = investment
 
   function handleInvestmentUpdate(updatedInvestment: Investment) {
     updateInvestment(updatedInvestment)
-    navigate(getInvestmentDetailPath(updatedInvestment.id), {
-      state: { activeNavSection, returnToPath },
+    navigateBackOrFallback(getInvestmentDetailPath(updatedInvestment.id), {
+      state: { activeNavSection },
     })
   }
 
   function handleCancel() {
-    navigate(getInvestmentDetailPath(selectedInvestment.id), {
-      state: { activeNavSection, returnToPath },
+    navigateBackOrFallback(getInvestmentDetailPath(selectedInvestment.id), {
+      state: { activeNavSection },
     })
   }
 
