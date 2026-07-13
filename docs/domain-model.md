@@ -1,10 +1,10 @@
-# Trafin Domain Model
+# Kadra Domain Model
 
 This document holds deeper domain-model detail than `project-plan.md`.
 
 ## Current Direction
 
-Trafin models one investment as an event-sourced history plus derived read
+Kadra models one investment as an event-sourced history plus derived read
 models.
 
 Core distinction:
@@ -48,7 +48,7 @@ Source-of-truth rule:
 
 Meaning of dates:
 
-- `createdAt` means when the record was created in Trafin
+- `createdAt` means when the record was created in Kadra
 - event `effectiveDate` means when that fact became true in the investment world
 - UI labels may still say "start date", "contribution date", or "maturity date"
   when that wording is clearer for users

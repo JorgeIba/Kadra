@@ -1,4 +1,4 @@
-# Trafin Backlog
+# Kadra Backlog
 
 This document holds future ideas and deferred work that are worth remembering, but are not the top-level story of the project right now.
 
@@ -8,7 +8,6 @@ This document holds future ideas and deferred work that are worth remembering, b
 2. Add planned contribution assumptions for projections
 3. Add richer grouping and exploration in Assets
 4. Add history-management flows beyond latest-event edit and append-only record change
-5. Replace the placeholder Vite `README.md` with real Trafin project documentation
 
 ## Deferred Ideas
 
@@ -27,7 +26,7 @@ This document holds future ideas and deferred work that are worth remembering, b
 - future-dated investment starts, where `startDate` can be after today and the
   UI treats the investment as promised or starting soon instead of active
 - fully historical investments where both `startDate` and `endDate` are before
-  today, so Trafin can record past investments and calculate total money earned
+  today, so Kadra can record past investments and calculate total money earned
 - replace silent date clamping before an investment's `startDate` with a clearer
   user-facing behavior, such as an error message or another explicit state; this
   needs product discussion before implementation

@@ -1,6 +1,6 @@
 # Engineering Guidelines
 
-This document tracks cross-cutting technical conventions for Trafin.
+This document tracks cross-cutting technical conventions for Kadra.
 
 ## Dates
 
