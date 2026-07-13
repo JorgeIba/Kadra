@@ -1,5 +1,5 @@
 ---
-name: Trafin
+name: Kadra
 description: Privacy-first fixed-income investment tracker.
 colors:
   background: "#0B1113"
@@ -70,17 +70,21 @@ components:
     height: "4px"
 ---
 
-# Design System: Trafin
+Source of truth: the runtime palette in `src/index.css`. This document records its human-readable hex equivalents; update both files together when the palette changes.
+
+# Design System: Kadra
 
 ## 1. Overview
 
 **Creative North Star: "The Private Yield Ledger"**
 
-Trafin should feel like a dark, private ledger for fixed-income assets: quiet, exact, and easy to scan from a phone. The preferred visual baseline is `assets/screenshots_2/dashboard_idea_1.png`.
+Kadra should feel like a dark, private ledger for fixed-income assets: quiet, exact, and easy to scan from a phone. The preferred visual baseline is `assets/screenshots_2/dashboard_idea_1.png`.
 
 The interface is not card-heavy. It uses a dark charcoal canvas, thin dividers, serif financial values, compact sans labels, muted blue-gray support text, and restrained mint accents for value, progress, and selected navigation states.
 
 The system rejects generic SaaS dashboards, crypto trading interfaces, loud marketing sites, and promotion-heavy consumer banking apps.
+
+The selected identity is documented in [docs/brand/README.md](docs/brand/README.md). Its Elms Sans Regular wordmark is a brand asset only; it does not replace the UI typography system below.
 
 **Key Characteristics:**
 
@@ -176,7 +180,7 @@ The baseline uses almost no shadows. Depth comes from a continuous dark surface,
 
 ### Navigation
 
-- **Top Bar:** Shield mark, Trafin wordmark, and compact profile affordance.
+- **Top Bar:** Kadra horizontal lockup (Kadra Angle mark plus wordmark) and compact profile affordance.
 - **Bottom Nav:** Icon-first, low-contrast inactive state, mint active state. Keep labels short.
 
 ### Dashboard Rows
@@ -195,7 +199,7 @@ Distribution, maturity, and active-asset rows should be horizontally scannable: 
 
 ### Don't:
 
-- **Don't** make Trafin feel like a generic SaaS dashboard.
+- **Don't** make Kadra feel like a generic SaaS dashboard.
 - **Don't** use crypto trading interface patterns, noisy chart colors, or speculative-investing visual language.
 - **Don't** make the product feel like a loud marketing site.
 - **Don't** use promotion-heavy consumer banking patterns.

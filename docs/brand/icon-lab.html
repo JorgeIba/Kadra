@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kadra mark and wordmark</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Elms+Sans:wght@400;500;600&family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap');
+      :root {
+        color-scheme: dark;
+        --canvas: #060d0c;
+        --surface: #101719;
+        --border: #24302e;
+        --ink: #f4f1ea;
+        --muted: #8d98a3;
+        --mint: #9bd8c2;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; background: var(--canvas); color: var(--ink); font: 14px/1.5 "Geist Variable", system-ui, sans-serif; }
+      main { max-width: 1120px; margin: auto; padding: 48px 24px 72px; }
+      h1 { margin: 0; font: 400 clamp(34px, 5vw, 48px)/1.05 Georgia, serif; }
+      .lede { max-width: 65ch; margin-top: 12px; color: var(--muted); }
+      .section-title { margin: 48px 0 12px; color: var(--ink); font: 500 12px/1.3 "Geist Variable", system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+      article { padding: 20px; border: 1px solid var(--border); background: var(--surface); border-radius: 12px; }
+      h2 { margin: 16px 0 4px; font-size: 16px; }
+      p { margin: 0; color: var(--muted); }
+      .hero { display: grid; place-items: center; aspect-ratio: 1; background: var(--canvas); border: 1px solid var(--border); border-radius: 24%; }
+      .hero svg { width: 72%; height: 72%; }
+      .sizes { display: flex; align-items: center; gap: 12px; min-height: 72px; margin-top: 16px; }
+      .sizes svg { display: block; background: var(--canvas); border-radius: 24%; }
+      .s16 { width: 16px; height: 16px; } .s32 { width: 32px; height: 32px; }
+      .s64 { width: 64px; height: 64px; }
+      .wordmark { margin-top: 18px; color: var(--ink); font-family: var(--wordmark-family, Comfortaa), "Avenir Next", "SF Pro Rounded", sans-serif; font-size: 32px; font-weight: var(--wordmark-weight, 500); line-height: .94; letter-spacing: var(--wordmark-tracking, -.04em); }
+      .wordmark-note { margin-top: 8px; font-size: 12px; }
+      .wordmark-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+      .type-study { display: grid; place-items: center; min-height: 190px; padding: 28px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+      .type-study .wordmark { margin: 0; font-size: clamp(42px, 7vw, 62px); }
+      .type-label { margin-top: 10px; font-size: 12px; text-align: center; }
+      .mark { fill: var(--mint); }
+      .launch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+      .launch { display: grid; place-items: center; aspect-ratio: 9 / 16; padding: 30px; background: var(--canvas); border: 1px solid var(--border); border-radius: 28px; }
+      .launch-lockup { display: grid; justify-items: center; gap: 18px; }
+      .launch svg { width: 98px; height: 98px; }
+      .launch .wordmark { margin: 0; font-size: 32px; }
+      .launch-label { margin-top: 10px; font-size: 12px; text-align: center; }
+      .lockup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+      .lockup { display: grid; place-items: center; min-height: 180px; padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+      .lockup.vertical { gap: 16px; }
+      .lockup.horizontal { grid-template-columns: auto auto; justify-content: center; gap: 8px; }
+      .lockup .mark-lockup { width: 62px; height: 62px; }
+      .lockup .wordmark { margin: 0; font-size: 34px; }
+      .lockup.horizontal .wordmark { font-size: 46px; }
+      .note { margin-top: 36px; padding: 16px; border-left: 1px solid var(--mint); color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Kadra identity study</h1>
+      <p class="lede">The selected reference rebuilt faithfully: a vertical ledger stem and one four-point diagonal with a deliberate flat base. There are exactly two filled forms, with a small protected interval between them. The wordmark follows the selected lowercase Ledger reference: compact, modern, and personal.</p>
+
+      <p class="section-title">App icon candidates</p>
+      <section class="grid" id="candidates"></section>
+
+      <p class="section-title">Wordmark study</p>
+      <section class="wordmark-compare" id="wordmark-study"></section>
+
+      <p class="section-title">Lockup composition</p>
+      <section class="lockup-grid" id="lockups"></section>
+
+      <p class="section-title">iPhone launch-screen preview</p>
+      <section class="launch-grid" id="launches"></section>
+
+      <p class="note">Shared rules: #060D0C icon and launch field; #9BD8C2 mark; no gradients, shadows, frames, coins, charts, shields, or text inside the app icon. Judge the 32px silhouette first. The launch screen deliberately uses the full Kadra lockup.</p>
+    </main>
+    <script>
+      const marks = [
+        {
+          id: 'kadra-angle',
+          name: 'Kadra Angle',
+          note: 'A faithful rebuild of the chosen reference: a vertical record and one rising four-point measure. Its flat base gives the diagonal form the same grounded weight as the reference.',
+          svg: '<rect class="mark" x="21" y="22" width="20" height="58"/><path class="mark" d="M43 50 55 30l25 50H59z"/>'
+        }
+      ];
+      const svg = (mark, className = '') => `<svg class="${className}" viewBox="0 0 100 100" aria-label="${mark.name}" role="img">${mark.svg}</svg>`;
+      const typefaces = [
+        { id: 'comfortaa', name: 'Comfortaa Medium', family: 'Comfortaa', weight: 500, tracking: '-.075em', note: 'Existing option' },
+        { id: 'elms', name: 'Elms Sans Regular', family: 'Elms Sans', weight: 400, tracking: '-.04em', note: 'Open-source candidate' },
+        { id: 'poppins', name: 'Poppins Regular', family: 'Poppins', weight: 400, tracking: '-.035em', note: 'Open-source candidate' },
+        { id: 'montserrat', name: 'Montserrat Regular', family: 'Montserrat', weight: 400, tracking: '-.035em', note: 'Open-source candidate' }
+      ];
+      const wordmarkText = (typeface, className = '') => `<div class="wordmark ${className}" style="--wordmark-family: '${typeface.family}'; --wordmark-weight: ${typeface.weight}; --wordmark-tracking: ${typeface.tracking}" aria-label="kadra">kadra</div>`;
+      const wordmark = () => `${wordmarkText(typefaces[0])}<p class="wordmark-note">Comfortaa Medium typography study</p>`;
+      document.querySelector('#candidates').innerHTML = marks.map((mark) => `<article><div class="hero">${svg(mark)}</div><h2>${mark.name}</h2><p>${mark.note}</p>${wordmark()}<div class="sizes">${svg(mark, 's16')}${svg(mark, 's32')}${svg(mark, 's64')}</div></article>`).join('');
+      document.querySelector('#wordmark-study').innerHTML = typefaces.map((typeface) => `<div><div class="type-study">${wordmarkText(typeface)}</div><p class="type-label">${typeface.name}<br>${typeface.note}</p></div>`).join('');
+      document.querySelector('#lockups').innerHTML = marks.flatMap((mark) => typefaces.flatMap((typeface) => [`<div><div class="lockup vertical">${svg(mark, 'mark-lockup')}${wordmarkText(typeface)}</div><p class="launch-label">${typeface.name}: mark above</p></div>`, `<div><div class="lockup horizontal">${svg(mark, 'mark-lockup')}${wordmarkText(typeface)}</div><p class="launch-label">${typeface.name}: mark left</p></div>`])).join('');
+      document.querySelector('#launches').innerHTML = marks.map((mark) => `<div><div class="launch"><div class="launch-lockup">${svg(mark)}${wordmarkText(typefaces[0])}</div></div><p class="launch-label">${mark.name} with Comfortaa Medium</p></div>`).join('');
+    </script>
+  </body>
+</html>
