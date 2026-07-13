@@ -23,7 +23,7 @@ export function AppErrorFallback({
     <main className="min-h-screen bg-background px-5 py-10 text-foreground">
       <section className="mx-auto max-w-lg rounded-3xl border bg-card p-6 shadow-sm">
         <p className="text-sm font-medium text-muted-foreground">
-          Trafin hit an unexpected problem
+          Kadra hit an unexpected problem
         </p>
         <h1 className="mt-3 font-ledger text-3xl tracking-normal">
           Something went wrong

@@ -19,9 +19,3 @@ brokerage-style interface.
 - [Design system](./DESIGN.md)
 - [Brand identity](./docs/brand/README.md)
 - [Domain model](./docs/domain-model.md)
-
-## Brand Rollout Status
-
-Kadra’s name and identity are documented, but the runtime app metadata, PWA
-manifest, and production icons have not yet been renamed or replaced. That
-rollout should be completed as one deliberate, tested change.

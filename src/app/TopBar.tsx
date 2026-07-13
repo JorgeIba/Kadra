@@ -5,9 +5,9 @@ import {
   EyeOff,
   MoreHorizontal,
   RefreshCw,
-  Shield,
   Trash2,
 } from "lucide-react"
+import { KadraMark } from "@/app/components/KadraMark"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -34,10 +34,10 @@ export function TopBar({
     <header className="fixed inset-x-0 top-0 z-20 mx-auto min-h-[var(--app-top-bar-height)] w-full max-w-md bg-background/75 px-5 pb-3 pt-[max(1.25rem,env(safe-area-inset-top))] backdrop-blur-[32px]">
       <div className="flex items-center justify-between gap-3">
         {onBack === undefined ? (
-          <div className="flex items-center gap-3">
-            <Shield className="size-5 text-primary" aria-hidden="true" />
-            <p className="font-ledger text-2xl leading-none text-foreground">
-              Trafin
+          <div className="flex items-center gap-0">
+            <KadraMark className="size-8 shrink-0 text-primary" />
+            <p className="font-brand text-[1.625rem] leading-[0.9] tracking-[-0.04em] text-foreground">
+              kadra
             </p>
           </div>
         ) : (

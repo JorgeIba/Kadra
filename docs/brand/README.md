@@ -4,12 +4,8 @@ Kadra is the selected product name for this privacy-first, fixed-income
 investment tracker. The identity should feel calm, trustworthy, personal, and
 precise: a private ledger, not a trading terminal or consumer bank campaign.
 
-## Status
-
-This document is the source of truth for the selected visual identity. It does
-not rename runtime metadata, browser titles, PWA manifests, or production icon
-files. Those changes happen together in a separate implementation pass once
-the identity assets are approved for release.
+This document is the source of truth for Kadra’s identity assets, colors,
+wordmark, and usage rules.
 
 ## Core System
 
@@ -30,7 +26,7 @@ visual comparison and scale study live in [icon-lab.html](./icon-lab.html).
 
 ## Prepared Exports
 
-The approved, non-production export pack is in [exports](./exports/):
+The approved export pack is in [exports](./exports/):
 
 - `kadra-favicon.svg`
 - `kadra-icon-16.png`, `kadra-icon-32.png`, and `kadra-icon-64.png` for scale checks

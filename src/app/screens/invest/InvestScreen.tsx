@@ -29,7 +29,7 @@ export function InvestScreen({
       <ScreenIntro
         eyebrow="Invest"
         title="New investment"
-        description="Capture the terms once so Trafin can track value, estimated income, and maturity progress from the moment you save it."
+        description="Capture the terms once so Kadra can track value, estimated income, and maturity progress from the moment you save it."
       />
 
       <InvestmentForm

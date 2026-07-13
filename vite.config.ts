@@ -13,9 +13,9 @@ export default defineConfig({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Trafin",
-        short_name: "Trafin",
-        description: "Privacy-first fixed-income investment tracker.",
+        name: "Kadra",
+        short_name: "Kadra",
+        description: "Private, local-first fixed-income investment tracking.",
         theme_color: "#0b1113",
         background_color: "#0b1113",
         display: "standalone",

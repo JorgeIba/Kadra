@@ -105,7 +105,7 @@ export function EffectiveDateSection({
   return (
     <FormSection
       title="Effective date"
-      description="Trafin will append new history from this date onward."
+      description="Kadra will append new history from this date onward."
     >
       <Field
         error={errors.effectiveDate?.message}

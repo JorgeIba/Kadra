@@ -29,7 +29,7 @@ Supporting docs:
 | Domain direction | Active | Event-history investments and resolved read models are now the working product model |
 | MVP app foundation | In progress | App shell, persistence, dashboard, assets, invest, detail, earnings, edit, and record-change flows are already underway in code |
 | Planning structure | Updated | `project-plan.md` is now the high-level hub with linked supporting docs |
-| Brand identity | Selected | Kadra name, Kadra Angle mark, Elms Sans wordmark, and launch lockup are documented; production metadata and PWA assets remain unchanged |
+| Brand identity | Applied | Kadra name, Kadra Angle mark, Elms Sans wordmark, browser metadata, PWA metadata, and production icons are aligned |
 
 ## Vision
 

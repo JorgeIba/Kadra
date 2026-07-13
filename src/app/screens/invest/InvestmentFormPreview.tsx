@@ -15,7 +15,7 @@ export function InvestmentFormPreview({
         <CardContent className="space-y-2">
           <p className="text-sm font-bold">Projection preview</p>
           <p className="text-sm leading-6 text-muted-foreground">
-            Add the required terms and Trafin will estimate value, return, and
+            Add the required terms and Kadra will estimate value, return, and
             maturity progress before you save.
           </p>
         </CardContent>
