@@ -34,10 +34,26 @@ The approved export pack is in [exports](./exports/):
 - `kadra-pwa-192x192.png`
 - `kadra-pwa-512x512.png`
 - `kadra-pwa-maskable-512x512.png`
+- `kadra-launch.png`, the rendered stacked lockup used as the launch-artwork source
+- `apple-splash-*.png`, the device-specific startup images for modern iPhones
 
 The PWA exports intentionally use the same full-field source. The mark occupies
 the central safe area, so platform masks can round or crop the outer field
 without cutting the K.
+
+## Apple PWA Launch Images
+
+Apple startup images use the centered stacked lockup on the identity field.
+They support the distinct viewport profiles used by iPhone 14 through iPhone
+17, including iPhone Air and Pro models. They are native PWA startup images,
+not an app-owned loading screen: the app does not delay rendering or add a
+separate launch route. Older iPhones and iPads use the standard iOS fallback.
+
+The editable artwork source is [kadra-launch-source.html](./kadra-launch-source.html).
+The image generator configuration is [pwa-assets.config.ts](../../pwa-assets.config.ts).
+After changing the launch artwork, recreate `public/kadra-launch.png` from the
+source and run `pnpm generate:apple-splash`; keep the generated image links in
+`index.html` in sync.
 
 ## Usage Rules
 

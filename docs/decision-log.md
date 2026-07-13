@@ -4,6 +4,23 @@ This document captures dated decisions and planning restructures so `project-pla
 
 ## 2026-07-13
 
+### Native Apple PWA launch images
+
+Decision:
+
+- Use device-specific Apple startup images for the modern iPhone 14–17
+  viewport profiles, built from the centered Kadra lockup.
+- Do not add an app-owned splash screen or intentional delay after the app is
+  ready to render.
+
+Why:
+
+- The startup artwork gives installed iPhone and iPad PWAs a coherent native
+  launch surface without turning a fast application into a fake loading state.
+- The focused profile set preserves the intended dark field, mark, wordmark,
+  and layout across current iPhone orientations without carrying every legacy
+  iPhone and iPad asset.
+
 ### Kadra identity selected
 
 Decision:

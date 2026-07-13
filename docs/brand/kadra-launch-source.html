@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kadra launch artwork</title>
+    <style>
+      @font-face {
+        font-family: "Elms Sans Variable";
+        font-style: normal;
+        font-weight: 100 900;
+        src: url("../../node_modules/@fontsource-variable/elms-sans/files/elms-sans-latin-wght-normal.woff2") format("woff2-variations");
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background: #060d0c;
+      }
+
+      .launch-lockup {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        place-content: center;
+        justify-items: center;
+        gap: 72px;
+        color: #9bd8c2;
+      }
+
+      .mark {
+        width: 360px;
+        height: 360px;
+      }
+
+      .wordmark {
+        color: #f4f1ea;
+        font-family: "Elms Sans Variable", sans-serif;
+        font-size: 168px;
+        font-variation-settings: "wght" 400;
+        font-weight: 400;
+        letter-spacing: -0.04em;
+        line-height: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="launch-lockup">
+      <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="21" y="22" width="20" height="58" fill="currentColor" />
+        <path d="M43 50 55 30l25 50H59z" fill="currentColor" />
+      </svg>
+      <div class="wordmark">kadra</div>
+    </main>
+  </body>
+</html>
