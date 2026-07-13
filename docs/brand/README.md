@@ -24,8 +24,24 @@ the identity assets are approved for release.
 | Icon / launch field | `#060D0C` |
 | Mark color | `#9BD8C2` |
 
-The editable source mark is [kadra-angle.svg](./kadra-angle.svg). The visual
-comparison and scale study live in [icon-lab.html](./icon-lab.html).
+The editable source mark is [kadra-angle.svg](./kadra-angle.svg). The canonical
+full-field app-icon source is [kadra-app-icon.svg](./kadra-app-icon.svg). The
+visual comparison and scale study live in [icon-lab.html](./icon-lab.html).
+
+## Prepared Exports
+
+The approved, non-production export pack is in [exports](./exports/):
+
+- `kadra-favicon.svg`
+- `kadra-icon-16.png`, `kadra-icon-32.png`, and `kadra-icon-64.png` for scale checks
+- `kadra-apple-touch-icon-180.png`
+- `kadra-pwa-192x192.png`
+- `kadra-pwa-512x512.png`
+- `kadra-pwa-maskable-512x512.png`
+
+The PWA exports intentionally use the same full-field source. The mark occupies
+the central safe area, so platform masks can round or crop the outer field
+without cutting the K.
 
 ## Usage Rules
 

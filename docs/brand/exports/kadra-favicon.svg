@@ -1,0 +1,13 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="512"
+  height="512"
+  viewBox="0 0 100 100"
+  role="img"
+  aria-labelledby="title"
+>
+  <title id="title">Kadra favicon</title>
+  <rect width="100" height="100" fill="#060D0C" />
+  <rect x="21" y="22" width="20" height="58" fill="#9BD8C2" />
+  <path d="M43 50 55 30l25 50H59z" fill="#9BD8C2" />
+</svg>
