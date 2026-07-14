@@ -43,9 +43,19 @@ interface ProjectionScreenProps {
 
 const PROJECTION_TRUST_NOTES = [
   "Uses the investments, contributions, and rates saved on this device.",
-  "Assumes no future contributions, renewals, or transfers.",
-  "Finished fixed-term investments leave active value at maturity.",
+  "Does not model new deposits, rate changes, or transfers.",
+  "Applies the selected strategy when fixed-term investments mature.",
 ]
+
+const REINVESTMENT_STRATEGY_DESCRIPTIONS: Record<ReinvestmentStrategy, string> =
+  {
+    [REINVESTMENT_STRATEGIES.keepAsCash]:
+      "Matured fixed-term investments move to cash and stop earning.",
+    [REINVESTMENT_STRATEGIES.reinvest]:
+      "Matured fixed-term investments keep earning at their current rate.",
+    [REINVESTMENT_STRATEGIES.strict]:
+      "Matured fixed-term investments are removed from the projected value.",
+  }
 
 export function ProjectionScreen({
   investments,
@@ -86,30 +96,33 @@ export function ProjectionScreen({
           Dashboard report
         </p>
         <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
-          Projected active portfolio value.
+          Projected portfolio value.
         </h1>
       </div>
 
       <div className="space-y-6">
         <section className="overflow-hidden border-y border-border/70">
           <div className="py-5">
-            <div className="space-y-2">
-              <p className="text-pretty text-sm leading-6 text-muted-foreground">
-                By {formatDisplayDate(snapshot.targetDate)}, active investments
-                are projected to earn
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">
+                Projected value on {formatDisplayDate(snapshot.targetDate)}
               </p>
-              <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
-                <MoneyAmount value={snapshot.projectedEarnings} />
+              <p className="font-ledger text-[2.7rem] leading-none text-foreground tabular-nums">
+                <MoneyAmount value={snapshot.projectedValue} />
               </p>
-              <div className="flex items-center gap-2">
-                <p className="text-sm leading-6 text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-6 text-muted-foreground">
+                <span>
+                  <MoneyAmount value={snapshot.projectedEarnings} /> earned by
+                  target
+                </span>
+                <span aria-hidden="true">·</span>
+                <span>
                   {formatInvestmentCount(
                     snapshot.activeInvestmentCount,
-                    "active investment",
-                    "active investments",
-                  )}{" "}
-                  · {snapshot.finishedInvestmentCount} finished by target
-                </p>
+                    "investment earning",
+                    "investments earning",
+                  )}
+                </span>
                 <TrustNotesPopover
                   label="Projection assumptions"
                   notes={PROJECTION_TRUST_NOTES}
@@ -168,26 +181,14 @@ export function ProjectionScreen({
                   setStrategy(val as ReinvestmentStrategy)
                 }
               />
-              {strategy === REINVESTMENT_STRATEGIES.keepAsCash &&
-                snapshot.maturedCash > 0 && (
-                  <div className="mt-2.5 rounded-md border border-border/70 bg-card/25 p-3 text-xs text-muted-foreground leading-relaxed">
-                    From your total projected value,{" "}
-                    <span className="font-ledger font-medium text-foreground">
-                      <MoneyAmount value={snapshot.maturedCash} />
-                    </span>{" "}
-                    will not be invested (held as cash).
-                  </div>
-                )}
-              {strategy === REINVESTMENT_STRATEGIES.strict &&
-                snapshot.excludedValue > 0 && (
-                  <div className="mt-2.5 rounded-md border border-border/70 bg-card/25 p-3 text-xs text-muted-foreground leading-relaxed">
-                    From your total projected value,{" "}
-                    <span className="font-ledger font-medium text-foreground">
-                      <MoneyAmount value={snapshot.excludedValue} />
-                    </span>{" "}
-                    has been excluded (matured fixed-term CDs).
-                  </div>
-                )}
+              <p className="text-pretty text-sm leading-6 text-muted-foreground">
+                {REINVESTMENT_STRATEGY_DESCRIPTIONS[strategy]}
+              </p>
+              <ProjectionStrategyOutcome
+                excludedValue={snapshot.excludedValue}
+                maturedCash={snapshot.maturedCash}
+                strategy={strategy}
+              />
             </div>
           </div>
         </section>
@@ -259,6 +260,60 @@ export function ProjectionScreen({
         </section>
       </div>
     </section>
+  )
+}
+
+function ProjectionStrategyOutcome({
+  excludedValue,
+  maturedCash,
+  strategy,
+}: {
+  excludedValue: number
+  maturedCash: number
+  strategy: ReinvestmentStrategy
+}) {
+  const isCashOutcome =
+    strategy === REINVESTMENT_STRATEGIES.keepAsCash && maturedCash > 0
+  const isStrictOutcome =
+    strategy === REINVESTMENT_STRATEGIES.strict && excludedValue > 0
+  const shouldShowOutcome = isCashOutcome || isStrictOutcome
+
+  const value = isCashOutcome ? maturedCash : excludedValue
+  const label = isCashOutcome
+    ? "Held as cash at target"
+    : "Excluded at maturity"
+  const description = isCashOutcome
+    ? "Included in the projected value, but no longer earning."
+    : "Not included in the projected value."
+
+  return (
+    <div
+      aria-hidden={!shouldShowOutcome}
+      aria-live={shouldShowOutcome ? "polite" : undefined}
+      className={`grid transition-[grid-template-rows] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+        shouldShowOutcome ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+      }`}
+    >
+      <div className="min-h-0 overflow-hidden">
+        <div
+          className={`flex items-start justify-between gap-4 border-t border-warning-border/65 pt-4 transition-[opacity,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+            shouldShowOutcome
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-1 opacity-0"
+          }`}
+        >
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">{label}</p>
+            <p className="text-sm leading-5 text-muted-foreground">
+              {description}
+            </p>
+          </div>
+          <p className="shrink-0 font-ledger text-xl leading-none text-warning tabular-nums">
+            <MoneyAmount value={value} />
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }
 
