@@ -1,11 +1,14 @@
+import { useRef } from "react"
 import { Menu } from "@base-ui/react/menu"
 import {
   ArrowLeft,
+  Download,
   Eye,
   EyeOff,
   MoreHorizontal,
   RefreshCw,
   Trash2,
+  Upload,
 } from "lucide-react"
 import { KadraMark } from "@/app/components/KadraMark"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
@@ -17,6 +20,8 @@ interface TopBarProps {
   isCheckingForUpdate: boolean
   onBack?: () => void
   onCheckForUpdates: () => void
+  onExportBackup: () => void
+  onImportBackup: (file: File) => void
   onResetLocalData: () => void
 }
 
@@ -25,13 +30,31 @@ export function TopBar({
   isCheckingForUpdate,
   onBack,
   onCheckForUpdates,
+  onExportBackup,
+  onImportBackup,
   onResetLocalData,
 }: TopBarProps) {
+  const backupInputRef = useRef<HTMLInputElement>(null)
   const { isMoneyHidden, toggleMoneyVisibility } = useMoneyPrivacy()
   const MoneyVisibilityIcon = isMoneyHidden ? EyeOff : Eye
 
   return (
     <header className="fixed inset-x-0 top-0 z-20 mx-auto min-h-[var(--app-top-bar-height)] w-full max-w-md bg-background/75 px-5 pb-3 pt-[max(1.25rem,env(safe-area-inset-top))] backdrop-blur-[32px]">
+      <input
+        ref={backupInputRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        onChange={(event) => {
+          const [file] = Array.from(event.target.files ?? [])
+
+          event.target.value = ""
+
+          if (file !== undefined) {
+            onImportBackup(file)
+          }
+        }}
+      />
       <div className="flex items-center justify-between gap-3">
         {onBack === undefined ? (
           <div className="flex items-center gap-0">
@@ -134,6 +157,32 @@ export function TopBar({
                       Check for updates
                     </Menu.Item>
                   )}
+
+                  <Menu.Item
+                    nativeButton
+                    onClick={onExportBackup}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-foreground outline-none transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/70 focus:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50"
+                    render={<button type="button" />}
+                  >
+                    <Download
+                      className="size-4 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                    Export backup
+                  </Menu.Item>
+
+                  <Menu.Item
+                    nativeButton
+                    onClick={() => backupInputRef.current?.click()}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-foreground outline-none transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/70 focus:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50"
+                    render={<button type="button" />}
+                  >
+                    <Upload
+                      className="size-4 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                    Restore backup
+                  </Menu.Item>
 
                   <Menu.Item
                     nativeButton

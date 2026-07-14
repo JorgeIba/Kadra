@@ -30,6 +30,7 @@ Supporting docs:
 | MVP app foundation | In progress | App shell, persistence, dashboard, assets, invest, detail, earnings, edit, and record-change flows are already underway in code |
 | Planning structure | Updated | `project-plan.md` is now the high-level hub with linked supporting docs |
 | Brand identity | Applied | Kadra name, Kadra Angle mark, Elms Sans wordmark, browser metadata, PWA metadata, production icons, and native Apple launch images are aligned |
+| Portfolio recovery | Applied | Users can export a local Kadra portfolio backup and restore it after reinstalling the PWA |
 
 ## Vision
 
@@ -47,6 +48,7 @@ The product should help users understand:
 ### Product Principles
 
 - This project is both a real product and a frontend learning project.
+- User-controlled local backups make PWA reinstallation recoverable without introducing accounts or cloud storage.
 - We do not want to rush into a fake V1 just to get screens quickly.
 - We want explicit decisions written down so the product and architecture do not drift across chats.
 - We should favor models that stay understandable as the product grows.
