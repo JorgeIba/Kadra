@@ -2,6 +2,9 @@ import {
   addCalendarDays,
   compareCalendarDatesAscending,
   getDaysBetween,
+  getInvestmentActiveLifecyclePeriodAtDate,
+  isFixedTermMaturingBetweenDates,
+  INVESTMENT_TYPES,
   parseCalendarDate,
   projectPortfolioAtDate,
   toDateString,
@@ -42,6 +45,7 @@ export interface PortfolioProjectionSnapshot {
   points: PortfolioProjectionPoint[]
   breakdown: InvestmentProjectionBreakdownItem[]
   reinvestmentStrategy: ReinvestmentStrategy
+  hasMaturityScenario: boolean
   maturedCash: number
   excludedValue: number
 }
@@ -116,6 +120,21 @@ export function getPortfolioProjectionSnapshot(
     ),
     breakdown,
     reinvestmentStrategy: strategy,
+    hasMaturityScenario: investments.some((investment) => {
+      const activeLifecycle = getInvestmentActiveLifecyclePeriodAtDate(
+        investment,
+        asOfDate,
+      )
+
+      return (
+        activeLifecycle?.type === INVESTMENT_TYPES.fixedTerm &&
+        isFixedTermMaturingBetweenDates(
+          investment,
+          asOfDateString,
+          resolvedTargetDate,
+        )
+      )
+    }),
     maturedCash: targetProjection.totalExtraCash,
     excludedValue: targetProjection.totalExcludedValue,
   }

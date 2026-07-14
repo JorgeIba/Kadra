@@ -29,6 +29,7 @@ describe("projection view model", () => {
     expect(snapshot.projectedEarnings).toBeCloseTo(60.034055)
     expect(snapshot.earningPace.daily).toBeCloseTo(12.010973)
     expect(snapshot.investmentCount).toBe(2)
+    expect(snapshot.hasMaturityScenario).toBe(false)
   })
 
   it("keeps fixed-term investments flat after maturity", () => {
@@ -42,6 +43,7 @@ describe("projection view model", () => {
     expect(snapshot.activeInvestmentCount).toBe(1)
     expect(snapshot.finishedInvestmentCount).toBe(1)
     expect(snapshot.earningPace.daily).toBeLessThan(3)
+    expect(snapshot.hasMaturityScenario).toBe(true)
     expect(snapshot.maturedCash).toBeGreaterThan(0)
     expect(snapshot.breakdown[0]).toMatchObject({
       investmentId: fixedInvestment.id,
@@ -131,5 +133,15 @@ describe("projection view model", () => {
     )
     expect(snapshot.reinvestmentStrategy).toBe("reinvest")
     expect(snapshot.activeInvestmentCount).toBe(2)
+  })
+
+  it("hides maturity scenarios when no active fixed-term investment matures by the target", () => {
+    const snapshot = getPortfolioProjectionSnapshot(
+      [openEndedInvestment],
+      asOfDate,
+      "2026-02-15",
+    )
+
+    expect(snapshot.hasMaturityScenario).toBe(false)
   })
 })

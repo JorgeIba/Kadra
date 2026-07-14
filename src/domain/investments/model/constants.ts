@@ -81,9 +81,9 @@ export const REINVESTMENT_STRATEGY_OPTIONS = [
 ] as const satisfies ReadonlyArray<ReinvestmentStrategy>
 
 export const REINVESTMENT_STRATEGY_LABELS = {
-  [REINVESTMENT_STRATEGIES.keepAsCash]: "Keep as cash",
-  [REINVESTMENT_STRATEGIES.reinvest]: "Reinvest",
-  [REINVESTMENT_STRATEGIES.strict]: "Strict (Capped)",
+  [REINVESTMENT_STRATEGIES.keepAsCash]: "Hold as cash",
+  [REINVESTMENT_STRATEGIES.reinvest]: "Reinvest at current rate",
+  [REINVESTMENT_STRATEGIES.strict]: "Exclude at maturity",
 } as const satisfies Record<ReinvestmentStrategy, string>
 
 // Derived status
