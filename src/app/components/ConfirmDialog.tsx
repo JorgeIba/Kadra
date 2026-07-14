@@ -9,9 +9,10 @@ interface ConfirmDialogProps {
   description: string
   confirmLabel: string
   cancelLabel?: string
+  showCancel?: boolean
   variant?: "default" | "destructive"
   onRequestOpenChange: (open: boolean) => void
-  onConfirm: () => void
+  onConfirm: () => boolean | void
 }
 
 function getDialogMotionProps(prefersReducedMotion: boolean) {
@@ -55,6 +56,7 @@ export function ConfirmDialog({
   onConfirm,
   onRequestOpenChange,
   open,
+  showCancel = true,
   title,
   variant = "default",
 }: ConfirmDialogProps) {
@@ -62,8 +64,9 @@ export function ConfirmDialog({
   const { backdrop, surface } = getDialogMotionProps(prefersReducedMotion)
 
   function handleConfirm() {
-    onConfirm()
-    onRequestOpenChange(false)
+    if (onConfirm() !== false) {
+      onRequestOpenChange(false)
+    }
   }
 
   return (
@@ -99,13 +102,15 @@ export function ConfirmDialog({
                 </div>
 
                 <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => onRequestOpenChange(false)}
-                  >
-                    {cancelLabel}
-                  </Button>
+                  {showCancel ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => onRequestOpenChange(false)}
+                    >
+                      {cancelLabel}
+                    </Button>
+                  ) : null}
 
                   <Button
                     type="button"

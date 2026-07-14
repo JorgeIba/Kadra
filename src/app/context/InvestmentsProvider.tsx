@@ -9,6 +9,7 @@ import {
   InvestmentsContext,
   type InvestmentsContextState,
 } from "@/app/context/investments-context"
+import { downloadPortfolioBackup } from "@/app/backup/download-portfolio-backup"
 import {
   loadInvestmentsFromStorage,
   saveInvestmentsToStorage,
@@ -55,19 +56,40 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     setInvestments([])
   }, [])
 
+  const exportPortfolioBackup = useCallback(() => {
+    downloadPortfolioBackup(investments)
+  }, [investments])
+
+  const restoreInvestments = useCallback(
+    (restoredInvestments: Investment[]) => {
+      if (!saveInvestmentsToStorage(restoredInvestments)) {
+        return false
+      }
+
+      setInvestments(restoredInvestments)
+
+      return true
+    },
+    [],
+  )
+
   const contextValue = useMemo<InvestmentsContextState>(() => {
     return {
       investments,
       addInvestment,
       deleteInvestment,
+      exportPortfolioBackup,
       resetLocalData,
+      restoreInvestments,
       updateInvestment,
     }
   }, [
     investments,
     addInvestment,
     deleteInvestment,
+    exportPortfolioBackup,
     resetLocalData,
+    restoreInvestments,
     updateInvestment,
   ])
 

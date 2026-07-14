@@ -5,7 +5,9 @@ export interface InvestmentsContextState {
   investments: Investment[]
   addInvestment: (investment: Investment) => void
   deleteInvestment: (investmentId: string) => void
+  exportPortfolioBackup: () => void
   resetLocalData: () => void
+  restoreInvestments: (investments: Investment[]) => boolean
   updateInvestment: (investment: Investment) => void
 }
 

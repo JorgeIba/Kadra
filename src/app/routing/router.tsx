@@ -56,9 +56,16 @@ export function AppRouter() {
 }
 
 function AppShellRoute() {
-  const { resetLocalData } = useInvestments()
+  const { exportPortfolioBackup, resetLocalData, restoreInvestments } =
+    useInvestments()
 
-  return <AppShell onResetLocalData={resetLocalData} />
+  return (
+    <AppShell
+      onExportBackup={exportPortfolioBackup}
+      onResetLocalData={resetLocalData}
+      onRestoreInvestments={restoreInvestments}
+    />
+  )
 }
 
 function AppRouteError() {

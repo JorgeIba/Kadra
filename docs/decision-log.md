@@ -4,6 +4,21 @@ This document captures dated decisions and planning restructures so `project-pla
 
 ## 2026-07-13
 
+### Local portfolio backups
+
+Decision:
+
+- Export complete investment histories to a versioned Kadra JSON file.
+- Restore validates the file before replacing the current local portfolio.
+- Keep the file local and exclude device-specific UI preferences from v1.
+
+Why:
+
+- iOS Home Screen web apps need reinstallation to reliably receive updated
+  install metadata such as their icon and launch image.
+- A user-controlled file makes that reinstall recoverable without weakening
+  Kadra's local-only, no-account product direction.
+
 ### Native Apple PWA launch images
 
 Decision:
