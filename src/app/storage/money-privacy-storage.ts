@@ -21,7 +21,11 @@ export function readMoneyPrivacyState(storage = getBrowserStorage()) {
       return false
     }
 
-    storage.setItem(MONEY_PRIVACY_STORAGE_KEY, legacyValue)
+    try {
+      storage.setItem(MONEY_PRIVACY_STORAGE_KEY, legacyValue)
+    } catch {
+      return legacyValue === "true"
+    }
 
     try {
       storage.removeItem(LEGACY_MONEY_PRIVACY_STORAGE_KEY)

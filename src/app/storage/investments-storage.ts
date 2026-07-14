@@ -39,7 +39,11 @@ export function loadInvestmentsFromStorage(
       return fallbackInvestments
     }
 
-    storage.setItem(INVESTMENTS_STORAGE_KEY, legacyRawInvestments)
+    try {
+      storage.setItem(INVESTMENTS_STORAGE_KEY, legacyRawInvestments)
+    } catch {
+      return parsedInvestments
+    }
 
     try {
       storage.removeItem(LEGACY_INVESTMENTS_STORAGE_KEY)

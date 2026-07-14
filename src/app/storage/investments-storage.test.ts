@@ -161,6 +161,23 @@ describe("investments storage", () => {
     expect(storage.getItem("trafin.investments.v1")).toBeNull()
   })
 
+  it("keeps legacy investments available when migration persistence fails", () => {
+    const legacyInvestments = JSON.stringify(storedInvestments)
+    const storage = {
+      getItem(key: string) {
+        return key === "trafin.investments.v1" ? legacyInvestments : null
+      },
+      removeItem: () => undefined,
+      setItem: () => {
+        throw new Error("storage quota exceeded")
+      },
+    }
+
+    expect(loadInvestmentsFromStorage(fallbackInvestments, storage)).toEqual(
+      storedInvestments,
+    )
+  })
+
   it("prefers Kadra investments when both storage namespaces exist", () => {
     const storage = createMemoryStorage({
       "kadra.investments.v1": JSON.stringify(storedInvestments),

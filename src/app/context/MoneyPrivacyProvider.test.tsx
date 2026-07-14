@@ -11,6 +11,20 @@ describe("MoneyPrivacyProvider", () => {
     expect(storage.getItem("kadra.moneyPrivacyHidden")).toBe("true")
     expect(storage.getItem("trafin.moneyPrivacyHidden")).toBeNull()
   })
+
+  it("keeps the legacy privacy preference when migration persistence fails", () => {
+    const storage = {
+      getItem(key: string) {
+        return key === "trafin.moneyPrivacyHidden" ? "true" : null
+      },
+      removeItem: () => undefined,
+      setItem: () => {
+        throw new Error("storage quota exceeded")
+      },
+    }
+
+    expect(readMoneyPrivacyState(storage)).toBe(true)
+  })
 })
 
 function createMemoryStorage(initialValues: Record<string, string> = {}) {
