@@ -12,7 +12,11 @@ import {
   compareCalendarDatesAscending,
   isCalendarDateString,
   toDateString,
+  REINVESTMENT_STRATEGIES,
+  REINVESTMENT_STRATEGY_OPTIONS,
+  REINVESTMENT_STRATEGY_LABELS,
   type Investment,
+  type ReinvestmentStrategy,
 } from "@/domain/investments"
 import {
   PROJECTION_GROUP_BY_LABELS,
@@ -52,6 +56,9 @@ export function ProjectionScreen({
   const [targetDate, setTargetDate] = useState(() => {
     return getDefaultProjectionTargetDate(asOfDate)
   })
+  const [strategy, setStrategy] = useState<ReinvestmentStrategy>(
+    REINVESTMENT_STRATEGIES.reinvest,
+  )
   const [groupByOption, setGroupByOption] = useState<ProjectionGroupByOption>(
     PROJECTION_GROUP_BY_OPTIONS.none,
   )
@@ -62,6 +69,7 @@ export function ProjectionScreen({
     investments,
     asOfDate,
     isTargetDateValid ? targetDate : today,
+    strategy,
   )
 
   const targetPoint = snapshot.points.at(-1)
@@ -139,6 +147,47 @@ export function ProjectionScreen({
                   Choose today or a future date.
                 </p>
               )}
+            </div>
+          </div>
+
+          <div className="border-t border-border/70 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reinvestment-strategy">
+                Reinvestment strategy
+              </Label>
+              <LabeledSelectControl
+                ariaLabel="Reinvestment strategy"
+                fallbackLabel="Select strategy"
+                label="Strategy"
+                options={REINVESTMENT_STRATEGY_OPTIONS}
+                value={strategy}
+                getOptionLabel={(option) =>
+                  REINVESTMENT_STRATEGY_LABELS[option]
+                }
+                onValueChange={(val) =>
+                  setStrategy(val as ReinvestmentStrategy)
+                }
+              />
+              {strategy === REINVESTMENT_STRATEGIES.keepAsCash &&
+                snapshot.maturedCash > 0 && (
+                  <div className="mt-2.5 rounded-md border border-border/70 bg-card/25 p-3 text-xs text-muted-foreground leading-relaxed">
+                    From your total projected value,{" "}
+                    <span className="font-ledger font-medium text-foreground">
+                      <MoneyAmount value={snapshot.maturedCash} />
+                    </span>{" "}
+                    will not be invested (held as cash).
+                  </div>
+                )}
+              {strategy === REINVESTMENT_STRATEGIES.strict &&
+                snapshot.excludedValue > 0 && (
+                  <div className="mt-2.5 rounded-md border border-border/70 bg-card/25 p-3 text-xs text-muted-foreground leading-relaxed">
+                    From your total projected value,{" "}
+                    <span className="font-ledger font-medium text-foreground">
+                      <MoneyAmount value={snapshot.excludedValue} />
+                    </span>{" "}
+                    has been excluded (matured fixed-term CDs).
+                  </div>
+                )}
             </div>
           </div>
         </section>

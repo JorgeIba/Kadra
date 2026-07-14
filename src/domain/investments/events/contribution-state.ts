@@ -2,6 +2,7 @@ import { compareCalendarDatesAscending } from "@/domain/investments/calculations
 import type {
   CalendarDateString,
   Investment,
+  InvestmentContributionEvent,
   InvestmentContributionState,
 } from "@/domain/investments/model/types"
 
@@ -26,5 +27,18 @@ export function getContributionStateAtDate(
       },
       0,
     ),
+  }
+}
+
+/**
+ * Returns a new investment copy with the specified contribution event appended to its history.
+ */
+export function addContributionEvent(
+  investment: Investment,
+  event: InvestmentContributionEvent,
+): Investment {
+  return {
+    ...investment,
+    contributionEvents: [...investment.contributionEvents, event],
   }
 }

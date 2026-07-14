@@ -37,6 +37,7 @@ This document holds future ideas and deferred work that are worth remembering, b
 - if route transitions ever make the top bar, bottom nav, or app shell flicker,
   investigate the root-level View Transition as a likely cause; the fix may be
   scoping the transition to the routed screen/outlet instead of `root`
+- for reinvested fixed-term CD projections, the reinvestment transitions to a single simulated `open-ended` period at maturity. For `at-maturity` payment frequencies, we fall back to daily compounding for simplicity. In the future, we could support exact interval-based rolling fixed terms to avoid this daily approximation.
 
 ## Notes
 

@@ -36,11 +36,13 @@ describe("projection view model", () => {
       investments,
       asOfDate,
       "2026-02-15",
+      "keep-as-cash",
     )
 
     expect(snapshot.activeInvestmentCount).toBe(1)
     expect(snapshot.finishedInvestmentCount).toBe(1)
     expect(snapshot.earningPace.daily).toBeLessThan(3)
+    expect(snapshot.maturedCash).toBeGreaterThan(0)
     expect(snapshot.breakdown[0]).toMatchObject({
       investmentId: fixedInvestment.id,
       type: INVESTMENT_TYPES.fixedTerm,
@@ -118,5 +120,16 @@ describe("projection view model", () => {
       "10mo",
       "Target",
     ])
+  })
+
+  it("propagates selected strategy to the snapshot", () => {
+    const snapshot = getPortfolioProjectionSnapshot(
+      investments,
+      asOfDate,
+      "2026-02-15",
+      "reinvest",
+    )
+    expect(snapshot.reinvestmentStrategy).toBe("reinvest")
+    expect(snapshot.activeInvestmentCount).toBe(2)
   })
 })

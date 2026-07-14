@@ -5,10 +5,12 @@ import {
   parseCalendarDate,
   projectPortfolioAtDate,
   toDateString,
+  REINVESTMENT_STRATEGIES,
   type CalendarDateString,
   type Investment,
   type InvestmentType,
   type PortfolioProjectionEarningPaceReadModel,
+  type ReinvestmentStrategy,
 } from "@/domain/investments"
 
 export interface PortfolioProjectionPoint {
@@ -39,6 +41,9 @@ export interface PortfolioProjectionSnapshot {
   earningPace: PortfolioProjectionEarningPaceReadModel
   points: PortfolioProjectionPoint[]
   breakdown: InvestmentProjectionBreakdownItem[]
+  reinvestmentStrategy: ReinvestmentStrategy
+  maturedCash: number
+  excludedValue: number
 }
 
 const PROJECTION_POINT_COUNT = 6
@@ -51,6 +56,7 @@ export function getPortfolioProjectionSnapshot(
   investments: Investment[],
   asOfDate = new Date(),
   targetDate: CalendarDateString = getDefaultProjectionTargetDate(asOfDate),
+  strategy: ReinvestmentStrategy = REINVESTMENT_STRATEGIES.reinvest,
 ): PortfolioProjectionSnapshot {
   const asOfDateString = toDateString(asOfDate)
   const resolvedTargetDate =
@@ -62,11 +68,13 @@ export function getPortfolioProjectionSnapshot(
     investments,
     asOfDate,
     asOfDate,
+    strategy,
   )
   const targetProjection = projectPortfolioAtDate(
     investments,
     targetDateObject,
     asOfDate,
+    strategy,
   )
 
   // Calculate the breakdown of projected earnings by investment
@@ -100,8 +108,16 @@ export function getPortfolioProjectionSnapshot(
     activeInvestmentCount: targetProjection.activeInvestmentCount,
     finishedInvestmentCount: targetProjection.finishedInvestmentCount,
     earningPace: targetProjection.earningPace,
-    points: getProjectionPoints(investments, asOfDate, resolvedTargetDate),
+    points: getProjectionPoints(
+      investments,
+      asOfDate,
+      resolvedTargetDate,
+      strategy,
+    ),
     breakdown,
+    reinvestmentStrategy: strategy,
+    maturedCash: targetProjection.totalExtraCash,
+    excludedValue: targetProjection.totalExcludedValue,
   }
 }
 
@@ -109,13 +125,16 @@ function getProjectionPoints(
   investments: Investment[],
   asOfDate: Date,
   targetDate: CalendarDateString,
+  strategy: ReinvestmentStrategy,
 ): PortfolioProjectionPoint[] {
   const startDate = toDateString(asOfDate)
   const totalDays = getDaysBetween(startDate, targetDate)
   const pointCount = Math.min(PROJECTION_POINT_COUNT, totalDays + 1)
 
   if (pointCount <= 1) {
-    return [getProjectionPoint(investments, asOfDate, asOfDate, "Today")]
+    return [
+      getProjectionPoint(investments, asOfDate, asOfDate, "Today", strategy),
+    ]
   }
 
   // Generate projection points evenly spaced between the asOfDate and the targetDate.
@@ -128,6 +147,7 @@ function getProjectionPoints(
       asOfDate,
       pointDate,
       getProjectionPointLabel(index, pointCount, dayOffset, totalDays),
+      strategy,
     )
   })
 }
@@ -137,11 +157,13 @@ function getProjectionPoint(
   asOfDate: Date,
   projectionDate: Date,
   label: string,
+  strategy: ReinvestmentStrategy,
 ): PortfolioProjectionPoint {
   const projection = projectPortfolioAtDate(
     investments,
     projectionDate,
     asOfDate,
+    strategy,
   )
 
   return {
