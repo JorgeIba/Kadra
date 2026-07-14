@@ -1,8 +1,8 @@
-# Trafin Session Init
+# Kadra Session Init
 
 ## Project Summary
 
-Trafin is a privacy-first PWA for tracking fixed-income investments.
+Kadra is a privacy-first PWA for tracking fixed-income investments.
 
 Primary target:
 
@@ -40,6 +40,7 @@ This project is both:
 The main living plan is:
 
 - [docs/project-plan.md](docs/project-plan.md)
+- [docs/brand/README.md](docs/brand/README.md) for the selected name and identity
 
 That file is the single source of truth for:
 

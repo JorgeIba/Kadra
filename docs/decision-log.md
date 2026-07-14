@@ -1,6 +1,48 @@
-# Trafin Decision Log
+# Kadra Decision Log
 
 This document captures dated decisions and planning restructures so `project-plan.md` can stay focused on the current story.
+
+## 2026-07-13
+
+### Native Apple PWA launch images
+
+Decision:
+
+- Use device-specific Apple startup images for the modern iPhone 14–17
+  viewport profiles, built from the centered Kadra lockup.
+- Do not add an app-owned splash screen or intentional delay after the app is
+  ready to render.
+
+Why:
+
+- The startup artwork gives installed iPhone and iPad PWAs a coherent native
+  launch surface without turning a fast application into a fake loading state.
+- The focused profile set preserves the intended dark field, mark, wordmark,
+  and layout across current iPhone orientations without carrying every legacy
+  iPhone and iPad asset.
+
+### Kadra identity selected
+
+Decision:
+
+- Use Kadra as the product name.
+- Use the Kadra Angle mark: a mint vertical ledger stem and a rising four-point
+  diagonal with a flat base.
+- Use Elms Sans Regular for the lowercase `kadra` wordmark.
+- Use the horizontal mark-left lockup as the primary lockup and the centered,
+  stacked lockup for launch screens.
+- Use `#060D0C` as the identity field and `#9BD8C2` as the mark color.
+- Keep this decision separate from the product UI type system: Georgia remains
+  for financial values and Geist remains for UI text.
+
+Why:
+
+- The mark is simple and recognizable at app-icon sizes without relying on
+  financial clichés.
+- Elms gives the identity a calm, modern, personal voice while preserving the
+  seriousness needed for a private investment tool.
+- Separating identity decisions from the runtime rollout prevents a half-renamed
+  PWA with mismatched icons, metadata, and typography.
 
 ## 2026-06-10
 

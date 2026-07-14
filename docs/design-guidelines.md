@@ -1,12 +1,12 @@
-# Trafin Design Guidelines
+# Kadra Design Guidelines
 
-This document defines the current visual direction for Trafin.
+This document defines the current visual direction for Kadra.
 
 It is intentionally short. The goal is to make design decisions easier and more consistent, not to create a large design system before the product needs one.
 
 ## Purpose
 
-Trafin is a privacy-first fixed-income tracking app.
+Kadra is a privacy-first fixed-income tracking app.
 
 The interface should feel:
 
@@ -48,8 +48,8 @@ Current direction:
 
 Dark theme should use:
 
-- deep charcoal or deep green-black backgrounds
-- restrained, muted emerald accents
+- Ledger Black `#0B1113` backgrounds
+- Mint Yield `#9BD8C2` accents, used sparingly
 - warm off-white text, not pure white everywhere
 - strong number contrast
 - quieter labels and support text
@@ -71,7 +71,7 @@ Baseline notes from the selected Stitch direction:
 
 ## Visual Personality
 
-Trafin should feel closer to:
+Kadra should feel closer to:
 
 - a private financial notebook
 - a focused portfolio tool
@@ -83,9 +83,32 @@ It should feel less like:
 - hyperactive investing software
 - default template UI
 
+## Brand Identity
+
+The selected brand specification lives in
+[brand/README.md](./brand/README.md). Its decisions are:
+
+- Kadra Angle mark for the app icon
+- `#060D0C` field with a `#9BD8C2` mark
+- lowercase `kadra` wordmark in Elms Sans Regular
+- mark-left horizontal lockup as the primary lockup
+- stacked lockup for launch screens
+
+The wordmark font is reserved for identity. Continue using Georgia for major
+financial values and Geist for product UI text.
+
 ## Color Strategy
 
 Use a restrained palette.
+
+The runtime palette in `src/index.css` is authoritative. These hex values make the core roles explicit for design work:
+
+- background: `#0B1113`
+- foreground: `#F4F1EA`
+- surface: `#101719`
+- muted foreground: `#8D98A3`
+- primary: `#9BD8C2`
+- border: `#182225`
 
 Default role expectations:
 

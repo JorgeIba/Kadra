@@ -147,9 +147,54 @@ describe("investments storage", () => {
     )
   })
 
+  it("migrates legacy investments into the Kadra storage namespace", () => {
+    const storage = createMemoryStorage({
+      "trafin.investments.v1": JSON.stringify(storedInvestments),
+    })
+
+    expect(loadInvestmentsFromStorage(fallbackInvestments, storage)).toEqual(
+      storedInvestments,
+    )
+    expect(storage.getItem("kadra.investments.v1")).toBe(
+      JSON.stringify(storedInvestments),
+    )
+    expect(storage.getItem("trafin.investments.v1")).toBeNull()
+  })
+
+  it("keeps legacy investments available when migration persistence fails", () => {
+    const legacyInvestments = JSON.stringify(storedInvestments)
+    const storage = {
+      getItem(key: string) {
+        return key === "trafin.investments.v1" ? legacyInvestments : null
+      },
+      removeItem: () => undefined,
+      setItem: () => {
+        throw new Error("storage quota exceeded")
+      },
+    }
+
+    expect(loadInvestmentsFromStorage(fallbackInvestments, storage)).toEqual(
+      storedInvestments,
+    )
+  })
+
+  it("prefers Kadra investments when both storage namespaces exist", () => {
+    const storage = createMemoryStorage({
+      "kadra.investments.v1": JSON.stringify(storedInvestments),
+      "trafin.investments.v1": JSON.stringify(fallbackInvestments),
+    })
+
+    expect(loadInvestmentsFromStorage(fallbackInvestments, storage)).toEqual(
+      storedInvestments,
+    )
+    expect(storage.getItem("trafin.investments.v1")).toBe(
+      JSON.stringify(fallbackInvestments),
+    )
+  })
+
   it("loads fallback investments when stored JSON is malformed", () => {
     const storage = createMemoryStorage({
-      "trafin.investments.v1": "{not-valid-json",
+      "kadra.investments.v1": "{not-valid-json",
     })
 
     expect(loadInvestmentsFromStorage(fallbackInvestments, storage)).toBe(
@@ -159,7 +204,7 @@ describe("investments storage", () => {
 
   it("loads fallback investments when stored investments are invalid", () => {
     const storage = createMemoryStorage({
-      "trafin.investments.v1": JSON.stringify([
+      "kadra.investments.v1": JSON.stringify([
         {
           ...storedInvestments[0],
           contributionEvents: [
@@ -198,6 +243,17 @@ describe("investments storage", () => {
     expect(loadInvestmentsFromStorage(fallbackInvestments, storage)).toBe(
       fallbackInvestments,
     )
+  })
+
+  it("clears current and legacy investment storage", () => {
+    const storage = createMemoryStorage({
+      "kadra.investments.v1": JSON.stringify(storedInvestments),
+      "trafin.investments.v1": JSON.stringify(fallbackInvestments),
+    })
+
+    expect(clearInvestmentsFromStorage(storage)).toBe(true)
+    expect(storage.getItem("kadra.investments.v1")).toBeNull()
+    expect(storage.getItem("trafin.investments.v1")).toBeNull()
   })
 
   it("reports failed clears without throwing", () => {

@@ -27,5 +27,5 @@ for proc_dir in /proc/[0-9]*; do
 done
 
 if [ "$stopped" -eq 0 ]; then
-  echo "No Trafin dev server process found."
+  echo "No Kadra dev server process found."
 fi

@@ -96,7 +96,7 @@ export function AppShell({ onResetLocalData }: AppShellProps) {
         <ConfirmDialog
           open={activeDialog === "reset"}
           title="Clear local data?"
-          description="This removes every investment from your local Trafin portfolio."
+          description="This removes every investment from your local Kadra portfolio."
           confirmLabel="Clear local data"
           variant="destructive"
           onRequestOpenChange={(open) => setActiveDialog(open ? "reset" : null)}
@@ -105,7 +105,7 @@ export function AppShell({ onResetLocalData }: AppShellProps) {
         <ConfirmDialog
           open={activeDialog === "update"}
           title="Update app?"
-          description="A new version of Trafin is ready. Updating will reload the app so the latest changes can take over."
+          description="A new version of Kadra is ready. Updating will reload the app so the latest changes can take over."
           confirmLabel="Update now"
           onRequestOpenChange={(open) =>
             setActiveDialog(open ? "update" : null)
