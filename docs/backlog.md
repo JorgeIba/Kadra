@@ -37,7 +37,7 @@ This document holds future ideas and deferred work that are worth remembering, b
 - if route transitions ever make the top bar, bottom nav, or app shell flicker,
   investigate the root-level View Transition as a likely cause; the fix may be
   scoping the transition to the routed screen/outlet instead of `root`
-- for reinvested fixed-term CD projections, the reinvestment transitions to a single simulated `open-ended` period at maturity. For `at-maturity` payment frequencies, we fall back to daily compounding for simplicity. In the future, we could support exact interval-based rolling fixed terms to avoid this daily approximation.
+- for reinvested fixed-term CD projections, retain the original lifecycle's payout behavior when creating the simulated renewal. In particular, a `to-cash` CD's earlier weekly or monthly payouts must remain cash; a projection must not rewrite that history as automatic reinvestment. Later, model a projection-only maturity transfer and explicit payout/cash handling so the renewal starts with exactly the proceeds available at maturity. For `at-maturity` payment frequencies, the current simulated renewal falls back to daily compounding; exact interval-based rolling fixed terms remain a future improvement.
 
 ## Notes
 

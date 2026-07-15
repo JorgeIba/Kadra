@@ -47,7 +47,7 @@ export function projectPortfolioAtDate(
   investments: Investment[],
   projectionDate: Date,
   baselineDate = new Date(),
-  strategy: ReinvestmentStrategy = REINVESTMENT_STRATEGIES.keepAsCash,
+  strategy: ReinvestmentStrategy = REINVESTMENT_STRATEGIES.reinvest,
 ): PortfolioProjectionReadModel {
   const baselineDateString = toDateString(baselineDate)
   const projectionDateString = toDateString(projectionDate)

@@ -1,6 +1,5 @@
 import {
   REINVESTMENT_STRATEGIES,
-  DERIVED_STATUSES,
   type ReinvestmentStrategy,
 } from "@/domain/investments/model/constants"
 import {
@@ -9,7 +8,6 @@ import {
 } from "@/domain/investments/calculations/investment-projections"
 import { toDateString } from "@/domain/investments/calculations/dates"
 import { getInvestmentEstimatedCurrentValueAtDate } from "@/domain/investments/calculations/investment-state"
-import { getDerivedStatus } from "@/domain/investments/events/lifecycle-periods"
 import type { Investment } from "@/domain/investments/model/types"
 
 /**
@@ -107,9 +105,12 @@ export const reinvestStrategy: ProjectionStrategyHandler = {
  * Matured fixed-term CDs are fully excluded. Their projected value drops to 0 at maturity.
  */
 export const strictStrategy: ProjectionStrategyHandler = {
-  project: (investment, _baselineDate, projectionDate) => {
-    const isFinished =
-      getDerivedStatus(investment, projectionDate) === DERIVED_STATUSES.finished
+  project: (investment, baselineDate, projectionDate) => {
+    const isMaturedInProjectionWindow = isFixedTermMaturingBetweenDates(
+      investment,
+      toDateString(baselineDate),
+      toDateString(projectionDate),
+    )
 
     const projectedValue = getInvestmentEstimatedCurrentValueAtDate(
       investment,
@@ -118,9 +119,9 @@ export const strictStrategy: ProjectionStrategyHandler = {
 
     return {
       projectedInvestment: investment,
-      projectedValue: isFinished ? 0 : projectedValue,
+      projectedValue: isMaturedInProjectionWindow ? 0 : projectedValue,
       cashGenerated: 0,
-      excludedValue: isFinished ? projectedValue : 0,
+      excludedValue: isMaturedInProjectionWindow ? projectedValue : 0,
     }
   },
 }
