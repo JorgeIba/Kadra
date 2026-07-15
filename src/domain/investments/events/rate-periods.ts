@@ -75,3 +75,16 @@ function getSortedRateEvents(investment: Investment): InvestmentRateEvent[] {
     return leftEvent.id.localeCompare(rightEvent.id)
   })
 }
+
+/**
+ * Returns a new investment copy with the specified rate event appended to its history.
+ */
+export function addRateEvent(
+  investment: Investment,
+  event: InvestmentRateEvent,
+): Investment {
+  return {
+    ...investment,
+    rateEvents: [...investment.rateEvents, event],
+  }
+}

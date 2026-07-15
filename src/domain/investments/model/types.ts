@@ -5,6 +5,7 @@ import type {
   InvestmentType,
   PaymentFrequency,
   ReinvestmentBehavior,
+  ReinvestmentStrategy,
 } from "@/domain/investments/model/constants"
 
 export type {
@@ -13,6 +14,7 @@ export type {
   InvestmentType,
   PaymentFrequency,
   ReinvestmentBehavior,
+  ReinvestmentStrategy,
 }
 
 /**

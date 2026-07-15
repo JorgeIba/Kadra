@@ -4,6 +4,8 @@ import {
   openEndedInvestment,
 } from "@/domain/investments/dev/investment-test-fixtures"
 import { projectPortfolioAtDate } from "@/domain/investments/read-models/portfolio-projections"
+import { INVESTMENT_TYPES } from "@/domain/investments/model/constants"
+import type { Investment } from "@/domain/investments/model/types"
 
 const baselineDate = new Date("2026-01-16T12:00:00.000Z")
 const investments = [fixedInvestment, openEndedInvestment]
@@ -31,6 +33,7 @@ describe("portfolio projections", () => {
       investments,
       new Date("2026-02-15T12:00:00.000Z"),
       baselineDate,
+      "keep-as-cash",
     )
 
     expect(projection.activeInvestmentCount).toBe(1)
@@ -41,5 +44,142 @@ describe("portfolio projections", () => {
       projectedEarnings: 150,
     })
     expect(projection.investments[1]?.projectedEarnings).toBeCloseTo(60.355101)
+  })
+
+  it("ensures baseline stability is unaffected by the strategy toggles", () => {
+    const projCash = projectPortfolioAtDate(
+      investments,
+      baselineDate,
+      baselineDate,
+      "keep-as-cash",
+    )
+    const projReinvest = projectPortfolioAtDate(
+      investments,
+      baselineDate,
+      baselineDate,
+      "reinvest",
+    )
+    const projStrict = projectPortfolioAtDate(
+      investments,
+      baselineDate,
+      baselineDate,
+      "strict",
+    )
+
+    expect(projCash.estimatedValue).toBe(projReinvest.estimatedValue)
+    expect(projCash.estimatedValue).toBe(projStrict.estimatedValue)
+    expect(projCash.projectedEarnings).toBe(0)
+    expect(projReinvest.projectedEarnings).toBe(0)
+    expect(projStrict.projectedEarnings).toBe(0)
+  })
+
+  it("defaults to the reinvestment strategy used by projection snapshots", () => {
+    const targetDate = new Date("2026-02-15T12:00:00.000Z")
+
+    expect(
+      projectPortfolioAtDate(investments, targetDate, baselineDate),
+    ).toMatchObject(
+      projectPortfolioAtDate(investments, targetDate, baselineDate, "reinvest"),
+    )
+  })
+
+  it("applies keep-as-cash strategy (retains value, drops active count and earning pace)", () => {
+    const projection = projectPortfolioAtDate(
+      investments,
+      new Date("2026-02-15T12:00:00.000Z"),
+      baselineDate,
+      "keep-as-cash",
+    )
+
+    // CD matures on 2026-01-31. It has matured by Feb 15.
+    // Value remains in portfolio as cash: active value (open ended) + cash (fixed matured value).
+    // Earning pace drops (CD is not active).
+    expect(projection.activeInvestmentCount).toBe(1)
+    expect(projection.finishedInvestmentCount).toBe(1)
+
+    // Total value = active open-ended + matured CD value ($36,650)
+    // Earning pace is only open-ended's daily return (~2)
+    expect(projection.earningPace.daily).toBeCloseTo(2.018079, 3)
+
+    // Check that individual breakdown values match the sum
+    const sumBreakdown = projection.investments.reduce(
+      (sum, inv) => sum + inv.projectedValue,
+      0,
+    )
+    expect(projection.estimatedValue).toBeCloseTo(sumBreakdown, 3)
+  })
+
+  it("applies reinvest strategy (value grows, active count remains high, earning pace remains high)", () => {
+    const projection = projectPortfolioAtDate(
+      investments,
+      new Date("2026-02-15T12:00:00.000Z"),
+      baselineDate,
+      "reinvest",
+    )
+
+    // CD is active due to reinvestment.
+    expect(projection.activeInvestmentCount).toBe(2)
+    expect(projection.finishedInvestmentCount).toBe(0)
+
+    // Earning pace is high (~12 daily return) because CD is still earning interest.
+    expect(projection.earningPace.daily).toBeCloseTo(12.018079, 3)
+
+    const sumBreakdown = projection.investments.reduce(
+      (sum, inv) => sum + inv.projectedValue,
+      0,
+    )
+    expect(projection.estimatedValue).toBeCloseTo(sumBreakdown, 3)
+  })
+
+  it("applies strict strategy (value drops, active count drops, individual projected value is 0)", () => {
+    const projection = projectPortfolioAtDate(
+      investments,
+      new Date("2026-02-15T12:00:00.000Z"),
+      baselineDate,
+      "strict",
+    )
+
+    // CD matured and is removed.
+    expect(projection.activeInvestmentCount).toBe(1)
+    expect(projection.finishedInvestmentCount).toBe(1)
+
+    // Earning pace drops
+    expect(projection.earningPace.daily).toBeCloseTo(2.018079, 3)
+
+    // CD projectedValue should be 0
+    const cdBreakdown = projection.investments.find(
+      (inv) => inv.investmentId === fixedInvestment.id,
+    )
+    expect(cdBreakdown?.projectedValue).toBe(0)
+
+    // Total value = only active open-ended (sum of breakdown match total value)
+    const sumBreakdown = projection.investments.reduce(
+      (sum, inv) => sum + inv.projectedValue,
+      0,
+    )
+    expect(projection.estimatedValue).toBeCloseTo(sumBreakdown, 3)
+  })
+
+  it("does not exclude CDs that matured before the projection baseline", () => {
+    const previouslyMaturedCd: Investment = {
+      ...fixedInvestment,
+      id: "previously-matured-cd",
+      lifecycleEvents: [
+        {
+          ...fixedInvestment.lifecycleEvents[0],
+          type: INVESTMENT_TYPES.fixedTerm,
+          maturityDate: "2026-01-10",
+        },
+      ],
+    }
+    const projection = projectPortfolioAtDate(
+      [previouslyMaturedCd],
+      new Date("2026-02-15T12:00:00.000Z"),
+      baselineDate,
+      "strict",
+    )
+
+    expect(projection.totalExcludedValue).toBe(0)
+    expect(projection.investments[0]?.projectedValue).toBeGreaterThan(0)
   })
 })

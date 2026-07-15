@@ -165,3 +165,16 @@ function getSortedLifecycleEvents(
     return leftEvent.id.localeCompare(rightEvent.id)
   })
 }
+
+/**
+ * Returns a new investment copy with the specified lifecycle event appended to its history.
+ */
+export function addLifecycleEvent(
+  investment: Investment,
+  event: InvestmentLifecycleEvent,
+): Investment {
+  return {
+    ...investment,
+    lifecycleEvents: [...investment.lifecycleEvents, event],
+  }
+}

@@ -64,6 +64,28 @@ export const REINVESTMENT_BEHAVIOR_LABELS = {
   [REINVESTMENT_BEHAVIORS.toCash]: "To cash",
 } as const satisfies Record<ReinvestmentBehavior, string>
 
+// Reinvestment strategy for projections
+export const REINVESTMENT_STRATEGIES = {
+  keepAsCash: "keep-as-cash",
+  reinvest: "reinvest",
+  strict: "strict",
+} as const
+
+export type ReinvestmentStrategy =
+  (typeof REINVESTMENT_STRATEGIES)[keyof typeof REINVESTMENT_STRATEGIES]
+
+export const REINVESTMENT_STRATEGY_OPTIONS = [
+  REINVESTMENT_STRATEGIES.keepAsCash,
+  REINVESTMENT_STRATEGIES.reinvest,
+  REINVESTMENT_STRATEGIES.strict,
+] as const satisfies ReadonlyArray<ReinvestmentStrategy>
+
+export const REINVESTMENT_STRATEGY_LABELS = {
+  [REINVESTMENT_STRATEGIES.keepAsCash]: "Hold as cash",
+  [REINVESTMENT_STRATEGIES.reinvest]: "Reinvest at current rate",
+  [REINVESTMENT_STRATEGIES.strict]: "Exclude at maturity",
+} as const satisfies Record<ReinvestmentStrategy, string>
+
 // Derived status
 export const DERIVED_STATUSES = {
   active: "active",
