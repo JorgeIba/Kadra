@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { ArrowUpDown, Building2, Filter } from "lucide-react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
@@ -74,12 +75,9 @@ export function AssetsScreen({
     sortOption,
   )
   const shownCountLabel = `${sortedInvestments.length} shown`
-  const listTransitionKey = [
-    filterOption,
-    sortOption,
-    groupByOption,
-    sortedInvestments.length,
-  ].join(":")
+  // Filtering and sorting keep the same surface so rows can move into place.
+  // Switching to grouped mode intentionally remounts the list as a new structure.
+  const listTransitionKey = groupByOption
 
   return (
     <section className="space-y-6">
@@ -193,14 +191,45 @@ function AssetsInvestmentList({
   }
 
   return (
+    <MotionInvestmentList
+      investments={investments}
+      onInvestmentSelect={onInvestmentSelect}
+    />
+  )
+}
+
+function MotionInvestmentList({
+  investments,
+  onInvestmentSelect,
+}: {
+  investments: ResolvedInvestment[]
+  onInvestmentSelect: (investmentId: string) => void
+}) {
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const transition = {
+    duration: prefersReducedMotion ? 0 : 0.22,
+    ease: [0.22, 1, 0.36, 1] as const,
+  }
+
+  return (
     <div className="divide-y divide-border/70 border-t border-border/70">
-      {investments.map((investment) => (
-        <InvestmentCard
-          key={investment.id}
-          investment={getResolvedInvestmentSummary(investment)}
-          onSelect={onInvestmentSelect}
-        />
-      ))}
+      <AnimatePresence initial={false} mode="popLayout">
+        {investments.map((investment) => (
+          <motion.div
+            key={investment.id}
+            layout="position"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
+            transition={transition}
+          >
+            <InvestmentCard
+              investment={getResolvedInvestmentSummary(investment)}
+              onSelect={onInvestmentSelect}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   )
 }

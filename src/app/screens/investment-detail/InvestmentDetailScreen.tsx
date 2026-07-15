@@ -9,6 +9,7 @@ import {
   WalletCards,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
@@ -31,6 +32,7 @@ interface InvestmentDetailScreenProps {
   onDelete: () => void
   onEdit: () => void
   onRecordChange: () => void
+  updateAcknowledgement?: "recorded-change" | "updated-terms"
 }
 
 export function InvestmentDetailScreen({
@@ -38,11 +40,19 @@ export function InvestmentDetailScreen({
   onDelete,
   onEdit,
   onRecordChange,
+  updateAcknowledgement,
 }: InvestmentDetailScreenProps) {
   const asOfDate = new Date()
   const resolvedInvestment = resolveInvestment(investment, asOfDate)
   const upcomingReturnMetrics = getUpcomingReturnMetrics(investment, asOfDate)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const updateMessage =
+    updateAcknowledgement === "recorded-change"
+      ? "Investment update recorded."
+      : updateAcknowledgement === "updated-terms"
+        ? "Investment terms updated."
+        : undefined
 
   return (
     <section className="space-y-7">
@@ -57,18 +67,37 @@ export function InvestmentDetailScreen({
       />
 
       <div className="space-y-6">
-        <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-5">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-              Estimated value
-            </p>
-            <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
-              <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
-            </p>
+        <div className="relative">
+          {updateMessage === undefined ? null : (
+            <motion.span
+              aria-hidden="true"
+              className="absolute -inset-x-3 -inset-y-2 rounded-lg bg-primary/10"
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: [0, 0.9, 0] }}
+              transition={{
+                duration: prefersReducedMotion ? 0 : 0.28,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            />
+          )}
+          <div className="relative flex items-start justify-between gap-4 border-b border-border/30 pb-5">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                Estimated value
+              </p>
+              <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
+                <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
+              </p>
+            </div>
+            <div className="grid size-10 place-items-center rounded-lg bg-secondary/50 text-primary">
+              <WalletCards className="size-5" aria-hidden="true" />
+            </div>
           </div>
-          <div className="grid size-10 place-items-center rounded-lg bg-secondary/50 text-primary">
-            <WalletCards className="size-5" aria-hidden="true" />
-          </div>
+          {updateMessage === undefined ? null : (
+            <p className="sr-only" role="status">
+              {updateMessage}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4 border-b border-border/30 pb-5">

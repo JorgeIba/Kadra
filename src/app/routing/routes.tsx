@@ -185,6 +185,11 @@ export function InvestmentDetailRoute() {
   const location = useLocation()
   const { investmentId } = useParams()
   const activeNavSection = getActiveNavSectionFromLocation(location)
+  const updateAcknowledgement = (
+    location.state as {
+      updateAcknowledgement?: "recorded-change" | "updated-terms"
+    } | null
+  )?.updateAcknowledgement
   const investment = investments.find((currentInvestment) => {
     return currentInvestment.id === investmentId
   })
@@ -218,12 +223,14 @@ export function InvestmentDetailRoute() {
       onDelete={handleDelete}
       onEdit={handleEdit}
       onRecordChange={handleRecordChange}
+      updateAcknowledgement={updateAcknowledgement}
     />
   )
 }
 
 export function EditInvestmentRoute() {
   const { investments, updateInvestment } = useInvestments()
+  const navigate = useNavigate()
   const navigateBackOrFallback = useBackOrFallbackNavigation()
   const location = useLocation()
   const { investmentId } = useParams()
@@ -240,8 +247,9 @@ export function EditInvestmentRoute() {
 
   function handleInvestmentUpdate(updatedInvestment: Investment) {
     updateInvestment(updatedInvestment)
-    navigateBackOrFallback(getInvestmentDetailPath(updatedInvestment.id), {
-      state: { activeNavSection },
+    navigate(getInvestmentDetailPath(updatedInvestment.id), {
+      replace: true,
+      state: { activeNavSection, updateAcknowledgement: "updated-terms" },
     })
   }
 
@@ -263,6 +271,7 @@ export function EditInvestmentRoute() {
 
 export function RecordChangeRoute() {
   const { investments, updateInvestment } = useInvestments()
+  const navigate = useNavigate()
   const navigateBackOrFallback = useBackOrFallbackNavigation()
   const location = useLocation()
   const { investmentId } = useParams()
@@ -279,8 +288,9 @@ export function RecordChangeRoute() {
 
   function handleInvestmentUpdate(updatedInvestment: Investment) {
     updateInvestment(updatedInvestment)
-    navigateBackOrFallback(getInvestmentDetailPath(updatedInvestment.id), {
-      state: { activeNavSection },
+    navigate(getInvestmentDetailPath(updatedInvestment.id), {
+      replace: true,
+      state: { activeNavSection, updateAcknowledgement: "recorded-change" },
     })
   }
 

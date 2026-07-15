@@ -1,10 +1,7 @@
 import { useState } from "react"
-import { useId, useRef } from "react"
 import {
   Building2,
   CalendarDays,
-  Check,
-  ChevronDown,
   MinusCircle,
   RefreshCw,
   Wallet,
@@ -12,6 +9,7 @@ import {
 } from "lucide-react"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
+import { ExpandingChoicePicker } from "@/app/components/ExpandingChoicePicker"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
@@ -43,7 +41,6 @@ import { getInvestmentTypeGroup } from "@/app/shared/investment-type-grouping"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
-import { cn } from "@/lib/utils"
 
 interface ProjectionScreenProps {
   investments: Investment[]
@@ -57,38 +54,31 @@ const PROJECTION_TRUST_NOTES = [
 ]
 
 const PROJECTION_STRATEGY_OPTIONS: ReadonlyArray<{
+  description: string
   label: string
-  outcome: string
-  screenReaderDescription: string
   summary: string
   icon: LucideIcon
   value: ReinvestmentStrategy
 }> = [
   {
-    value: REINVESTMENT_STRATEGIES.keepAsCash,
-    label: "Cash",
-    summary: "Hold as cash",
-    outcome: "Stops earning",
-    screenReaderDescription:
-      "Keep the matured balance in your total, but stop earning.",
-    icon: Wallet,
-  },
-  {
     value: REINVESTMENT_STRATEGIES.reinvest,
     label: "Reinvest",
     summary: "Reinvest at current rate",
-    outcome: "Keeps earning",
-    screenReaderDescription:
-      "Illustrative scenario. Let the matured balance keep earning at its current rate.",
+    description: "Keeps earning",
     icon: RefreshCw,
+  },
+  {
+    value: REINVESTMENT_STRATEGIES.keepAsCash,
+    label: "Cash",
+    summary: "Hold as cash",
+    description: "Stops earning",
+    icon: Wallet,
   },
   {
     value: REINVESTMENT_STRATEGIES.strict,
     label: "Exclude",
     summary: "Exclude at maturity",
-    outcome: "Not included",
-    screenReaderDescription:
-      "Conservative scenario. Leave matured fixed-term value out of the projected total.",
+    description: "Not included",
     icon: MinusCircle,
   },
 ]
@@ -105,6 +95,8 @@ export function ProjectionScreen({
   const [strategy, setStrategy] = useState<ReinvestmentStrategy>(
     REINVESTMENT_STRATEGIES.reinvest,
   )
+  const [outcomeStrategy, setOutcomeStrategy] =
+    useState<ReinvestmentStrategy>(strategy)
   const [groupByOption, setGroupByOption] = useState<ProjectionGroupByOption>(
     PROJECTION_GROUP_BY_OPTIONS.none,
   )
@@ -205,14 +197,19 @@ export function ProjectionScreen({
                 <h2 className="text-sm font-medium text-foreground">
                   Maturity scenario
                 </h2>
-                <ProjectionStrategyPicker
+                <ExpandingChoicePicker
+                  ariaLabel="Maturity scenario"
+                  legend="Choose a maturity scenario"
+                  name="projection-maturity-scenario"
                   value={strategy}
                   onValueChange={setStrategy}
+                  onValueSettled={setOutcomeStrategy}
+                  options={PROJECTION_STRATEGY_OPTIONS}
                 />
                 <ProjectionStrategyOutcome
                   excludedValue={snapshot.excludedValue}
                   maturedCash={snapshot.maturedCash}
-                  strategy={strategy}
+                  strategy={outcomeStrategy}
                 />
               </div>
             </div>
@@ -286,154 +283,6 @@ export function ProjectionScreen({
         </section>
       </div>
     </section>
-  )
-}
-
-interface ProjectionStrategyPickerProps {
-  onValueChange: (value: ReinvestmentStrategy) => void
-  value: ReinvestmentStrategy
-}
-
-function ProjectionStrategyPicker({
-  onValueChange,
-  value,
-}: ProjectionStrategyPickerProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const optionsId = useId()
-  const selectedOption = PROJECTION_STRATEGY_OPTIONS.find((option) => {
-    return option.value === value
-  })
-
-  return (
-    <div className="space-y-3">
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-controls={optionsId}
-        aria-expanded={isOpen}
-        aria-label={`Maturity scenario: ${selectedOption?.summary ?? "Select a scenario"}`}
-        className={cn(
-          "flex h-11 w-full items-center justify-between gap-4 rounded-lg border px-3 text-left outline-none transition-[transform,background-color,border-color,box-shadow] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-primary/25 hover:bg-muted/35 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px active:scale-[0.995] motion-reduce:transform-none motion-reduce:transition-none",
-          isOpen
-            ? "border-primary/45 bg-accent/35"
-            : "border-border/75 bg-background/25",
-        )}
-        onClick={() => setIsOpen((wasOpen) => !wasOpen)}
-      >
-        <span className="min-w-0 truncate text-sm font-medium text-foreground">
-          {selectedOption?.summary}
-        </span>
-        <ChevronDown
-          className={cn(
-            "size-4 shrink-0 text-muted-foreground transition-transform duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-            isOpen && "rotate-180 text-primary",
-          )}
-          aria-hidden="true"
-        />
-      </button>
-
-      <div
-        id={optionsId}
-        aria-hidden={!isOpen}
-        inert={!isOpen}
-        className={cn(
-          "grid transition-[grid-template-rows] duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-        )}
-      >
-        <ProjectionStrategyOptionsRow
-          isOpen={isOpen}
-          value={value}
-          onValueChange={(nextStrategy) => {
-            onValueChange(nextStrategy)
-            setIsOpen(false)
-            requestAnimationFrame(() => triggerRef.current?.focus())
-          }}
-        />
-      </div>
-
-      <p className="sr-only" role="status" aria-atomic="true">
-        Projection updated: {selectedOption?.summary}.
-      </p>
-    </div>
-  )
-}
-
-interface ProjectionStrategyOptionsRowProps {
-  isOpen: boolean
-  onValueChange: (value: ReinvestmentStrategy) => void
-  value: ReinvestmentStrategy
-}
-
-function ProjectionStrategyOptionsRow({
-  isOpen,
-  onValueChange,
-  value,
-}: ProjectionStrategyOptionsRowProps) {
-  return (
-    <fieldset className="min-h-0 overflow-hidden">
-      <legend className="sr-only">Choose a maturity scenario</legend>
-      <div className="grid grid-cols-3 gap-2 pt-3">
-        {PROJECTION_STRATEGY_OPTIONS.map((option, index) => {
-          const Icon = option.icon
-          const isSelected = option.value === value
-
-          return (
-            <label
-              key={option.value}
-              className={cn(
-                "flex min-h-26 cursor-pointer flex-col justify-between rounded-lg border p-3 transition-[transform,opacity,background-color,border-color,box-shadow] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none",
-                isOpen
-                  ? "translate-y-0 opacity-100"
-                  : "pointer-events-none translate-y-1 opacity-0",
-                isSelected
-                  ? "border-primary/60 bg-accent/50 text-foreground"
-                  : "border-border/75 bg-background/35 text-muted-foreground hover:border-primary/30 hover:bg-muted/40",
-              )}
-              style={{
-                transitionDelay: isOpen ? `${index * 28}ms` : "0ms",
-              }}
-            >
-              <input
-                checked={isSelected}
-                className="sr-only"
-                name="projection-maturity-scenario"
-                tabIndex={isOpen ? 0 : -1}
-                type="radio"
-                value={option.value}
-                aria-label={`${option.label}: ${option.screenReaderDescription}`}
-                onChange={() => onValueChange(option.value)}
-              />
-              <span className="flex items-center justify-between gap-2">
-                <Icon
-                  className={cn(
-                    "size-4",
-                    isSelected ? "text-primary" : "text-muted-foreground",
-                  )}
-                  aria-hidden="true"
-                />
-                <Check
-                  className={cn(
-                    "size-4 transition-opacity duration-180 motion-reduce:transition-none",
-                    isSelected ? "opacity-100 text-primary" : "opacity-0",
-                  )}
-                  aria-hidden="true"
-                />
-              </span>
-              <span className="space-y-1">
-                <span className="block text-sm font-medium text-foreground">
-                  {option.label}
-                </span>
-                <span className="block text-sm leading-5 text-muted-foreground">
-                  {option.outcome}
-                </span>
-              </span>
-            </label>
-          )
-        })}
-      </div>
-    </fieldset>
   )
 }
 
