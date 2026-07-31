@@ -1,15 +1,7 @@
 import { useState } from "react"
-import {
-  Building2,
-  CalendarDays,
-  MinusCircle,
-  RefreshCw,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react"
+import { Building2, CalendarDays } from "lucide-react"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
-import { ExpandingChoicePicker } from "@/app/components/ExpandingChoicePicker"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
@@ -35,6 +27,7 @@ import {
   getPortfolioProjectionSnapshot,
   type InvestmentProjectionBreakdownItem,
 } from "@/app/screens/projection/projection-view-model"
+import { MaturityScenarioControl } from "@/app/screens/projection/MaturityScenarioControl"
 import { createGroups, type GroupIdentity } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 import { getInvestmentTypeGroup } from "@/app/shared/investment-type-grouping"
@@ -53,36 +46,6 @@ const PROJECTION_TRUST_NOTES = [
   "Applies the selected strategy when fixed-term investments mature.",
 ]
 
-const PROJECTION_STRATEGY_OPTIONS: ReadonlyArray<{
-  description: string
-  label: string
-  summary: string
-  icon: LucideIcon
-  value: ReinvestmentStrategy
-}> = [
-  {
-    value: REINVESTMENT_STRATEGIES.reinvest,
-    label: "Reinvest",
-    summary: "Reinvest at current rate",
-    description: "Keeps earning",
-    icon: RefreshCw,
-  },
-  {
-    value: REINVESTMENT_STRATEGIES.keepAsCash,
-    label: "Cash",
-    summary: "Hold as cash",
-    description: "Stops earning",
-    icon: Wallet,
-  },
-  {
-    value: REINVESTMENT_STRATEGIES.strict,
-    label: "Exclude",
-    summary: "Exclude at maturity",
-    description: "Not included",
-    icon: MinusCircle,
-  },
-]
-
 export function ProjectionScreen({
   investments,
   onInvestmentSelect,
@@ -95,8 +58,6 @@ export function ProjectionScreen({
   const [strategy, setStrategy] = useState<ReinvestmentStrategy>(
     REINVESTMENT_STRATEGIES.reinvest,
   )
-  const [outcomeStrategy, setOutcomeStrategy] =
-    useState<ReinvestmentStrategy>(strategy)
   const [groupByOption, setGroupByOption] = useState<ProjectionGroupByOption>(
     PROJECTION_GROUP_BY_OPTIONS.none,
   )
@@ -192,27 +153,12 @@ export function ProjectionScreen({
           </div>
 
           {snapshot.hasMaturityScenario ? (
-            <div className="border-t border-border/70 py-4">
-              <div className="space-y-3">
-                <h2 className="text-sm font-medium text-foreground">
-                  Maturity scenario
-                </h2>
-                <ExpandingChoicePicker
-                  ariaLabel="Maturity scenario"
-                  legend="Choose a maturity scenario"
-                  name="projection-maturity-scenario"
-                  value={strategy}
-                  onValueChange={setStrategy}
-                  onValueSettled={setOutcomeStrategy}
-                  options={PROJECTION_STRATEGY_OPTIONS}
-                />
-                <ProjectionStrategyOutcome
-                  excludedValue={snapshot.excludedValue}
-                  maturedCash={snapshot.maturedCash}
-                  strategy={outcomeStrategy}
-                />
-              </div>
-            </div>
+            <MaturityScenarioControl
+              excludedValue={snapshot.excludedValue}
+              maturedCash={snapshot.maturedCash}
+              strategy={strategy}
+              onStrategyCommit={setStrategy}
+            />
           ) : null}
         </section>
 
@@ -283,60 +229,6 @@ export function ProjectionScreen({
         </section>
       </div>
     </section>
-  )
-}
-
-function ProjectionStrategyOutcome({
-  excludedValue,
-  maturedCash,
-  strategy,
-}: {
-  excludedValue: number
-  maturedCash: number
-  strategy: ReinvestmentStrategy
-}) {
-  const isCashOutcome =
-    strategy === REINVESTMENT_STRATEGIES.keepAsCash && maturedCash > 0
-  const isStrictOutcome =
-    strategy === REINVESTMENT_STRATEGIES.strict && excludedValue > 0
-  const shouldShowOutcome = isCashOutcome || isStrictOutcome
-
-  const value = isCashOutcome ? maturedCash : excludedValue
-  const label = isCashOutcome
-    ? "Held as cash at target"
-    : "Excluded at maturity"
-  const description = isCashOutcome
-    ? "Included in the projected value, but no longer earning."
-    : "Not included in the projected value."
-
-  return (
-    <div
-      aria-hidden={!shouldShowOutcome}
-      aria-live={shouldShowOutcome ? "polite" : undefined}
-      className={`grid transition-[grid-template-rows] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-        shouldShowOutcome ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-      }`}
-    >
-      <div className="min-h-0 overflow-hidden">
-        <div
-          className={`flex items-start justify-between gap-4 border-t border-warning-border/65 pt-4 transition-[opacity,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-            shouldShowOutcome
-              ? "translate-y-0 opacity-100"
-              : "-translate-y-1 opacity-0"
-          }`}
-        >
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">{label}</p>
-            <p className="text-sm leading-5 text-muted-foreground">
-              {description}
-            </p>
-          </div>
-          <p className="shrink-0 font-ledger text-xl leading-none text-warning tabular-nums">
-            <MoneyAmount value={value} />
-          </p>
-        </div>
-      </div>
-    </div>
   )
 }
 

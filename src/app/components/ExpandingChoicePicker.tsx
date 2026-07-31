@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Check, ChevronDown, type LucideIcon } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils"
@@ -14,27 +14,63 @@ export interface ExpandingChoicePickerOption<T extends string> {
 interface ExpandingChoicePickerProps<T extends string> {
   ariaLabel: string
   legend: string
-  name: string
-  onValueChange: (value: T) => void
-  onValueSettled?: (value: T) => void
+  isOpeningAuthorized?: boolean
+  onCloseComplete?: () => void
+  onOpenRequest?: () => void
+  onValueCommit: (value: T) => void
   options: readonly ExpandingChoicePickerOption<T>[]
   value: T
 }
 
+/**
+ * Keeps a provisional choice inside the picker until its closing animation
+ * finishes. Resting and opening states cannot accidentally carry one.
+ */
+type PickerInteractionState<T extends string> =
+  | { phase: "collapsed"; valueToCommit: null }
+  | { phase: "open-requested"; valueToCommit: null }
+  | { phase: "closing"; valueToCommit: T | null }
+
 export function ExpandingChoicePicker<T extends string>({
   ariaLabel,
   legend,
-  name,
-  onValueChange,
-  onValueSettled,
+  isOpeningAuthorized = true,
+  onCloseComplete,
+  onOpenRequest,
+  onValueCommit,
   options,
   value,
 }: ExpandingChoicePickerProps<T>) {
-  const [isOpen, setIsOpen] = useState(false)
-  const pendingValueRef = useRef<T | null>(null)
+  const radioGroupName = useId()
+  const [interaction, setInteraction] = useState<PickerInteractionState<T>>({
+    phase: "collapsed",
+    valueToCommit: null,
+  })
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const selectedRadioRef = useRef<HTMLInputElement>(null)
   const prefersReducedMotion = useReducedMotion() ?? false
-  const selectedOption = options.find((option) => option.value === value)
+
+  // User intent and parent authorization are separate so a sibling can finish
+  // exiting while the picker remains visibly collapsed.
+  const isOpen = interaction.phase === "open-requested" && isOpeningAuthorized
+  const isWaitingForOpeningAuthorization =
+    interaction.phase === "open-requested" && !isOpeningAuthorized
+  const isBusy =
+    isWaitingForOpeningAuthorization || interaction.phase === "closing"
+
+  // Focus the selected radio when the picker opens.
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    selectedRadioRef.current?.focus({ preventScroll: true })
+  }, [isOpen])
+
+  const displayedValue = interaction.valueToCommit ?? value
+  const selectedOption = options.find(
+    (option) => option.value === displayedValue,
+  )
 
   if (selectedOption === undefined) {
     return null
@@ -42,14 +78,38 @@ export function ExpandingChoicePicker<T extends string>({
 
   const visibleOptions = isOpen ? options : [selectedOption]
 
-  function handleValueChange(nextValue: T) {
-    pendingValueRef.current = nextValue
-    onValueChange(nextValue)
-    setIsOpen(false)
+  function requestOpen() {
+    if (interaction.phase !== "collapsed") {
+      return
+    }
+
+    // The parent may authorize immediately or wait for a prerequisite animation.
+    setInteraction({ phase: "open-requested", valueToCommit: null })
+    onOpenRequest?.()
   }
 
-  function closePicker() {
-    setIsOpen(false)
+  function chooseOptionAndStartClosing(chosenValue: T) {
+    setInteraction({
+      phase: "closing",
+      valueToCommit: chosenValue === value ? null : chosenValue,
+    })
+  }
+
+  // The picker container owns layout completion so semantic settlement does not
+  // depend on any individual option card's Motion lifecycle.
+  function finishCloseAfterLayoutAnimation() {
+    if (interaction.phase !== "closing") {
+      return
+    }
+
+    const { valueToCommit } = interaction
+    setInteraction({ phase: "collapsed", valueToCommit: null })
+
+    if (valueToCommit !== null) {
+      onValueCommit(valueToCommit)
+    }
+
+    onCloseComplete?.()
     requestAnimationFrame(() =>
       triggerRef.current?.focus({ preventScroll: true }),
     )
@@ -70,11 +130,12 @@ export function ExpandingChoicePicker<T extends string>({
             ? { duration: 0 }
             : { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
         }}
+        onLayoutAnimationComplete={finishCloseAfterLayoutAnimation}
       >
         <AnimatePresence initial={false} mode="popLayout">
           {visibleOptions.map((option) => {
             const Icon = option.icon
-            const isSelected = option.value === value
+            const isSelected = option.value === displayedValue
 
             return (
               <motion.div
@@ -107,16 +168,6 @@ export function ExpandingChoicePicker<T extends string>({
                     ? { duration: 0 }
                     : { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
                 }}
-                onLayoutAnimationComplete={() => {
-                  if (!isOpen && pendingValueRef.current === option.value) {
-                    const settledValue = pendingValueRef.current
-                    pendingValueRef.current = null
-                    onValueSettled?.(settledValue)
-                    requestAnimationFrame(() =>
-                      triggerRef.current?.focus({ preventScroll: true }),
-                    )
-                  }
-                }}
               >
                 {isOpen ? (
                   <label
@@ -124,18 +175,19 @@ export function ExpandingChoicePicker<T extends string>({
                     onClick={(event) => {
                       if (isSelected) {
                         event.preventDefault()
-                        closePicker()
+                        chooseOptionAndStartClosing(option.value)
                       }
                     }}
                   >
                     <input
+                      ref={isSelected ? selectedRadioRef : undefined}
                       checked={isSelected}
                       className="sr-only"
-                      name={name}
+                      name={radioGroupName}
                       type="radio"
                       value={option.value}
                       aria-label={`${option.label}: ${option.description}`}
-                      onChange={() => handleValueChange(option.value)}
+                      onChange={() => chooseOptionAndStartClosing(option.value)}
                     />
                     <span className="flex items-center justify-between gap-2">
                       <Icon
@@ -167,9 +219,11 @@ export function ExpandingChoicePicker<T extends string>({
                     ref={triggerRef}
                     type="button"
                     aria-expanded={isOpen}
+                    aria-busy={isBusy}
                     aria-label={`${ariaLabel}: ${selectedOption.summary}`}
+                    disabled={interaction.phase !== "collapsed"}
                     className="flex h-full w-full items-center gap-3 px-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                    onClick={() => setIsOpen(true)}
+                    onClick={requestOpen}
                   >
                     <Icon
                       className="size-4 shrink-0 text-primary"
@@ -191,7 +245,9 @@ export function ExpandingChoicePicker<T extends string>({
       </motion.div>
 
       <p className="sr-only" role="status" aria-atomic="true">
-        {ariaLabel} updated: {selectedOption.summary}.
+        {isBusy
+          ? `${ariaLabel} is updating.`
+          : `${ariaLabel} updated: ${selectedOption.summary}.`}
       </p>
     </fieldset>
   )
