@@ -145,7 +145,7 @@ function ProjectionStrategyOutcome({
     // Animate the real flow height so the Value path reflows with the outcome
     // instead of snapping while a transform-only layout animation is running.
     <motion.div
-      aria-live="polite"
+      aria-live={shouldShowOutcome ? "polite" : undefined}
       aria-atomic="true"
       animate={{ height: shouldShowOutcome ? "auto" : 0 }}
       className="overflow-hidden"

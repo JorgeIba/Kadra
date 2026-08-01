@@ -220,8 +220,8 @@ export function ExpandingChoicePicker<T extends string>({
                     type="button"
                     aria-expanded={isOpen}
                     aria-busy={isBusy}
+                    aria-disabled={interaction.phase !== "collapsed"}
                     aria-label={`${ariaLabel}: ${selectedOption.summary}`}
-                    disabled={interaction.phase !== "collapsed"}
                     className="flex h-full w-full items-center gap-3 px-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                     onClick={requestOpen}
                   >
