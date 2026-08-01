@@ -1,4 +1,4 @@
-import { Fragment, useMemo, type ReactNode } from "react"
+import { Fragment, type ReactNode } from "react"
 import {
   DERIVED_STATUSES,
   getActiveInvestmentCount,
@@ -49,7 +49,7 @@ export function DashboardScreen({
   onOpenProjection,
   onInvestmentSelect,
 }: DashboardScreenProps) {
-  const asOfDate = useMemo(() => new Date(), [])
+  const asOfDate = new Date()
   const resolvedInvestments = investments.map((investment) =>
     resolveInvestment(investment, asOfDate),
   )
@@ -64,10 +64,7 @@ export function DashboardScreen({
     asOfDate,
   )
   const portfolioBreakdown = getPortfolioBreakdown(resolvedInvestments)
-  const projectionPoints = useMemo(
-    () => getPortfolioProjectionPoints(investments, asOfDate),
-    [asOfDate, investments],
-  )
+  const projectionPoints = getPortfolioProjectionPoints(investments, asOfDate)
   const projectionEarningPace = getPortfolioProjectionEarningPace(
     investments,
     asOfDate,
