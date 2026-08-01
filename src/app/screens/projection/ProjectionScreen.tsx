@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Building2, CalendarDays } from "lucide-react"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
@@ -50,7 +50,7 @@ export function ProjectionScreen({
   investments,
   onInvestmentSelect,
 }: ProjectionScreenProps) {
-  const asOfDate = new Date()
+  const asOfDate = useMemo(() => new Date(), [])
   const today = toDateString(asOfDate)
   const [targetDate, setTargetDate] = useState(() => {
     return getDefaultProjectionTargetDate(asOfDate)
@@ -64,11 +64,15 @@ export function ProjectionScreen({
   const isTargetDateValid =
     isCalendarDateString(targetDate) &&
     compareCalendarDatesAscending(targetDate, today) >= 0
-  const snapshot = getPortfolioProjectionSnapshot(
-    investments,
-    asOfDate,
-    isTargetDateValid ? targetDate : today,
-    strategy,
+  const snapshot = useMemo(
+    () =>
+      getPortfolioProjectionSnapshot(
+        investments,
+        asOfDate,
+        isTargetDateValid ? targetDate : today,
+        strategy,
+      ),
+    [asOfDate, investments, isTargetDateValid, strategy, targetDate, today],
   )
 
   const targetPoint = snapshot.points.at(-1)

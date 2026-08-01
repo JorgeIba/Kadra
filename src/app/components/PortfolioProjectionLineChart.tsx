@@ -2,11 +2,13 @@ import { useReducedMotion } from "motion/react"
 import {
   CartesianGrid,
   Line,
+  LineDrawShape,
   LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
+  type LineDrawShapeProps,
 } from "recharts"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
@@ -31,6 +33,21 @@ interface ProjectionTooltipProps {
   payload?: Array<{ payload?: PortfolioProjectionLineChartPoint }>
 }
 
+/**
+ * POP navigation should render the first line immediately, but later data
+ * revisions should still use Recharts' normal point interpolation. Recharts
+ * exposes that distinction through `isEntrance`; removing only the entrance
+ * stroke reveal keeps the data-update animation intact.
+ */
+function StaticPopEntryLineShape(props: LineDrawShapeProps) {
+  return (
+    <LineDrawShape
+      {...props}
+      visibleLength={props.isEntrance ? null : props.visibleLength}
+    />
+  )
+}
+
 export function PortfolioProjectionLineChart({
   className,
   points,
@@ -38,7 +55,7 @@ export function PortfolioProjectionLineChart({
   const prefersReducedMotion = useReducedMotion() ?? false
   const shouldAnimateRouteEntry = useShouldAnimateRouteEntry()
   const { isMoneyHidden } = useMoneyPrivacy()
-  const shouldAnimateChart = !prefersReducedMotion && shouldAnimateRouteEntry
+  const shouldAnimateChart = !prefersReducedMotion
 
   return (
     <div className={cn("h-56", className)}>
@@ -75,6 +92,9 @@ export function PortfolioProjectionLineChart({
             isAnimationActive={shouldAnimateChart}
             animationDuration={360}
             animationEasing="ease-out"
+            shape={
+              shouldAnimateRouteEntry ? undefined : StaticPopEntryLineShape
+            }
             stroke="var(--primary)"
             strokeWidth={2}
             dot={{ fill: "var(--primary)", r: 2 }}
