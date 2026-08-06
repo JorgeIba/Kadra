@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useReducer } from "react"
 import { MinusCircle, RefreshCw, Wallet } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
@@ -25,15 +25,16 @@ interface MaturityScenarioOutcome {
   value: number
 }
 
-type MaturityScenarioPhase =
-  | "settled"
-  | "hiding-outcome-before-picker"
-  | "picker-active"
+const OUTCOME_CONTAINER_REFLOW_TRANSITION = {
+  bounce: 0.04,
+  duration: 0.35,
+  type: "spring",
+} as const
 
-const OUTCOME_TRANSITION = {
-  duration: 0.18,
-  ease: [0.22, 1, 0.36, 1],
-  type: "tween",
+const OUTCOME_CONTENT_ENTER_EXIT_TRANSITION = {
+  bounce: 0.02,
+  duration: 0.24,
+  type: "spring",
 } as const
 
 const MATURITY_SCENARIO_OPTIONS = [
@@ -60,47 +61,101 @@ const MATURITY_SCENARIO_OPTIONS = [
   },
 ] satisfies readonly ExpandingChoicePickerOption<ReinvestmentStrategy>[]
 
+type MaturityScenarioPhase =
+  | "settled"
+  | "outcome-exiting"
+  | "picker-interaction-active"
+
+type MaturityScenarioEvent =
+  | {
+      requiresOutcomeExit: boolean
+      strategyAtOpen: ReinvestmentStrategy
+      type: "PICKER_OPEN_REQUESTED"
+    }
+  | { type: "OUTCOME_EXIT_COMPLETED" }
+  | { type: "PICKER_VALUE_CHANGED"; value: ReinvestmentStrategy }
+  | { type: "PICKER_CLOSE_COMPLETED" }
+
+interface MaturityScenarioState {
+  pickerSelection: ReinvestmentStrategy
+  phase: MaturityScenarioPhase
+}
+
+/**
+ * Coordinates the product boundary around the picker: `pickerSelection`
+ * drives its immediate visual selection, while the screen strategy changes
+ * only after the picker commits a completed interaction.
+ */
+function maturityScenarioReducer(
+  state: MaturityScenarioState,
+  event: MaturityScenarioEvent,
+): MaturityScenarioState {
+  switch (event.type) {
+    case "PICKER_OPEN_REQUESTED":
+      if (state.phase !== "settled") {
+        return state
+      }
+
+      return {
+        pickerSelection: event.strategyAtOpen,
+        phase: event.requiresOutcomeExit
+          ? "outcome-exiting"
+          : "picker-interaction-active",
+      }
+    case "OUTCOME_EXIT_COMPLETED":
+      return state.phase === "outcome-exiting"
+        ? { ...state, phase: "picker-interaction-active" }
+        : state
+    case "PICKER_VALUE_CHANGED":
+      return state.phase === "picker-interaction-active"
+        ? { ...state, pickerSelection: event.value }
+        : state
+    case "PICKER_CLOSE_COMPLETED":
+      return state.phase === "picker-interaction-active"
+        ? { ...state, phase: "settled" }
+        : state
+  }
+}
+
 export function MaturityScenarioControl({
   excludedValue,
   maturedCash,
   onStrategyCommit,
   strategy,
 }: MaturityScenarioControlProps) {
-  const outcome = deriveMaturityScenarioOutcome({
+  const outcome = deriveProjectionStrategyOutcome({
     excludedValue,
     maturedCash,
     strategy,
   })
-  const [phase, setPhase] = useState<MaturityScenarioPhase>("settled")
-  const isPickerOpeningAuthorized = phase === "picker-active"
-  const isOutcomeVisible = phase === "settled"
+  const [state, dispatch] = useReducer(maturityScenarioReducer, {
+    pickerSelection: strategy,
+    phase: "settled",
+  })
+  const canStartPendingPickerOpening =
+    state.phase === "picker-interaction-active"
+  const isInteractionSettled = state.phase === "settled"
+  const pickerValue = isInteractionSettled ? strategy : state.pickerSelection
+  const shouldShowOutcome = isInteractionSettled && outcome !== null
 
   function handlePickerOpenRequest() {
-    if (phase !== "settled") {
-      return
-    }
+    dispatch({
+      requiresOutcomeExit: outcome !== null,
+      strategyAtOpen: strategy,
+      type: "PICKER_OPEN_REQUESTED",
+    })
+  }
 
-    // Keep the picker collapsed until an existing outcome finishes exiting,
-    // or open it immediately when there is no outcome to dismiss.
-    setPhase(
-      outcome === null ? "picker-active" : "hiding-outcome-before-picker",
-    )
+  function handlePickerValueChange(value: ReinvestmentStrategy) {
+    dispatch({ type: "PICKER_VALUE_CHANGED", value })
   }
 
   function handleOutcomeExitComplete() {
-    if (phase !== "hiding-outcome-before-picker") {
-      return
-    }
-
-    setPhase("picker-active")
+    dispatch({ type: "OUTCOME_EXIT_COMPLETED" })
   }
 
   function handlePickerCloseComplete() {
-    if (phase !== "picker-active") {
-      return
-    }
-
-    setPhase("settled")
+    dispatch({ type: "PICKER_CLOSE_COMPLETED" })
   }
 
   return (
@@ -111,20 +166,21 @@ export function MaturityScenarioControl({
         </h2>
         <ExpandingChoicePicker
           ariaLabel="Maturity scenario"
+          canStartPendingOpening={canStartPendingPickerOpening}
           legend="Choose a maturity scenario"
-          isOpeningAuthorized={isPickerOpeningAuthorized}
           onCloseComplete={handlePickerCloseComplete}
           onOpenRequest={handlePickerOpenRequest}
+          onValueChange={handlePickerValueChange}
           onValueCommit={onStrategyCommit}
           options={MATURITY_SCENARIO_OPTIONS}
-          value={strategy}
+          value={pickerValue}
+        />
+        <ProjectionStrategyOutcome
+          isVisible={shouldShowOutcome}
+          outcome={outcome}
+          onExitComplete={handleOutcomeExitComplete}
         />
       </div>
-      <ProjectionStrategyOutcome
-        isVisible={isOutcomeVisible}
-        outcome={outcome}
-        onExitComplete={handleOutcomeExitComplete}
-      />
     </div>
   )
 }
@@ -139,30 +195,29 @@ function ProjectionStrategyOutcome({
   outcome: MaturityScenarioOutcome | null
 }) {
   const prefersReducedMotion = useReducedMotion() ?? false
-  const shouldShowOutcome = isVisible && outcome !== null
+  const outcomeContainerReflowTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : OUTCOME_CONTAINER_REFLOW_TRANSITION
+  const outcomeContentEnterExitTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : OUTCOME_CONTENT_ENTER_EXIT_TRANSITION
+  const shouldRenderOutcome = isVisible && outcome !== null
 
   return (
-    // Animate the real flow height so the Value path reflows with the outcome
-    // instead of snapping while a transform-only layout animation is running.
     <motion.div
-      aria-live={shouldShowOutcome ? "polite" : undefined}
-      aria-atomic="true"
-      animate={{ height: shouldShowOutcome ? "auto" : 0 }}
-      className="overflow-hidden"
-      initial={false}
-      transition={prefersReducedMotion ? { duration: 0 } : OUTCOME_TRANSITION}
+      layout
+      aria-live={shouldRenderOutcome ? "polite" : undefined}
+      transition={{ layout: outcomeContainerReflowTransition }}
     >
       <AnimatePresence initial={false} onExitComplete={onExitComplete}>
-        {shouldShowOutcome ? (
+        {shouldRenderOutcome ? (
           <motion.div
             key={outcome.key}
-            initial={{ opacity: 0, y: -4 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={
-              prefersReducedMotion ? { duration: 0 } : OUTCOME_TRANSITION
-            }
-            className="mt-3 flex items-start justify-between gap-4 border-t border-warning-border/65 pt-4"
+            exit={{ opacity: 0, y: -6 }}
+            transition={outcomeContentEnterExitTransition}
+            className="flex items-start justify-between gap-4 border-t border-warning-border/65 pt-4"
           >
             <div className="space-y-1">
               <p className="text-sm font-medium text-foreground">
@@ -182,11 +237,7 @@ function ProjectionStrategyOutcome({
   )
 }
 
-/**
- * Derives the note produced by the committed maturity strategy. `null` means
- * that the current strategy has no idle or excluded value worth calling out.
- */
-function deriveMaturityScenarioOutcome({
+function deriveProjectionStrategyOutcome({
   excludedValue,
   maturedCash,
   strategy,

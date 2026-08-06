@@ -1,6 +1,9 @@
-import { useEffect, useId, useRef, useState } from "react"
-import { Check, ChevronDown, type LucideIcon } from "lucide-react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useId } from "react"
+import { ChevronDown, type LucideIcon } from "lucide-react"
+import { AnimatePresence, LayoutGroup, motion } from "motion/react"
+import { type PickerStage } from "@/app/components/expanding-choice-picker-machine"
+import { useExpandingChoicePickerController } from "@/app/components/use-expanding-choice-picker-controller"
+import { type PickerLayoutTransitions } from "@/app/components/expanding-choice-picker-animations"
 import { cn } from "@/lib/utils"
 
 export interface ExpandingChoicePickerOption<T extends string> {
@@ -13,242 +16,478 @@ export interface ExpandingChoicePickerOption<T extends string> {
 
 interface ExpandingChoicePickerProps<T extends string> {
   ariaLabel: string
+  canStartPendingOpening?: boolean
   legend: string
-  isOpeningAuthorized?: boolean
   onCloseComplete?: () => void
   onOpenRequest?: () => void
-  onValueCommit: (value: T) => void
+  onValueChange: (value: T) => void
+  onValueCommit?: (value: T) => void
   options: readonly ExpandingChoicePickerOption<T>[]
   value: T
 }
 
+type PickerSurfaceAction = "none" | "request-open" | "choose-option"
+
+interface PickerPresentation {
+  deck: "single-row" | "stacked" | "expanded"
+  availableAction: PickerSurfaceAction
+  areBackCardsVisible: boolean
+  selectionVisible: boolean
+  surface: "single-row" | "card"
+}
+
+/** Named render recipes shared by one or more choreography stages. */
+const PICKER_PRESENTATIONS = {
+  singleRowReadyToOpen: {
+    areBackCardsVisible: false,
+    availableAction: "request-open",
+    deck: "single-row",
+    selectionVisible: false,
+    surface: "single-row",
+  },
+  singleRowLocked: {
+    areBackCardsVisible: false,
+    availableAction: "none",
+    deck: "single-row",
+    selectionVisible: false,
+    surface: "single-row",
+  },
+  singleRowWithBackCards: {
+    areBackCardsVisible: true,
+    availableAction: "none",
+    deck: "single-row",
+    selectionVisible: false,
+    surface: "single-row",
+  },
+  stackedCardsContentHidden: {
+    areBackCardsVisible: true,
+    availableAction: "none",
+    deck: "stacked",
+    selectionVisible: false,
+    surface: "card",
+  },
+  stackedCardsSelectionVisible: {
+    areBackCardsVisible: true,
+    availableAction: "none",
+    deck: "stacked",
+    selectionVisible: true,
+    surface: "card",
+  },
+  expandedCardsLocked: {
+    areBackCardsVisible: true,
+    availableAction: "none",
+    deck: "expanded",
+    selectionVisible: false,
+    surface: "card",
+  },
+  expandedCardsReadyToChoose: {
+    areBackCardsVisible: true,
+    availableAction: "choose-option",
+    deck: "expanded",
+    selectionVisible: true,
+    surface: "card",
+  },
+  expandedCardsSelectionMoving: {
+    areBackCardsVisible: true,
+    availableAction: "none",
+    deck: "expanded",
+    selectionVisible: true,
+    surface: "card",
+  },
+} satisfies Record<string, PickerPresentation>
+
+/** Maps behavioral stages to visual arrangements that stages can share. */
+const PICKER_PRESENTATION_BY_STAGE = {
+  collapsed: PICKER_PRESENTATIONS.singleRowReadyToOpen,
+  "awaiting-open-readiness": PICKER_PRESENTATIONS.singleRowLocked,
+  "opening-content-hide": PICKER_PRESENTATIONS.singleRowLocked,
+  "opening-row-to-card": PICKER_PRESENTATIONS.stackedCardsContentHidden,
+  "opening-content-show": PICKER_PRESENTATIONS.stackedCardsContentHidden,
+  "opening-deck-expand": PICKER_PRESENTATIONS.expandedCardsLocked,
+  expanded: PICKER_PRESENTATIONS.expandedCardsReadyToChoose,
+  "moving-selection": PICKER_PRESENTATIONS.expandedCardsSelectionMoving,
+  "closing-deck-stack": PICKER_PRESENTATIONS.stackedCardsSelectionVisible,
+  "closing-content-hide": PICKER_PRESENTATIONS.stackedCardsContentHidden,
+  "closing-card-to-row": PICKER_PRESENTATIONS.singleRowWithBackCards,
+  "closing-content-show": PICKER_PRESENTATIONS.singleRowLocked,
+} satisfies Record<PickerStage, PickerPresentation>
+
 /**
- * Keeps a provisional choice inside the picker until its closing animation
- * finishes. Resting and opening states cannot accidentally carry one.
+ * Converts the machine's behavioral stage into the visual recipe the React
+ * tree should render.
  */
-type PickerInteractionState<T extends string> =
-  | { phase: "collapsed"; valueToCommit: null }
-  | { phase: "open-requested"; valueToCommit: null }
-  | { phase: "closing"; valueToCommit: T | null }
+function getPickerPresentation(
+  stage: PickerStage,
+  isCloseSettlementPending: boolean,
+): PickerPresentation {
+  // The close geometry has settled, but React has not delivered the close to
+  // the parent yet. Keep the single-row control locked so a new session
+  // cannot overlap it.
+  if (isCloseSettlementPending) {
+    return PICKER_PRESENTATIONS.singleRowLocked
+  }
+
+  return PICKER_PRESENTATION_BY_STAGE[stage]
+}
 
 export function ExpandingChoicePicker<T extends string>({
   ariaLabel,
+  canStartPendingOpening,
   legend,
-  isOpeningAuthorized = true,
   onCloseComplete,
   onOpenRequest,
+  onValueChange,
   onValueCommit,
   options,
   value,
 }: ExpandingChoicePickerProps<T>) {
-  const radioGroupName = useId()
-  const [interaction, setInteraction] = useState<PickerInteractionState<T>>({
-    phase: "collapsed",
-    valueToCommit: null,
+  const pickerId = useId()
+  const {
+    choreography,
+    chooseOption,
+    isCloseSettlementPending,
+    requestOpen,
+    stage,
+  } = useExpandingChoicePickerController({
+    canStartPendingOpening,
+    onCloseComplete,
+    onOpenRequest,
+    onValueChange,
+    onValueCommit,
+    value,
   })
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const selectedRadioRef = useRef<HTMLInputElement>(null)
-  const prefersReducedMotion = useReducedMotion() ?? false
-
-  // User intent and parent authorization are separate so a sibling can finish
-  // exiting while the picker remains visibly collapsed.
-  const isOpen = interaction.phase === "open-requested" && isOpeningAuthorized
-  const isWaitingForOpeningAuthorization =
-    interaction.phase === "open-requested" && !isOpeningAuthorized
-  const isBusy =
-    isWaitingForOpeningAuthorization || interaction.phase === "closing"
-
-  // Focus the selected radio when the picker opens.
-  useEffect(() => {
-    if (!isOpen) {
-      return
-    }
-
-    selectedRadioRef.current?.focus({ preventScroll: true })
-  }, [isOpen])
-
-  const displayedValue = interaction.valueToCommit ?? value
-  const selectedOption = options.find(
-    (option) => option.value === displayedValue,
-  )
+  const {
+    choiceContentAnimationScope,
+    layoutTransitions,
+    reportLayoutAnimationComplete,
+  } = choreography
+  const presentation = getPickerPresentation(stage, isCloseSettlementPending)
+  const selectedOption = options.find((option) => {
+    return option.value === value
+  })
 
   if (selectedOption === undefined) {
     return null
   }
 
-  const visibleOptions = isOpen ? options : [selectedOption]
-
-  function requestOpen() {
-    if (interaction.phase !== "collapsed") {
-      return
-    }
-
-    // The parent may authorize immediately or wait for a prerequisite animation.
-    setInteraction({ phase: "open-requested", valueToCommit: null })
-    onOpenRequest?.()
-  }
-
-  function chooseOptionAndStartClosing(chosenValue: T) {
-    setInteraction({
-      phase: "closing",
-      valueToCommit: chosenValue === value ? null : chosenValue,
-    })
-  }
-
-  // The picker container owns layout completion so semantic settlement does not
-  // depend on any individual option card's Motion lifecycle.
-  function finishCloseAfterLayoutAnimation() {
-    if (interaction.phase !== "closing") {
-      return
-    }
-
-    const { valueToCommit } = interaction
-    setInteraction({ phase: "collapsed", valueToCommit: null })
-
-    if (valueToCommit !== null) {
-      onValueCommit(valueToCommit)
-    }
-
-    onCloseComplete?.()
-    requestAnimationFrame(() =>
-      triggerRef.current?.focus({ preventScroll: true }),
-    )
-  }
-
   return (
-    <fieldset className="min-w-0">
+    <fieldset ref={choiceContentAnimationScope} className="min-w-0">
       <legend className="sr-only">{legend}</legend>
-      <motion.div
-        layout
-        aria-label={ariaLabel}
-        className={cn(
-          "relative grid gap-2",
-          isOpen ? "grid-cols-3" : "grid-cols-1",
-        )}
-        transition={{
-          layout: prefersReducedMotion
-            ? { duration: 0 }
-            : { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-        }}
-        onLayoutAnimationComplete={finishCloseAfterLayoutAnimation}
-      >
-        <AnimatePresence initial={false} mode="popLayout">
-          {visibleOptions.map((option) => {
-            const Icon = option.icon
-            const isSelected = option.value === displayedValue
-
-            return (
-              <motion.div
-                key={option.value}
-                layout
-                className={cn(
-                  "min-w-0 overflow-hidden rounded-lg border transition-[background-color,border-color,box-shadow] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                  isOpen ? "min-h-26" : "h-11",
-                  isSelected
-                    ? "border-primary/60 bg-accent/50 text-foreground"
-                    : "border-border/75 bg-background/35 text-muted-foreground hover:border-primary/30 hover:bg-muted/40",
-                )}
-                exit={
-                  prefersReducedMotion
-                    ? { opacity: 1 }
-                    : { opacity: 0, scale: 0.98 }
-                }
-                initial={
-                  prefersReducedMotion ? false : { opacity: 0, scale: 0.98 }
-                }
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  layout: prefersReducedMotion
-                    ? { duration: 0 }
-                    : { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-                  opacity: prefersReducedMotion
-                    ? { duration: 0 }
-                    : { duration: 0.16, ease: [0.22, 1, 0.36, 1] },
-                  scale: prefersReducedMotion
-                    ? { duration: 0 }
-                    : { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
-                }}
-              >
-                {isOpen ? (
-                  <label
-                    className="flex h-full min-h-26 cursor-pointer flex-col justify-between p-3 focus-within:ring-3 focus-within:ring-ring/50 active:scale-[0.98] motion-reduce:transform-none"
-                    onClick={(event) => {
-                      if (isSelected) {
-                        event.preventDefault()
-                        chooseOptionAndStartClosing(option.value)
-                      }
-                    }}
-                  >
-                    <input
-                      ref={isSelected ? selectedRadioRef : undefined}
-                      checked={isSelected}
-                      className="sr-only"
-                      name={radioGroupName}
-                      type="radio"
-                      value={option.value}
-                      aria-label={`${option.label}: ${option.description}`}
-                      onChange={() => chooseOptionAndStartClosing(option.value)}
-                    />
-                    <span className="flex items-center justify-between gap-2">
-                      <Icon
-                        className={cn(
-                          "size-4",
-                          isSelected ? "text-primary" : "text-muted-foreground",
-                        )}
-                        aria-hidden="true"
-                      />
-                      <Check
-                        className={cn(
-                          "size-4 transition-opacity duration-180 motion-reduce:transition-none",
-                          isSelected ? "opacity-100 text-primary" : "opacity-0",
-                        )}
-                        aria-hidden="true"
-                      />
-                    </span>
-                    <span className="space-y-1">
-                      <span className="block text-sm font-medium text-foreground">
-                        {option.label}
-                      </span>
-                      <span className="block text-sm leading-5 text-muted-foreground">
-                        {option.description}
-                      </span>
-                    </span>
-                  </label>
-                ) : (
-                  <button
-                    ref={triggerRef}
-                    type="button"
-                    aria-expanded={isOpen}
-                    aria-busy={isBusy}
-                    aria-disabled={interaction.phase !== "collapsed"}
-                    aria-label={`${ariaLabel}: ${selectedOption.summary}`}
-                    className="flex h-full w-full items-center gap-3 px-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                    onClick={requestOpen}
-                  >
-                    <Icon
-                      className="size-4 shrink-0 text-primary"
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                      {selectedOption.summary}
-                    </span>
-                    <ChevronDown
-                      className="size-4 shrink-0 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                  </button>
-                )}
-              </motion.div>
-            )
-          })}
-        </AnimatePresence>
-      </motion.div>
+      <LayoutGroup id={pickerId}>
+        <ChoiceDeck
+          layoutTransitions={layoutTransitions}
+          options={options}
+          presentation={presentation}
+          selectedValue={value}
+          selectionLayoutId={`${pickerId}-selection`}
+          stage={stage}
+          onChoose={chooseOption}
+          onLayoutAnimationComplete={reportLayoutAnimationComplete}
+          onOpen={requestOpen}
+        />
+      </LayoutGroup>
 
       <p className="sr-only" role="status" aria-atomic="true">
-        {isBusy
+        {presentation.availableAction === "none"
           ? `${ariaLabel} is updating.`
           : `${ariaLabel} updated: ${selectedOption.summary}.`}
       </p>
     </fieldset>
+  )
+}
+
+/**
+ * The container for every choice surface. It arranges the same option buttons
+ * as one single-row control, a stack, or an expanded card deck without
+ * replacing their DOM.
+ */
+function ChoiceDeck<T extends string>({
+  layoutTransitions,
+  onChoose,
+  onLayoutAnimationComplete,
+  onOpen,
+  options,
+  presentation,
+  selectedValue,
+  selectionLayoutId,
+  stage,
+}: {
+  layoutTransitions: PickerLayoutTransitions
+  onChoose: (value: T) => void
+  onLayoutAnimationComplete: (stage: PickerStage) => void
+  onOpen: () => void
+  options: readonly ExpandingChoicePickerOption<T>[]
+  presentation: PickerPresentation
+  selectedValue: T
+  selectionLayoutId: string
+  stage: PickerStage
+}) {
+  const selectedIndex = options.findIndex((option) => {
+    return option.value === selectedValue
+  })
+  const motionModel = {
+    layoutTransitions,
+    selectionLayoutId,
+  }
+
+  function performAvailableAction(action: PickerSurfaceAction, value: T) {
+    if (action === "request-open") {
+      onOpen()
+    } else if (action === "choose-option") {
+      onChoose(value)
+    }
+    // "none" is a no-op, so we don't need to handle it here.
+  }
+
+  // Capture the stage rendered with this element. If Motion fires after the
+  // machine has advanced, it still reports its original stage, allowing the
+  // machine to reject that stale completion instead of advancing the current one.
+  function reportCurrentStageLayoutAnimationComplete() {
+    onLayoutAnimationComplete(stage)
+  }
+
+  return (
+    <motion.div
+      layout
+      transition={{ layout: layoutTransitions.deckArrangement }}
+      className={cn(
+        "relative grid gap-2 overflow-hidden",
+        presentation.deck === "single-row" ? "h-11" : "h-26",
+      )}
+      style={{
+        gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
+      }}
+    >
+      {options.map((option, optionIndex) => {
+        const isSelected = option.value === selectedValue
+        const view = createChoiceSurfaceViewModel({
+          isSelected,
+          optionCount: options.length,
+          optionIndex,
+          picker: presentation,
+          selectedIndex,
+        })
+
+        return (
+          <ChoiceSurface
+            key={option.value}
+            motionModel={motionModel}
+            option={option}
+            view={view}
+            onPerformAction={performAvailableAction}
+            onLayoutAnimationComplete={
+              reportCurrentStageLayoutAnimationComplete
+            }
+          />
+        )
+      })}
+    </motion.div>
+  )
+}
+
+interface ChoiceSurfaceViewModel {
+  usesSingleRowLayout: boolean
+  isExpandedDeck: boolean
+  hidden: boolean
+  availableAction: PickerSurfaceAction
+  selectionIndicatorVisible: boolean
+  style: React.CSSProperties
+}
+
+interface ChoiceSurfaceMotionModel {
+  layoutTransitions: PickerLayoutTransitions
+  selectionLayoutId: string
+}
+
+/**
+ * Derives one option's geometry and available action from the deck recipe and
+ * its position relative to the selected option.
+ */
+function createChoiceSurfaceViewModel({
+  isSelected,
+  optionCount,
+  optionIndex,
+  picker,
+  selectedIndex,
+}: {
+  isSelected: boolean
+  optionCount: number
+  optionIndex: number
+  picker: PickerPresentation
+  selectedIndex: number
+}): ChoiceSurfaceViewModel {
+  const isExpandedDeck = picker.deck === "expanded"
+  // Stacked cards share the selected column. Keep the selected surface in
+  // front and preserve option order for the cards underneath it; otherwise
+  // the last DOM child (Exclude) becomes the visual top card.
+  // Expanded: each option gets its own column. Row: the selected surface
+  // spans the deck. Stacked: every surface shares the selected option's column.
+  const gridColumn = isExpandedDeck
+    ? optionIndex + 1
+    : isSelected && picker.deck === "single-row"
+      ? `1 / span ${optionCount}`
+      : selectedIndex + 1
+  const zIndex = isSelected ? optionCount + 1 : optionCount - optionIndex
+
+  return {
+    usesSingleRowLayout: picker.surface === "single-row" && isSelected,
+    isExpandedDeck,
+    hidden: !isSelected && !picker.areBackCardsVisible,
+    availableAction:
+      picker.availableAction === "request-open" && !isSelected
+        ? "none"
+        : picker.availableAction,
+    selectionIndicatorVisible: isSelected && picker.selectionVisible,
+    style: {
+      gridColumn,
+      gridRow: 1,
+      zIndex,
+    },
+  }
+}
+
+/**
+ * One physical Motion button for an option. It morphs between the selected
+ * single-row control and a card, which lets Motion animate a continuous
+ * surface instead of a disappearing control and newly mounted card.
+ */
+function ChoiceSurface<T extends string>({
+  motionModel,
+  onLayoutAnimationComplete,
+  onPerformAction,
+  option,
+  view,
+}: {
+  motionModel: ChoiceSurfaceMotionModel
+  onLayoutAnimationComplete: () => void
+  onPerformAction: (action: PickerSurfaceAction, value: T) => void
+  option: ExpandingChoicePickerOption<T>
+  view: ChoiceSurfaceViewModel
+}) {
+  const Icon = option.icon
+  const canChoose = view.availableAction === "choose-option"
+  const canOpen = view.availableAction === "request-open"
+
+  return (
+    <motion.button
+      layout
+      type="button"
+      aria-expanded={canOpen ? view.isExpandedDeck : undefined}
+      aria-label={
+        canChoose ? `${option.label}. ${option.description}` : undefined
+      }
+      aria-hidden={view.hidden || undefined}
+      aria-disabled={!canOpen && !canChoose}
+      tabIndex={view.hidden || (!canOpen && !canChoose) ? -1 : undefined}
+      style={{
+        borderRadius: 8,
+        // Keep hidden surfaces mounted so Motion can interpolate their layout.
+        visibility: view.hidden ? "hidden" : undefined,
+        ...view.style,
+      }}
+      transition={{ layout: motionModel.layoutTransitions.choiceSurfaceMorph }}
+      className={cn(
+        "relative min-w-0 overflow-hidden bg-border/75 text-left text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        view.usesSingleRowLayout ? "h-11" : "h-26 self-start",
+      )}
+      onClick={() => {
+        onPerformAction(view.availableAction, option.value)
+      }}
+      onLayoutAnimationComplete={onLayoutAnimationComplete}
+    >
+      <span className="absolute inset-px bg-card" style={{ borderRadius: 7 }} />
+      <ChoiceSelectionIndicator
+        selectionLayoutId={motionModel.selectionLayoutId}
+        transition={motionModel.layoutTransitions.selectionIndicatorMove}
+        visible={view.selectionIndicatorVisible}
+        onLayoutAnimationComplete={onLayoutAnimationComplete}
+      />
+      <ChoiceContent
+        icon={
+          <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+        }
+        usesSingleRowLayout={view.usesSingleRowLayout}
+        option={option}
+      />
+    </motion.button>
+  )
+}
+
+/** Moves one shared selected-state background between option surfaces. */
+function ChoiceSelectionIndicator({
+  onLayoutAnimationComplete,
+  selectionLayoutId,
+  transition,
+  visible,
+}: {
+  onLayoutAnimationComplete: () => void
+  selectionLayoutId: string
+  transition: PickerLayoutTransitions["selectionIndicatorMove"]
+  visible: boolean
+}) {
+  return (
+    <AnimatePresence initial={false}>
+      {visible ? (
+        <motion.span
+          layoutId={selectionLayoutId}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={transition}
+          onLayoutAnimationComplete={onLayoutAnimationComplete}
+          className="pointer-events-none absolute inset-px bg-accent/50 ring-1 ring-inset ring-primary/60"
+          style={{ borderRadius: 7 }}
+        />
+      ) : null}
+    </AnimatePresence>
+  )
+}
+
+/**
+ * The icon and copy inside a choice surface. Choreography targets
+ * `data-choice-content` to hide it before surfaces move and reveal it after.
+ */
+function ChoiceContent<T extends string>({
+  icon,
+  option,
+  usesSingleRowLayout,
+}: {
+  icon: React.ReactNode
+  option: ExpandingChoicePickerOption<T>
+  usesSingleRowLayout: boolean
+}) {
+  return (
+    <span
+      data-choice-content
+      style={{ transformOrigin: "center" }}
+      className={cn(
+        "relative grid h-full w-full p-3",
+        usesSingleRowLayout
+          ? "grid-cols-[1rem_minmax(0,1fr)_1rem] grid-rows-1 items-center gap-x-3"
+          : "grid-cols-[1rem_minmax(0,1fr)] grid-rows-[1rem_minmax(0,1fr)] gap-x-2",
+      )}
+    >
+      <span className="col-start-1 row-start-1 self-start">{icon}</span>
+      <span
+        className={cn(
+          "min-w-0",
+          usesSingleRowLayout
+            ? "col-start-2 row-start-1 flex items-baseline gap-2"
+            : "col-span-2 col-start-1 row-start-2 self-end space-y-1",
+        )}
+      >
+        <span className="block text-sm font-medium text-foreground">
+          {option.label}
+        </span>
+        <span className="block truncate text-sm leading-5 text-muted-foreground">
+          {option.description}
+        </span>
+      </span>
+      {usesSingleRowLayout ? (
+        <span className="col-start-3 row-start-1 justify-self-end">
+          <ChevronDown className="size-4" aria-hidden="true" />
+        </span>
+      ) : null}
+    </span>
   )
 }
