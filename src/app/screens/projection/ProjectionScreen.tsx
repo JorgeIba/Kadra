@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Building2, CalendarDays } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
@@ -46,10 +47,20 @@ const PROJECTION_TRUST_NOTES = [
   "Applies the selected strategy when fixed-term investments mature.",
 ]
 
+const PROJECTION_SECTION_REPOSITION_TRANSITION = {
+  bounce: 0.04,
+  duration: 0.35,
+  type: "spring",
+} as const
+
 export function ProjectionScreen({
   investments,
   onInvestmentSelect,
 }: ProjectionScreenProps) {
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const projectionSectionRepositionTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : PROJECTION_SECTION_REPOSITION_TRANSITION
   const asOfDate = new Date()
   const today = toDateString(asOfDate)
   const [targetDate, setTargetDate] = useState(() => {
@@ -79,7 +90,8 @@ export function ProjectionScreen({
   ].join(":")
 
   return (
-    <section className="space-y-6">
+    // Let Motion, rather than browser scroll anchoring, own vertical repositioning.
+    <section className="space-y-6 [overflow-anchor:none]">
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
           Dashboard report
@@ -162,7 +174,11 @@ export function ProjectionScreen({
           ) : null}
         </section>
 
-        <section className="space-y-5 border-t border-border/70 pt-5">
+        <motion.section
+          layout="position"
+          className="space-y-5 border-t border-border/70 pt-5"
+          transition={{ layout: projectionSectionRepositionTransition }}
+        >
           <div className="space-y-2">
             <h2 className="text-balance text-base font-bold leading-tight text-foreground">
               Value path
@@ -194,9 +210,13 @@ export function ProjectionScreen({
             description="Based on investments still active on the target date."
             pace={snapshot.earningPace}
           />
-        </section>
+        </motion.section>
 
-        <section className="space-y-5 border-t border-border/70 pt-5">
+        <motion.section
+          layout="position"
+          className="space-y-5 border-t border-border/70 pt-5"
+          transition={{ layout: projectionSectionRepositionTransition }}
+        >
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
               <h2 className="text-balance text-base font-bold leading-tight text-foreground">
@@ -226,7 +246,7 @@ export function ProjectionScreen({
               projectedEarnings={snapshot.projectedEarnings}
             />
           </AnimatedListSurface>
-        </section>
+        </motion.section>
       </div>
     </section>
   )
