@@ -175,55 +175,97 @@ export function MoneyMovementSection({
         />
       </div>
 
-      {transactionType === "contribution" && (
-        <InlineNotice tone="success">
-          Net capital contributed on this date:{" "}
-          <span className="font-semibold text-foreground">
-            <MoneyAmount value={availableContribution} />
-          </span>
-        </InlineNotice>
-      )}
-
-      {transactionType === "withdrawal" && (
-        <InlineNotice tone="destructive">
-          Available active balance to withdraw on this date:{" "}
-          <span className="font-semibold text-foreground">
-            <MoneyAmount value={activeBalance} />
-          </span>
-        </InlineNotice>
-      )}
-
-      {transactionType !== "none" ? (
-        <Field
-          error={errors.contributionAmount?.message}
-          label={
-            transactionType === "contribution"
-              ? "Added amount"
-              : "Withdrawn amount"
-          }
-          htmlFor={FORM_FIELD_IDS.contributionAmount}
-        >
-          <div className="relative flex items-center">
-            <span className="absolute left-3.5 border-r py-1 pr-3 text-xs font-semibold text-muted-foreground select-none">
-              MXN $
-            </span>
-            <Input
-              id={FORM_FIELD_IDS.contributionAmount}
-              type="number"
-              inputMode="decimal"
-              min="0"
-              placeholder="2500"
-              className="h-12 pl-20 text-lg font-semibold"
-              {...getFieldAccessibilityProps(
-                FORM_FIELD_IDS.contributionAmount,
-                errors.contributionAmount?.message,
-              )}
-              {...register("contributionAmount", { valueAsNumber: true })}
-            />
-          </div>
-        </Field>
-      ) : null}
+      <MoneyMovementDetails
+        activeBalance={activeBalance}
+        availableContribution={availableContribution}
+        amountError={errors.contributionAmount?.message}
+        transactionType={transactionType}
+        register={register}
+      />
     </FormSection>
+  )
+}
+
+/**
+ * Everything revealed below the movement picker for a selected deposit or
+ * withdrawal. Keeping this region together gives its future enter/exit
+ * choreography one stable sibling boundary.
+ */
+function MoneyMovementDetails({
+  activeBalance,
+  amountError,
+  availableContribution,
+  register,
+  transactionType,
+}: {
+  activeBalance: number
+  amountError: string | undefined
+  availableContribution: number
+  register: UseFormRegister<RecordChangeFormValues>
+  transactionType: "none" | "contribution" | "withdrawal"
+}) {
+  let details: {
+    amount: number
+    amountLabel: string
+    notice: string
+    tone: "success" | "destructive"
+  }
+
+  switch (transactionType) {
+    case "none":
+      return null
+    case "contribution":
+      details = {
+        amount: availableContribution,
+        amountLabel: "Added amount",
+        notice: "Net capital contributed on this date:",
+        tone: "success",
+      }
+      break
+    case "withdrawal":
+      details = {
+        amount: activeBalance,
+        amountLabel: "Withdrawn amount",
+        notice: "Available active balance to withdraw on this date:",
+        tone: "destructive",
+      }
+      break
+  }
+
+  return (
+    <div className="space-y-4">
+      <InlineNotice tone={details.tone}>
+        {details.notice}{" "}
+        <span className="font-semibold text-foreground">
+          <MoneyAmount value={details.amount} />
+        </span>
+      </InlineNotice>
+
+      <Field
+        error={amountError}
+        label={details.amountLabel}
+        htmlFor={FORM_FIELD_IDS.contributionAmount}
+      >
+        <div className="relative flex items-center">
+          <span className="absolute left-3.5 border-r py-1 pr-3 text-xs font-semibold text-muted-foreground select-none">
+            MXN $
+          </span>
+          <Input
+            id={FORM_FIELD_IDS.contributionAmount}
+            type="number"
+            inputMode="decimal"
+            min="0"
+            placeholder="2500"
+            className="h-12 pl-20 text-lg font-semibold"
+            {...getFieldAccessibilityProps(
+              FORM_FIELD_IDS.contributionAmount,
+              amountError,
+            )}
+            {...register("contributionAmount", { valueAsNumber: true })}
+          />
+        </div>
+      </Field>
+    </div>
   )
 }
 
