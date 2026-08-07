@@ -1,4 +1,3 @@
-import { useReducer } from "react"
 import { MinusCircle, RefreshCw, Wallet } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
@@ -6,6 +5,7 @@ import {
   type ExpandingChoicePickerOption,
 } from "@/app/components/ExpandingChoicePicker"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
+import { usePickerWithDependentContent } from "@/app/components/use-picker-with-dependent-content"
 import {
   REINVESTMENT_STRATEGIES,
   type ReinvestmentStrategy,
@@ -61,62 +61,6 @@ const MATURITY_SCENARIO_OPTIONS = [
   },
 ] satisfies readonly ExpandingChoicePickerOption<ReinvestmentStrategy>[]
 
-type MaturityScenarioPhase =
-  | "settled"
-  | "outcome-exiting"
-  | "picker-interaction-active"
-
-type MaturityScenarioEvent =
-  | {
-      requiresOutcomeExit: boolean
-      strategyAtOpen: ReinvestmentStrategy
-      type: "PICKER_OPEN_REQUESTED"
-    }
-  | { type: "OUTCOME_EXIT_COMPLETED" }
-  | { type: "PICKER_VALUE_CHANGED"; value: ReinvestmentStrategy }
-  | { type: "PICKER_CLOSE_COMPLETED" }
-
-interface MaturityScenarioState {
-  pickerSelection: ReinvestmentStrategy
-  phase: MaturityScenarioPhase
-}
-
-/**
- * Coordinates the product boundary around the picker: `pickerSelection`
- * drives its immediate visual selection, while the screen strategy changes
- * only after the picker commits a completed interaction.
- */
-function maturityScenarioReducer(
-  state: MaturityScenarioState,
-  event: MaturityScenarioEvent,
-): MaturityScenarioState {
-  switch (event.type) {
-    case "PICKER_OPEN_REQUESTED":
-      if (state.phase !== "settled") {
-        return state
-      }
-
-      return {
-        pickerSelection: event.strategyAtOpen,
-        phase: event.requiresOutcomeExit
-          ? "outcome-exiting"
-          : "picker-interaction-active",
-      }
-    case "OUTCOME_EXIT_COMPLETED":
-      return state.phase === "outcome-exiting"
-        ? { ...state, phase: "picker-interaction-active" }
-        : state
-    case "PICKER_VALUE_CHANGED":
-      return state.phase === "picker-interaction-active"
-        ? { ...state, pickerSelection: event.value }
-        : state
-    case "PICKER_CLOSE_COMPLETED":
-      return state.phase === "picker-interaction-active"
-        ? { ...state, phase: "settled" }
-        : state
-  }
-}
-
 export function MaturityScenarioControl({
   excludedValue,
   maturedCash,
@@ -128,35 +72,9 @@ export function MaturityScenarioControl({
     maturedCash,
     strategy,
   })
-  const [state, dispatch] = useReducer(maturityScenarioReducer, {
-    pickerSelection: strategy,
-    phase: "settled",
+  const pickerInteraction = usePickerWithDependentContent({
+    hasVisibleDependentContent: outcome !== null,
   })
-  const canStartPendingPickerOpening =
-    state.phase === "picker-interaction-active"
-  const isInteractionSettled = state.phase === "settled"
-  const pickerValue = isInteractionSettled ? strategy : state.pickerSelection
-  const shouldShowOutcome = isInteractionSettled && outcome !== null
-
-  function handlePickerOpenRequest() {
-    dispatch({
-      requiresOutcomeExit: outcome !== null,
-      strategyAtOpen: strategy,
-      type: "PICKER_OPEN_REQUESTED",
-    })
-  }
-
-  function handlePickerValueChange(value: ReinvestmentStrategy) {
-    dispatch({ type: "PICKER_VALUE_CHANGED", value })
-  }
-
-  function handleOutcomeExitComplete() {
-    dispatch({ type: "OUTCOME_EXIT_COMPLETED" })
-  }
-
-  function handlePickerCloseComplete() {
-    dispatch({ type: "PICKER_CLOSE_COMPLETED" })
-  }
 
   return (
     <div className="border-t border-border/70 py-4">
@@ -166,19 +84,20 @@ export function MaturityScenarioControl({
         </h2>
         <ExpandingChoicePicker
           ariaLabel="Maturity scenario"
-          canStartPendingOpening={canStartPendingPickerOpening}
+          canStartPendingOpening={
+            pickerInteraction.canStartPendingPickerOpening
+          }
           legend="Choose a maturity scenario"
-          onCloseComplete={handlePickerCloseComplete}
-          onOpenRequest={handlePickerOpenRequest}
-          onValueChange={handlePickerValueChange}
+          onCloseComplete={pickerInteraction.onPickerCloseComplete}
+          onOpenRequest={pickerInteraction.onPickerOpenRequest}
           onValueCommit={onStrategyCommit}
           options={MATURITY_SCENARIO_OPTIONS}
-          value={pickerValue}
+          value={strategy}
         />
         <ProjectionStrategyOutcome
-          isVisible={shouldShowOutcome}
+          isVisible={pickerInteraction.shouldRenderDependentContent}
           outcome={outcome}
-          onExitComplete={handleOutcomeExitComplete}
+          onExitComplete={pickerInteraction.onDependentContentExitComplete}
         />
       </div>
     </div>

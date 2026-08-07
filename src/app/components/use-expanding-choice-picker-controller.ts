@@ -11,6 +11,7 @@ import {
   useEffectEvent,
   useReducer,
   useRef,
+  useState,
 } from "react"
 import {
   canRequestOpen,
@@ -30,7 +31,7 @@ interface UseExpandingChoicePickerControllerOptions<T extends string> {
   canStartPendingOpening?: boolean
   onCloseComplete?: () => void
   onOpenRequest?: () => void
-  onValueChange: (value: T) => void
+  onValueChange?: (value: T) => void
   onValueCommit?: (value: T) => void
   value: T
 }
@@ -49,11 +50,19 @@ export function useExpandingChoicePickerController<T extends string>({
   )
   // The sequence distinguishes repeated one-shot outputs until acknowledged.
   const lastHandledOutputSequenceRef = useRef(0)
-  // Commit callbacks only fire when the controlled value changed during the
-  // current opening session, matching established value/commit component APIs.
+  // The caller owns `value`; this controller owns the choice being previewed
+  // until the picker has visually settled and may commit it to the caller.
+  const [displayedSelection, setDisplayedSelection] = useState<T>(value)
   const valueAtOpenRef = useRef(value)
   const canStartOpeningSession = canRequestOpen(state)
   const isCloseSettlementPending = isPickerCloseSettlementPending(state)
+  // Keep the picker’s temporary choice through close-output delivery so the
+  // collapsed row cannot briefly revert before the parent commits it.
+  const shouldUseDisplayedSelection =
+    state.stage !== "collapsed" || state.output !== null
+  const displayedValue = shouldUseDisplayedSelection
+    ? displayedSelection
+    : value
 
   const completeTransitionStep = useCallback(
     (step: PickerTransitionStep) => {
@@ -101,8 +110,8 @@ export function useExpandingChoicePickerController<T extends string>({
   const handlePickerClosedOutput = useEffectEvent((sequence: number) => {
     lastHandledOutputSequenceRef.current = sequence
 
-    if (value !== valueAtOpenRef.current) {
-      onValueCommit?.(value)
+    if (displayedSelection !== valueAtOpenRef.current) {
+      onValueCommit?.(displayedSelection)
     }
     onCloseComplete?.()
 
@@ -164,13 +173,20 @@ export function useExpandingChoicePickerController<T extends string>({
     }
 
     valueAtOpenRef.current = value
+    setDisplayedSelection(value)
     dispatch({ type: "OPEN_REQUESTED" })
   }
 
   function chooseOption(chosenValue: T) {
-    const didValueChange = chosenValue !== value
+    if (state.stage !== "expanded") {
+      return
+    }
+
+    const didValueChange = chosenValue !== valueAtOpenRef.current
+    setDisplayedSelection(chosenValue)
+
     if (didValueChange) {
-      onValueChange(chosenValue)
+      onValueChange?.(chosenValue)
     }
 
     dispatch({
@@ -182,6 +198,7 @@ export function useExpandingChoicePickerController<T extends string>({
   return {
     choreography,
     chooseOption,
+    displayedValue,
     isCloseSettlementPending,
     requestOpen,
     stage: state.stage,
