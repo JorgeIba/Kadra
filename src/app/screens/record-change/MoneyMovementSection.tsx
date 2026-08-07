@@ -93,7 +93,7 @@ export function MoneyMovementSection({
     hasVisibleDependentContent: transactionType !== "none",
   })
 
-  function handlePickerValueCommit(value: MoneyMovementType) {
+  function handlePickerValueChange(value: MoneyMovementType) {
     transactionTypeField.onChange(value)
 
     if (value === "none") {
@@ -115,7 +115,7 @@ export function MoneyMovementSection({
         legend="Choose a money movement"
         onCloseComplete={pickerInteraction.onPickerCloseComplete}
         onOpenRequest={pickerInteraction.onPickerOpenRequest}
-        onValueCommit={handlePickerValueCommit}
+        onValueChange={handlePickerValueChange}
         options={MONEY_MOVEMENT_OPTIONS}
         value={transactionType}
       />

@@ -20,7 +20,8 @@ interface ExpandingChoicePickerProps<T extends string> {
   legend: string
   onCloseComplete?: () => void
   onOpenRequest?: () => void
-  onValueCommit: (value: T) => void
+  onValueChange?: (value: T) => void
+  onValueCommit?: (value: T) => void
   options: readonly ExpandingChoicePickerOption<T>[]
   value: T
 }
@@ -135,6 +136,7 @@ export function ExpandingChoicePicker<T extends string>({
   legend,
   onCloseComplete,
   onOpenRequest,
+  onValueChange,
   onValueCommit,
   options,
   value,
@@ -151,6 +153,7 @@ export function ExpandingChoicePicker<T extends string>({
     canStartPendingOpening,
     onCloseComplete,
     onOpenRequest,
+    onValueChange,
     onValueCommit,
     value,
   })

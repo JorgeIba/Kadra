@@ -31,7 +31,8 @@ interface UseExpandingChoicePickerControllerOptions<T extends string> {
   canStartPendingOpening?: boolean
   onCloseComplete?: () => void
   onOpenRequest?: () => void
-  onValueCommit: (value: T) => void
+  onValueChange?: (value: T) => void
+  onValueCommit?: (value: T) => void
   value: T
 }
 
@@ -39,6 +40,7 @@ export function useExpandingChoicePickerController<T extends string>({
   canStartPendingOpening,
   onCloseComplete,
   onOpenRequest,
+  onValueChange,
   onValueCommit,
   value,
 }: UseExpandingChoicePickerControllerOptions<T>) {
@@ -109,7 +111,7 @@ export function useExpandingChoicePickerController<T extends string>({
     lastHandledOutputSequenceRef.current = sequence
 
     if (displayedSelection !== valueAtOpenRef.current) {
-      onValueCommit(displayedSelection)
+      onValueCommit?.(displayedSelection)
     }
     onCloseComplete?.()
 
@@ -180,9 +182,15 @@ export function useExpandingChoicePickerController<T extends string>({
       return
     }
 
+    const didValueChange = chosenValue !== valueAtOpenRef.current
     setDisplayedSelection(chosenValue)
+
+    if (didValueChange) {
+      onValueChange?.(chosenValue)
+    }
+
     dispatch({
-      didValueChange: chosenValue !== valueAtOpenRef.current,
+      didValueChange,
       type: "OPTION_CHOSEN",
     })
   }
