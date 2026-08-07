@@ -73,7 +73,6 @@ export function MaturityScenarioControl({
     strategy,
   })
   const pickerInteraction = usePickerWithDependentContent({
-    committedValue: strategy,
     hasVisibleDependentContent: outcome !== null,
   })
 
@@ -91,10 +90,9 @@ export function MaturityScenarioControl({
           legend="Choose a maturity scenario"
           onCloseComplete={pickerInteraction.onPickerCloseComplete}
           onOpenRequest={pickerInteraction.onPickerOpenRequest}
-          onValueChange={pickerInteraction.onPickerValueChange}
           onValueCommit={onStrategyCommit}
           options={MATURITY_SCENARIO_OPTIONS}
-          value={pickerInteraction.pickerValue}
+          value={strategy}
         />
         <ProjectionStrategyOutcome
           isVisible={pickerInteraction.shouldRenderDependentContent}

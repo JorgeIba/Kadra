@@ -5,46 +5,41 @@ type PickerWithDependentContentPhase =
   | "dependent-content-exiting"
   | "picker-interaction-active"
 
-type PickerWithDependentContentEvent<T> =
+type PickerWithDependentContentEvent =
   | {
-      committedValue: T
       hasVisibleDependentContent: boolean
       type: "PICKER_OPEN_REQUESTED"
     }
   | { type: "DEPENDENT_CONTENT_EXIT_COMPLETED" }
-  | { type: "PICKER_VALUE_CHANGED"; value: T }
   | { type: "PICKER_CLOSE_COMPLETED" }
 
-interface PickerWithDependentContentState<T> {
-  pickerSelection: T
+interface PickerWithDependentContentState {
   phase: PickerWithDependentContentPhase
 }
 
-interface UsePickerWithDependentContentOptions<T> {
-  /** The authoritative value owned and committed by the caller. */
-  committedValue: T
+interface UsePickerWithDependentContentOptions {
   /** Whether the caller is currently rendering content that must exit first. */
   hasVisibleDependentContent: boolean
 }
 
 /**
- * Coordinates an externally controlled picker with dependent sibling content.
- * Visible content exits before opening; the picker previews its selection
- * locally until the caller commits a completed interaction.
+ * Coordinates a picker with dependent sibling content. It owns only the
+ * sequencing boundary: visible content exits before the picker may open, and
+ * returns once the completed picker interaction has closed.
+ *
+ * The picker itself owns its temporary selection; the caller owns its
+ * committed value and the dependent content derived from that value.
  */
-export function usePickerWithDependentContent<T>({
-  committedValue,
+export function usePickerWithDependentContent({
   hasVisibleDependentContent,
-}: UsePickerWithDependentContentOptions<T>) {
-  const [state, dispatch] = useReducer(pickerWithDependentContentReducer<T>, {
-    pickerSelection: committedValue,
+}: UsePickerWithDependentContentOptions) {
+  const [state, dispatch] = useReducer(pickerWithDependentContentReducer, {
     phase: "settled",
   })
   const isInteractionSettled = state.phase === "settled"
 
   function onPickerOpenRequest() {
     dispatch({
-      committedValue,
       hasVisibleDependentContent,
       type: "PICKER_OPEN_REQUESTED",
     })
@@ -52,10 +47,6 @@ export function usePickerWithDependentContent<T>({
 
   function onDependentContentExitComplete() {
     dispatch({ type: "DEPENDENT_CONTENT_EXIT_COMPLETED" })
-  }
-
-  function onPickerValueChange(value: T) {
-    dispatch({ type: "PICKER_VALUE_CHANGED", value })
   }
 
   function onPickerCloseComplete() {
@@ -67,8 +58,6 @@ export function usePickerWithDependentContent<T>({
     onDependentContentExitComplete,
     onPickerCloseComplete,
     onPickerOpenRequest,
-    onPickerValueChange,
-    pickerValue: isInteractionSettled ? committedValue : state.pickerSelection,
     shouldRenderDependentContent:
       isInteractionSettled && hasVisibleDependentContent,
   }
@@ -76,12 +65,12 @@ export function usePickerWithDependentContent<T>({
 
 /**
  * Keeps only the generic timing rule: dependent content exits before a picker
- * opens, and a temporary choice remains visible until that picker closes.
+ * opens and is allowed to return after that picker closes.
  */
-function pickerWithDependentContentReducer<T>(
-  state: PickerWithDependentContentState<T>,
-  event: PickerWithDependentContentEvent<T>,
-): PickerWithDependentContentState<T> {
+function pickerWithDependentContentReducer(
+  state: PickerWithDependentContentState,
+  event: PickerWithDependentContentEvent,
+): PickerWithDependentContentState {
   switch (event.type) {
     case "PICKER_OPEN_REQUESTED":
       if (state.phase !== "settled") {
@@ -89,7 +78,6 @@ function pickerWithDependentContentReducer<T>(
       }
 
       return {
-        pickerSelection: event.committedValue,
         phase: event.hasVisibleDependentContent
           ? "dependent-content-exiting"
           : "picker-interaction-active",
@@ -97,10 +85,6 @@ function pickerWithDependentContentReducer<T>(
     case "DEPENDENT_CONTENT_EXIT_COMPLETED":
       return state.phase === "dependent-content-exiting"
         ? { ...state, phase: "picker-interaction-active" }
-        : state
-    case "PICKER_VALUE_CHANGED":
-      return state.phase === "picker-interaction-active"
-        ? { ...state, pickerSelection: event.value }
         : state
     case "PICKER_CLOSE_COMPLETED":
       return state.phase === "picker-interaction-active"

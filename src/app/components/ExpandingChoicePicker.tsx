@@ -20,8 +20,7 @@ interface ExpandingChoicePickerProps<T extends string> {
   legend: string
   onCloseComplete?: () => void
   onOpenRequest?: () => void
-  onValueChange: (value: T) => void
-  onValueCommit?: (value: T) => void
+  onValueCommit: (value: T) => void
   options: readonly ExpandingChoicePickerOption<T>[]
   value: T
 }
@@ -39,57 +38,57 @@ interface PickerPresentation {
 /** Named render recipes shared by one or more choreography stages. */
 const PICKER_PRESENTATIONS = {
   singleRowReadyToOpen: {
-    areBackCardsVisible: false,
     availableAction: "request-open",
+    areBackCardsVisible: false,
     deck: "single-row",
     selectionVisible: false,
     surface: "single-row",
   },
   singleRowLocked: {
-    areBackCardsVisible: false,
     availableAction: "none",
+    areBackCardsVisible: false,
     deck: "single-row",
     selectionVisible: false,
     surface: "single-row",
   },
   singleRowWithBackCards: {
-    areBackCardsVisible: true,
     availableAction: "none",
+    areBackCardsVisible: true,
     deck: "single-row",
     selectionVisible: false,
     surface: "single-row",
   },
   stackedCardsContentHidden: {
-    areBackCardsVisible: true,
     availableAction: "none",
+    areBackCardsVisible: true,
     deck: "stacked",
     selectionVisible: false,
     surface: "card",
   },
   stackedCardsSelectionVisible: {
-    areBackCardsVisible: true,
     availableAction: "none",
+    areBackCardsVisible: true,
     deck: "stacked",
     selectionVisible: true,
     surface: "card",
   },
   expandedCardsLocked: {
-    areBackCardsVisible: true,
     availableAction: "none",
+    areBackCardsVisible: true,
     deck: "expanded",
     selectionVisible: false,
     surface: "card",
   },
   expandedCardsReadyToChoose: {
-    areBackCardsVisible: true,
     availableAction: "choose-option",
+    areBackCardsVisible: true,
     deck: "expanded",
     selectionVisible: true,
     surface: "card",
   },
   expandedCardsSelectionMoving: {
-    areBackCardsVisible: true,
     availableAction: "none",
+    areBackCardsVisible: true,
     deck: "expanded",
     selectionVisible: true,
     surface: "card",
@@ -136,7 +135,6 @@ export function ExpandingChoicePicker<T extends string>({
   legend,
   onCloseComplete,
   onOpenRequest,
-  onValueChange,
   onValueCommit,
   options,
   value,
@@ -145,6 +143,7 @@ export function ExpandingChoicePicker<T extends string>({
   const {
     choreography,
     chooseOption,
+    displayedValue,
     isCloseSettlementPending,
     requestOpen,
     stage,
@@ -152,7 +151,6 @@ export function ExpandingChoicePicker<T extends string>({
     canStartPendingOpening,
     onCloseComplete,
     onOpenRequest,
-    onValueChange,
     onValueCommit,
     value,
   })
@@ -163,7 +161,7 @@ export function ExpandingChoicePicker<T extends string>({
   } = choreography
   const presentation = getPickerPresentation(stage, isCloseSettlementPending)
   const selectedOption = options.find((option) => {
-    return option.value === value
+    return option.value === displayedValue
   })
 
   if (selectedOption === undefined) {
@@ -178,7 +176,7 @@ export function ExpandingChoicePicker<T extends string>({
           layoutTransitions={layoutTransitions}
           options={options}
           presentation={presentation}
-          selectedValue={value}
+          selectedValue={displayedValue}
           selectionLayoutId={`${pickerId}-selection`}
           stage={stage}
           onChoose={chooseOption}
