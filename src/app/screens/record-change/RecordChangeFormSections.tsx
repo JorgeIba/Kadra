@@ -18,12 +18,14 @@ import {
   type ReinvestmentBehavior,
 } from "@/domain/investments"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
+import {
+  Field,
+  FormSection,
+} from "@/app/screens/record-change/RecordChangeFormPrimitives"
+import { getFieldAccessibilityProps } from "@/app/screens/record-change/record-change-form-field-accessibility"
 import type { RecordChangeFormValues } from "@/app/screens/record-change/record-change-form-schema"
-import { cn } from "@/lib/utils"
-import { ArrowDownLeft, ArrowUpRight, Ban, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -51,37 +53,9 @@ const REINVESTMENT_BEHAVIOR_OPTIONS = [
   REINVESTMENT_BEHAVIORS.toCash,
 ] as const satisfies ReadonlyArray<ReinvestmentBehavior>
 
-const MONEY_MOVEMENT_TONE_STYLES = {
-  destructive: {
-    check: "border-destructive bg-destructive text-background",
-    icon: "border-destructive/35 bg-destructive/10 text-destructive",
-    option: "border-destructive/35 bg-destructive/10",
-  },
-  primary: {
-    check: "border-primary bg-primary text-primary-foreground",
-    icon: "border-primary/55 bg-primary/15 text-primary",
-    option: "border-primary/55 bg-primary/10",
-  },
-  success: {
-    check: "border-success bg-success text-success-foreground",
-    icon: "border-success-border bg-success-surface text-success",
-    option: "border-success-border bg-success-surface/65",
-  },
-} as const satisfies Record<MoneyMovementTone, MoneyMovementToneStyle>
-
-type MoneyMovementTone = "primary" | "success" | "destructive"
-
-interface MoneyMovementToneStyle {
-  check: string
-  icon: string
-  option: string
-}
-
 const FORM_FIELD_IDS = {
   annualRate: "record-change-annual-rate",
-  contributionAmount: "record-change-contribution-amount",
   effectiveDate: "record-change-effective-date",
-  transactionType: "record-change-transaction-type",
   investmentType: "record-change-investment-type",
   maturityDate: "record-change-maturity-date",
   paymentFrequency: "record-change-payment-frequency",
@@ -124,148 +98,6 @@ export function EffectiveDateSection({
         />
       </Field>
     </FormSection>
-  )
-}
-
-interface MoneyMovementSectionProps extends RecordChangeSectionProps {
-  availableContribution: number
-  activeBalance: number
-  transactionType: "none" | "contribution" | "withdrawal"
-}
-
-export function MoneyMovementSection({
-  availableContribution,
-  activeBalance,
-  errors,
-  transactionType,
-  register,
-}: MoneyMovementSectionProps) {
-  return (
-    <FormSection
-      title="Money movement"
-      description="Optional. Record a deposit or withdrawal on this date."
-    >
-      <div className="grid gap-2">
-        <MoneyMovementOption
-          description="Only record rate or term changes."
-          icon={<Ban className="h-4 w-4" />}
-          isSelected={transactionType === "none"}
-          label="No movement"
-          tone="primary"
-          value="none"
-          register={register}
-        />
-        <MoneyMovementOption
-          description="Add new capital to this investment."
-          icon={<ArrowDownLeft className="h-4 w-4" />}
-          isSelected={transactionType === "contribution"}
-          label="Deposit"
-          tone="success"
-          value="contribution"
-          register={register}
-        />
-        <MoneyMovementOption
-          description="Take capital out of this investment."
-          icon={<ArrowUpRight className="h-4 w-4" />}
-          isSelected={transactionType === "withdrawal"}
-          label="Withdrawal"
-          tone="destructive"
-          value="withdrawal"
-          register={register}
-        />
-      </div>
-
-      <MoneyMovementDetails
-        activeBalance={activeBalance}
-        availableContribution={availableContribution}
-        amountError={errors.contributionAmount?.message}
-        transactionType={transactionType}
-        register={register}
-      />
-    </FormSection>
-  )
-}
-
-/**
- * Everything revealed below the movement picker for a selected deposit or
- * withdrawal. Keeping this region together gives its future enter/exit
- * choreography one stable sibling boundary.
- */
-function MoneyMovementDetails({
-  activeBalance,
-  amountError,
-  availableContribution,
-  register,
-  transactionType,
-}: {
-  activeBalance: number
-  amountError: string | undefined
-  availableContribution: number
-  register: UseFormRegister<RecordChangeFormValues>
-  transactionType: "none" | "contribution" | "withdrawal"
-}) {
-  let details: {
-    amount: number
-    amountLabel: string
-    notice: string
-    tone: "success" | "destructive"
-  }
-
-  switch (transactionType) {
-    case "none":
-      return null
-    case "contribution":
-      details = {
-        amount: availableContribution,
-        amountLabel: "Added amount",
-        notice: "Net capital contributed on this date:",
-        tone: "success",
-      }
-      break
-    case "withdrawal":
-      details = {
-        amount: activeBalance,
-        amountLabel: "Withdrawn amount",
-        notice: "Available active balance to withdraw on this date:",
-        tone: "destructive",
-      }
-      break
-  }
-
-  return (
-    <div className="space-y-4">
-      <InlineNotice tone={details.tone}>
-        {details.notice}{" "}
-        <span className="font-semibold text-foreground">
-          <MoneyAmount value={details.amount} />
-        </span>
-      </InlineNotice>
-
-      <Field
-        error={amountError}
-        label={details.amountLabel}
-        htmlFor={FORM_FIELD_IDS.contributionAmount}
-      >
-        <div className="relative flex items-center">
-          <span className="absolute left-3.5 border-r py-1 pr-3 text-xs font-semibold text-muted-foreground select-none">
-            MXN $
-          </span>
-          <Input
-            id={FORM_FIELD_IDS.contributionAmount}
-            type="number"
-            inputMode="decimal"
-            min="0"
-            placeholder="2500"
-            className="h-12 pl-20 text-lg font-semibold"
-            {...getFieldAccessibilityProps(
-              FORM_FIELD_IDS.contributionAmount,
-              amountError,
-            )}
-            {...register("contributionAmount", { valueAsNumber: true })}
-          />
-        </div>
-      </Field>
-    </div>
   )
 }
 
@@ -616,115 +448,6 @@ export function RecordChangeFormActions({
   )
 }
 
-function FormSection({
-  children,
-  description,
-  title,
-}: {
-  children: ReactNode
-  description: string
-  title: string
-}) {
-  return (
-    <section className="space-y-4 border-t border-border/70 py-5 first:border-t-0">
-      <div className="space-y-1.5">
-        <h2 className="text-base font-bold leading-tight text-foreground">
-          {title}
-        </h2>
-        <p className="text-sm leading-6 text-muted-foreground">{description}</p>
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
-  )
-}
-
-function MoneyMovementOption({
-  description,
-  icon,
-  isSelected,
-  label,
-  register,
-  tone,
-  value,
-}: {
-  description: string
-  icon: ReactNode
-  isSelected: boolean
-  label: string
-  register: UseFormRegister<RecordChangeFormValues>
-  tone: MoneyMovementTone
-  value: "none" | "contribution" | "withdrawal"
-}) {
-  const toneStyles = MONEY_MOVEMENT_TONE_STYLES[tone]
-
-  return (
-    <label
-      className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-lg border border-border/70 bg-card/45 p-3 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:outline-none hover:bg-muted/25",
-        isSelected && toneStyles.option,
-      )}
-    >
-      <input
-        type="radio"
-        value={value}
-        className="sr-only"
-        {...register("transactionType")}
-      />
-
-      <span
-        className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border/70 bg-muted/35 text-muted-foreground",
-          isSelected && toneStyles.icon,
-        )}
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
-
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold leading-5 text-foreground">
-          {label}
-        </span>
-        <span className="block text-xs leading-5 text-muted-foreground">
-          {description}
-        </span>
-      </span>
-
-      <span
-        className={cn(
-          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border/70 text-background",
-          isSelected && toneStyles.check,
-        )}
-        aria-hidden="true"
-      >
-        {isSelected ? <Check className="h-3.5 w-3.5" /> : null}
-      </span>
-    </label>
-  )
-}
-
-function InlineNotice({
-  children,
-  tone,
-}: {
-  children: ReactNode
-  tone: "success" | "destructive"
-}) {
-  return (
-    <p
-      className={cn(
-        "rounded-lg border px-3 py-2 text-xs leading-5",
-        tone === "success" &&
-          "border-success-border bg-success-surface text-success",
-        tone === "destructive" &&
-          "border-destructive/30 bg-destructive/10 text-destructive",
-      )}
-    >
-      {children}
-    </p>
-  )
-}
-
 function SummaryItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-md border border-border/60 bg-background/35 px-3 py-2">
@@ -780,41 +503,4 @@ function getMovementSummary({
 
 function isFinitePositiveNumber(value: number | undefined): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0
-}
-
-function Field({
-  children,
-  error,
-  htmlFor,
-  label,
-}: {
-  children: ReactNode
-  error?: string
-  htmlFor: string
-  label: string
-}) {
-  const errorId = `${htmlFor}-error`
-
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
-      {children}
-      {error === undefined ? null : (
-        <p id={errorId} className="text-sm leading-5 text-destructive">
-          {error}
-        </p>
-      )}
-    </div>
-  )
-}
-
-function getFieldAccessibilityProps(fieldId: string, error?: string) {
-  if (error === undefined) {
-    return {}
-  }
-
-  return {
-    "aria-describedby": `${fieldId}-error`,
-    "aria-invalid": true,
-  } as const
 }

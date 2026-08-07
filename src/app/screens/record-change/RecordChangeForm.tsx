@@ -16,10 +16,10 @@ import {
 import {
   CurrentTermsSection,
   EffectiveDateSection,
-  MoneyMovementSection,
   RecordChangeFormActions,
   RecordChangeSummary,
 } from "@/app/screens/record-change/RecordChangeFormSections"
+import { MoneyMovementSection } from "@/app/screens/record-change/MoneyMovementSection"
 import {
   createRecordChangeFormSchema,
   type RecordChangeFormValues,
@@ -179,9 +179,9 @@ export function RecordChangeForm({
           <MoneyMovementSection
             availableContribution={availableContribution}
             activeBalance={activeBalance}
+            control={control}
             errors={errors}
-            transactionType={transactionType}
-            register={register}
+            setValue={setValue}
           />
 
           <CurrentTermsSection
