@@ -111,6 +111,7 @@ export function MoneyMovementSection({
     >
       <ExpandingChoicePicker
         ariaLabel="Money movement"
+        animationSpeed="quick"
         canStartPendingOpening={pickerInteraction.canStartPendingPickerOpening}
         legend="Choose a money movement"
         onCloseComplete={pickerInteraction.onPickerCloseComplete}
