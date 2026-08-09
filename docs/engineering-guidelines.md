@@ -50,6 +50,12 @@ Current recommendation:
 - Add a short inline comment when code exists mainly for accessibility behavior.
 - Keep the comment focused on why the behavior exists, such as keyboard focus or screen-reader semantics.
 
+## Money Privacy
+
+- Money masking is visual privacy for casual on-screen use, not cryptographic protection.
+- The real amount remains in the browser DOM while the visual mask is active and during transitions, so `MoneyAmount` is not a security boundary.
+- If a workflow requires confidentiality from browser inspection, the value must not be sent to the client until it is explicitly needed.
+
 ## Learning Explanations
 
 - Explain new code as a story before explaining individual lines.

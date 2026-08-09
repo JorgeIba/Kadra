@@ -17,11 +17,12 @@ import {
 import {
   isPickerContentAnimationStep,
   isPickerLayoutAnimationStep,
-  PICKER_CONTENT_ANIMATION,
-  PICKER_LAYOUT_ANIMATION,
+  PICKER_ANIMATION_PROFILES,
+  type PickerAnimationSpeed,
 } from "@/app/components/expanding-choice-picker-animations"
 
 interface UseExpandingChoicePickerChoreographyOptions {
+  animationSpeed: PickerAnimationSpeed
   onTransitionSequenceFastForwarded: (step: PickerTransitionStep) => void
   onTransitionStepCompleted: (step: PickerTransitionStep) => void
   stage: PickerStage
@@ -35,15 +36,17 @@ interface UseExpandingChoicePickerChoreographyOptions {
  * visual sequence while preserving the machine's normal settlement.
  */
 export function useExpandingChoicePickerChoreography({
+  animationSpeed,
   onTransitionSequenceFastForwarded,
   onTransitionStepCompleted,
   stage,
 }: UseExpandingChoicePickerChoreographyOptions) {
   const prefersReducedMotion = useReducedMotion() ?? false
   const [choiceContentAnimationScope, animateChoiceContent] = useAnimate()
+  const animationProfile = PICKER_ANIMATION_PROFILES[animationSpeed]
   const layoutTransitions = prefersReducedMotion
-    ? PICKER_LAYOUT_ANIMATION.transitions.reducedMotion
-    : PICKER_LAYOUT_ANIMATION.transitions.standard
+    ? animationProfile.layout.transitions.reducedMotion
+    : animationProfile.layout.transitions.standard
 
   /**
    * Content steps report completion when Motion's imperative animation control
@@ -59,8 +62,8 @@ export function useExpandingChoicePickerChoreography({
     let isCancelled = false
     const contentAnimation = animateChoiceContent(
       "[data-choice-content]",
-      PICKER_CONTENT_ANIMATION.valuesByStep[contentStep],
-      PICKER_CONTENT_ANIMATION.transition,
+      animationProfile.content.valuesByStep[contentStep],
+      animationProfile.content.transition,
     )
 
     contentAnimation.then(() => {
@@ -74,6 +77,7 @@ export function useExpandingChoicePickerChoreography({
     }
   }, [
     animateChoiceContent,
+    animationProfile,
     onTransitionStepCompleted,
     prefersReducedMotion,
     stage,
@@ -92,10 +96,10 @@ export function useExpandingChoicePickerChoreography({
 
     const watchdogTimeoutId = window.setTimeout(() => {
       onTransitionStepCompleted(layoutStep)
-    }, PICKER_LAYOUT_ANIMATION.completionWatchdogDelayByStep[layoutStep])
+    }, animationProfile.layout.completionWatchdogDelayByStep[layoutStep])
 
     return () => window.clearTimeout(watchdogTimeoutId)
-  }, [onTransitionStepCompleted, prefersReducedMotion, stage])
+  }, [animationProfile, onTransitionStepCompleted, prefersReducedMotion, stage])
 
   /**
    * Reduced-motion steps report completion by fast-forwarding on the next

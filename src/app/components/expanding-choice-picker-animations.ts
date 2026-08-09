@@ -12,12 +12,12 @@ import {
   type PickerTransitionStep,
 } from "@/app/components/expanding-choice-picker-machine"
 
-const PICKER_ANIMATION_DURATIONS_IN_SECONDS = {
-  choiceContentVisibility: 0.18,
-  choiceSurfaceMorph: 0.26,
-  deckArrangement: 0.24,
-  selectionIndicatorMove: 0.2,
-} as const
+interface PickerAnimationDurationsInSeconds {
+  choiceContentVisibility: number
+  choiceSurfaceMorph: number
+  deckArrangement: number
+  selectionIndicatorMove: number
+}
 
 /** Partitions transition steps by the animation mechanism that owns them. */
 const PICKER_CONTENT_ANIMATION_STEPS = [
@@ -83,19 +83,23 @@ const SHOW_OPTION_CONTENT_ANIMATION_VALUES = {
 } satisfies OptionContentAnimationValues
 
 /** Imperative option-content animation driven and completed by `useAnimate`. */
-export const PICKER_CONTENT_ANIMATION = {
-  transition: {
-    duration: PICKER_ANIMATION_DURATIONS_IN_SECONDS.choiceContentVisibility,
-    ease: [0.22, 1, 0.36, 1],
-    type: "tween",
-  },
-  valuesByStep: {
-    "opening-content-hide": HIDE_OPTION_CONTENT_ANIMATION_VALUES,
-    "opening-content-show": SHOW_OPTION_CONTENT_ANIMATION_VALUES,
-    "closing-content-hide": HIDE_OPTION_CONTENT_ANIMATION_VALUES,
-    "closing-content-show": SHOW_OPTION_CONTENT_ANIMATION_VALUES,
-  },
-} satisfies OptionContentAnimationConfig
+function createPickerContentAnimation(
+  durations: PickerAnimationDurationsInSeconds,
+) {
+  return {
+    transition: {
+      duration: durations.choiceContentVisibility,
+      ease: [0.22, 1, 0.36, 1],
+      type: "tween",
+    },
+    valuesByStep: {
+      "opening-content-hide": HIDE_OPTION_CONTENT_ANIMATION_VALUES,
+      "opening-content-show": SHOW_OPTION_CONTENT_ANIMATION_VALUES,
+      "closing-content-hide": HIDE_OPTION_CONTENT_ANIMATION_VALUES,
+      "closing-content-show": SHOW_OPTION_CONTENT_ANIMATION_VALUES,
+    },
+  } satisfies OptionContentAnimationConfig
+}
 
 /** Motion transitions consumed by the deck, option surfaces, and indicator. */
 export interface PickerLayoutTransitions {
@@ -112,11 +116,6 @@ interface PickerLayoutAnimationConfig {
   completionWatchdogDelayByStep: Record<PickerLayoutAnimationStep, number>
 }
 
-// Deck changes move both the grid and its choices; the watchdog uses the slower duration.
-const LONGEST_DECK_LAYOUT_TRANSITION_DURATION_SECONDS = Math.max(
-  PICKER_ANIMATION_DURATIONS_IN_SECONDS.deckArrangement,
-  PICKER_ANIMATION_DURATIONS_IN_SECONDS.choiceSurfaceMorph,
-)
 const LAYOUT_COMPLETION_WATCHDOG_MARGIN_MS = 20
 
 function getLayoutCompletionWatchdogDelayMs(animationDurationSeconds: number) {
@@ -130,46 +129,88 @@ const REDUCED_MOTION_TRANSITION = { duration: 0 } satisfies Transition
  * Declarative layout recipes and their completion policy. Motion's callback
  * normally completes each step; watchdog delays only prevent a stalled machine.
  */
-export const PICKER_LAYOUT_ANIMATION = {
-  transitions: {
-    reducedMotion: {
-      choiceSurfaceMorph: REDUCED_MOTION_TRANSITION,
-      deckArrangement: REDUCED_MOTION_TRANSITION,
-      selectionIndicatorMove: REDUCED_MOTION_TRANSITION,
+function createPickerLayoutAnimation(
+  durations: PickerAnimationDurationsInSeconds,
+) {
+  // Deck changes move both the grid and its choices; the watchdog uses the slower duration.
+  const longestDeckLayoutTransitionDurationSeconds = Math.max(
+    durations.deckArrangement,
+    durations.choiceSurfaceMorph,
+  )
+
+  return {
+    transitions: {
+      reducedMotion: {
+        choiceSurfaceMorph: REDUCED_MOTION_TRANSITION,
+        deckArrangement: REDUCED_MOTION_TRANSITION,
+        selectionIndicatorMove: REDUCED_MOTION_TRANSITION,
+      },
+      standard: {
+        choiceSurfaceMorph: {
+          bounce: 0.02,
+          duration: durations.choiceSurfaceMorph,
+          type: "spring",
+        },
+        deckArrangement: {
+          bounce: 0.02,
+          duration: durations.deckArrangement,
+          type: "spring",
+        },
+        selectionIndicatorMove: {
+          bounce: 0.02,
+          duration: durations.selectionIndicatorMove,
+          type: "spring",
+        },
+      },
     },
-    standard: {
-      choiceSurfaceMorph: {
-        bounce: 0.02,
-        duration: PICKER_ANIMATION_DURATIONS_IN_SECONDS.choiceSurfaceMorph,
-        type: "spring",
-      },
-      deckArrangement: {
-        bounce: 0.02,
-        duration: PICKER_ANIMATION_DURATIONS_IN_SECONDS.deckArrangement,
-        type: "spring",
-      },
-      selectionIndicatorMove: {
-        bounce: 0.02,
-        duration: PICKER_ANIMATION_DURATIONS_IN_SECONDS.selectionIndicatorMove,
-        type: "spring",
-      },
+    completionWatchdogDelayByStep: {
+      "opening-row-to-card": getLayoutCompletionWatchdogDelayMs(
+        durations.choiceSurfaceMorph,
+      ),
+      "opening-deck-expand": getLayoutCompletionWatchdogDelayMs(
+        longestDeckLayoutTransitionDurationSeconds,
+      ),
+      "moving-selection": getLayoutCompletionWatchdogDelayMs(
+        durations.selectionIndicatorMove,
+      ),
+      "closing-deck-stack": getLayoutCompletionWatchdogDelayMs(
+        longestDeckLayoutTransitionDurationSeconds,
+      ),
+      "closing-card-to-row": getLayoutCompletionWatchdogDelayMs(
+        durations.choiceSurfaceMorph,
+      ),
     },
-  },
-  completionWatchdogDelayByStep: {
-    "opening-row-to-card": getLayoutCompletionWatchdogDelayMs(
-      PICKER_ANIMATION_DURATIONS_IN_SECONDS.choiceSurfaceMorph,
-    ),
-    "opening-deck-expand": getLayoutCompletionWatchdogDelayMs(
-      LONGEST_DECK_LAYOUT_TRANSITION_DURATION_SECONDS,
-    ),
-    "moving-selection": getLayoutCompletionWatchdogDelayMs(
-      PICKER_ANIMATION_DURATIONS_IN_SECONDS.selectionIndicatorMove,
-    ),
-    "closing-deck-stack": getLayoutCompletionWatchdogDelayMs(
-      LONGEST_DECK_LAYOUT_TRANSITION_DURATION_SECONDS,
-    ),
-    "closing-card-to-row": getLayoutCompletionWatchdogDelayMs(
-      PICKER_ANIMATION_DURATIONS_IN_SECONDS.choiceSurfaceMorph,
-    ),
-  },
-} satisfies PickerLayoutAnimationConfig
+  } satisfies PickerLayoutAnimationConfig
+}
+
+interface PickerAnimationProfile {
+  content: OptionContentAnimationConfig
+  layout: PickerLayoutAnimationConfig
+}
+
+function createPickerAnimationProfile(
+  durations: PickerAnimationDurationsInSeconds,
+) {
+  return {
+    content: createPickerContentAnimation(durations),
+    layout: createPickerLayoutAnimation(durations),
+  } satisfies PickerAnimationProfile
+}
+
+/** Timing profiles let each picker match the urgency of the surrounding task. */
+export const PICKER_ANIMATION_PROFILES = {
+  standard: createPickerAnimationProfile({
+    choiceContentVisibility: 0.18,
+    choiceSurfaceMorph: 0.26,
+    deckArrangement: 0.24,
+    selectionIndicatorMove: 0.2,
+  }),
+  quick: createPickerAnimationProfile({
+    choiceContentVisibility: 0.13,
+    choiceSurfaceMorph: 0.2,
+    deckArrangement: 0.18,
+    selectionIndicatorMove: 0.16,
+  }),
+} as const satisfies Record<string, PickerAnimationProfile>
+
+export type PickerAnimationSpeed = keyof typeof PICKER_ANIMATION_PROFILES

@@ -20,9 +20,11 @@ import {
   pickerReducer,
   type PickerTransitionStep,
 } from "@/app/components/expanding-choice-picker-machine"
+import { type PickerAnimationSpeed } from "@/app/components/expanding-choice-picker-animations"
 import { useExpandingChoicePickerChoreography } from "@/app/components/use-expanding-choice-picker-choreography"
 
 interface UseExpandingChoicePickerControllerOptions<T extends string> {
+  animationSpeed: PickerAnimationSpeed
   /**
    * When provided, this only releases an opening request already waiting for
    * external readiness; it does not decide whether a collapsed picker accepts
@@ -37,6 +39,7 @@ interface UseExpandingChoicePickerControllerOptions<T extends string> {
 }
 
 export function useExpandingChoicePickerController<T extends string>({
+  animationSpeed,
   canStartPendingOpening,
   onCloseComplete,
   onOpenRequest,
@@ -79,6 +82,7 @@ export function useExpandingChoicePickerController<T extends string>({
   )
 
   const choreography = useExpandingChoicePickerChoreography({
+    animationSpeed,
     onTransitionSequenceFastForwarded: fastForwardTransitionSequence,
     onTransitionStepCompleted: completeTransitionStep,
     stage: state.stage,

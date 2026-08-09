@@ -21,6 +21,7 @@ type MoneyMovementType = RecordChangeFormValues["transactionType"]
 
 const MONEY_MOVEMENT_OPTIONS = [
   {
+    compactDescription: "No change",
     description: "Only record rate or term changes.",
     icon: Ban,
     label: "No movement",
@@ -28,6 +29,7 @@ const MONEY_MOVEMENT_OPTIONS = [
     value: "none",
   },
   {
+    compactDescription: "Add capital",
     description: "Add new capital to this investment.",
     icon: ArrowDownLeft,
     label: "Deposit",
@@ -35,6 +37,7 @@ const MONEY_MOVEMENT_OPTIONS = [
     value: "contribution",
   },
   {
+    compactDescription: "Cash out",
     description: "Take capital out of this investment.",
     icon: ArrowUpRight,
     label: "Withdrawal",
@@ -111,6 +114,7 @@ export function MoneyMovementSection({
     >
       <ExpandingChoicePicker
         ariaLabel="Money movement"
+        animationSpeed="quick"
         canStartPendingOpening={pickerInteraction.canStartPendingPickerOpening}
         legend="Choose a money movement"
         onCloseComplete={pickerInteraction.onPickerCloseComplete}

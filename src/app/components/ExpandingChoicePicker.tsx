@@ -3,10 +3,15 @@ import { ChevronDown, type LucideIcon } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { type PickerStage } from "@/app/components/expanding-choice-picker-machine"
 import { useExpandingChoicePickerController } from "@/app/components/use-expanding-choice-picker-controller"
-import { type PickerLayoutTransitions } from "@/app/components/expanding-choice-picker-animations"
+import {
+  type PickerAnimationSpeed,
+  type PickerLayoutTransitions,
+} from "@/app/components/expanding-choice-picker-animations"
 import { cn } from "@/lib/utils"
 
 export interface ExpandingChoicePickerOption<T extends string> {
+  /** Copy tailored for the narrower card and stack presentations. */
+  compactDescription?: string
   description: string
   icon: LucideIcon
   label: string
@@ -16,6 +21,7 @@ export interface ExpandingChoicePickerOption<T extends string> {
 
 interface ExpandingChoicePickerProps<T extends string> {
   ariaLabel: string
+  animationSpeed?: PickerAnimationSpeed
   canStartPendingOpening?: boolean
   legend: string
   onCloseComplete?: () => void
@@ -132,6 +138,7 @@ function getPickerPresentation(
 
 export function ExpandingChoicePicker<T extends string>({
   ariaLabel,
+  animationSpeed = "standard",
   canStartPendingOpening,
   legend,
   onCloseComplete,
@@ -150,6 +157,7 @@ export function ExpandingChoicePicker<T extends string>({
     requestOpen,
     stage,
   } = useExpandingChoicePickerController({
+    animationSpeed,
     canStartPendingOpening,
     onCloseComplete,
     onOpenRequest,
@@ -457,6 +465,10 @@ function ChoiceContent<T extends string>({
   option: ExpandingChoicePickerOption<T>
   usesSingleRowLayout: boolean
 }) {
+  const descriptionForCurrentLayout = usesSingleRowLayout
+    ? option.description
+    : (option.compactDescription ?? option.description)
+
   return (
     <span
       data-choice-content
@@ -481,7 +493,7 @@ function ChoiceContent<T extends string>({
           {option.label}
         </span>
         <span className="block truncate text-sm leading-5 text-muted-foreground">
-          {option.description}
+          {descriptionForCurrentLayout}
         </span>
       </span>
       {usesSingleRowLayout ? (

@@ -189,6 +189,9 @@ body {
     display: inline-grid;
     align-items: baseline;
     font-variant-numeric: tabular-nums;
+    isolation: isolate;
+    overflow: hidden;
+    position: relative;
   }
 
   .money-amount[data-privacy="hidden"] {
@@ -197,6 +200,34 @@ body {
 
   .money-amount-value {
     grid-area: 1 / 1;
+    position: relative;
+    z-index: 0;
+  }
+
+  .money-amount-visible-value {
+    z-index: 1;
+  }
+
+  .money-amount-hidden-value {
+    color: var(--muted-foreground);
+  }
+
+  .money-privacy-veil {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklch, var(--primary) 72%, transparent),
+      transparent
+    );
+    border-radius: 999px;
+    bottom: -25%;
+    filter: blur(4px);
+    height: 150%;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    top: -25%;
+    z-index: 2;
   }
 
   @media (prefers-reduced-motion: no-preference) {
