@@ -1,10 +1,12 @@
 import {
+  compareCalendarDatesAscending,
   DAY_COUNTS,
   getUpcomingInvestmentProjectedEarningsForDays,
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
   PAYMENT_FREQUENCY_LABELS,
   resolveInvestment,
+  toDateString,
   type Investment,
 } from "@/domain/investments"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
@@ -28,6 +30,12 @@ export function InvestmentPreview({
   const paymentFrequency =
     PAYMENT_FREQUENCY_LABELS[resolvedInvestment.paymentFrequency]
   const paymentFrequencyLabel = paymentFrequency.toLowerCase()
+  const asOfDateString = toDateString(asOfDate)
+  const shouldShowMaturityCountdown =
+    isFixedTerm &&
+    compareCalendarDatesAscending(asOfDateString, resolvedInvestment.endDate) <=
+      0 &&
+    resolvedInvestment.daysRemaining <= 90
 
   return (
     <Card className="border-border/80 bg-card/55">
@@ -62,7 +70,7 @@ export function InvestmentPreview({
               estimated return
             </p>
           ) : null}
-          {isFixedTerm && resolvedInvestment.daysRemaining <= 90 ? (
+          {shouldShowMaturityCountdown ? (
             <p className="mt-3 text-xs font-medium leading-5 text-muted-foreground">
               {formatMaturityCountdown(resolvedInvestment.daysRemaining)}
             </p>
