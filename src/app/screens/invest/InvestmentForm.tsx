@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from "react"
-import { Autocomplete } from "@base-ui/react/autocomplete"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -24,6 +23,7 @@ import {
   investmentFormSchema,
   type InvestmentFormValues,
 } from "@/app/screens/invest/investment-form-schema"
+import { AutocompleteField } from "@/components/ui/autocomplete-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -197,7 +197,7 @@ export function InvestmentForm({
                 control={control}
                 name="institutionName"
                 render={({ field: institutionNameField }) => (
-                  <InstitutionCombobox
+                  <AutocompleteField
                     id={FORM_FIELD_IDS.institutionName}
                     name={institutionNameField.name}
                     placeholder="CETES Directo"
@@ -555,76 +555,6 @@ export function InvestmentForm({
         onConfirm={() => onCancel?.()}
       />
     </>
-  )
-}
-
-function InstitutionCombobox({
-  id,
-  name,
-  onBlur,
-  onValueChange,
-  placeholder,
-  suggestions,
-  value,
-  ...accessibilityProps
-}: {
-  id: string
-  name: string
-  placeholder: string
-  suggestions: string[]
-  value: string
-  onBlur: () => void
-  onValueChange: (value: string) => void
-  "aria-describedby"?: string
-  "aria-invalid"?: boolean
-}) {
-  return (
-    <Autocomplete.Root
-      items={suggestions}
-      value={value}
-      onValueChange={onValueChange}
-      limit={6}
-      autoHighlight
-      filter={(suggestion, query) => {
-        return suggestion
-          .toLocaleLowerCase()
-          .includes(query.trim().toLocaleLowerCase())
-      }}
-    >
-      <Autocomplete.Input
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        className={cn(
-          "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        )}
-        value={value}
-        onBlur={onBlur}
-        {...accessibilityProps}
-      />
-
-      <Autocomplete.Portal>
-        <Autocomplete.Positioner
-          sideOffset={4}
-          align="start"
-          className="isolate z-50"
-        >
-          <Autocomplete.Popup className="relative isolate z-50 max-h-48 w-(--anchor-width) min-w-48 origin-(--transform-origin) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
-            <Autocomplete.List>
-              {(suggestion: string) => (
-                <Autocomplete.Item
-                  key={suggestion}
-                  value={suggestion}
-                  className="block w-full cursor-default rounded-md px-2 py-1.5 text-left text-sm outline-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-accent data-selected:text-accent-foreground"
-                >
-                  {suggestion}
-                </Autocomplete.Item>
-              )}
-            </Autocomplete.List>
-          </Autocomplete.Popup>
-        </Autocomplete.Positioner>
-      </Autocomplete.Portal>
-    </Autocomplete.Root>
   )
 }
 
