@@ -7,7 +7,10 @@ import {
   resolveInvestment,
   type Investment,
 } from "@/domain/investments"
-import { getSearchedInvestments } from "@/app/screens/assets/assets-search"
+import {
+  getAssetSearchSuggestions,
+  getSearchedInvestments,
+} from "@/app/screens/assets/assets-search"
 
 const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 
@@ -58,6 +61,44 @@ describe("asset search", () => {
       "cetes",
     ])
   })
+
+  it("does not return suggestions until the query has two characters", () => {
+    expect(getAssetSearchSuggestions(investments, "K")).toEqual([])
+    expect(getAssetSearchSuggestions(investments, "  K ")).toEqual([])
+  })
+
+  it("suggests names and institutions with normalized, case-insensitive deduplication", () => {
+    expect(getAssetSearchSuggestions(investments, "Klar")).toEqual([
+      "Klar",
+      "Klar 2",
+    ])
+
+    expect(getAssetSearchSuggestions(investments, "CETES")).toEqual(["CETÉS"])
+  })
+
+  it("does not suggest values found only in notes", () => {
+    expect(getAssetSearchSuggestions(investments, "emergencia")).toEqual([])
+  })
+
+  it("limits suggestions to six deterministic results", () => {
+    const manyInvestments = Array.from({ length: 8 }, (_, index) =>
+      buildOpenEndedInvestment({
+        id: `provider-${index}`,
+        institutionName: `Provider ${index}`,
+        name: `Asset ${index}`,
+        notes: "",
+      }),
+    )
+
+    expect(getAssetSearchSuggestions(manyInvestments, "provider")).toEqual([
+      "Provider 0",
+      "Provider 1",
+      "Provider 2",
+      "Provider 3",
+      "Provider 4",
+      "Provider 5",
+    ])
+  })
 })
 
 const investments: Investment[] = [
@@ -69,7 +110,7 @@ const investments: Investment[] = [
   }),
   buildOpenEndedInvestment({
     id: "klar",
-    institutionName: "Klar",
+    institutionName: "klar",
     name: "Klar",
     notes: "Emergency savings",
   }),
