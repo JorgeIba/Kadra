@@ -10,6 +10,8 @@ import {
 import { cn } from "@/lib/utils"
 
 export interface ExpandingChoicePickerOption<T extends string> {
+  /** Copy tailored for the narrower card and stack presentations. */
+  compactDescription?: string
   description: string
   icon: LucideIcon
   label: string
@@ -463,6 +465,10 @@ function ChoiceContent<T extends string>({
   option: ExpandingChoicePickerOption<T>
   usesSingleRowLayout: boolean
 }) {
+  const descriptionForCurrentLayout = usesSingleRowLayout
+    ? option.description
+    : (option.compactDescription ?? option.description)
+
   return (
     <span
       data-choice-content
@@ -487,7 +493,7 @@ function ChoiceContent<T extends string>({
           {option.label}
         </span>
         <span className="block truncate text-sm leading-5 text-muted-foreground">
-          {option.description}
+          {descriptionForCurrentLayout}
         </span>
       </span>
       {usesSingleRowLayout ? (
