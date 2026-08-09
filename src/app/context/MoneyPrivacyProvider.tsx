@@ -7,9 +7,7 @@ import {
   readMoneyPrivacyState,
   saveMoneyPrivacyState,
 } from "@/app/storage/money-privacy-storage"
-import { formatMxn } from "@/lib/formatters"
-
-const HIDDEN_MONEY_MASK = "$••••••"
+import { formatHiddenMoney, formatMxn } from "@/lib/formatters"
 
 export function MoneyPrivacyProvider({ children }: { children: ReactNode }) {
   const [isMoneyHidden, setIsMoneyHidden] = useState(readMoneyPrivacyState)
@@ -21,11 +19,7 @@ export function MoneyPrivacyProvider({ children }: { children: ReactNode }) {
   const value = useMemo<MoneyPrivacyContextValue>(
     () => ({
       formatMoney(value) {
-        if (!isMoneyHidden) {
-          return formatMxn(value)
-        }
-
-        return value < 0 ? `-${HIDDEN_MONEY_MASK}` : HIDDEN_MONEY_MASK
+        return isMoneyHidden ? formatHiddenMoney(value) : formatMxn(value)
       },
       isMoneyHidden,
       toggleMoneyVisibility() {

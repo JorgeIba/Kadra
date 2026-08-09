@@ -24,8 +24,14 @@ const displayDateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 })
 
+const HIDDEN_MONEY_MASK = "$••••••"
+
 export function formatMxn(value: number): string {
   return mxnFormatter.format(value)
+}
+
+export function formatHiddenMoney(value: number): string {
+  return value < 0 ? `-${HIDDEN_MONEY_MASK}` : HIDDEN_MONEY_MASK
 }
 
 export function formatPercentage(
