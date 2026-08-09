@@ -494,6 +494,8 @@ export function InvestmentForm({
             </Field>
           </FormSection>
 
+          <InvestmentFormPreview investment={previewInvestment} />
+
           <FormSection
             title="Notes"
             description="Optional context for future you."
@@ -508,8 +510,6 @@ export function InvestmentForm({
             </Field>
           </FormSection>
         </div>
-
-        <InvestmentFormPreview investment={previewInvestment} />
 
         <div className="space-y-3">
           {submitGuidance === undefined ? null : (
