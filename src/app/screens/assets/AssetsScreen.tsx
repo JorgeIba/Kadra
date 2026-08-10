@@ -106,6 +106,7 @@ export function AssetsScreen({
   )
   const shownCountLabel = `${sortedInvestments.length} shown`
   const hasActiveSearch = searchQuery.trim() !== ""
+  const hasNoSearchMatches = hasActiveSearch && matchingInvestments.length === 0
   const listTransitionKey = [
     groupByOption,
     sortedInvestments.length === 0 ? "empty" : "populated",
@@ -207,7 +208,7 @@ export function AssetsScreen({
 
           <AnimatedListSurface transitionKey={listTransitionKey}>
             {sortedInvestments.length === 0 ? (
-              hasActiveSearch ? (
+              hasNoSearchMatches ? (
                 <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center">
                   <p className="text-sm text-muted-foreground">
                     No investments match your search.
@@ -223,8 +224,21 @@ export function AssetsScreen({
                   </Button>
                 </div>
               ) : (
-                <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center text-sm text-muted-foreground">
-                  No investments match this filter.
+                <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {hasActiveSearch
+                      ? "No search results match this filter."
+                      : "No investments match this filter."}
+                  </p>
+                  <Button
+                    className="mt-3 h-11"
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setFilterOption(ASSET_FILTER_OPTIONS.all)}
+                  >
+                    Show all
+                  </Button>
                 </div>
               )
             ) : (
