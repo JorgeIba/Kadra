@@ -126,17 +126,17 @@ export function AssetsScreen({
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <label
-                    className="flex items-center gap-1.5 text-[0.68rem] leading-none font-medium text-muted-foreground"
+                    className="flex items-center gap-1.5 text-[0.68rem] leading-[1.35] font-medium tracking-[0.14em] text-muted-foreground uppercase"
                     htmlFor="assets-search"
                   >
-                    <span className="grid size-3.5 shrink-0 place-items-center text-primary/80">
+                    <span className="grid size-3.5 shrink-0 place-items-center text-muted-foreground">
                       <Search className="size-3.5" aria-hidden="true" />
                     </span>
                     Search
                   </label>
                   <AutocompleteField
                     id="assets-search"
-                    className="h-11 border-border/80 bg-background/35 px-3 text-foreground hover:border-primary/25 hover:bg-muted/45 focus-visible:border-primary/35 focus-visible:bg-muted/55 focus-visible:ring-3 focus-visible:ring-primary/20"
+                    className="h-10 border-border/80 bg-background/35 px-3 text-sm text-foreground hover:border-primary/25 hover:bg-muted/45 focus-visible:border-primary/35 focus-visible:bg-muted/55 focus-visible:ring-3 focus-visible:ring-primary/20"
                     clearable
                     clearButtonLabel="Clear search"
                     filterSuggestion={null}
@@ -147,7 +147,7 @@ export function AssetsScreen({
                   />
                 </div>
 
-                <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2">
+                <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2 border-t border-border/70 pt-3">
                   <LabeledSelectControl
                     ariaLabel="Filter investments"
                     fallbackLabel="Select filter"
