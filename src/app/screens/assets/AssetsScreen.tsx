@@ -1,5 +1,11 @@
 import { useState } from "react"
 import { ArrowUpDown, Building2, Filter, Search } from "lucide-react"
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useReducedMotion,
+} from "motion/react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
@@ -43,6 +49,16 @@ import {
 } from "@/app/screens/assets/assets-search"
 import { createGroups } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
+
+const ASSETS_LIST_LAYOUT_TRANSITION = {
+  duration: 0.24,
+  ease: [0.22, 1, 0.36, 1],
+} as const
+
+const ASSETS_LIST_EXIT_TRANSITION = {
+  duration: 0.14,
+  ease: [0.22, 1, 0.36, 1],
+} as const
 
 interface AssetsScreenProps {
   initialFilterOption?: AssetFilterOption
@@ -91,10 +107,8 @@ export function AssetsScreen({
   const shownCountLabel = `${sortedInvestments.length} shown`
   const hasActiveSearch = searchQuery.trim() !== ""
   const listTransitionKey = [
-    filterOption,
-    sortOption,
     groupByOption,
-    sortedInvestments.length,
+    sortedInvestments.length === 0 ? "empty" : "populated",
   ].join(":")
 
   return (
@@ -245,6 +259,8 @@ function AssetsInvestmentList({
   investments: ResolvedInvestment[]
   onInvestmentSelect: (investmentId: string) => void
 }) {
+  const prefersReducedMotion = useReducedMotion() ?? false
+
   if (groupByOption === ASSET_GROUP_BY_OPTIONS.institution) {
     return (
       <AssetInstitutionGroups
@@ -254,16 +270,36 @@ function AssetsInvestmentList({
     )
   }
 
+  const listTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : {
+        layout: ASSETS_LIST_LAYOUT_TRANSITION,
+        opacity: ASSETS_LIST_EXIT_TRANSITION,
+      }
+
   return (
-    <div className="divide-y divide-border/70 border-t border-border/70">
-      {investments.map((investment) => (
-        <InvestmentCard
-          key={investment.id}
-          investment={getResolvedInvestmentSummary(investment)}
-          onSelect={onInvestmentSelect}
-        />
-      ))}
-    </div>
+    <LayoutGroup id="assets-investment-list-layout">
+      <div className="divide-y divide-border/70 border-t border-border/70">
+        <AnimatePresence initial={false} mode="popLayout">
+          {investments.map((investment) => (
+            <motion.div
+              key={investment.id}
+              className="assets-list-item"
+              initial={false}
+              animate={{ opacity: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+              layout={prefersReducedMotion ? false : "position"}
+              transition={listTransition}
+            >
+              <InvestmentCard
+                investment={getResolvedInvestmentSummary(investment)}
+                onSelect={onInvestmentSelect}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </LayoutGroup>
   )
 }
 
