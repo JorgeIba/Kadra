@@ -8,15 +8,15 @@ import {
   type Investment,
 } from "@/domain/investments"
 import {
-  getAssetSearchSuggestions,
-  getSearchedInvestments,
+  getAssetSuggestionsMatchingQuery,
+  getInvestmentsMatchingQuery,
 } from "@/app/screens/assets/assets-search"
 
 const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 
 describe("asset search", () => {
   it("returns all investments for an empty query without reusing the source array", () => {
-    const result = getSearchedInvestments(resolvedInvestments, "  ")
+    const result = getInvestmentsMatchingQuery(resolvedInvestments, "  ")
 
     expect(result).toEqual(resolvedInvestments)
     expect(result).not.toBe(resolvedInvestments)
@@ -24,19 +24,19 @@ describe("asset search", () => {
 
   it("matches investment names, institutions, and notes", () => {
     expect(
-      getSearchedInvestments(resolvedInvestments, "Klar").map(
+      getInvestmentsMatchingQuery(resolvedInvestments, "Klar").map(
         (investment) => investment.id,
       ),
     ).toEqual(["klar-2", "klar"])
 
     expect(
-      getSearchedInvestments(resolvedInvestments, "CETES").map(
+      getInvestmentsMatchingQuery(resolvedInvestments, "CETES").map(
         (investment) => investment.id,
       ),
     ).toEqual(["cetes"])
 
     expect(
-      getSearchedInvestments(resolvedInvestments, "emergencia").map(
+      getInvestmentsMatchingQuery(resolvedInvestments, "emergencia").map(
         (investment) => investment.id,
       ),
     ).toEqual(["cetes"])
@@ -44,7 +44,7 @@ describe("asset search", () => {
 
   it("matches case, accents, partial text, and repeated whitespace", () => {
     expect(
-      getSearchedInvestments(
+      getInvestmentsMatchingQuery(
         resolvedInvestments,
         "  VACACIONES   MEXICO  ",
       ).map((investment) => investment.id),
@@ -52,7 +52,10 @@ describe("asset search", () => {
   })
 
   it("preserves source order and returns no investments for an unmatched query", () => {
-    const result = getSearchedInvestments(resolvedInvestments, "does not exist")
+    const result = getInvestmentsMatchingQuery(
+      resolvedInvestments,
+      "does not exist",
+    )
 
     expect(result).toEqual([])
     expect(resolvedInvestments.map((investment) => investment.id)).toEqual([
@@ -62,22 +65,34 @@ describe("asset search", () => {
     ])
   })
 
-  it("does not return suggestions until the query has two characters", () => {
-    expect(getAssetSearchSuggestions(investments, "K")).toEqual([])
-    expect(getAssetSearchSuggestions(investments, "  K ")).toEqual([])
+  it("returns suggestions for one character but not empty queries", () => {
+    expect(getAssetSuggestionsMatchingQuery(investments, "K")).toEqual([
+      "Klar",
+      "Klar 2",
+    ])
+    expect(getAssetSuggestionsMatchingQuery(investments, "  K ")).toEqual([
+      "Klar",
+      "Klar 2",
+    ])
+    expect(getAssetSuggestionsMatchingQuery(investments, "")).toEqual([])
+    expect(getAssetSuggestionsMatchingQuery(investments, "   ")).toEqual([])
   })
 
   it("suggests names and institutions with normalized, case-insensitive deduplication", () => {
-    expect(getAssetSearchSuggestions(investments, "Klar")).toEqual([
+    expect(getAssetSuggestionsMatchingQuery(investments, "Klar")).toEqual([
       "Klar",
       "Klar 2",
     ])
 
-    expect(getAssetSearchSuggestions(investments, "CETES")).toEqual(["CETÉS"])
+    expect(getAssetSuggestionsMatchingQuery(investments, "CETES")).toEqual([
+      "CETÉS",
+    ])
   })
 
   it("does not suggest values found only in notes", () => {
-    expect(getAssetSearchSuggestions(investments, "emergencia")).toEqual([])
+    expect(getAssetSuggestionsMatchingQuery(investments, "emergencia")).toEqual(
+      [],
+    )
   })
 
   it("limits suggestions to six deterministic results", () => {
@@ -90,7 +105,9 @@ describe("asset search", () => {
       }),
     )
 
-    expect(getAssetSearchSuggestions(manyInvestments, "provider")).toEqual([
+    expect(
+      getAssetSuggestionsMatchingQuery(manyInvestments, "provider"),
+    ).toEqual([
       "Provider 0",
       "Provider 1",
       "Provider 2",

@@ -18,7 +18,7 @@ interface AutocompleteFieldProps {
   clearButtonLabel?: string
   clearable?: boolean
   disabled?: boolean
-  filterSuggestion?: (suggestion: string, query: string) => boolean
+  filterSuggestion?: null | ((suggestion: string, query: string) => boolean)
   id?: string
   name?: string
   onBlur?: FocusEventHandler<HTMLInputElement>
@@ -43,7 +43,8 @@ export function AutocompleteField({
   value,
   ...accessibilityProps
 }: AutocompleteFieldProps) {
-  const filter = filterSuggestion ?? defaultFilterSuggestion
+  const filter =
+    filterSuggestion === undefined ? defaultFilterSuggestion : filterSuggestion
 
   return (
     <Autocomplete.Root
@@ -62,8 +63,8 @@ export function AutocompleteField({
           placeholder={placeholder}
           className={cn(
             DEFAULT_INPUT_CLASS_NAME,
-            clearable && "pr-9",
             className,
+            clearable && "pr-11",
           )}
           value={value}
           onBlur={onBlur}
@@ -74,7 +75,7 @@ export function AutocompleteField({
           <Autocomplete.Clear
             type="button"
             aria-label={clearButtonLabel}
-            className="absolute right-1.5 top-1/2 inline-flex size-5 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center rounded-r-lg text-muted-foreground outline-none transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <X className="size-3.5" aria-hidden="true" />
           </Autocomplete.Clear>
@@ -93,7 +94,7 @@ export function AutocompleteField({
                 <Autocomplete.Item
                   key={suggestion}
                   value={suggestion}
-                  className="block w-full cursor-default rounded-md px-2 py-1.5 text-left text-sm outline-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-accent data-selected:text-accent-foreground"
+                  className="flex min-h-11 w-full cursor-default items-center rounded-md px-2 py-1.5 text-left text-sm outline-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-accent data-selected:text-accent-foreground"
                 >
                   {suggestion}
                 </Autocomplete.Item>

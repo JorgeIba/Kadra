@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowUpDown, Building2, Filter } from "lucide-react"
+import { ArrowUpDown, Building2, Filter, Search } from "lucide-react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
@@ -16,6 +16,7 @@ import {
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
 import { AutocompleteField } from "@/components/ui/autocomplete-field"
+import { Button } from "@/components/ui/button"
 import {
   ASSET_SORT_OPTION_LABELS,
   ASSET_SORT_OPTION_VALUES,
@@ -36,7 +37,10 @@ import {
   ASSET_GROUP_BY_OPTIONS,
   type AssetGroupByOption,
 } from "@/app/screens/assets/assets-grouping"
-import { getSearchedInvestments } from "@/app/screens/assets/assets-search"
+import {
+  getAssetSuggestionsMatchingQuery,
+  getInvestmentsMatchingQuery,
+} from "@/app/screens/assets/assets-search"
 import { createGroups } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 
@@ -68,12 +72,16 @@ export function AssetsScreen({
     resolveInvestment(investment, asOfDate),
   )
   const totalValue = getPortfolioEstimatedCurrentValue(resolvedInvestments)
-  const searchedInvestments = getSearchedInvestments(
+  const matchingInvestments = getInvestmentsMatchingQuery(
     resolvedInvestments,
     searchQuery,
   )
+  const matchingSuggestions = getAssetSuggestionsMatchingQuery(
+    investments,
+    searchQuery,
+  )
   const filteredInvestments = getFilteredInvestments(
-    searchedInvestments,
+    matchingInvestments,
     filterOption,
   )
   const sortedInvestments = getSortedInvestments(
@@ -81,6 +89,7 @@ export function AssetsScreen({
     sortOption,
   )
   const shownCountLabel = `${sortedInvestments.length} shown`
+  const hasActiveSearch = searchQuery.trim() !== ""
   const listTransitionKey = [
     filterOption,
     sortOption,
@@ -115,14 +124,28 @@ export function AssetsScreen({
 
             <div className="rounded-lg border border-border/70 bg-card/45 p-3">
               <div className="space-y-3">
-                <AutocompleteField
-                  aria-label="Search investments"
-                  clearable
-                  clearButtonLabel="Clear search"
-                  placeholder="Search name, institution, or notes"
-                  value={searchQuery}
-                  onValueChange={setSearchQuery}
-                />
+                <div className="space-y-1.5">
+                  <label
+                    className="flex items-center gap-1.5 text-[0.68rem] leading-none font-medium text-muted-foreground"
+                    htmlFor="assets-search"
+                  >
+                    <span className="grid size-3.5 shrink-0 place-items-center text-primary/80">
+                      <Search className="size-3.5" aria-hidden="true" />
+                    </span>
+                    Search
+                  </label>
+                  <AutocompleteField
+                    id="assets-search"
+                    className="h-11 border-border/80 bg-background/35 px-3 text-foreground hover:border-primary/25 hover:bg-muted/45 focus-visible:border-primary/35 focus-visible:bg-muted/55 focus-visible:ring-3 focus-visible:ring-primary/20"
+                    clearable
+                    clearButtonLabel="Clear search"
+                    filterSuggestion={null}
+                    placeholder="Name, institution, or notes"
+                    suggestions={matchingSuggestions}
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                  />
+                </div>
 
                 <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2">
                   <LabeledSelectControl
@@ -170,9 +193,26 @@ export function AssetsScreen({
 
           <AnimatedListSurface transitionKey={listTransitionKey}>
             {sortedInvestments.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center text-sm text-muted-foreground">
-                No investments match this filter.
-              </div>
+              hasActiveSearch ? (
+                <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No investments match your search.
+                  </p>
+                  <Button
+                    className="mt-3 h-11"
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center text-sm text-muted-foreground">
+                  No investments match this filter.
+                </div>
+              )
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">

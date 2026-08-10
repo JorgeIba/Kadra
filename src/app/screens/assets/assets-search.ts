@@ -1,9 +1,9 @@
 import type { Investment, ResolvedInvestment } from "@/domain/investments"
 
-const MIN_SUGGESTION_QUERY_LENGTH = 2
+const MIN_SUGGESTION_QUERY_LENGTH = 1
 const MAX_SUGGESTION_COUNT = 6
 
-export function getSearchedInvestments(
+export function getInvestmentsMatchingQuery(
   investments: ResolvedInvestment[],
   query: string,
 ): ResolvedInvestment[] {
@@ -24,7 +24,7 @@ export function getSearchedInvestments(
   })
 }
 
-export function getAssetSearchSuggestions(
+export function getAssetSuggestionsMatchingQuery(
   investments: Investment[],
   query: string,
 ): string[] {
