@@ -1,5 +1,11 @@
 import { useState } from "react"
-import { ArrowUpDown, Building2, Filter } from "lucide-react"
+import { ArrowUpDown, Building2, Filter, Search } from "lucide-react"
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useReducedMotion,
+} from "motion/react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
@@ -15,6 +21,8 @@ import {
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
+import { AutocompleteField } from "@/components/ui/autocomplete-field"
+import { Button } from "@/components/ui/button"
 import {
   ASSET_SORT_OPTION_LABELS,
   ASSET_SORT_OPTION_VALUES,
@@ -35,8 +43,22 @@ import {
   ASSET_GROUP_BY_OPTIONS,
   type AssetGroupByOption,
 } from "@/app/screens/assets/assets-grouping"
+import {
+  getAssetSuggestionsMatchingQuery,
+  getInvestmentsMatchingQuery,
+} from "@/app/screens/assets/assets-search"
 import { createGroups } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
+
+const ASSETS_LIST_LAYOUT_TRANSITION = {
+  duration: 0.24,
+  ease: [0.22, 1, 0.36, 1],
+} as const
+
+const ASSETS_LIST_EXIT_TRANSITION = {
+  duration: 0.14,
+  ease: [0.22, 1, 0.36, 1],
+} as const
 
 interface AssetsScreenProps {
   initialFilterOption?: AssetFilterOption
@@ -51,6 +73,7 @@ export function AssetsScreen({
   onAddInvestment,
   onInvestmentSelect,
 }: AssetsScreenProps) {
+  const [searchQuery, setSearchQuery] = useState("")
   const [filterOption, setFilterOption] = useState<AssetFilterOption>(
     initialFilterOption ?? ASSET_FILTER_OPTIONS.all,
   )
@@ -65,8 +88,16 @@ export function AssetsScreen({
     resolveInvestment(investment, asOfDate),
   )
   const totalValue = getPortfolioEstimatedCurrentValue(resolvedInvestments)
-  const filteredInvestments = getFilteredInvestments(
+  const matchingInvestments = getInvestmentsMatchingQuery(
     resolvedInvestments,
+    searchQuery,
+  )
+  const matchingSuggestions = getAssetSuggestionsMatchingQuery(
+    investments,
+    searchQuery,
+  )
+  const filteredInvestments = getFilteredInvestments(
+    matchingInvestments,
     filterOption,
   )
   const sortedInvestments = getSortedInvestments(
@@ -74,11 +105,11 @@ export function AssetsScreen({
     sortOption,
   )
   const shownCountLabel = `${sortedInvestments.length} shown`
+  const hasActiveSearch = searchQuery.trim() !== ""
+  const hasNoSearchMatches = hasActiveSearch && matchingInvestments.length === 0
   const listTransitionKey = [
-    filterOption,
-    sortOption,
     groupByOption,
-    sortedInvestments.length,
+    sortedInvestments.length === 0 ? "empty" : "populated",
   ].join(":")
 
   return (
@@ -107,50 +138,109 @@ export function AssetsScreen({
             </div>
 
             <div className="rounded-lg border border-border/70 bg-card/45 p-3">
-              <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2">
-                <LabeledSelectControl
-                  ariaLabel="Filter investments"
-                  fallbackLabel="Select filter"
-                  icon={<Filter className="size-3.5" aria-hidden="true" />}
-                  label="Filter"
-                  options={ASSET_FILTER_OPTION_VALUES}
-                  value={filterOption}
-                  getOptionLabel={(option) =>
-                    ASSET_FILTER_OPTION_LABELS[option]
-                  }
-                  onValueChange={setFilterOption}
-                />
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label
+                    className="flex items-center gap-1.5 text-[0.68rem] leading-[1.35] font-medium tracking-[0.14em] text-muted-foreground uppercase"
+                    htmlFor="assets-search"
+                  >
+                    <span className="grid size-3.5 shrink-0 place-items-center text-muted-foreground">
+                      <Search className="size-3.5" aria-hidden="true" />
+                    </span>
+                    Search
+                  </label>
+                  <AutocompleteField
+                    id="assets-search"
+                    className="h-10 border-border/80 bg-background/35 px-3 text-sm text-foreground hover:border-primary/25 hover:bg-muted/45 focus-visible:border-primary/35 focus-visible:bg-muted/55 focus-visible:ring-3 focus-visible:ring-primary/20"
+                    clearable
+                    clearButtonLabel="Clear search"
+                    filterSuggestion={null}
+                    placeholder="Name, institution, or notes"
+                    suggestions={matchingSuggestions}
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                  />
+                </div>
 
-                <LabeledSelectControl
-                  ariaLabel="Sort investments"
-                  fallbackLabel="Select sort"
-                  icon={<ArrowUpDown className="size-3.5" aria-hidden="true" />}
-                  label="Sort"
-                  options={ASSET_SORT_OPTION_VALUES}
-                  value={sortOption}
-                  getOptionLabel={(option) => ASSET_SORT_OPTION_LABELS[option]}
-                  onValueChange={setSortOption}
-                />
+                <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2 border-t border-border/70 pt-3">
+                  <LabeledSelectControl
+                    ariaLabel="Filter investments"
+                    fallbackLabel="Select filter"
+                    icon={<Filter className="size-3.5" aria-hidden="true" />}
+                    label="Filter"
+                    options={ASSET_FILTER_OPTION_VALUES}
+                    value={filterOption}
+                    getOptionLabel={(option) =>
+                      ASSET_FILTER_OPTION_LABELS[option]
+                    }
+                    onValueChange={setFilterOption}
+                  />
 
-                <LabeledSelectControl
-                  ariaLabel="Change asset list view"
-                  fallbackLabel="Select view"
-                  icon={<Building2 className="size-3.5" aria-hidden="true" />}
-                  label="View"
-                  options={ASSET_GROUP_BY_OPTION_VALUES}
-                  value={groupByOption}
-                  getOptionLabel={(option) => ASSET_GROUP_BY_LABELS[option]}
-                  onValueChange={setGroupByOption}
-                />
+                  <LabeledSelectControl
+                    ariaLabel="Sort investments"
+                    fallbackLabel="Select sort"
+                    icon={
+                      <ArrowUpDown className="size-3.5" aria-hidden="true" />
+                    }
+                    label="Sort"
+                    options={ASSET_SORT_OPTION_VALUES}
+                    value={sortOption}
+                    getOptionLabel={(option) =>
+                      ASSET_SORT_OPTION_LABELS[option]
+                    }
+                    onValueChange={setSortOption}
+                  />
+
+                  <LabeledSelectControl
+                    ariaLabel="Change asset list view"
+                    fallbackLabel="Select view"
+                    icon={<Building2 className="size-3.5" aria-hidden="true" />}
+                    label="View"
+                    options={ASSET_GROUP_BY_OPTION_VALUES}
+                    value={groupByOption}
+                    getOptionLabel={(option) => ASSET_GROUP_BY_LABELS[option]}
+                    onValueChange={setGroupByOption}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           <AnimatedListSurface transitionKey={listTransitionKey}>
             {sortedInvestments.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center text-sm text-muted-foreground">
-                No investments match this filter.
-              </div>
+              hasNoSearchMatches ? (
+                <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No investments match your search.
+                  </p>
+                  <Button
+                    className="mt-3 h-11"
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {hasActiveSearch
+                      ? "No search results match this filter."
+                      : "No investments match this filter."}
+                  </p>
+                  <Button
+                    className="mt-3 h-11"
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setFilterOption(ASSET_FILTER_OPTIONS.all)}
+                  >
+                    Show all
+                  </Button>
+                </div>
+              )
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -183,6 +273,8 @@ function AssetsInvestmentList({
   investments: ResolvedInvestment[]
   onInvestmentSelect: (investmentId: string) => void
 }) {
+  const prefersReducedMotion = useReducedMotion() ?? false
+
   if (groupByOption === ASSET_GROUP_BY_OPTIONS.institution) {
     return (
       <AssetInstitutionGroups
@@ -192,16 +284,36 @@ function AssetsInvestmentList({
     )
   }
 
+  const listTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : {
+        layout: ASSETS_LIST_LAYOUT_TRANSITION,
+        opacity: ASSETS_LIST_EXIT_TRANSITION,
+      }
+
   return (
-    <div className="divide-y divide-border/70 border-t border-border/70">
-      {investments.map((investment) => (
-        <InvestmentCard
-          key={investment.id}
-          investment={getResolvedInvestmentSummary(investment)}
-          onSelect={onInvestmentSelect}
-        />
-      ))}
-    </div>
+    <LayoutGroup id="assets-investment-list-layout">
+      <div className="divide-y divide-border/70 border-t border-border/70">
+        <AnimatePresence initial={false} mode="popLayout">
+          {investments.map((investment) => (
+            <motion.div
+              key={investment.id}
+              className="assets-list-item"
+              initial={false}
+              animate={{ opacity: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+              layout={prefersReducedMotion ? false : "position"}
+              transition={listTransition}
+            >
+              <InvestmentCard
+                investment={getResolvedInvestmentSummary(investment)}
+                onSelect={onInvestmentSelect}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </LayoutGroup>
   )
 }
 

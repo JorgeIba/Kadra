@@ -35,9 +35,9 @@ export function LabeledSelectControl<TOption extends string>({
 }: LabeledSelectControlProps<TOption>) {
   return (
     <div className={cn("min-w-0 space-y-1.5", className)}>
-      <span className="flex items-center gap-1.5 text-[0.68rem] leading-none font-medium text-muted-foreground">
+      <span className="flex items-center gap-1.5 text-[0.68rem] leading-[1.35] font-medium tracking-[0.14em] text-muted-foreground uppercase">
         {icon === undefined ? null : (
-          <span className="grid size-3.5 shrink-0 place-items-center text-primary/80">
+          <span className="grid size-3.5 shrink-0 place-items-center text-muted-foreground">
             {icon}
           </span>
         )}
@@ -53,13 +53,13 @@ export function LabeledSelectControl<TOption extends string>({
       >
         <SelectTrigger
           className={cn(
-            "h-9 w-full min-w-0 border-border/80 bg-background/35 px-2.5 text-foreground hover:border-primary/25 hover:bg-muted/45 data-[popup-open]:border-primary/35 data-[popup-open]:bg-muted/55",
+            "w-full min-w-0 border-border/80 bg-background/35 px-2.5 text-foreground hover:border-primary/25 hover:bg-muted/45 data-[popup-open]:border-primary/35 data-[popup-open]:bg-muted/55",
             triggerClassName,
           )}
-          size="sm"
+          size="lg"
           aria-label={ariaLabel}
         >
-          <SelectValue className="font-medium">
+          <SelectValue className="text-sm leading-tight font-normal tracking-normal">
             {(nextValue: TOption | null) =>
               nextValue === null ? fallbackLabel : getOptionLabel(nextValue)
             }
@@ -67,7 +67,7 @@ export function LabeledSelectControl<TOption extends string>({
         </SelectTrigger>
         <SelectContent sideOffset={6}>
           {options.map((option) => (
-            <SelectItem key={option} value={option}>
+            <SelectItem key={option} value={option} className="min-h-11">
               {getOptionLabel(option)}
             </SelectItem>
           ))}
