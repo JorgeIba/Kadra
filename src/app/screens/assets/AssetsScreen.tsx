@@ -15,6 +15,7 @@ import {
 } from "@/domain/investments"
 import { EmptyInvestmentsState } from "@/app/components/investments/EmptyInvestmentsState"
 import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
+import { AutocompleteField } from "@/components/ui/autocomplete-field"
 import {
   ASSET_SORT_OPTION_LABELS,
   ASSET_SORT_OPTION_VALUES,
@@ -35,6 +36,7 @@ import {
   ASSET_GROUP_BY_OPTIONS,
   type AssetGroupByOption,
 } from "@/app/screens/assets/assets-grouping"
+import { getSearchedInvestments } from "@/app/screens/assets/assets-search"
 import { createGroups } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 
@@ -51,6 +53,7 @@ export function AssetsScreen({
   onAddInvestment,
   onInvestmentSelect,
 }: AssetsScreenProps) {
+  const [searchQuery, setSearchQuery] = useState("")
   const [filterOption, setFilterOption] = useState<AssetFilterOption>(
     initialFilterOption ?? ASSET_FILTER_OPTIONS.all,
   )
@@ -65,8 +68,12 @@ export function AssetsScreen({
     resolveInvestment(investment, asOfDate),
   )
   const totalValue = getPortfolioEstimatedCurrentValue(resolvedInvestments)
-  const filteredInvestments = getFilteredInvestments(
+  const searchedInvestments = getSearchedInvestments(
     resolvedInvestments,
+    searchQuery,
+  )
+  const filteredInvestments = getFilteredInvestments(
+    searchedInvestments,
     filterOption,
   )
   const sortedInvestments = getSortedInvestments(
@@ -107,41 +114,56 @@ export function AssetsScreen({
             </div>
 
             <div className="rounded-lg border border-border/70 bg-card/45 p-3">
-              <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2">
-                <LabeledSelectControl
-                  ariaLabel="Filter investments"
-                  fallbackLabel="Select filter"
-                  icon={<Filter className="size-3.5" aria-hidden="true" />}
-                  label="Filter"
-                  options={ASSET_FILTER_OPTION_VALUES}
-                  value={filterOption}
-                  getOptionLabel={(option) =>
-                    ASSET_FILTER_OPTION_LABELS[option]
-                  }
-                  onValueChange={setFilterOption}
+              <div className="space-y-3">
+                <AutocompleteField
+                  aria-label="Search investments"
+                  clearable
+                  clearButtonLabel="Clear search"
+                  placeholder="Search name, institution, or notes"
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
                 />
 
-                <LabeledSelectControl
-                  ariaLabel="Sort investments"
-                  fallbackLabel="Select sort"
-                  icon={<ArrowUpDown className="size-3.5" aria-hidden="true" />}
-                  label="Sort"
-                  options={ASSET_SORT_OPTION_VALUES}
-                  value={sortOption}
-                  getOptionLabel={(option) => ASSET_SORT_OPTION_LABELS[option]}
-                  onValueChange={setSortOption}
-                />
+                <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2">
+                  <LabeledSelectControl
+                    ariaLabel="Filter investments"
+                    fallbackLabel="Select filter"
+                    icon={<Filter className="size-3.5" aria-hidden="true" />}
+                    label="Filter"
+                    options={ASSET_FILTER_OPTION_VALUES}
+                    value={filterOption}
+                    getOptionLabel={(option) =>
+                      ASSET_FILTER_OPTION_LABELS[option]
+                    }
+                    onValueChange={setFilterOption}
+                  />
 
-                <LabeledSelectControl
-                  ariaLabel="Change asset list view"
-                  fallbackLabel="Select view"
-                  icon={<Building2 className="size-3.5" aria-hidden="true" />}
-                  label="View"
-                  options={ASSET_GROUP_BY_OPTION_VALUES}
-                  value={groupByOption}
-                  getOptionLabel={(option) => ASSET_GROUP_BY_LABELS[option]}
-                  onValueChange={setGroupByOption}
-                />
+                  <LabeledSelectControl
+                    ariaLabel="Sort investments"
+                    fallbackLabel="Select sort"
+                    icon={
+                      <ArrowUpDown className="size-3.5" aria-hidden="true" />
+                    }
+                    label="Sort"
+                    options={ASSET_SORT_OPTION_VALUES}
+                    value={sortOption}
+                    getOptionLabel={(option) =>
+                      ASSET_SORT_OPTION_LABELS[option]
+                    }
+                    onValueChange={setSortOption}
+                  />
+
+                  <LabeledSelectControl
+                    ariaLabel="Change asset list view"
+                    fallbackLabel="Select view"
+                    icon={<Building2 className="size-3.5" aria-hidden="true" />}
+                    label="View"
+                    options={ASSET_GROUP_BY_OPTION_VALUES}
+                    value={groupByOption}
+                    getOptionLabel={(option) => ASSET_GROUP_BY_LABELS[option]}
+                    onValueChange={setGroupByOption}
+                  />
+                </div>
               </div>
             </div>
           </div>
