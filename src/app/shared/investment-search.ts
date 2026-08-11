@@ -4,7 +4,7 @@ const MIN_SUGGESTION_QUERY_LENGTH = 1
 const MAX_SUGGESTION_COUNT = 6
 
 export function getInvestmentsMatchingQuery(
-  investments: ResolvedInvestment[],
+  investments: readonly ResolvedInvestment[],
   query: string,
 ): ResolvedInvestment[] {
   const normalizedQuery = normalizeSearchText(query)
@@ -13,19 +13,11 @@ export function getInvestmentsMatchingQuery(
     return [...investments]
   }
 
-  return investments.filter((investment) => {
-    return [
-      investment.name,
-      investment.institutionName,
-      investment.notes ?? "",
-    ].some((field) => {
-      return normalizeSearchText(field).includes(normalizedQuery)
-    })
-  })
+  return getInvestmentsMatchingNormalizedQuery(investments, normalizedQuery)
 }
 
 export function getAssetSuggestionsMatchingQuery(
-  investments: Investment[],
+  investments: readonly Investment[],
   query: string,
 ): string[] {
   const normalizedQuery = normalizeSearchText(query)
@@ -54,6 +46,21 @@ export function getAssetSuggestionsMatchingQuery(
     .sort(([leftValue], [rightValue]) => leftValue.localeCompare(rightValue))
     .slice(0, MAX_SUGGESTION_COUNT)
     .map(([, displayValue]) => displayValue)
+}
+
+function getInvestmentsMatchingNormalizedQuery(
+  investments: readonly ResolvedInvestment[],
+  normalizedQuery: string,
+) {
+  return investments.filter((investment) => {
+    return [
+      investment.name,
+      investment.institutionName,
+      investment.notes ?? "",
+    ].some((field) => {
+      return normalizeSearchText(field).includes(normalizedQuery)
+    })
+  })
 }
 
 function normalizeSearchText(value: string) {

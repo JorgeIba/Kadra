@@ -10,7 +10,7 @@ import {
 import {
   getAssetSuggestionsMatchingQuery,
   getInvestmentsMatchingQuery,
-} from "@/app/screens/assets/assets-search"
+} from "@/app/shared/investment-search"
 
 const asOfDate = new Date("2026-06-05T12:00:00.000Z")
 
@@ -62,6 +62,33 @@ describe("asset search", () => {
       "klar-2",
       "klar",
       "cetes",
+    ])
+  })
+
+  it("keeps investments with duplicate names as separate concrete matches", () => {
+    const investmentsWithDuplicateNames = resolvedInvestments
+      .slice(0, 2)
+      .map((investment, index) => ({
+        ...investment,
+        name: "Klar",
+        institutionName: index === 0 ? "Nu" : "Stori",
+      }))
+
+    expect(
+      getInvestmentsMatchingQuery(investmentsWithDuplicateNames, "klar"),
+    ).toMatchObject([
+      {
+        id: "klar-2",
+        name: "Klar",
+        institutionName: "Nu",
+        type: INVESTMENT_TYPES.openEnded,
+      },
+      {
+        id: "klar",
+        name: "Klar",
+        institutionName: "Stori",
+        type: INVESTMENT_TYPES.openEnded,
+      },
     ])
   })
 

@@ -46,7 +46,7 @@ import {
 import {
   getAssetSuggestionsMatchingQuery,
   getInvestmentsMatchingQuery,
-} from "@/app/screens/assets/assets-search"
+} from "@/app/shared/investment-search"
 import { createGroups } from "@/app/shared/grouping"
 import { getInstitutionGroup } from "@/app/shared/institution-grouping"
 
