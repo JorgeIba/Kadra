@@ -1,17 +1,18 @@
 # Kadra
 
-Kadra is a privacy-first, local-first PWA for tracking fixed-income
-investments. It helps a person quickly understand their invested balance,
-estimated income, projected growth, and upcoming maturities without a
-brokerage-style interface.
+Kadra is a personal, local-first PWA for keeping up with fixed-income
+investments. It gives a person one clear place to see what they own, what it is
+worth, what it is earning, how it may grow, and what deserves attention.
 
 ## Product Direction
 
 - Mobile-first, especially an installed iPhone PWA
+- Personal portfolio visibility designed for brief, repeated check-ins
 - Local-only data storage, with no login or third-party tracking
 - Downloadable portfolio backups for safe local recovery after reinstalling
 - Fixed-income investments first, with MXN as the required MVP currency
-- Calm, exact, private ledger experience rather than trading software
+- Calm financial information with tactile, occasionally playful interactions
+- No institution connections, money movement, or trade execution
 
 ## Local Backups
 

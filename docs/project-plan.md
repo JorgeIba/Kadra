@@ -25,7 +25,7 @@ Supporting docs:
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Product direction | Active | Privacy-first, local-only PWA remains the core direction |
+| Product direction | Active | Personal fixed-income companion; local-only PWA remains the core architecture |
 | Domain direction | Active | Event-history investments and resolved read models are now the working product model |
 | MVP app foundation | In progress | App shell, persistence, dashboard, assets, invest, detail, earnings, edit, and record-change flows are already underway in code |
 | Planning structure | Updated | `project-plan.md` is now the high-level hub with linked supporting docs |
@@ -34,7 +34,7 @@ Supporting docs:
 
 ## Vision
 
-Build a privacy-first PWA for tracking fixed-income investments, primarily for Mexican users and MXN workflows, with all user data stored locally on-device and no required backend.
+Build a personal, mobile-first companion for checking fixed-income investments, primarily for Mexican users and MXN workflows. Keep all user data stored locally on-device with no required backend.
 
 The product should help users understand:
 
@@ -52,6 +52,7 @@ The product should help users understand:
 - We do not want to rush into a fake V1 just to get screens quickly.
 - We want explicit decisions written down so the product and architecture do not drift across chats.
 - We should favor models that stay understandable as the product grows.
+- Financial information should stay calm and dependable while reversible interactions can feel expressive and rewarding.
 
 ### Product Scope
 

@@ -6,14 +6,17 @@ It is intentionally short. The goal is to make design decisions easier and more 
 
 ## Purpose
 
-Kadra is a privacy-first fixed-income tracking app.
+Kadra is a personal, fixed-income-first investment companion. It gives one person a clear place to check what they own, what it is worth, what it is earning, how it may grow, and what deserves attention.
 
 The interface should feel:
 
 - calm
-- trustworthy
+- clear
 - personal
 - precise
+- curious
+- rewarding
+- quietly playful
 - mobile-first
 
 It should not feel like:
@@ -36,7 +39,7 @@ Primary dashboard question:
 
 > How much do I have invested, how much is it producing, and what needs attention?
 
-That means design should prioritize fast comprehension over decorative complexity.
+That means design should prioritize fast comprehension while leaving room for personality in the interactions around the data.
 
 ## Theme Direction
 
@@ -48,7 +51,7 @@ Current direction:
 
 Dark theme should use:
 
-- Ledger Black `#0B1113` backgrounds
+- Kadra Black `#0B1113` backgrounds
 - Mint Yield `#9BD8C2` accents, used sparingly
 - warm off-white text, not pure white everywhere
 - strong number contrast
@@ -63,7 +66,7 @@ Avoid:
 
 Baseline notes from the selected Stitch direction:
 
-- use one continuous dark ledger surface rather than a stack of cards
+- use one continuous dark surface rather than a stack of cards
 - use serif type for major financial values and asset names
 - use compact sans labels and muted blue-gray metadata
 - use mint only for value, progress, status, and active navigation
@@ -73,14 +76,15 @@ Baseline notes from the selected Stitch direction:
 
 Kadra should feel closer to:
 
-- a private financial notebook
-- a focused portfolio tool
-- a premium utility
+- a personal investment companion
+- a familiar portfolio check-in
+- a focused tool that is pleasant to revisit
 
 It should feel less like:
 
 - social fintech
 - hyperactive investing software
+- sterile financial software
 - default template UI
 
 ## Brand Identity
@@ -192,12 +196,15 @@ If the design makes lower-priority content compete with the top summary, the hie
 
 ## Motion
 
-Motion should be minimal but intentional.
+Motion should keep financial information calm while giving Kadra a recognizable, tactile personality.
 
 Rules:
 
-- prefer subtle fades, lifts, or emphasis transitions
-- avoid decorative motion for its own sake
+- use expressive motion for clear state changes such as search expansion, navigation, selection, progress, and reversible actions
+- let a small number of signature interactions feel playful instead of applying the same animation everywhere
+- keep monetary values, charts, and comparison states visually stable while users read them
+- make focus and interaction available immediately; animation should not delay the task
+- avoid idle motion that repeatedly demands attention
 - loading states should feel calm, not flashy
 - reduced-motion support remains required
 
@@ -229,7 +236,7 @@ Rules:
 - decorative gradients as a substitute for hierarchy
 - visually identical card grids everywhere
 - contrast that looks elegant in isolation but is hard to read on a phone
-- over-designed financial UI that feels less trustworthy
+- animation or decoration that competes with the user's financial information
 
 ## Current Working Workflow
 
@@ -267,9 +274,4 @@ AI is least useful when:
 
 ## Next Design Slice
 
-The recommended first polish slice is:
-
-- app shell
-- dashboard
-
-That slice should define the tone for the rest of the product before polishing assets, forms, or detail screens.
+The next design slice should define Kadra's more expressive interaction language through global investment search. Use that focused feature to establish how tactile motion, result discovery, and reduced-motion behavior work before expanding the language elsewhere.
