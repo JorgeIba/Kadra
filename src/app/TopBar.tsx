@@ -11,8 +11,10 @@ import {
   Upload,
 } from "lucide-react"
 import { KadraMark } from "@/app/components/KadraMark"
+import { GlobalInvestmentSearch } from "@/app/components/GlobalInvestmentSearch"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
 import { Button, buttonVariants } from "@/components/ui/button"
+import type { Investment } from "@/domain/investments"
 import { cn } from "@/lib/utils"
 
 interface TopBarProps {
@@ -21,8 +23,10 @@ interface TopBarProps {
   onBack?: () => void
   onCheckForUpdates: () => void
   onExportBackup: () => void
+  onGlobalSearchResultSelect: (investmentId: string) => void
   onImportBackup: (file: File) => void
   onResetLocalData: () => void
+  searchableInvestments: readonly Investment[]
 }
 
 export function TopBar({
@@ -31,8 +35,10 @@ export function TopBar({
   onBack,
   onCheckForUpdates,
   onExportBackup,
+  onGlobalSearchResultSelect,
   onImportBackup,
   onResetLocalData,
+  searchableInvestments,
 }: TopBarProps) {
   const backupInputRef = useRef<HTMLInputElement>(null)
   const { isMoneyHidden, toggleMoneyVisibility } = useMoneyPrivacy()
@@ -77,24 +83,6 @@ export function TopBar({
         )}
 
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={
-              isMoneyHidden ? "Show money amounts" : "Hide money amounts"
-            }
-            aria-pressed={isMoneyHidden}
-            className={cn(
-              "rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground",
-              isMoneyHidden &&
-                "border-primary/55 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
-            )}
-            onClick={toggleMoneyVisibility}
-          >
-            <MoneyVisibilityIcon className="size-5" aria-hidden="true" />
-          </Button>
-
           {hasAppUpdate || isCheckingForUpdate ? (
             <Button
               type="button"
@@ -118,6 +106,29 @@ export function TopBar({
               ) : null}
             </Button>
           ) : null}
+
+          <GlobalInvestmentSearch
+            searchableInvestments={searchableInvestments}
+            onSearchResultSelect={onGlobalSearchResultSelect}
+          />
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={
+              isMoneyHidden ? "Show money amounts" : "Hide money amounts"
+            }
+            aria-pressed={isMoneyHidden}
+            className={cn(
+              "rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground",
+              isMoneyHidden &&
+                "border-primary/55 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+            )}
+            onClick={toggleMoneyVisibility}
+          >
+            <MoneyVisibilityIcon className="size-5" aria-hidden="true" />
+          </Button>
 
           <Menu.Root modal={false}>
             <Menu.Trigger

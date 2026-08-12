@@ -1,5 +1,10 @@
 import { useLayoutEffect, useState } from "react"
-import { Outlet, useLocation, useNavigationType } from "react-router"
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useNavigationType,
+} from "react-router"
 import { BottomNav } from "@/app/BottomNav"
 import { parsePortfolioBackupText } from "@/app/backup/portfolio-backup"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
@@ -10,6 +15,7 @@ import {
   shouldHideBackButtonFromLocation,
 } from "@/app/routing/active-section"
 import { RouteEntryAnimationContext } from "@/app/routing/navigation-animation"
+import { getInvestmentDetailPath } from "@/app/routing/navigation"
 import { TopBar } from "@/app/TopBar"
 import { useActiveAppSection } from "@/app/routing/useActiveAppSection"
 import { useBackOrFallbackNavigation } from "@/app/routing/useBackOrFallbackNavigation"
@@ -21,6 +27,7 @@ interface AppShellProps {
   onExportBackup: () => void
   onResetLocalData: () => void
   onRestoreInvestments: (investments: Investment[]) => boolean
+  searchableInvestments: readonly Investment[]
 }
 
 interface RestoreCandidate {
@@ -73,8 +80,10 @@ export function AppShell({
   onExportBackup,
   onResetLocalData,
   onRestoreInvestments,
+  searchableInvestments,
 }: AppShellProps) {
   const location = useLocation()
+  const navigate = useNavigate()
   const navigateBackOrFallback = useBackOrFallbackNavigation()
   const activeSection = useActiveAppSection()
   const fallbackPath = getFallbackPathFromLocation(location)
@@ -110,6 +119,12 @@ export function AppShell({
     }
 
     navigateBackOrFallback(fallbackPath)
+  }
+
+  function handleGlobalSearchResultSelect(investmentId: string) {
+    navigate(getInvestmentDetailPath(investmentId), {
+      state: { activeNavSection: activeSection },
+    })
   }
 
   async function handleImportBackup(file: File) {
@@ -168,8 +183,10 @@ export function AppShell({
             onBack={shouldHideBackButton ? undefined : handleBack}
             onCheckForUpdates={handleCheckForUpdates}
             onExportBackup={onExportBackup}
+            onGlobalSearchResultSelect={handleGlobalSearchResultSelect}
             onImportBackup={handleImportBackup}
             onResetLocalData={() => setActiveDialog({ kind: "reset" })}
+            searchableInvestments={searchableInvestments}
           />
           <main className="app-main flex-1 px-5 pb-28">
             <RouteAnimationBoundary />

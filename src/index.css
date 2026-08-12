@@ -172,7 +172,7 @@ body {
   .app-frame {
     @apply mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background;
     --app-top-bar-height: calc(
-      max(1.25rem, env(safe-area-inset-top)) + 2.75rem
+      max(1.25rem, env(safe-area-inset-top)) + 3.25rem
     );
     --app-main-top-padding: calc(var(--app-top-bar-height) + 1.75rem);
   }

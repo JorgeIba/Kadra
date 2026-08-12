@@ -56,14 +56,19 @@ export function AppRouter() {
 }
 
 function AppShellRoute() {
-  const { exportPortfolioBackup, resetLocalData, restoreInvestments } =
-    useInvestments()
+  const {
+    exportPortfolioBackup,
+    investments: searchableInvestments,
+    resetLocalData,
+    restoreInvestments,
+  } = useInvestments()
 
   return (
     <AppShell
       onExportBackup={exportPortfolioBackup}
       onResetLocalData={resetLocalData}
       onRestoreInvestments={restoreInvestments}
+      searchableInvestments={searchableInvestments}
     />
   )
 }
