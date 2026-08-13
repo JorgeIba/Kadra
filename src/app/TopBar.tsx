@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { Menu } from "@base-ui/react/menu"
 import {
   ArrowLeft,
@@ -41,6 +41,8 @@ export function TopBar({
   searchableInvestments,
 }: TopBarProps) {
   const backupInputRef = useRef<HTMLInputElement>(null)
+  const [isGlobalInvestmentSearchOpen, setIsGlobalInvestmentSearchOpen] =
+    useState(false)
   const { isMoneyHidden, toggleMoneyVisibility } = useMoneyPrivacy()
   const MoneyVisibilityIcon = isMoneyHidden ? EyeOff : Eye
 
@@ -108,6 +110,8 @@ export function TopBar({
           ) : null}
 
           <GlobalInvestmentSearch
+            isOpen={isGlobalInvestmentSearchOpen}
+            onOpenChange={setIsGlobalInvestmentSearchOpen}
             searchableInvestments={searchableInvestments}
             onSearchResultSelect={onGlobalSearchResultSelect}
           />

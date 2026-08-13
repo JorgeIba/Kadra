@@ -15,22 +15,24 @@ import {
 const MAX_SEARCH_RESULT_COUNT = 6
 
 interface GlobalInvestmentSearchProps {
+  isOpen: boolean
+  onOpenChange: (isOpen: boolean) => void
   searchableInvestments: readonly Investment[]
   onSearchResultSelect: (investmentId: string) => void
 }
 
 export function GlobalInvestmentSearch({
+  isOpen,
+  onOpenChange,
   searchableInvestments,
   onSearchResultSelect,
 }: GlobalInvestmentSearchProps) {
-  const [isSearchSurfaceOpen, setIsSearchSurfaceOpen] = useState(false)
-
   function openSearchSurface() {
-    setIsSearchSurfaceOpen(true)
+    onOpenChange(true)
   }
 
   function closeSearchSurface() {
-    setIsSearchSurfaceOpen(false)
+    onOpenChange(false)
   }
 
   function handleSearchResultSelect(investmentId: string) {
@@ -50,7 +52,7 @@ export function GlobalInvestmentSearch({
         <Search className="size-4.5" aria-hidden="true" />
       </Button>
 
-      {isSearchSurfaceOpen
+      {isOpen
         ? createPortal(
             <>
               <div
@@ -104,7 +106,7 @@ function InvestmentSearchAutocomplete({
       searchQuery,
     ).slice(0, MAX_SEARCH_RESULT_COUNT)
   }, [resolvedSearchableInvestments, searchQuery])
-  
+
   const hasSearchQuery = searchQuery.trim() !== ""
 
   return (
