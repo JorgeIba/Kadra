@@ -208,7 +208,7 @@ function InvestmentSearchAutocomplete({
           autoFocus
           aria-label="Search investments"
           placeholder="Search investments"
-          className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:text-sm"
           onKeyDownCapture={(event) => {
             if (event.key !== "Enter") {
               return

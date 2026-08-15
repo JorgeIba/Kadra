@@ -151,7 +151,7 @@ export function AssetsScreen({
                   </label>
                   <AutocompleteField
                     id="assets-search"
-                    className="h-10 border-border/80 bg-background/35 px-3 text-sm text-foreground hover:border-primary/25 hover:bg-muted/45 focus-visible:border-primary/35 focus-visible:bg-muted/55 focus-visible:ring-3 focus-visible:ring-primary/20"
+                    className="h-10 border-border/80 bg-background/35 px-3 text-foreground hover:border-primary/25 hover:bg-muted/45 focus-visible:border-primary/35 focus-visible:bg-muted/55 focus-visible:ring-3 focus-visible:ring-primary/20"
                     clearable
                     clearButtonLabel="Clear search"
                     filterSuggestion={null}
