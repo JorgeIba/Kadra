@@ -1,9 +1,8 @@
-import { useMemo, useState } from "react"
-import { createPortal } from "react-dom"
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
 import { Autocomplete } from "@base-ui/react/autocomplete"
 import { Search, X } from "lucide-react"
+import { GlobalInvestmentSearchSurface } from "@/app/components/GlobalInvestmentSearchSurface"
 import { getInvestmentsMatchingQuery } from "@/app/shared/investment-search"
-import { Button } from "@/components/ui/button"
 import {
   DERIVED_STATUS_LABELS,
   INVESTMENT_TYPE_LABELS,
@@ -27,11 +26,74 @@ export function GlobalInvestmentSearch({
   searchableInvestments,
   onSearchResultSelect,
 }: GlobalInvestmentSearchProps) {
-  function openSearchSurface() {
-    onOpenChange(true)
-  }
+  const searchSurfaceRef = useRef<HTMLDivElement>(null)
+  const searchResultsRegionRef = useRef<HTMLDivElement>(null)
+  const searchTriggerRef = useRef<HTMLButtonElement>(null)
+  const shouldRestoreSearchTriggerFocusRef = useRef(false)
+
+  // Explicit close actions wait for the closed trigger to mount before restoring focus.
+  // Outside presses intentionally skip this so the clicked control keeps its focus.
+  useEffect(() => {
+    if (isOpen || !shouldRestoreSearchTriggerFocusRef.current) {
+      return
+    }
+
+    searchTriggerRef.current?.focus()
+    shouldRestoreSearchTriggerFocusRef.current = false
+  }, [isOpen])
+
+  // Treat the inline capsule and portaled results positioner as one search boundary.
+  // Capture-phase listeners still observe outside interactions that stop bubbling.
+  useEffect(() => {
+    const searchSurface = searchSurfaceRef.current
+
+    if (!isOpen || searchSurface === null) {
+      return undefined
+    }
+
+    const ownerDocument = searchSurface.ownerDocument
+    let didPrimaryPointerDownStartOutsideSearch = false
+
+    function isInsideSearch(event: Event) {
+      const eventPath = event.composedPath()
+      const currentSearchSurface = searchSurfaceRef.current
+      const currentSearchResultsRegion = searchResultsRegionRef.current
+
+      return (
+        (currentSearchSurface !== null &&
+          eventPath.includes(currentSearchSurface)) ||
+        (currentSearchResultsRegion !== null &&
+          eventPath.includes(currentSearchResultsRegion))
+      )
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      didPrimaryPointerDownStartOutsideSearch =
+        event.isPrimary && event.button === 0 && !isInsideSearch(event)
+    }
+
+    function handleClick(event: MouseEvent) {
+      const shouldClose =
+        didPrimaryPointerDownStartOutsideSearch && !isInsideSearch(event)
+
+      didPrimaryPointerDownStartOutsideSearch = false
+
+      if (shouldClose) {
+        onOpenChange(false)
+      }
+    }
+
+    ownerDocument.addEventListener("pointerdown", handlePointerDown, true)
+    ownerDocument.addEventListener("click", handleClick, true)
+
+    return () => {
+      ownerDocument.removeEventListener("pointerdown", handlePointerDown, true)
+      ownerDocument.removeEventListener("click", handleClick, true)
+    }
+  }, [isOpen, onOpenChange])
 
   function closeSearchSurface() {
+    shouldRestoreSearchTriggerFocusRef.current = true
     onOpenChange(false)
   }
 
@@ -41,54 +103,44 @@ export function GlobalInvestmentSearch({
   }
 
   return (
-    <>
-      <Button
-        type="button"
-        variant="ghost"
-        aria-label="Search investments"
-        className="size-10 rounded-full border border-border/80 bg-secondary/70 text-primary hover:bg-secondary hover:text-primary"
-        onClick={openSearchSurface}
-      >
-        <Search className="size-4.5" aria-hidden="true" />
-      </Button>
-
-      {isOpen
-        ? createPortal(
-            <>
-              <div
-                className="fixed inset-0 z-20 cursor-default bg-transparent"
-                aria-hidden="true"
-                onClick={closeSearchSurface}
-              />
-              <div className="fixed inset-x-0 top-[max(1.25rem,env(safe-area-inset-top))] z-30 mx-auto flex w-full max-w-md justify-end px-5">
-                <InvestmentSearchAutocomplete
-                  searchableInvestments={searchableInvestments}
-                  onClose={closeSearchSurface}
-                  onSearchResultSelect={handleSearchResultSelect}
-                />
-              </div>
-            </>,
-            document.body,
-          )
-        : null}
-    </>
+    <GlobalInvestmentSearchSurface
+      ref={searchSurfaceRef}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      onRequestClose={closeSearchSurface}
+      triggerRef={searchTriggerRef}
+    >
+      {isOpen ? (
+        <InvestmentSearchAutocomplete
+          onRequestClose={closeSearchSurface}
+          onSearchResultSelect={handleSearchResultSelect}
+          searchResultsRegionRef={searchResultsRegionRef}
+          searchableInvestments={searchableInvestments}
+        />
+      ) : null}
+    </GlobalInvestmentSearchSurface>
   )
 }
 
 interface InvestmentSearchAutocompleteProps {
-  searchableInvestments: readonly Investment[]
-  onClose: () => void
+  onRequestClose: () => void
   onSearchResultSelect: (investmentId: string) => void
+  searchResultsRegionRef: RefObject<HTMLDivElement | null>
+  searchableInvestments: readonly Investment[]
 }
 
 function InvestmentSearchAutocomplete({
-  searchableInvestments,
-  onClose,
+  onRequestClose,
   onSearchResultSelect,
+  searchResultsRegionRef,
+  searchableInvestments,
 }: InvestmentSearchAutocompleteProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isResultsPopupOpen, setIsResultsPopupOpen] = useState(false)
   const [searchAsOfDate] = useState(() => new Date())
+  const highlightedSearchResultRef = useRef<ResolvedInvestment | undefined>(
+    undefined,
+  )
 
   const resolvedSearchableInvestments = useMemo(() => {
     return searchableInvestments.map((investment) => {
@@ -109,6 +161,18 @@ function InvestmentSearchAutocomplete({
 
   const hasSearchQuery = searchQuery.trim() !== ""
 
+  function selectHighlightedSearchResult() {
+    const highlightedSearchResult =
+      highlightedSearchResultRef.current ?? searchResults[0]
+
+    if (highlightedSearchResult === undefined) {
+      return false
+    }
+
+    onSearchResultSelect(highlightedSearchResult.id)
+    return true
+  }
+
   return (
     <Autocomplete.Root
       autoHighlight="always"
@@ -118,51 +182,64 @@ function InvestmentSearchAutocomplete({
       items={resolvedSearchableInvestments}
       open={isResultsPopupOpen && hasSearchQuery}
       value={searchQuery}
-      onOpenChange={(isOpen, eventDetails) => {
+      onOpenChange={(isOpen) => {
         setIsResultsPopupOpen(isOpen)
-
-        if (!isOpen && eventDetails.reason === "escape-key") {
-          onClose()
-        }
+      }}
+      onItemHighlighted={(highlightedSearchResult) => {
+        highlightedSearchResultRef.current = highlightedSearchResult
       }}
       onValueChange={(nextSearchQuery, eventDetails) => {
-        if (eventDetails.reason !== "item-press") {
-          setSearchQuery(nextSearchQuery)
-          setIsResultsPopupOpen(nextSearchQuery.trim() !== "")
+        if (eventDetails.reason === "item-press") {
+          selectHighlightedSearchResult()
+          return
         }
+
+        highlightedSearchResultRef.current = undefined
+        setSearchQuery(nextSearchQuery)
+        setIsResultsPopupOpen(nextSearchQuery.trim() !== "")
       }}
     >
-      <div className="mr-20 w-[calc(100%-5rem)] max-w-70">
-        <Autocomplete.InputGroup className="relative flex h-10 items-center rounded-full border border-primary/25 bg-card pl-10 pr-10 focus-within:border-primary/60 focus-within:ring-3 focus-within:ring-primary/12">
-          <Search
-            className="pointer-events-none absolute left-3.5 size-4 text-primary"
-            aria-hidden="true"
-          />
-          <Autocomplete.Input
-            autoFocus
-            aria-label="Search investments"
-            placeholder="Search investments"
-            className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                onClose()
-              }
-            }}
-          />
-          <button
-            type="button"
-            aria-label="Close search"
-            className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-secondary/70 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-            onClick={onClose}
-          >
-            <X className="size-4" aria-hidden="true" />
-          </button>
-        </Autocomplete.InputGroup>
-      </div>
+      <Autocomplete.InputGroup className="relative flex h-10 w-full items-center bg-transparent pl-10 pr-10">
+        <Search
+          className="pointer-events-none absolute left-3.5 size-4 text-primary"
+          aria-hidden="true"
+        />
+        <Autocomplete.Input
+          autoFocus
+          aria-label="Search investments"
+          placeholder="Search investments"
+          className="h-full min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          onKeyDownCapture={(event) => {
+            if (event.key !== "Enter") {
+              return
+            }
+
+            event.preventDefault()
+            event.stopPropagation()
+            selectHighlightedSearchResult()
+          }}
+        />
+        <button
+          type="button"
+          aria-label="Close search"
+          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-secondary/70 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+          onClick={onRequestClose}
+        >
+          <X className="size-4" aria-hidden="true" />
+        </button>
+      </Autocomplete.InputGroup>
 
       <Autocomplete.Portal>
-        <Autocomplete.Positioner sideOffset={6} align="end" className="z-50">
-          <Autocomplete.Popup className="max-h-[min(22rem,var(--available-height))] w-(--anchor-width) overflow-y-auto rounded-xl border border-border bg-card p-1.5 text-card-foreground shadow-[0_6px_8px_rgb(0_0_0/0.32)] outline-none">
+        <Autocomplete.Positioner
+          ref={searchResultsRegionRef}
+          sideOffset={6}
+          align="end"
+          className="z-50"
+        >
+          <Autocomplete.Popup
+            initialFocus={false}
+            className="max-h-[min(22rem,var(--available-height))] w-(--anchor-width) overflow-y-auto rounded-xl border border-border bg-card p-1.5 text-card-foreground shadow-[0_6px_8px_rgb(0_0_0/0.32)] outline-none"
+          >
             <Autocomplete.List>
               {(searchResult: ResolvedInvestment, resultIndex: number) => (
                 <Autocomplete.Item
@@ -170,7 +247,6 @@ function InvestmentSearchAutocomplete({
                   value={searchResult}
                   index={resultIndex}
                   className="flex min-h-14 w-full cursor-default flex-col justify-center rounded-lg px-3 py-2 text-left outline-none data-highlighted:bg-secondary/80"
-                  onClick={() => onSearchResultSelect(searchResult.id)}
                 >
                   <span className="truncate text-sm font-medium text-foreground">
                     {searchResult.name}
@@ -183,9 +259,11 @@ function InvestmentSearchAutocomplete({
                 </Autocomplete.Item>
               )}
             </Autocomplete.List>
-            <Autocomplete.Empty className="px-3 py-5 text-center text-sm text-muted-foreground">
-              No investments found.
-            </Autocomplete.Empty>
+            {searchResults.length === 0 ? (
+              <Autocomplete.Empty className="px-3 py-5 text-center text-sm text-muted-foreground">
+                No investments found.
+              </Autocomplete.Empty>
+            ) : null}
           </Autocomplete.Popup>
         </Autocomplete.Positioner>
       </Autocomplete.Portal>
