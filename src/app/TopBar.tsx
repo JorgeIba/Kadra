@@ -54,16 +54,6 @@ export function TopBar({
       : GLOBAL_INVESTMENT_SEARCH_MOTION.companionDuration,
     ease: GLOBAL_INVESTMENT_SEARCH_MOTION.easing,
   }
-  const topBarLayoutTransition = {
-    layout: {
-      duration: prefersReducedMotion
-        ? 0
-        : isGlobalInvestmentSearchOpen
-          ? GLOBAL_INVESTMENT_SEARCH_MOTION.openDuration
-          : GLOBAL_INVESTMENT_SEARCH_MOTION.closeDuration,
-      ease: GLOBAL_INVESTMENT_SEARCH_MOTION.easing,
-    },
-  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-20 mx-auto min-h-[var(--app-top-bar-height)] w-full max-w-md bg-background/75 px-5 pb-3 pt-[max(1.25rem,env(safe-area-inset-top))] backdrop-blur-[32px]">
@@ -87,9 +77,9 @@ export function TopBar({
           {!isGlobalInvestmentSearchOpen ? (
             <motion.div
               key="top-bar-identity"
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={companionControlsTransition}
               className="min-w-0 shrink-0"
             >
@@ -116,16 +106,7 @@ export function TopBar({
           ) : null}
         </AnimatePresence>
 
-        <motion.div
-          layout
-          transition={topBarLayoutTransition}
-          className={cn(
-            "flex min-w-0 items-center",
-            isGlobalInvestmentSearchOpen
-              ? "flex-1"
-              : "shrink-0 items-center gap-2",
-          )}
-        >
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
           <GlobalInvestmentSearch
             isOpen={isGlobalInvestmentSearchOpen}
             onOpenChange={setIsGlobalInvestmentSearchOpen}
@@ -137,9 +118,9 @@ export function TopBar({
             {!isGlobalInvestmentSearchOpen ? (
               <motion.div
                 key="top-bar-utility-controls"
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 8 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={companionControlsTransition}
                 className="flex shrink-0 items-center gap-2"
               >
@@ -269,7 +250,7 @@ export function TopBar({
               </motion.div>
             ) : null}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
     </header>
   )

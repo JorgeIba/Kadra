@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
 import { Autocomplete } from "@base-ui/react/autocomplete"
-import { Search, X } from "lucide-react"
 import { GlobalInvestmentSearchSurface } from "@/app/components/GlobalInvestmentSearchSurface"
 import { getInvestmentsMatchingQuery } from "@/app/shared/investment-search"
 import {
@@ -112,7 +111,6 @@ export function GlobalInvestmentSearch({
     >
       {isOpen ? (
         <InvestmentSearchAutocomplete
-          onRequestClose={closeSearchSurface}
           onSearchResultSelect={handleSearchResultSelect}
           searchResultsRegionRef={searchResultsRegionRef}
           searchableInvestments={searchableInvestments}
@@ -123,14 +121,12 @@ export function GlobalInvestmentSearch({
 }
 
 interface InvestmentSearchAutocompleteProps {
-  onRequestClose: () => void
   onSearchResultSelect: (investmentId: string) => void
   searchResultsRegionRef: RefObject<HTMLDivElement | null>
   searchableInvestments: readonly Investment[]
 }
 
 function InvestmentSearchAutocomplete({
-  onRequestClose,
   onSearchResultSelect,
   searchResultsRegionRef,
   searchableInvestments,
@@ -199,11 +195,7 @@ function InvestmentSearchAutocomplete({
         setIsResultsPopupOpen(nextSearchQuery.trim() !== "")
       }}
     >
-      <Autocomplete.InputGroup className="relative flex h-10 w-full items-center bg-transparent pl-10 pr-10">
-        <Search
-          className="pointer-events-none absolute left-3.5 size-4 text-primary"
-          aria-hidden="true"
-        />
+      <Autocomplete.InputGroup className="relative flex h-10 w-full items-center bg-transparent px-3">
         <Autocomplete.Input
           autoFocus
           aria-label="Search investments"
@@ -219,14 +211,6 @@ function InvestmentSearchAutocomplete({
             selectHighlightedSearchResult()
           }}
         />
-        <button
-          type="button"
-          aria-label="Close search"
-          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-secondary/70 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-          onClick={onRequestClose}
-        >
-          <X className="size-4" aria-hidden="true" />
-        </button>
       </Autocomplete.InputGroup>
 
       <Autocomplete.Portal>
