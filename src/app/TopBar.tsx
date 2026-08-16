@@ -54,6 +54,14 @@ export function TopBar({
       : GLOBAL_INVESTMENT_SEARCH_MOTION.companionDuration,
     ease: GLOBAL_INVESTMENT_SEARCH_MOTION.easing,
   }
+  const topBarLayoutTransition = {
+    duration: prefersReducedMotion
+      ? 0
+      : isGlobalInvestmentSearchOpen
+        ? GLOBAL_INVESTMENT_SEARCH_MOTION.openDuration
+        : GLOBAL_INVESTMENT_SEARCH_MOTION.closeDuration,
+    ease: GLOBAL_INVESTMENT_SEARCH_MOTION.easing,
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-20 mx-auto min-h-[var(--app-top-bar-height)] w-full max-w-md bg-background/75 px-5 pb-3 pt-[max(1.25rem,env(safe-area-inset-top))] backdrop-blur-[32px]">
@@ -72,8 +80,12 @@ export function TopBar({
           }
         }}
       />
-      <div className="flex items-center justify-between gap-3">
-        <AnimatePresence initial={false} mode="popLayout">
+      <motion.div
+        layout
+        transition={{ layout: topBarLayoutTransition }}
+        className="flex items-center justify-between gap-3"
+      >
+        <AnimatePresence initial={false} mode="sync">
           {!isGlobalInvestmentSearchOpen ? (
             <motion.div
               key="top-bar-identity"
@@ -106,7 +118,11 @@ export function TopBar({
           ) : null}
         </AnimatePresence>
 
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+        <motion.div
+          layout
+          transition={{ layout: topBarLayoutTransition }}
+          className="flex min-w-0 flex-1 items-center justify-end gap-2"
+        >
           <GlobalInvestmentSearch
             isOpen={isGlobalInvestmentSearchOpen}
             onOpenChange={setIsGlobalInvestmentSearchOpen}
@@ -114,7 +130,7 @@ export function TopBar({
             onSearchResultSelect={onGlobalSearchResultSelect}
           />
 
-          <AnimatePresence initial={false} mode="popLayout">
+          <AnimatePresence initial={false} mode="sync">
             {!isGlobalInvestmentSearchOpen ? (
               <motion.div
                 key="top-bar-utility-controls"
@@ -250,8 +266,8 @@ export function TopBar({
               </motion.div>
             ) : null}
           </AnimatePresence>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </header>
   )
 }
