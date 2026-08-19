@@ -1,7 +1,7 @@
 import { useState } from "react"
 import {
   GlobalInvestmentSearchMorphLabPreview,
-  type GlobalInvestmentSearchLabBarDirection,
+  type GlobalInvestmentSearchLabBarSide,
   type GlobalInvestmentSearchLabPhase,
 } from "@/app/lab/GlobalInvestmentSearchMorphLabPreview"
 
@@ -10,8 +10,8 @@ export const GLOBAL_INVESTMENT_SEARCH_MOTION_LAB_PATH = "/__lab/global-search"
 export function GlobalInvestmentSearchMotionLab() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isReducedMotionPreview, setIsReducedMotionPreview] = useState(false)
-  const [searchBarDirection, setSearchBarDirection] =
-    useState<GlobalInvestmentSearchLabBarDirection>("right")
+  const [searchBarSide, setSearchBarSide] =
+    useState<GlobalInvestmentSearchLabBarSide>("right")
   const [inspectionPhase, setInspectionPhase] =
     useState<GlobalInvestmentSearchLabPhase | null>(null)
 
@@ -25,10 +25,8 @@ export function GlobalInvestmentSearchMotionLab() {
     setIsSearchOpen(phase !== "closed")
   }
 
-  function changeSearchBarDirection(
-    direction: GlobalInvestmentSearchLabBarDirection,
-  ) {
-    setSearchBarDirection(direction)
+  function changeSearchBarSide(side: GlobalInvestmentSearchLabBarSide) {
+    setSearchBarSide(side)
     setInspectionPhase(null)
     setIsSearchOpen(false)
   }
@@ -55,7 +53,7 @@ export function GlobalInvestmentSearchMotionLab() {
           </p>
           <div className="flex min-h-36 w-full items-center justify-center rounded-2xl border border-border/80 bg-card/40 px-4">
             <GlobalInvestmentSearchMorphLabPreview
-              barDirection={searchBarDirection}
+              barSide={searchBarSide}
               isOpen={isSearchOpen}
               manualPhase={inspectionPhase ?? undefined}
               onOpenChange={setLiveSearchState}
@@ -115,8 +113,8 @@ export function GlobalInvestmentSearchMotionLab() {
                 key={direction}
                 type="button"
                 className="rounded-full border border-border/80 bg-secondary/70 px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
-                aria-pressed={searchBarDirection === direction}
-                onClick={() => changeSearchBarDirection(direction)}
+                aria-pressed={searchBarSide === direction}
+                onClick={() => changeSearchBarSide(direction)}
               >
                 {label}
               </button>
