@@ -1,31 +1,31 @@
 import { useState } from "react"
 import {
-  GlobalInvestmentSearchMorphLabPreview,
-  type GlobalInvestmentSearchLabBarSide,
-  type GlobalInvestmentSearchLabPhase,
-} from "@/app/lab/GlobalInvestmentSearchMorphLabPreview"
+  SearchMorphLabPreview,
+  type SearchMorphLabBarSide,
+  type SearchMorphLabPhase,
+} from "@/app/lab/SearchMorphLabPreview"
 
-export const GLOBAL_INVESTMENT_SEARCH_MOTION_LAB_PATH = "/__lab/global-search"
+export const SEARCH_MORPH_MOTION_LAB_PATH = "/__lab/global-search"
 
-export function GlobalInvestmentSearchMotionLab() {
+export function SearchMorphMotionLab() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isReducedMotionPreview, setIsReducedMotionPreview] = useState(false)
   const [searchBarSide, setSearchBarSide] =
-    useState<GlobalInvestmentSearchLabBarSide>("right")
+    useState<SearchMorphLabBarSide>("right")
   const [inspectionPhase, setInspectionPhase] =
-    useState<GlobalInvestmentSearchLabPhase | null>(null)
+    useState<SearchMorphLabPhase | null>(null)
 
   function setLiveSearchState(isOpen: boolean) {
     setInspectionPhase(null)
     setIsSearchOpen(isOpen)
   }
 
-  function showInspectionPhase(phase: GlobalInvestmentSearchLabPhase) {
+  function showInspectionPhase(phase: SearchMorphLabPhase) {
     setInspectionPhase(phase)
     setIsSearchOpen(phase !== "closed")
   }
 
-  function changeSearchBarSide(side: GlobalInvestmentSearchLabBarSide) {
+  function changeSearchBarSide(side: SearchMorphLabBarSide) {
     setSearchBarSide(side)
     setInspectionPhase(null)
     setIsSearchOpen(false)
@@ -52,7 +52,7 @@ export function GlobalInvestmentSearchMotionLab() {
             Preview
           </p>
           <div className="flex min-h-36 w-full items-center justify-center rounded-2xl border border-border/80 bg-card/40 px-4">
-            <GlobalInvestmentSearchMorphLabPreview
+            <SearchMorphLabPreview
               barSide={searchBarSide}
               isOpen={isSearchOpen}
               manualPhase={inspectionPhase ?? undefined}
