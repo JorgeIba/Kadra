@@ -6,6 +6,8 @@ import {
 } from "@/app/components/search-morph-motion"
 import {
   SEARCH_MORPH_BAR_SEPARATION_OFFSET,
+  SEARCH_MORPH_ANIMATION_SPEED,
+  SEARCH_MORPH_ANIMATION_TIMING,
   SEARCH_MORPH_MIN_BAR_WIDTH,
   SEARCH_MORPH_ORB_SIZE,
 } from "@/app/components/search-morph-animations"
@@ -79,9 +81,16 @@ describe("global investment search morph motion", () => {
       opacity: [null, 0.75, 1, 1, 1, 1, 0.9, 0.35, 0],
     })
     expect(motion.transition).toMatchObject({
-      duration: 1,
+      duration:
+        SEARCH_MORPH_ANIMATION_TIMING.openingDuration /
+        SEARCH_MORPH_ANIMATION_SPEED,
       ease: "easeInOut",
       times: [0, 0.08, 0.16, 0.24, 0.34, 0.48, 0.62, 0.8, 1],
+    })
+    expect(motion.content.transition).toMatchObject({
+      duration:
+        SEARCH_MORPH_ANIMATION_TIMING.contentRevealDuration /
+        SEARCH_MORPH_ANIMATION_SPEED,
     })
   })
 
@@ -120,7 +129,9 @@ describe("global investment search morph motion", () => {
       opacity: [null, 0.2, 0.6, 0.9, 1, 1, 0.9, 0.45, 0],
     })
     expect(motion.transition).toMatchObject({
-      duration: 0.9,
+      duration:
+        SEARCH_MORPH_ANIMATION_TIMING.closingDuration /
+        SEARCH_MORPH_ANIMATION_SPEED,
       times: [0, 0.1, 0.2, 0.34, 0.48, 0.62, 0.76, 0.9, 1],
     })
     expectAnimatedTracksToMatchTransition(motion)

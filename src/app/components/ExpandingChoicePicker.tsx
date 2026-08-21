@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils"
 
 export interface ExpandingChoicePickerOption<T extends string> {
-  /** Copy tailored for the narrower card and stack presentations. */
+  /** Optional shorter copy used while the open selection view is visible. */
   compactDescription?: string
   description: string
   icon: LucideIcon
@@ -282,6 +282,7 @@ function ChoiceDeck<T extends string>({
             key={option.value}
             motionModel={motionModel}
             option={option}
+            stage={stage}
             view={view}
             onPerformAction={performAvailableAction}
             onLayoutAnimationComplete={
@@ -365,12 +366,14 @@ function ChoiceSurface<T extends string>({
   onLayoutAnimationComplete,
   onPerformAction,
   option,
+  stage,
   view,
 }: {
   motionModel: ChoiceSurfaceMotionModel
   onLayoutAnimationComplete: () => void
   onPerformAction: (action: PickerSurfaceAction, value: T) => void
   option: ExpandingChoicePickerOption<T>
+  stage: PickerStage
   view: ChoiceSurfaceViewModel
 }) {
   const Icon = option.icon
@@ -415,6 +418,7 @@ function ChoiceSurface<T extends string>({
         icon={
           <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
         }
+        stage={stage}
         usesSingleRowLayout={view.usesSingleRowLayout}
         option={option}
       />
@@ -453,21 +457,37 @@ function ChoiceSelectionIndicator({
 }
 
 /**
+ * The copy changes only after opening content has hidden and before closing
+ * content is revealed, so visible text remains stable during layout morphs.
+ */
+const PICKER_SHORT_DESCRIPTION_STAGES: ReadonlySet<PickerStage> = new Set([
+  "opening-row-to-card",
+  "opening-content-show",
+  "opening-deck-expand",
+  "expanded",
+  "moving-selection",
+  "closing-deck-stack",
+  "closing-content-hide",
+])
+
+/**
  * The icon and copy inside a choice surface. Choreography targets
  * `data-choice-content` to hide it before surfaces move and reveal it after.
  */
 function ChoiceContent<T extends string>({
   icon,
   option,
+  stage,
   usesSingleRowLayout,
 }: {
   icon: React.ReactNode
   option: ExpandingChoicePickerOption<T>
+  stage: PickerStage
   usesSingleRowLayout: boolean
 }) {
-  const descriptionForCurrentLayout = usesSingleRowLayout
-    ? option.description
-    : (option.compactDescription ?? option.description)
+  const descriptionForCurrentLayout = PICKER_SHORT_DESCRIPTION_STAGES.has(stage)
+    ? (option.compactDescription ?? option.description)
+    : option.description
 
   return (
     <span
