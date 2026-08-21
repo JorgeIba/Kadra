@@ -5,6 +5,7 @@ interface GlobalInvestmentSearchSurfaceProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onBeforeClose: () => void
+  onOpened?: () => void
   onClosed?: () => void
   ref: Ref<HTMLDivElement>
   triggerRef: Ref<HTMLButtonElement>
@@ -19,6 +20,7 @@ export function GlobalInvestmentSearchSurface({
   isOpen,
   onOpenChange,
   onBeforeClose,
+  onOpened,
   onClosed,
   ref: searchSurfaceRef,
   triggerRef,
@@ -31,6 +33,7 @@ export function GlobalInvestmentSearchSurface({
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       onBeforeClose={onBeforeClose}
+      onOpened={onOpened}
       onClosed={onClosed}
       triggerAriaLabel={isOpen ? "Close search" : "Search investments"}
       triggerRef={triggerRef}

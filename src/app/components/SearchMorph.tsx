@@ -17,6 +17,7 @@ interface SearchMorphCommonProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onBeforeClose?: () => void
+  onOpened?: () => void
   onClosed?: () => void
   reducedMotion?: boolean
   containerRef?: Ref<HTMLDivElement>
@@ -37,6 +38,7 @@ export function SearchMorph({
   isOpen,
   onOpenChange,
   onBeforeClose,
+  onOpened,
   onClosed,
   reducedMotion,
   containerRef,
@@ -57,6 +59,13 @@ export function SearchMorph({
     reducedMotion,
     stage: controller.stage,
   })
+
+  // Notify consumers only after Motion reports the settled open stage.
+  useEffect(() => {
+    if (controller.stage === "open") {
+      onOpened?.()
+    }
+  }, [controller.stage, onOpened])
 
   // Let consumers restore adjacent UI only after the closing morph is complete.
   useEffect(() => {

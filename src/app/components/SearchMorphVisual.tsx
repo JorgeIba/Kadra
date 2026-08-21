@@ -151,8 +151,8 @@ export function SearchMorphVisual({
       <motion.div
         id={contentId}
         initial={false}
-        aria-hidden={!isTriggerExpanded}
-        inert={!isTriggerExpanded}
+        aria-hidden={!isContentVisible}
+        inert={!isContentVisible}
         className="absolute inset-y-0 z-20 overflow-hidden rounded-full"
         animate={{
           opacity: isContentVisible ? 1 : 0,

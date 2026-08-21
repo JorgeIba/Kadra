@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react"
 import { Autocomplete } from "@base-ui/react/autocomplete"
 import { GlobalInvestmentSearchSurface } from "@/app/components/GlobalInvestmentSearchSurface"
 import { getInvestmentsMatchingQuery } from "@/app/shared/investment-search"
@@ -29,8 +36,13 @@ export function GlobalInvestmentSearch({
 }: GlobalInvestmentSearchProps) {
   const searchSurfaceRef = useRef<HTMLDivElement>(null)
   const searchResultsRegionRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const searchTriggerRef = useRef<HTMLButtonElement>(null)
   const shouldRestoreSearchTriggerFocusRef = useRef(false)
+
+  const focusSearchInput = useCallback(() => {
+    searchInputRef.current?.focus()
+  }, [])
 
   // Explicit close actions wait for the closed trigger to mount before restoring focus.
   // Outside presses intentionally skip this so the clicked control keeps its focus.
@@ -113,11 +125,13 @@ export function GlobalInvestmentSearch({
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       onBeforeClose={prepareSearchSurfaceClose}
+      onOpened={focusSearchInput}
       onClosed={onSearchClosed}
       triggerRef={searchTriggerRef}
     >
       {isOpen ? (
         <InvestmentSearchAutocomplete
+          inputRef={searchInputRef}
           onSearchResultSelect={handleSearchResultSelect}
           searchResultsRegionRef={searchResultsRegionRef}
           searchableInvestments={searchableInvestments}
@@ -128,12 +142,14 @@ export function GlobalInvestmentSearch({
 }
 
 interface InvestmentSearchAutocompleteProps {
+  inputRef: RefObject<HTMLInputElement | null>
   onSearchResultSelect: (investmentId: string) => void
   searchResultsRegionRef: RefObject<HTMLDivElement | null>
   searchableInvestments: readonly Investment[]
 }
 
 function InvestmentSearchAutocomplete({
+  inputRef,
   onSearchResultSelect,
   searchResultsRegionRef,
   searchableInvestments,
@@ -204,7 +220,7 @@ function InvestmentSearchAutocomplete({
     >
       <Autocomplete.InputGroup className="relative flex h-10 w-full items-center bg-transparent px-3">
         <Autocomplete.Input
-          autoFocus
+          ref={inputRef}
           aria-label="Search investments"
           placeholder="Search investments"
           className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:text-sm"
