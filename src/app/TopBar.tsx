@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useCallback, useRef, useState } from "react"
 import { Menu } from "@base-ui/react/menu"
 import {
   ArrowLeft,
@@ -10,10 +10,20 @@ import {
   Trash2,
   Upload,
 } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 import { KadraMark } from "@/app/components/KadraMark"
+import { GlobalInvestmentSearch } from "@/app/components/GlobalInvestmentSearch"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
 import { Button, buttonVariants } from "@/components/ui/button"
+import type { Investment } from "@/domain/investments"
 import { cn } from "@/lib/utils"
+
+const TOP_BAR_LEADING_CONTENT_TRANSITION = {
+  duration: 0.42,
+  ease: [0.22, 1, 0.36, 1],
+} as const
+const TOP_BAR_LEADING_CONTENT_HIDE_DELAY = 0.12
+const TOP_BAR_LEADING_CONTENT_HIDE_OFFSET = 12
 
 interface TopBarProps {
   hasAppUpdate: boolean
@@ -21,8 +31,10 @@ interface TopBarProps {
   onBack?: () => void
   onCheckForUpdates: () => void
   onExportBackup: () => void
+  onGlobalSearchResultSelect: (investmentId: string) => void
   onImportBackup: (file: File) => void
   onResetLocalData: () => void
+  searchableInvestments: readonly Investment[]
 }
 
 export function TopBar({
@@ -31,12 +43,38 @@ export function TopBar({
   onBack,
   onCheckForUpdates,
   onExportBackup,
+  onGlobalSearchResultSelect,
   onImportBackup,
   onResetLocalData,
+  searchableInvestments,
 }: TopBarProps) {
   const backupInputRef = useRef<HTMLInputElement>(null)
+  const [isGlobalInvestmentSearchOpen, setIsGlobalInvestmentSearchOpen] =
+    useState(false)
+  const [isGlobalSearchSurfaceActive, setIsGlobalSearchSurfaceActive] =
+    useState(false)
   const { isMoneyHidden, toggleMoneyVisibility } = useMoneyPrivacy()
   const MoneyVisibilityIcon = isMoneyHidden ? EyeOff : Eye
+  const prefersReducedMotion = useReducedMotion() ?? false
+  const shouldHideLeadingContent = isGlobalSearchSurfaceActive
+  const handleGlobalSearchOpenChange = useCallback((nextIsOpen: boolean) => {
+    setIsGlobalInvestmentSearchOpen(nextIsOpen)
+
+    if (nextIsOpen) {
+      setIsGlobalSearchSurfaceActive(true)
+    }
+  }, [])
+  const handleGlobalSearchClosed = useCallback(() => {
+    setIsGlobalSearchSurfaceActive(false)
+  }, [])
+  const leadingContentTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : {
+        ...TOP_BAR_LEADING_CONTENT_TRANSITION,
+        delay: shouldHideLeadingContent
+          ? TOP_BAR_LEADING_CONTENT_HIDE_DELAY
+          : 0,
+      }
 
   return (
     <header className="fixed inset-x-0 top-0 z-20 mx-auto min-h-[var(--app-top-bar-height)] w-full max-w-md bg-background/75 px-5 pb-3 pt-[max(1.25rem,env(safe-area-inset-top))] backdrop-blur-[32px]">
@@ -55,46 +93,57 @@ export function TopBar({
           }
         }}
       />
-      <div className="flex items-center justify-between gap-3">
-        {onBack === undefined ? (
-          <div className="flex items-center gap-0">
-            <KadraMark className="size-8 shrink-0 text-primary" />
-            <p className="font-brand text-[1.625rem] leading-[0.9] tracking-[-0.04em] text-foreground">
-              kadra
-            </p>
-          </div>
-        ) : (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="-ml-2 rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground"
-            onClick={onBack}
-          >
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            Back
-          </Button>
-        )}
-
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={
-              isMoneyHidden ? "Show money amounts" : "Hide money amounts"
-            }
-            aria-pressed={isMoneyHidden}
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <div className="relative min-w-0">
+          <motion.div
+            initial={false}
+            aria-hidden={shouldHideLeadingContent ? true : undefined}
+            inert={shouldHideLeadingContent}
+            animate={{
+              opacity: shouldHideLeadingContent ? 0 : 1,
+              x: shouldHideLeadingContent
+                ? -TOP_BAR_LEADING_CONTENT_HIDE_OFFSET
+                : 0,
+            }}
+            transition={leadingContentTransition}
             className={cn(
-              "rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground",
-              isMoneyHidden &&
-                "border-primary/55 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+              "relative z-20 flex h-10 w-max items-center",
+              shouldHideLeadingContent && "pointer-events-none",
             )}
-            onClick={toggleMoneyVisibility}
           >
-            <MoneyVisibilityIcon className="size-5" aria-hidden="true" />
-          </Button>
+            {onBack === undefined ? (
+              <div className="flex items-center gap-0">
+                <KadraMark className="size-8 shrink-0 text-primary" />
+                <p className="font-brand text-[1.625rem] leading-[0.9] tracking-[-0.04em] text-foreground">
+                  kadra
+                </p>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="-ml-2 rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                onClick={onBack}
+              >
+                <ArrowLeft className="size-4" aria-hidden="true" />
+                Back
+              </Button>
+            )}
+          </motion.div>
 
+          <div className="pointer-events-none absolute inset-0 z-10">
+            <GlobalInvestmentSearch
+              isOpen={isGlobalInvestmentSearchOpen}
+              onOpenChange={handleGlobalSearchOpenChange}
+              onSearchClosed={handleGlobalSearchClosed}
+              searchableInvestments={searchableInvestments}
+              onSearchResultSelect={onGlobalSearchResultSelect}
+            />
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
           {hasAppUpdate || isCheckingForUpdate ? (
             <Button
               type="button"
@@ -118,6 +167,24 @@ export function TopBar({
               ) : null}
             </Button>
           ) : null}
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={
+              isMoneyHidden ? "Show money amounts" : "Hide money amounts"
+            }
+            aria-pressed={isMoneyHidden}
+            className={cn(
+              "rounded-full border border-border/80 bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground",
+              isMoneyHidden &&
+                "border-primary/55 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+            )}
+            onClick={toggleMoneyVisibility}
+          >
+            <MoneyVisibilityIcon className="size-5" aria-hidden="true" />
+          </Button>
 
           <Menu.Root modal={false}>
             <Menu.Trigger

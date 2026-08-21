@@ -15,7 +15,8 @@ export default defineConfig({
       manifest: {
         name: "Kadra",
         short_name: "Kadra",
-        description: "Private, local-first fixed-income investment tracking.",
+        description:
+          "Track fixed-income investments, estimated earnings, projected growth, and maturities.",
         theme_color: "#0b1113",
         background_color: "#0b1113",
         display: "standalone",

@@ -1,8 +1,10 @@
 # Kadra Brand Identity
 
-Kadra is the selected product name for this privacy-first, fixed-income
-investment tracker. The identity should feel calm, trustworthy, personal, and
-precise: a private ledger, not a trading terminal or consumer bank campaign.
+Kadra is the selected product name for this personal, fixed-income-first
+investment companion. The identity should feel clear, personal, precise,
+curious, rewarding, and quietly playful. It supports a focused portfolio
+check-in without borrowing the urgency of a trading product or the promotional
+language of a consumer bank campaign.
 
 This document is the source of truth for Kadra’s identity assets, colors,
 wordmark, and usage rules.
@@ -13,7 +15,7 @@ wordmark, and usage rules.
 | --- | --- |
 | Product name | Kadra |
 | App icon | The Kadra Angle mark only, with no text |
-| Primary mark | A mint vertical ledger stem and one rising four-point diagonal with a flat base |
+| Primary mark | A mint vertical stem and one rising four-point diagonal with a flat base |
 | Wordmark | Lowercase `kadra` in Elms Sans Regular |
 | Primary lockup | Mark left of the wordmark |
 | Launch lockup | Mark above the wordmark, centered |

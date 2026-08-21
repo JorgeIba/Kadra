@@ -39,6 +39,7 @@ This document holds future ideas and deferred work that are worth remembering, b
   scoping the transition to the routed screen/outlet instead of `root`
 - for reinvested fixed-term CD projections, retain the original lifecycle's payout behavior when creating the simulated renewal. In particular, a `to-cash` CD's earlier weekly or monthly payouts must remain cash; a projection must not rewrite that history as automatic reinvestment. Later, model a projection-only maturity transfer and explicit payout/cash handling so the renewal starts with exactly the proceeds available at maturity. For `at-maturity` payment frequencies, the current simulated renewal falls back to daily compounding; exact interval-based rolling fixed terms remain a future improvement.
 - restore accessible single-selection semantics for the expanding maturity picker: expose the expanded choices as native radios, or an equivalent `radiogroup`/`radio` pattern with selected-state announcements and keyboard navigation, while preserving the Motion layout choreography; keep the collapsed control as a disclosure button and verify the screen-reader and focus behavior.
+- standardize the Expanding Choice Picker's controller/choreography composition with the global search morph: keep the Picker controller independent of Motion and assemble its choreography in the Picker component, preserving existing behavior and tests
 
 ## Notes
 

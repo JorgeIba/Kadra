@@ -2,6 +2,23 @@
 
 This document captures dated decisions and planning restructures so `project-plan.md` can stay focused on the current story.
 
+## 2026-08-10
+
+### Personal investment companion positioning
+
+Decision:
+
+- Position Kadra as a personal, fixed-income-first investment companion for checking value, estimated earnings, projected growth, maturities, and what deserves attention.
+- Treat local storage, user-controlled backups, and the absence of institution connections, money movement, and trade execution as supporting product boundaries rather than the product personality.
+- Keep financial data calm and dependable while allowing search, navigation, progress, selection, and other reversible interactions to feel tactile, rewarding, and quietly playful.
+- Replace the "Private Yield Ledger" design north star with "The Personal Investment Companion."
+
+Why:
+
+- The previous framing described Kadra mainly through privacy and what it was not, which pushed the visual system toward unnecessary austerity.
+- Kadra is used for brief, repeated portfolio check-ins rather than high-pressure financial transactions.
+- Clear financial information and expressive interaction can coexist when motion does not distort data or delay the user's task.
+
 ## 2026-07-13
 
 ### Local portfolio backups

@@ -1,6 +1,6 @@
 ---
 name: Kadra
-description: Privacy-first fixed-income investment tracker.
+description: Personal fixed-income investment companion.
 colors:
   background: "#0B1113"
   foreground: "#F4F1EA"
@@ -76,22 +76,23 @@ Source of truth: the runtime palette in `src/index.css`. This document records i
 
 ## 1. Overview
 
-**Creative North Star: "The Private Yield Ledger"**
+**Creative North Star: "The Personal Investment Companion"**
 
-Kadra should feel like a dark, private ledger for fixed-income assets: quiet, exact, and easy to scan from a phone. The preferred visual baseline is `assets/screenshots_2/dashboard_idea_1.png`.
+Kadra should feel like a personal place to check in on fixed-income investments: clear, rewarding, quietly playful, and easy to scan from a phone. The preferred visual baseline is `assets/screenshots_2/dashboard_idea_1.png`.
 
 The interface is not card-heavy. It uses a dark charcoal canvas, thin dividers, serif financial values, compact sans labels, muted blue-gray support text, and restrained mint accents for value, progress, and selected navigation states.
 
-The system rejects generic SaaS dashboards, crypto trading interfaces, loud marketing sites, and promotion-heavy consumer banking apps.
+The system rejects generic SaaS dashboards, crypto trading interfaces, loud marketing sites, and promotion-heavy consumer banking apps. These boundaries keep financial information focused without making every interaction austere.
 
 The selected identity is documented in [docs/brand/README.md](docs/brand/README.md). Its Elms Sans Regular wordmark is a brand asset only; it does not replace the UI typography system below.
 
 **Key Characteristics:**
 
-- Dark mobile ledger composition.
+- Dark mobile portfolio composition.
 - Large serif portfolio value as the first read.
 - Compact sections separated by hairline dividers.
-- Mint accent used for positive value and active state only.
+- Mint accent used for value, active state, and expressive interaction feedback.
+- Calm financial data paired with tactile, memorable state changes.
 - No floating card grid as the default dashboard structure.
 
 ## 2. Colors
@@ -104,15 +105,15 @@ The palette is dark-first and restrained. Near-black surfaces carry the product,
 
 ### Neutral
 
-- **Ledger Black**: The app background and dominant dashboard surface.
+- **Kadra Black**: The app background and dominant dashboard surface.
 - **Raised Charcoal**: Subtle secondary surface for pills, icons, and controls.
-- **Warm Ledger Ink**: Main values and headings.
+- **Warm Ink**: Main values and headings.
 - **Quiet Blue Gray**: Labels, captions, secondary metrics, and chart axis text.
 - **Divider Charcoal**: Hairline separators between sections and rows.
 
 ### Named Rules
 
-**The Ledger Surface Rule.** The dashboard is mostly one continuous dark surface. Use dividers and spacing before adding cards.
+**The Continuous Surface Rule.** The dashboard is mostly one continuous dark surface. Use dividers and spacing before adding cards.
 
 **The Mint Rarity Rule.** Mint is for meaning: value, progress, active state, and urgency. It is not decoration.
 
@@ -122,7 +123,7 @@ The palette is dark-first and restrained. Near-black surfaces carry the product,
 **Body Font:** Geist Variable, sans-serif
 **Label/Mono Font:** Geist Variable, sans-serif
 
-**Character:** Serif type gives financial values and asset names a ledger quality. Geist keeps labels, navigation, and metadata crisp.
+**Character:** Serif type gives financial values and asset names a grounded, personal quality. Geist keeps labels, navigation, and metadata crisp.
 
 ### Hierarchy
 
@@ -144,7 +145,7 @@ The baseline uses almost no shadows. Depth comes from a continuous dark surface,
 
 ### Shadow Vocabulary
 
-- **None by default**: Dashboard sections, rows, and charts should sit flat on the ledger surface.
+- **None by default**: Dashboard sections, rows, and charts should sit flat on the continuous surface.
 
 ### Named Rules
 
@@ -183,6 +184,15 @@ The baseline uses almost no shadows. Depth comes from a continuous dark surface,
 - **Top Bar:** Kadra horizontal lockup (Kadra Angle mark plus wordmark) and compact profile affordance.
 - **Bottom Nav:** Icon-first, low-contrast inactive state, mint active state. Keep labels short.
 
+### Motion
+
+- **Financial data:** Values, labels, and charts remain stable and readable while users inspect them.
+- **Stateful interaction:** Search, navigation, selection, progress, and reversible actions may use more expressive motion when it clarifies what changed.
+- **Signature moments:** A small number of tactile or playful transitions can carry Kadra's personality instead of applying generic animation everywhere.
+- **Accessibility:** Every expressive transition has a reduced-motion alternative that preserves state and feedback.
+
+**The Calm Data, Playful Interaction Rule.** Keep the portfolio dependable; let the interaction around it feel alive.
+
 ### Dashboard Rows
 
 Distribution, maturity, and active-asset rows should be horizontally scannable: title left, value right, supporting metadata below, and progress or status only when it adds information.
@@ -196,6 +206,7 @@ Distribution, maturity, and active-asset rows should be horizontally scannable: 
 - **Do** use serif type for money and asset names.
 - **Do** use thin dividers and spacing before introducing cards.
 - **Do** reserve mint for value, progress, status, and active navigation.
+- **Do** use distinctive motion selectively for reversible state changes and discovery.
 
 ### Don't:
 
@@ -204,4 +215,5 @@ Distribution, maturity, and active-asset rows should be horizontally scannable: 
 - **Don't** make the product feel like a loud marketing site.
 - **Don't** use promotion-heavy consumer banking patterns.
 - **Don't** turn the dashboard into a grid of rounded cards.
-- **Don't** add decorative shadows or glass effects to the ledger surface.
+- **Don't** animate financial values in ways that make them harder to compare or trust.
+- **Don't** add decorative shadows or glass effects to the continuous surface.
