@@ -15,6 +15,7 @@ const MAX_SEARCH_RESULT_COUNT = 6
 interface GlobalInvestmentSearchProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
+  onSearchClosed?: () => void
   searchableInvestments: readonly Investment[]
   onSearchResultSelect: (investmentId: string) => void
 }
@@ -22,6 +23,7 @@ interface GlobalInvestmentSearchProps {
 export function GlobalInvestmentSearch({
   isOpen,
   onOpenChange,
+  onSearchClosed,
   searchableInvestments,
   onSearchResultSelect,
 }: GlobalInvestmentSearchProps) {
@@ -91,8 +93,12 @@ export function GlobalInvestmentSearch({
     }
   }, [isOpen, onOpenChange])
 
-  function closeSearchSurface() {
+  function prepareSearchSurfaceClose() {
     shouldRestoreSearchTriggerFocusRef.current = true
+  }
+
+  function closeSearchSurface() {
+    prepareSearchSurfaceClose()
     onOpenChange(false)
   }
 
@@ -106,7 +112,8 @@ export function GlobalInvestmentSearch({
       ref={searchSurfaceRef}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      onRequestClose={closeSearchSurface}
+      onBeforeClose={prepareSearchSurfaceClose}
+      onClosed={onSearchClosed}
       triggerRef={searchTriggerRef}
     >
       {isOpen ? (

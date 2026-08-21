@@ -5,7 +5,7 @@
  * Motion, DOM, or state-machine responsibilities, so the animation can be
  * inspected and tested independently from rendering.
  */
-export const SEARCH_MORPH_ORB_SIZE = 40
+export const SEARCH_MORPH_ORB_SIZE = 32
 export const SEARCH_MORPH_GAP = 8
 export const SEARCH_MORPH_MIN_BAR_WIDTH = 80
 export const SEARCH_MORPH_MIN_STAGE_WIDTH =

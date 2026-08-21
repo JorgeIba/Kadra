@@ -35,7 +35,7 @@ export function useSearchMorphLayout({
 
   useImperativeHandle(containerRef, () => containerElementRef.current!, [])
 
-  /** Keeps geometry calculations aligned with the actual rendered container. */
+  /** Keep Motion geometry aligned with the container's stable CSS size. */
   useLayoutEffect(() => {
     const containerElement = containerElementRef.current
 

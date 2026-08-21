@@ -50,7 +50,7 @@ export function SearchMorphInspection({
   return (
     <div
       ref={containerElementRef}
-      className={cn("relative h-10 min-w-32 w-full", className)}
+      className={cn("relative h-10 min-w-0 w-full", className)}
     >
       <SearchMorphVisual
         isContentVisible={isTriggerExpanded}

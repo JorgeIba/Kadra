@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref, useMemo } from "react"
+import { type ReactNode, type Ref, useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import {
   createMorphFrame,
@@ -10,17 +10,21 @@ import { useSearchMorphChoreography } from "@/app/components/use-search-morph-ch
 import { useSearchMorphController } from "@/app/components/use-search-morph-controller"
 import { useSearchMorphLayout } from "@/app/components/use-search-morph-layout"
 
-export interface SearchMorphProps {
+interface SearchMorphCommonProps {
   barSide?: MorphBarSide
   children: ReactNode
   className?: string
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
+  onBeforeClose?: () => void
+  onClosed?: () => void
   reducedMotion?: boolean
   containerRef?: Ref<HTMLDivElement>
   triggerAriaLabel: string
   triggerRef?: Ref<HTMLButtonElement>
 }
+
+export type SearchMorphProps = SearchMorphCommonProps
 
 /**
  * Owns the live production morph: controlled state, choreography, layout, and
@@ -32,6 +36,8 @@ export function SearchMorph({
   className,
   isOpen,
   onOpenChange,
+  onBeforeClose,
+  onClosed,
   reducedMotion,
   containerRef,
   triggerAriaLabel,
@@ -52,6 +58,13 @@ export function SearchMorph({
     stage: controller.stage,
   })
 
+  // Let consumers restore adjacent UI only after the closing morph is complete.
+  useEffect(() => {
+    if (controller.stage === "closed") {
+      onClosed?.()
+    }
+  }, [controller.stage, onClosed])
+
   const visualModel = useMemo(() => {
     if (controller.stage === "closed" || controller.stage === "open") {
       return createMorphFrame({
@@ -70,16 +83,37 @@ export function SearchMorph({
     })
   }, [barSide, controller.stage, expandedBarWidth, orbLeft])
 
+  function requestClose() {
+    onBeforeClose?.()
+    onOpenChange(false)
+  }
+
   return (
     <div
       ref={containerElementRef}
-      className={cn("relative h-10 min-w-32 w-full", className)}
+      className={cn("relative h-10 min-w-0 w-full", className)}
+      onKeyDownCapture={(event) => {
+        if (!isOpen || event.key !== "Escape") {
+          return
+        }
+
+        event.preventDefault()
+        event.stopPropagation()
+        requestClose()
+      }}
     >
       <SearchMorphVisual
         isContentVisible={controller.isContentVisible}
         isTriggerExpanded={controller.isTriggerExpanded}
         onTransitionStepComplete={choreography.reportTransitionStepComplete}
-        onToggle={() => onOpenChange(!isOpen)}
+        onToggle={() => {
+          if (!isOpen) {
+            onOpenChange(true)
+            return
+          }
+
+          requestClose()
+        }}
         stage={controller.stage}
         triggerAriaLabel={triggerAriaLabel}
         triggerRef={triggerRef}

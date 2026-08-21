@@ -6,6 +6,7 @@ import {
 } from "@/app/components/search-morph-motion"
 import {
   SEARCH_MORPH_BAR_SEPARATION_OFFSET,
+  SEARCH_MORPH_MIN_BAR_WIDTH,
   SEARCH_MORPH_ORB_SIZE,
 } from "@/app/components/search-morph-animations"
 
@@ -61,7 +62,17 @@ describe("global investment search morph motion", () => {
         SEARCH_MORPH_BAR_SEPARATION_OFFSET,
         SEARCH_MORPH_BAR_SEPARATION_OFFSET,
       ],
-      width: [null, 40, 42, 54, 64, 72, 80, 80, 300],
+      width: [
+        null,
+        SEARCH_MORPH_ORB_SIZE,
+        SEARCH_MORPH_ORB_SIZE + 2,
+        54,
+        64,
+        72,
+        80,
+        80,
+        300,
+      ],
     })
     expect(motion.connectorGeometry).toMatchObject({
       width: [null, 8, 18, 26, 30, 25, 18, 6, 0],
@@ -81,8 +92,28 @@ describe("global investment search morph motion", () => {
     })
 
     expect(motion.bar.geometry).toMatchObject({
-      x: [null, 50, 48, 48, 40, 26, 12, 0, 0],
-      width: [null, 298, 300, 300, 72, 64, 52, 40, 40],
+      x: [
+        null,
+        SEARCH_MORPH_BAR_SEPARATION_OFFSET + 2,
+        SEARCH_MORPH_BAR_SEPARATION_OFFSET,
+        SEARCH_MORPH_BAR_SEPARATION_OFFSET,
+        40,
+        26,
+        12,
+        0,
+        0,
+      ],
+      width: [
+        null,
+        298,
+        300,
+        300,
+        72,
+        64,
+        52,
+        SEARCH_MORPH_ORB_SIZE,
+        SEARCH_MORPH_ORB_SIZE,
+      ],
     })
     expect(motion.connectorGeometry).toMatchObject({
       width: [null, 5, 14, 18, 24, 28, 20, 10, 0],
@@ -116,17 +147,17 @@ describe("global investment search morph motion", () => {
       null,
       260,
       258,
-      242,
-      222,
-      198,
+      234,
+      214,
+      190,
       172,
       172,
       0,
     ])
     expect(motion.bar.geometry.width).toEqual([
       null,
-      40,
-      42,
+      SEARCH_MORPH_ORB_SIZE,
+      SEARCH_MORPH_ORB_SIZE + 2,
       54,
       64,
       72,
@@ -134,7 +165,10 @@ describe("global investment search morph motion", () => {
       80,
       252,
     ])
-    expect(motion.content.position).toEqual({ left: 0, right: 48 })
+    expect(motion.content.position).toEqual({
+      left: 0,
+      right: SEARCH_MORPH_BAR_SEPARATION_OFFSET,
+    })
   })
 
   it("uses live animation frames for manual inspection states", () => {
@@ -151,7 +185,7 @@ describe("global investment search morph motion", () => {
     expect(pressure.connectorGeometry).toMatchObject({ width: 30, x: 30 })
     expect(pressure.orb.motion).toMatchObject({ scale: 1.22, rotate: 3 })
     expect(split.bar.geometry).toMatchObject({
-      width: SEARCH_MORPH_ORB_SIZE * 2,
+      width: SEARCH_MORPH_MIN_BAR_WIDTH,
       x: SEARCH_MORPH_BAR_SEPARATION_OFFSET,
     })
   })

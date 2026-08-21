@@ -11,6 +11,8 @@ import { SEARCH_MORPH_ORB_SIZE } from "@/app/components/search-morph-animations"
 import type { MorphStage } from "@/app/components/search-morph-machine"
 import { type MorphVisualModel } from "@/app/components/search-morph-motion"
 
+const SEARCH_MORPH_BAR_SURFACE_INSET = 4
+
 interface SearchMorphVisualProps {
   children: ReactNode
   isContentVisible: boolean
@@ -107,19 +109,21 @@ export function SearchMorphVisual({
       >
         <motion.div
           initial={false}
-          className="absolute top-0 size-10 rounded-full bg-secondary"
+          className="absolute size-8 rounded-full bg-secondary"
           animate={orb.motion}
           transition={transition}
-          style={{ left: orb.left, transformOrigin: "center" }}
+          style={{ top: 4, left: orb.left, transformOrigin: "center" }}
         />
 
         <motion.div
           initial={false}
-          className="absolute inset-y-0 rounded-full bg-secondary"
+          className="absolute rounded-full bg-secondary"
           animate={bar.geometry}
           transition={transition}
           onAnimationComplete={reportCurrentStageTransitionComplete}
           style={{
+            top: SEARCH_MORPH_BAR_SURFACE_INSET,
+            bottom: SEARCH_MORPH_BAR_SURFACE_INSET,
             left: 0,
             width: SEARCH_MORPH_ORB_SIZE,
             transformOrigin:
@@ -135,10 +139,10 @@ export function SearchMorphVisual({
         aria-controls={contentId}
         aria-expanded={isTriggerExpanded}
         aria-label={triggerAriaLabel}
-        className="absolute inset-y-0 z-30 flex size-10 items-center justify-center rounded-full bg-transparent text-primary outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="pointer-events-auto absolute z-30 flex size-8 items-center justify-center rounded-full bg-transparent text-primary outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         animate={orb.motion}
         transition={transition}
-        style={{ left: orb.left }}
+        style={{ top: 4, left: orb.left }}
         onClick={onToggle}
       >
         <Search className="size-5" strokeWidth={2.25} aria-hidden="true" />
@@ -147,8 +151,8 @@ export function SearchMorphVisual({
       <motion.div
         id={contentId}
         initial={false}
-        aria-hidden={!isContentVisible}
-        inert={!isContentVisible}
+        aria-hidden={!isTriggerExpanded}
+        inert={!isTriggerExpanded}
         className="absolute inset-y-0 z-20 overflow-hidden rounded-full"
         animate={{
           opacity: isContentVisible ? 1 : 0,
