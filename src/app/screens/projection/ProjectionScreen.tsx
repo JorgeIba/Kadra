@@ -166,10 +166,9 @@ export function ProjectionScreen({
 
           {snapshot.hasMaturityScenario ? (
             <MaturityScenarioControl
-              excludedValue={snapshot.excludedValue}
-              maturedCash={snapshot.maturedCash}
-              strategy={strategy}
+              comparison={snapshot.comparison}
               onStrategyCommit={setStrategy}
+              strategy={strategy}
             />
           ) : null}
         </section>

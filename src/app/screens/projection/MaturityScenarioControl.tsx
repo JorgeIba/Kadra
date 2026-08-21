@@ -10,10 +10,10 @@ import {
   REINVESTMENT_STRATEGIES,
   type ReinvestmentStrategy,
 } from "@/domain/investments"
+import type { PortfolioProjectionComparison } from "@/app/screens/projection/projection-view-model"
 
 interface MaturityScenarioControlProps {
-  excludedValue: number
-  maturedCash: number
+  comparison: PortfolioProjectionComparison | null
   onStrategyCommit: (strategy: ReinvestmentStrategy) => void
   strategy: ReinvestmentStrategy
 }
@@ -22,6 +22,7 @@ interface MaturityScenarioOutcome {
   description: string
   key: ReinvestmentStrategy
   label: string
+  valueLabel: string
   value: number
 }
 
@@ -62,16 +63,11 @@ const MATURITY_SCENARIO_OPTIONS = [
 ] satisfies readonly ExpandingChoicePickerOption<ReinvestmentStrategy>[]
 
 export function MaturityScenarioControl({
-  excludedValue,
-  maturedCash,
+  comparison,
   onStrategyCommit,
   strategy,
 }: MaturityScenarioControlProps) {
-  const outcome = deriveProjectionStrategyOutcome({
-    excludedValue,
-    maturedCash,
-    strategy,
-  })
+  const outcome = deriveProjectionStrategyOutcome(comparison)
   const pickerInteraction = usePickerWithDependentContent({
     hasVisibleDependentContent: outcome !== null,
   })
@@ -136,18 +132,21 @@ function ProjectionStrategyOutcome({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={outcomeContentEnterExitTransition}
-            className="flex items-start justify-between gap-4 border-t border-warning-border/65 pt-4"
+            className="space-y-1.5 border-t border-warning-border/65 pt-4"
           >
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                {outcome.label}
-              </p>
-              <p className="text-sm leading-5 text-muted-foreground">
-                {outcome.description}
-              </p>
-            </div>
-            <p className="shrink-0 font-ledger text-xl leading-none text-warning tabular-nums">
-              <MoneyAmount value={outcome.value} />
+            <p className="text-sm font-medium text-foreground">
+              {outcome.label}
+            </p>
+            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span className="font-ledger text-xl leading-none text-warning tabular-nums">
+                <MoneyAmount value={outcome.value} />
+              </span>
+              <span className="text-xs leading-4 text-muted-foreground">
+                {outcome.valueLabel}
+              </span>
+            </p>
+            <p className="text-sm leading-5 text-muted-foreground">
+              {outcome.description}
             </p>
           </motion.div>
         ) : null}
@@ -156,32 +155,43 @@ function ProjectionStrategyOutcome({
   )
 }
 
-function deriveProjectionStrategyOutcome({
-  excludedValue,
-  maturedCash,
-  strategy,
-}: {
-  excludedValue: number
-  maturedCash: number
-  strategy: ReinvestmentStrategy
-}): MaturityScenarioOutcome | null {
-  if (strategy === REINVESTMENT_STRATEGIES.keepAsCash && maturedCash > 0) {
-    return {
-      description: "Included in the projected value, but no longer earning.",
-      key: strategy,
-      label: "Held as cash at target",
-      value: maturedCash,
-    }
+function deriveProjectionStrategyOutcome(
+  comparison: PortfolioProjectionComparison | null,
+): MaturityScenarioOutcome | null {
+  if (!comparison || comparison.relationToReference === "equal") {
+    return null
   }
 
-  if (strategy === REINVESTMENT_STRATEGIES.strict && excludedValue > 0) {
-    return {
-      description: "Not included in the projected value.",
-      key: strategy,
-      label: "Excluded at maturity",
-      value: excludedValue,
-    }
+  return {
+    description: getStrategyOutcomeDescription(comparison.selectedStrategy),
+    key: comparison.selectedStrategy,
+    label: `Compared with ${getStrategyComparisonLabel(comparison.referenceStrategy)}`,
+    valueLabel:
+      comparison.relationToReference === "lower"
+        ? "less projected value at target"
+        : "more projected value at target",
+    value: Math.abs(comparison.deltaFromReference),
   }
+}
 
-  return null
+function getStrategyComparisonLabel(strategy: ReinvestmentStrategy) {
+  switch (strategy) {
+    case REINVESTMENT_STRATEGIES.keepAsCash:
+      return "holding as cash"
+    case REINVESTMENT_STRATEGIES.reinvest:
+      return "reinvesting"
+    case REINVESTMENT_STRATEGIES.strict:
+      return "excluding"
+  }
+}
+
+function getStrategyOutcomeDescription(strategy: ReinvestmentStrategy) {
+  switch (strategy) {
+    case REINVESTMENT_STRATEGIES.keepAsCash:
+      return "The matured balance stays in the projection as cash, but stops earning after maturity."
+    case REINVESTMENT_STRATEGIES.reinvest:
+      return "The matured balance is reinvested at the current rate."
+    case REINVESTMENT_STRATEGIES.strict:
+      return "The matured balance is excluded from the projection at maturity."
+  }
 }

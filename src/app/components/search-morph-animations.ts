@@ -14,12 +14,15 @@ export const SEARCH_MORPH_MIN_STAGE_WIDTH =
 export const SEARCH_MORPH_BAR_SEPARATION_OFFSET =
   SEARCH_MORPH_ORB_SIZE + SEARCH_MORPH_GAP
 
+/** Higher values make the complete morph faster while preserving its rhythm. */
+export const SEARCH_MORPH_ANIMATION_SPEED = 1.35
+
 export const SEARCH_MORPH_ANIMATION_TIMING = {
   closingDuration: 0.9,
+  contentRevealDuration: 0.18,
   easing: "easeInOut" as const,
   openingDuration: 1,
 }
-export const SEARCH_MORPH_CONTENT_REVEAL_DURATION = 0.18
 
 const SEARCH_BAR_PRESSURE_X = 14
 const SEARCH_BAR_PRESSURE_WIDTH = 64

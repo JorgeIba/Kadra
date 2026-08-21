@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  createPortfolioProjectionComparison,
   getDefaultProjectionTargetDate,
   getPortfolioProjectionSnapshot,
 } from "@/app/screens/projection/projection-view-model"
@@ -133,6 +134,71 @@ describe("projection view model", () => {
     )
     expect(snapshot.reinvestmentStrategy).toBe("reinvest")
     expect(snapshot.activeInvestmentCount).toBe(2)
+  })
+
+  it("compares the selected maturity strategy with reinvesting", () => {
+    const targetDate = "2026-02-15"
+    const reinvestedSnapshot = getPortfolioProjectionSnapshot(
+      investments,
+      asOfDate,
+      targetDate,
+      "reinvest",
+    )
+    const cashSnapshot = getPortfolioProjectionSnapshot(
+      investments,
+      asOfDate,
+      targetDate,
+      "keep-as-cash",
+    )
+    const excludedSnapshot = getPortfolioProjectionSnapshot(
+      investments,
+      asOfDate,
+      targetDate,
+      "strict",
+    )
+
+    expect(reinvestedSnapshot.comparison).toBeNull()
+    expect(cashSnapshot.comparison).toMatchObject({
+      metric: "projected-portfolio-value",
+      selectedStrategy: "keep-as-cash",
+      referenceStrategy: "reinvest",
+      selectedValue: cashSnapshot.projectedValue,
+      referenceValue: reinvestedSnapshot.projectedValue,
+      relationToReference: "lower",
+    })
+    expect(excludedSnapshot.comparison).toMatchObject({
+      metric: "projected-portfolio-value",
+      selectedStrategy: "strict",
+      referenceStrategy: "reinvest",
+      selectedValue: excludedSnapshot.projectedValue,
+      referenceValue: reinvestedSnapshot.projectedValue,
+      relationToReference: "lower",
+    })
+    expect(cashSnapshot.comparison?.deltaFromReference).toBeCloseTo(
+      Math.round(cashSnapshot.projectedValue * 100) / 100 -
+        Math.round(reinvestedSnapshot.projectedValue * 100) / 100,
+    )
+    expect(excludedSnapshot.comparison?.deltaFromReference).toBeCloseTo(
+      Math.round(excludedSnapshot.projectedValue * 100) / 100 -
+        Math.round(reinvestedSnapshot.projectedValue * 100) / 100,
+    )
+    expect(
+      Math.abs(excludedSnapshot.comparison?.deltaFromReference ?? 0),
+    ).toBeGreaterThan(
+      Math.abs(cashSnapshot.comparison?.deltaFromReference ?? 0),
+    )
+  })
+
+  it("keeps the displayed comparison amount aligned with its rounded relation", () => {
+    const comparison = createPortfolioProjectionComparison({
+      selectedStrategy: "keep-as-cash",
+      selectedValue: 100.004,
+      referenceStrategy: "reinvest",
+      referenceValue: 100.006,
+    })
+
+    expect(comparison.relationToReference).toBe("lower")
+    expect(comparison.deltaFromReference).toBe(-0.01)
   })
 
   it("hides maturity scenarios when no active fixed-term investment matures by the target", () => {

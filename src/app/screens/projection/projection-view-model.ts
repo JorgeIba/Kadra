@@ -33,6 +33,18 @@ export interface InvestmentProjectionBreakdownItem {
   percentage: number
 }
 
+export type PortfolioProjectionValueRelation = "higher" | "lower" | "equal"
+
+export interface PortfolioProjectionComparison {
+  metric: "projected-portfolio-value"
+  selectedStrategy: ReinvestmentStrategy
+  referenceStrategy: ReinvestmentStrategy
+  selectedValue: number
+  referenceValue: number
+  deltaFromReference: number
+  relationToReference: PortfolioProjectionValueRelation
+}
+
 export interface PortfolioProjectionSnapshot {
   targetDate: CalendarDateString
   currentValue: number
@@ -48,9 +60,11 @@ export interface PortfolioProjectionSnapshot {
   hasMaturityScenario: boolean
   maturedCash: number
   excludedValue: number
+  comparison: PortfolioProjectionComparison | null
 }
 
 const PROJECTION_POINT_COUNT = 6
+const PROJECTION_REFERENCE_STRATEGY = REINVESTMENT_STRATEGIES.reinvest
 
 export function getDefaultProjectionTargetDate(asOfDate = new Date()) {
   return addCalendarDays(asOfDate, 365)
@@ -80,6 +94,24 @@ export function getPortfolioProjectionSnapshot(
     asOfDate,
     strategy,
   )
+  const referenceTargetProjection =
+    strategy === PROJECTION_REFERENCE_STRATEGY
+      ? targetProjection
+      : projectPortfolioAtDate(
+          investments,
+          targetDateObject,
+          asOfDate,
+          PROJECTION_REFERENCE_STRATEGY,
+        )
+  const comparison =
+    strategy === PROJECTION_REFERENCE_STRATEGY
+      ? null
+      : createPortfolioProjectionComparison({
+          selectedStrategy: strategy,
+          selectedValue: targetProjection.estimatedValue,
+          referenceStrategy: PROJECTION_REFERENCE_STRATEGY,
+          referenceValue: referenceTargetProjection.estimatedValue,
+        })
 
   // Calculate the breakdown of projected earnings by investment
   // and how much each investment contributes to the total projected earnings.
@@ -137,6 +169,39 @@ export function getPortfolioProjectionSnapshot(
     }),
     maturedCash: targetProjection.totalExtraCash,
     excludedValue: targetProjection.totalExcludedValue,
+    comparison,
+  }
+}
+
+export function createPortfolioProjectionComparison({
+  selectedStrategy,
+  selectedValue,
+  referenceStrategy,
+  referenceValue,
+}: {
+  selectedStrategy: ReinvestmentStrategy
+  selectedValue: number
+  referenceStrategy: ReinvestmentStrategy
+  referenceValue: number
+}): PortfolioProjectionComparison {
+  const selectedValueInCents = Math.round(selectedValue * 100)
+  const referenceValueInCents = Math.round(referenceValue * 100)
+  const deltaFromReference =
+    (selectedValueInCents - referenceValueInCents) / 100
+
+  return {
+    metric: "projected-portfolio-value",
+    selectedStrategy,
+    referenceStrategy,
+    selectedValue,
+    referenceValue,
+    deltaFromReference,
+    relationToReference:
+      selectedValueInCents === referenceValueInCents
+        ? "equal"
+        : selectedValueInCents > referenceValueInCents
+          ? "higher"
+          : "lower",
   }
 }
 

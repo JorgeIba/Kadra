@@ -9,8 +9,8 @@ import {
   createMorphClosingFrames,
   createMorphOpeningFrames,
   getMorphAnimationFrame,
+  SEARCH_MORPH_ANIMATION_SPEED,
   SEARCH_MORPH_ANIMATION_TIMING,
-  SEARCH_MORPH_CONTENT_REVEAL_DURATION,
   SEARCH_MORPH_GAP,
   SEARCH_MORPH_MIN_BAR_WIDTH,
   SEARCH_MORPH_ORB_SIZE,
@@ -240,6 +240,10 @@ function startMotionFromCurrent(
   }
 }
 
+function scaleAnimationDuration(baseDuration: number) {
+  return baseDuration / SEARCH_MORPH_ANIMATION_SPEED
+}
+
 function createAnimatedVisualModel(
   frames: readonly MorphAnimationFrame[],
   {
@@ -327,15 +331,17 @@ export function createMorphMotion({
       : createMorphClosingFrames(finalWidth)
   const animationDuration =
     target === "open"
-      ? SEARCH_MORPH_ANIMATION_TIMING.openingDuration
-      : SEARCH_MORPH_ANIMATION_TIMING.closingDuration
+      ? scaleAnimationDuration(SEARCH_MORPH_ANIMATION_TIMING.openingDuration)
+      : scaleAnimationDuration(SEARCH_MORPH_ANIMATION_TIMING.closingDuration)
   const transition = {
     duration: animationDuration,
     ease: SEARCH_MORPH_ANIMATION_TIMING.easing,
     times: frames.map((frame) => frame.progress),
   }
   const contentTransition = {
-    duration: SEARCH_MORPH_CONTENT_REVEAL_DURATION,
+    duration: scaleAnimationDuration(
+      SEARCH_MORPH_ANIMATION_TIMING.contentRevealDuration,
+    ),
     ease: "easeOut" as const,
   }
 
