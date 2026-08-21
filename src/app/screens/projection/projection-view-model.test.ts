@@ -135,6 +135,57 @@ describe("projection view model", () => {
     expect(snapshot.activeInvestmentCount).toBe(2)
   })
 
+  it("compares the selected maturity strategy with reinvesting", () => {
+    const targetDate = "2026-02-15"
+    const reinvestedSnapshot = getPortfolioProjectionSnapshot(
+      investments,
+      asOfDate,
+      targetDate,
+      "reinvest",
+    )
+    const cashSnapshot = getPortfolioProjectionSnapshot(
+      investments,
+      asOfDate,
+      targetDate,
+      "keep-as-cash",
+    )
+    const excludedSnapshot = getPortfolioProjectionSnapshot(
+      investments,
+      asOfDate,
+      targetDate,
+      "strict",
+    )
+
+    expect(reinvestedSnapshot.comparison).toBeNull()
+    expect(cashSnapshot.comparison).toMatchObject({
+      metric: "projected-portfolio-value",
+      selectedStrategy: "keep-as-cash",
+      referenceStrategy: "reinvest",
+      selectedValue: cashSnapshot.projectedValue,
+      referenceValue: reinvestedSnapshot.projectedValue,
+      relationToReference: "lower",
+    })
+    expect(excludedSnapshot.comparison).toMatchObject({
+      metric: "projected-portfolio-value",
+      selectedStrategy: "strict",
+      referenceStrategy: "reinvest",
+      selectedValue: excludedSnapshot.projectedValue,
+      referenceValue: reinvestedSnapshot.projectedValue,
+      relationToReference: "lower",
+    })
+    expect(cashSnapshot.comparison?.deltaFromReference).toBeCloseTo(
+      cashSnapshot.projectedValue - reinvestedSnapshot.projectedValue,
+    )
+    expect(excludedSnapshot.comparison?.deltaFromReference).toBeCloseTo(
+      excludedSnapshot.projectedValue - reinvestedSnapshot.projectedValue,
+    )
+    expect(
+      Math.abs(excludedSnapshot.comparison?.deltaFromReference ?? 0),
+    ).toBeGreaterThan(
+      Math.abs(cashSnapshot.comparison?.deltaFromReference ?? 0),
+    )
+  })
+
   it("hides maturity scenarios when no active fixed-term investment matures by the target", () => {
     const snapshot = getPortfolioProjectionSnapshot(
       [openEndedInvestment],

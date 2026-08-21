@@ -37,7 +37,7 @@ export function TrustNotesPopover({ label, notes }: TrustNotesPopoverProps) {
     <Popover.Root>
       <Popover.Trigger
         aria-label={label}
-        className="inline-grid size-6 place-items-center rounded-md border border-border/70 bg-background/35 text-muted-foreground outline-none transition-[background-color,border-color,color,transform] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-primary/25 hover:bg-muted/45 hover:text-primary focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:border-primary/30 data-popup-open:text-primary active:translate-y-px motion-reduce:transform-none"
+        className="inline-grid size-6 place-items-center rounded-full text-muted-foreground outline-none transition-[color,opacity] duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:text-primary active:opacity-70 motion-reduce:transition-none"
       >
         <Info className="size-3.5" aria-hidden="true" />
       </Popover.Trigger>
