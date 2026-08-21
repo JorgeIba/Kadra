@@ -173,7 +173,7 @@ export function getPortfolioProjectionSnapshot(
   }
 }
 
-function createPortfolioProjectionComparison({
+export function createPortfolioProjectionComparison({
   selectedStrategy,
   selectedValue,
   referenceStrategy,
@@ -186,6 +186,8 @@ function createPortfolioProjectionComparison({
 }): PortfolioProjectionComparison {
   const selectedValueInCents = Math.round(selectedValue * 100)
   const referenceValueInCents = Math.round(referenceValue * 100)
+  const deltaFromReference =
+    (selectedValueInCents - referenceValueInCents) / 100
 
   return {
     metric: "projected-portfolio-value",
@@ -193,7 +195,7 @@ function createPortfolioProjectionComparison({
     referenceStrategy,
     selectedValue,
     referenceValue,
-    deltaFromReference: selectedValue - referenceValue,
+    deltaFromReference,
     relationToReference:
       selectedValueInCents === referenceValueInCents
         ? "equal"

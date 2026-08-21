@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  createPortfolioProjectionComparison,
   getDefaultProjectionTargetDate,
   getPortfolioProjectionSnapshot,
 } from "@/app/screens/projection/projection-view-model"
@@ -174,16 +175,30 @@ describe("projection view model", () => {
       relationToReference: "lower",
     })
     expect(cashSnapshot.comparison?.deltaFromReference).toBeCloseTo(
-      cashSnapshot.projectedValue - reinvestedSnapshot.projectedValue,
+      Math.round(cashSnapshot.projectedValue * 100) / 100 -
+        Math.round(reinvestedSnapshot.projectedValue * 100) / 100,
     )
     expect(excludedSnapshot.comparison?.deltaFromReference).toBeCloseTo(
-      excludedSnapshot.projectedValue - reinvestedSnapshot.projectedValue,
+      Math.round(excludedSnapshot.projectedValue * 100) / 100 -
+        Math.round(reinvestedSnapshot.projectedValue * 100) / 100,
     )
     expect(
       Math.abs(excludedSnapshot.comparison?.deltaFromReference ?? 0),
     ).toBeGreaterThan(
       Math.abs(cashSnapshot.comparison?.deltaFromReference ?? 0),
     )
+  })
+
+  it("keeps the displayed comparison amount aligned with its rounded relation", () => {
+    const comparison = createPortfolioProjectionComparison({
+      selectedStrategy: "keep-as-cash",
+      selectedValue: 100.004,
+      referenceStrategy: "reinvest",
+      referenceValue: 100.006,
+    })
+
+    expect(comparison.relationToReference).toBe("lower")
+    expect(comparison.deltaFromReference).toBe(-0.01)
   })
 
   it("hides maturity scenarios when no active fixed-term investment matures by the target", () => {
