@@ -98,6 +98,7 @@ export function TopBar({
           <motion.div
             initial={false}
             aria-hidden={shouldHideLeadingContent ? true : undefined}
+            inert={shouldHideLeadingContent}
             animate={{
               opacity: shouldHideLeadingContent ? 0 : 1,
               x: shouldHideLeadingContent
