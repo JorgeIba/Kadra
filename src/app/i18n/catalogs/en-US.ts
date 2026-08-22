@@ -5,6 +5,7 @@
 export interface TranslationCatalog {
   common: {
     language: {
+      label: string
       englishUS: string
       spanishMX: string
       system: string
@@ -15,6 +16,7 @@ export interface TranslationCatalog {
 export const enUS = {
   common: {
     language: {
+      label: "Language",
       englishUS: "English (United States)",
       spanishMX: "Español (México)",
       system: "Use device language",
