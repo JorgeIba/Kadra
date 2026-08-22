@@ -78,7 +78,7 @@ Source of truth: the runtime palette in `src/index.css`. This document records i
 
 **Creative North Star: "The Personal Investment Companion"**
 
-Kadra should feel like a personal place to check in on fixed-income investments: clear, rewarding, quietly playful, and easy to scan from a phone. The preferred visual baseline is `assets/screenshots_2/dashboard_idea_1.png`.
+Kadra should feel like a personal place to check in on fixed-income investments: clear, rewarding, quietly playful, and easy to scan from a phone. The preferred visual baseline is `assets/screens/kadra-dashboard-iphone-17-pro-max.png`.
 
 The interface is not card-heavy. It uses a dark charcoal canvas, thin dividers, serif financial values, compact sans labels, muted blue-gray support text, and restrained mint accents for value, progress, and selected navigation states.
 
@@ -201,7 +201,7 @@ Distribution, maturity, and active-asset rows should be horizontally scannable: 
 
 ### Do:
 
-- **Do** use `assets/screenshots_2/dashboard_idea_1.png` as the current visual baseline.
+- **Do** use `assets/screens/kadra-dashboard-iphone-17-pro-max.png` as the current visual baseline.
 - **Do** make the total portfolio value the dominant first read.
 - **Do** use serif type for money and asset names.
 - **Do** use thin dividers and spacing before introducing cards.

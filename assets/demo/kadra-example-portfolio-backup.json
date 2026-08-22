@@ -1,0 +1,52 @@
+{
+  "format": "kadra.portfolio-backup",
+  "version": 1,
+  "exportedAt": "2026-08-21T22:00:00.000Z",
+  "investments": [
+    {
+      "id": "steady-reserve",
+      "name": "Steady Reserve",
+      "institutionName": "Northstar Finance",
+      "currency": "MXN",
+      "createdAt": "2025-10-21T12:00:00.000Z",
+      "updatedAt": "2025-10-21T12:00:00.000Z",
+      "contributionEvents": [{"id":"steady-reserve-contribution-1","amount":10000,"kind":"contribution","effectiveDate":"2025-10-21","createdAt":"2025-10-21T12:00:00.000Z"}],
+      "rateEvents": [{"id":"steady-reserve-rate-1","annualRate":10.5,"effectiveDate":"2025-10-21","createdAt":"2025-10-21T12:00:00.000Z"}],
+      "lifecycleEvents": [{"id":"steady-reserve-lifecycle-1","type":"open-ended","paymentFrequency":"monthly","reinvestmentBehavior":"automatic","effectiveDate":"2025-10-21","createdAt":"2025-10-21T12:00:00.000Z"}]
+    },
+    {
+      "id": "growth-horizon",
+      "name": "Growth Horizon",
+      "institutionName": "Northstar Finance",
+      "currency": "MXN",
+      "createdAt": "2025-06-21T12:00:00.000Z",
+      "updatedAt": "2025-06-21T12:00:00.000Z",
+      "contributionEvents": [{"id":"growth-horizon-contribution-1","amount":25000,"kind":"contribution","effectiveDate":"2025-06-21","createdAt":"2025-06-21T12:00:00.000Z"}],
+      "rateEvents": [{"id":"growth-horizon-rate-1","annualRate":12.25,"effectiveDate":"2025-06-21","createdAt":"2025-06-21T12:00:00.000Z"}],
+      "lifecycleEvents": [{"id":"growth-horizon-lifecycle-1","type":"open-ended","paymentFrequency":"monthly","reinvestmentBehavior":"automatic","effectiveDate":"2025-06-21","createdAt":"2025-06-21T12:00:00.000Z"}]
+    },
+    {
+      "id": "flex-reserve",
+      "name": "Flex Reserve",
+      "institutionName": "Northstar Finance",
+      "currency": "MXN",
+      "createdAt": "2026-02-01T12:00:00.000Z",
+      "updatedAt": "2026-02-01T12:00:00.000Z",
+      "contributionEvents": [{"id":"flex-reserve-contribution-1","amount":7500,"kind":"contribution","effectiveDate":"2026-02-01","createdAt":"2026-02-01T12:00:00.000Z"}],
+      "rateEvents": [{"id":"flex-reserve-rate-1","annualRate":8.75,"effectiveDate":"2026-02-01","createdAt":"2026-02-01T12:00:00.000Z"}],
+      "lifecycleEvents": [{"id":"flex-reserve-lifecycle-1","type":"open-ended","paymentFrequency":"monthly","reinvestmentBehavior":"automatic","effectiveDate":"2026-02-01","createdAt":"2026-02-01T12:00:00.000Z"}]
+    },
+    {
+      "id": "finished-reserve",
+      "name": "Finished Reserve",
+      "institutionName": "Northstar Finance",
+      "currency": "MXN",
+      "notes": "Example of a completed fixed-term investment.",
+      "createdAt": "2024-01-15T12:00:00.000Z",
+      "updatedAt": "2024-01-15T12:00:00.000Z",
+      "contributionEvents": [{"id":"finished-reserve-contribution-1","amount":12000,"kind":"contribution","effectiveDate":"2024-01-15","createdAt":"2024-01-15T12:00:00.000Z"}],
+      "rateEvents": [{"id":"finished-reserve-rate-1","annualRate":9.25,"effectiveDate":"2024-01-15","createdAt":"2024-01-15T12:00:00.000Z"}],
+      "lifecycleEvents": [{"id":"finished-reserve-lifecycle-1","type":"fixed-term","paymentFrequency":"at-maturity","reinvestmentBehavior":"to-cash","effectiveDate":"2024-01-15","maturityDate":"2024-07-15","createdAt":"2024-01-15T12:00:00.000Z"}]
+    }
+  ]
+}
