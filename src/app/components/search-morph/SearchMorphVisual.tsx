@@ -7,9 +7,9 @@
 import { type ReactNode, type Ref, useId } from "react"
 import { Search } from "lucide-react"
 import { motion } from "motion/react"
-import { SEARCH_MORPH_ORB_SIZE } from "@/app/components/search-morph-animations"
-import type { MorphStage } from "@/app/components/search-morph-machine"
-import { type MorphVisualModel } from "@/app/components/search-morph-motion"
+import { SEARCH_MORPH_ORB_SIZE } from "@/app/components/search-morph/search-morph-animations"
+import type { MorphStage } from "@/app/components/search-morph/search-morph-machine"
+import { type MorphVisualModel } from "@/app/components/search-morph/search-morph-motion"
 
 const SEARCH_MORPH_BAR_SURFACE_INSET = 4
 

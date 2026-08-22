@@ -11,7 +11,7 @@ import {
   isMorphTransitionStep,
   type MorphStage,
   type MorphTransitionStep,
-} from "@/app/components/search-morph-machine"
+} from "@/app/components/search-morph/search-morph-machine"
 
 interface UseSearchMorphChoreographyOptions {
   onTransitionSequenceFastForwarded: (step: MorphTransitionStep) => void

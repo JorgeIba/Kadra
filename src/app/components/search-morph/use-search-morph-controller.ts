@@ -11,7 +11,7 @@ import {
   isSettledAtTarget,
   morphReducer,
   type MorphTransitionStep,
-} from "@/app/components/search-morph-machine"
+} from "@/app/components/search-morph/search-morph-machine"
 
 interface UseSearchMorphControllerOptions {
   isOpen: boolean

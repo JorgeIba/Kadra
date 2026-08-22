@@ -10,7 +10,7 @@ import {
   isPickerTransitionStep,
   type PickerStage,
   type PickerTransitionStep,
-} from "@/app/components/expanding-choice-picker-machine"
+} from "@/app/components/expanding-choice-picker/expanding-choice-picker-machine"
 
 interface PickerAnimationDurationsInSeconds {
   choiceContentVisibility: number

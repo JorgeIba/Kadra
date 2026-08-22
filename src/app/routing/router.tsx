@@ -8,10 +8,6 @@ import {
 import { RouterProvider } from "react-router/dom"
 import { AppShell } from "@/app/AppShell"
 import { AppErrorFallback } from "@/app/components/AppErrorBoundary"
-import {
-  SearchMorphMotionLab,
-  SEARCH_MORPH_MOTION_LAB_PATH,
-} from "@/app/lab/SearchMorphMotionLab"
 import { InvestmentsProvider } from "@/app/context/InvestmentsProvider"
 import { useInvestments } from "@/app/context/investments-context"
 import { APP_PATHS, APP_ROUTE_PATHS } from "@/app/routing/navigation"
@@ -52,13 +48,6 @@ const appRouter = createBrowserRouter(
 )
 
 export function AppRouter() {
-  if (
-    import.meta.env.DEV &&
-    window.location.pathname === SEARCH_MORPH_MOTION_LAB_PATH
-  ) {
-    return <SearchMorphMotionLab />
-  }
-
   return (
     <InvestmentsProvider>
       <RouterProvider router={appRouter} />

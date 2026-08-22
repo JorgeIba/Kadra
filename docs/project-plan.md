@@ -34,7 +34,7 @@ Supporting docs:
 
 ## Vision
 
-Build a personal, mobile-first companion for checking fixed-income investments, primarily for Mexican users and MXN workflows. Keep all user data stored locally on-device with no required backend.
+Build a personal, mobile-first companion for checking fixed-income investments. Keep all user data stored locally on-device with no required backend.
 
 The product should help users understand:
 
@@ -59,7 +59,6 @@ The product should help users understand:
 - SOFIPOs, CETES, personal loans, and similar fixed-income assets should fit under one generic investment concept.
 - The app is focused on fixed-rate investments first.
 - Taxes are out of scope for the current planning pass.
-- `MXN` is the only required MVP currency for now.
 
 ### Investment Vision
 

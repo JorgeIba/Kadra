@@ -5,9 +5,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
   ExpandingChoicePicker,
   type ExpandingChoicePickerOption,
-} from "@/app/components/ExpandingChoicePicker"
+} from "@/app/components/expanding-choice-picker/ExpandingChoicePicker"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
-import { usePickerWithDependentContent } from "@/app/components/use-picker-with-dependent-content"
+import { usePickerWithDependentContent } from "@/app/components/expanding-choice-picker/use-picker-with-dependent-content"
 import {
   Field,
   FormSection,

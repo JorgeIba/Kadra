@@ -16,8 +16,8 @@ import {
   SEARCH_MORPH_MIN_BAR_WIDTH,
   SEARCH_MORPH_ORB_SIZE,
   SEARCH_MORPH_MIN_STAGE_WIDTH,
-} from "@/app/components/search-morph-animations"
-import type { MorphBarSide } from "@/app/components/search-morph-motion"
+} from "@/app/components/search-morph/search-morph-animations"
+import type { MorphBarSide } from "@/app/components/search-morph/search-morph-motion"
 
 interface UseSearchMorphLayoutOptions {
   barSide: MorphBarSide

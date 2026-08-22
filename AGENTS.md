@@ -6,7 +6,7 @@
   `docs/domain-model.md` for domain modeling,
   `docs/decision-log.md` for dated decision history,
   and `docs/backlog.md` for parked ideas and future work.
-- Use `init.md` only for high-level project context, not for evolving architecture decisions.
+- Use `docs/project-plan.md` for high-level project context, not session-specific setup notes.
 - Prefer clear local imports over inline `typeof import("...")` type expressions when both options are equivalent.
 - Treat exploratory wording such as "what do you think", "could we", "I was wondering", or proposed alternatives as discussion-only; do not modify code unless the user explicitly asks to implement the change.
 - When explaining technical choices, emphasize why they are structured that way and how a learner could reason toward the same conclusion themselves.

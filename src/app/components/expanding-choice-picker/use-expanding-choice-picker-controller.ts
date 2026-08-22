@@ -19,9 +19,9 @@ import {
   isPickerCloseSettlementPending,
   pickerReducer,
   type PickerTransitionStep,
-} from "@/app/components/expanding-choice-picker-machine"
-import { type PickerAnimationSpeed } from "@/app/components/expanding-choice-picker-animations"
-import { useExpandingChoicePickerChoreography } from "@/app/components/use-expanding-choice-picker-choreography"
+} from "@/app/components/expanding-choice-picker/expanding-choice-picker-machine"
+import { type PickerAnimationSpeed } from "@/app/components/expanding-choice-picker/expanding-choice-picker-animations"
+import { useExpandingChoicePickerChoreography } from "@/app/components/expanding-choice-picker/use-expanding-choice-picker-choreography"
 
 interface UseExpandingChoicePickerControllerOptions<T extends string> {
   animationSpeed: PickerAnimationSpeed

@@ -6,7 +6,7 @@ import {
   pickerReducer,
   type PickerState,
   type PickerTransitionStep,
-} from "@/app/components/expanding-choice-picker-machine"
+} from "@/app/components/expanding-choice-picker/expanding-choice-picker-machine"
 
 const OPENING_STEPS = [
   "opening-content-hide",

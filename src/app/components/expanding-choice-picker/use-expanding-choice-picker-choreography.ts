@@ -13,13 +13,13 @@ import {
   isPickerTransitionStep,
   type PickerStage,
   type PickerTransitionStep,
-} from "@/app/components/expanding-choice-picker-machine"
+} from "@/app/components/expanding-choice-picker/expanding-choice-picker-machine"
 import {
   isPickerContentAnimationStep,
   isPickerLayoutAnimationStep,
   PICKER_ANIMATION_PROFILES,
   type PickerAnimationSpeed,
-} from "@/app/components/expanding-choice-picker-animations"
+} from "@/app/components/expanding-choice-picker/expanding-choice-picker-animations"
 
 interface UseExpandingChoicePickerChoreographyOptions {
   animationSpeed: PickerAnimationSpeed
