@@ -24,7 +24,7 @@
 <p align="center">
   <video
     src="https://raw.githubusercontent.com/JorgeIba/kadra/main/assets/demo/kadra-demo-1080p.mp4"
-    poster="https://raw.githubusercontent.com/JorgeIba/kadra/main/assets/kadra-hero.png"
+    poster="https://raw.githubusercontent.com/JorgeIba/kadra/main/assets/demo/kadra-hero.png"
     controls
     muted
     loop
@@ -52,7 +52,7 @@ calculates estimates for value, earnings, and growth.
 
 - Record contributions, rate changes, and lifecycle changes as an investment evolves.
 - Understand how an investment got to where it is today.
-- Keep the history behind a projection visible instead of rewriting the past.
+- Keep the bigger picture as each investment evolves.
 
 ### Know what comes next
 
