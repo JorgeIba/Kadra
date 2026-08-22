@@ -1,10 +1,13 @@
 import { AppErrorBoundary } from "@/app/components/AppErrorBoundary"
+import { LocaleProvider } from "@/app/i18n"
 import { AppRouter } from "@/app/routing/router"
 
 function App() {
   return (
     <AppErrorBoundary>
-      <AppRouter />
+      <LocaleProvider>
+        <AppRouter />
+      </LocaleProvider>
     </AppErrorBoundary>
   )
 }

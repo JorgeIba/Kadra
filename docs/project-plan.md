@@ -31,6 +31,7 @@ Supporting docs:
 | Planning structure | Updated | `project-plan.md` is now the high-level hub with linked supporting docs |
 | Brand identity | Applied | Kadra name, Kadra Angle mark, Elms Sans wordmark, browser metadata, PWA metadata, production icons, and native Apple launch images are aligned |
 | Portfolio recovery | Applied | Users can export a local Kadra portfolio backup and restore it after reinstalling the PWA |
+| Localization foundation | In progress | Typed catalogs, system-language matching, persisted preferences, and a language selector are in place; `en-US` remains the default and fallback while Spanish coverage is built |
 
 ## Vision
 
@@ -53,6 +54,12 @@ The product should help users understand:
 - We want explicit decisions written down so the product and architecture do not drift across chats.
 - We should favor models that stay understandable as the product grows.
 - Financial information should stay calm and dependable while reversible interactions can feel expressive and rewarding.
+
+### Localization Direction
+
+- Use typed translation catalogs and a React locale provider for future user-facing copy.
+- Keep `en-US` as the default and fallback. System-language detection and an explicit persisted preference determine the active locale.
+- `es-MX` is the first additional catalog, but its current coverage is limited to the language-selection UI. Migrate product copy incrementally before treating Spanish as fully supported, and keep accessibility metadata aligned with the actual language of the rendered content.
 
 ### Product Scope
 
@@ -86,6 +93,7 @@ This order reflects current priority, not a strict commitment to implementation 
 
 - Continue strengthening the existing local-first MVP flows.
 - Keep the current app usable while extending the event-history model deliberately.
+- Keep English as the source of truth for untranslated surfaces while product copy is migrated into the locale catalogs.
 
 ### Next Product Directions
 

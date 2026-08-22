@@ -13,6 +13,7 @@ import {
 import { motion, useReducedMotion } from "motion/react"
 import { KadraMark } from "@/app/components/KadraMark"
 import { GlobalInvestmentSearch } from "@/app/components/GlobalInvestmentSearch"
+import { LanguagePreferenceMenu } from "@/app/components/LanguagePreferenceMenu"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
 import { Button, buttonVariants } from "@/components/ui/button"
 import type { Investment } from "@/domain/investments"
@@ -205,7 +206,7 @@ export function TopBar({
                 align="end"
                 className="z-50 outline-none"
               >
-                <Menu.Popup className="w-56 rounded-lg border border-border bg-card p-1 text-card-foreground shadow-none outline-none">
+                <Menu.Popup className="max-h-(--available-height) w-[min(20rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-lg border border-border bg-card p-1 text-card-foreground shadow-none outline-none md:w-56">
                   {hasAppUpdate ? null : (
                     <Menu.Item
                       nativeButton
@@ -250,6 +251,12 @@ export function TopBar({
                     />
                     Restore backup
                   </Menu.Item>
+
+                  <Menu.Separator className="my-1 h-px bg-border" />
+
+                  <LanguagePreferenceMenu />
+
+                  <Menu.Separator className="my-1 h-px bg-border" />
 
                   <Menu.Item
                     nativeButton
