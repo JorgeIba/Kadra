@@ -22,15 +22,7 @@
 ## See Kadra in action
 
 <p align="center">
-  <video
-    src="https://raw.githubusercontent.com/JorgeIba/kadra/main/assets/demo/kadra-demo-1080p.mp4"
-    poster="https://raw.githubusercontent.com/JorgeIba/kadra/main/assets/demo/kadra-hero.png"
-    controls
-    muted
-    loop
-    playsinline
-    width="100%"
-  ></video>
+  <img src="assets/demo/kadra-demo.webp" alt="Kadra product demo" width="100%">
 </p>
 
 ## A clearer way to check in
