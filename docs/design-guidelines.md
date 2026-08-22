@@ -47,7 +47,7 @@ Current direction:
 
 - dark theme first
 - light theme later
-- `assets/screenshots_2/dashboard_idea_1.png` is the current visual baseline
+- `assets/screens/kadra-dashboard-iphone-17-pro-max.png` is the current visual baseline
 
 Dark theme should use:
 
