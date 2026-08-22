@@ -4,11 +4,11 @@ import {
   createMorphFrame,
   createMorphMotion,
   type MorphBarSide,
-} from "@/app/components/search-morph-motion"
-import { SearchMorphVisual } from "@/app/components/SearchMorphVisual"
-import { useSearchMorphChoreography } from "@/app/components/use-search-morph-choreography"
-import { useSearchMorphController } from "@/app/components/use-search-morph-controller"
-import { useSearchMorphLayout } from "@/app/components/use-search-morph-layout"
+} from "@/app/components/search-morph/search-morph-motion"
+import { SearchMorphVisual } from "@/app/components/search-morph/SearchMorphVisual"
+import { useSearchMorphChoreography } from "@/app/components/search-morph/use-search-morph-choreography"
+import { useSearchMorphController } from "@/app/components/search-morph/use-search-morph-controller"
+import { useSearchMorphLayout } from "@/app/components/search-morph/use-search-morph-layout"
 
 interface SearchMorphCommonProps {
   barSide?: MorphBarSide

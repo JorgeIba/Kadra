@@ -16,8 +16,8 @@ import {
   SEARCH_MORPH_ORB_SIZE,
   type MorphAnimationFrame,
   type MorphInspectionFrame,
-} from "@/app/components/search-morph-animations"
-import type { MorphTarget } from "@/app/components/search-morph-machine"
+} from "@/app/components/search-morph/search-morph-animations"
+import type { MorphTarget } from "@/app/components/search-morph/search-morph-machine"
 
 export type MorphBarSide = "left" | "right"
 

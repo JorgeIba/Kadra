@@ -1,5 +1,5 @@
 import { type ReactNode, type Ref } from "react"
-import { SearchMorph } from "@/app/components/SearchMorph"
+import { SearchMorph } from "@/app/components/search-morph/SearchMorph"
 interface GlobalInvestmentSearchSurfaceProps {
   children: ReactNode
   isOpen: boolean

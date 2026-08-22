@@ -1,12 +1,12 @@
 import { useId } from "react"
 import { ChevronDown, type LucideIcon } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
-import { type PickerStage } from "@/app/components/expanding-choice-picker-machine"
-import { useExpandingChoicePickerController } from "@/app/components/use-expanding-choice-picker-controller"
+import { type PickerStage } from "@/app/components/expanding-choice-picker/expanding-choice-picker-machine"
+import { useExpandingChoicePickerController } from "@/app/components/expanding-choice-picker/use-expanding-choice-picker-controller"
 import {
   type PickerAnimationSpeed,
   type PickerLayoutTransitions,
-} from "@/app/components/expanding-choice-picker-animations"
+} from "@/app/components/expanding-choice-picker/expanding-choice-picker-animations"
 import { cn } from "@/lib/utils"
 
 export interface ExpandingChoicePickerOption<T extends string> {

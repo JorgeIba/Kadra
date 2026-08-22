@@ -3,7 +3,7 @@ import {
   createInitialMorphState,
   isSettledAtTarget,
   morphReducer,
-} from "@/app/components/search-morph-machine"
+} from "@/app/components/search-morph/search-morph-machine"
 
 const openRequest = { type: "OPEN_REQUESTED" as const }
 const closeRequest = { type: "CLOSE_REQUESTED" as const }

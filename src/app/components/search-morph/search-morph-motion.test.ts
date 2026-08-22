@@ -3,14 +3,14 @@ import {
   createMorphFrame,
   createMorphMotion,
   type MorphVisualModel,
-} from "@/app/components/search-morph-motion"
+} from "@/app/components/search-morph/search-morph-motion"
 import {
   SEARCH_MORPH_BAR_SEPARATION_OFFSET,
   SEARCH_MORPH_ANIMATION_SPEED,
   SEARCH_MORPH_ANIMATION_TIMING,
   SEARCH_MORPH_MIN_BAR_WIDTH,
   SEARCH_MORPH_ORB_SIZE,
-} from "@/app/components/search-morph-animations"
+} from "@/app/components/search-morph/search-morph-animations"
 
 const sharedOptions = {
   barSide: "right" as const,
