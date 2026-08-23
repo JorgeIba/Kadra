@@ -83,3 +83,15 @@ local development setup, scripts, and testing workflow.
 - ✦ **[Brand identity](docs/brand/README.md)** — Kadra’s mark, wordmark, and asset usage.
 - 🧠 **[Domain model](docs/domain-model.md)** — Deeper investment history and derived-state details.
 - 🏗️ **[Project plan](docs/project-plan.md)** — Current direction, decisions, and roadmap.
+
+## Credits
+
+Third-party visual assets are documented in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## License
+
+Kadra's source code is available under the [MIT License](LICENSE).
+
+Third-party visual assets have separate terms documented in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
