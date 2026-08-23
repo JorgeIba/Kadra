@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { FixedTermInvestmentSummary } from "@/domain/investments"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
+import { useLocale } from "@/app/i18n"
 import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
@@ -18,6 +19,7 @@ export function FixedTermInvestmentCard({
   onSelect,
 }: FixedTermInvestmentCardProps) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
 
   return (
     <article
@@ -52,7 +54,7 @@ export function FixedTermInvestmentCard({
         </p>
         <p className="mt-1.5 truncate text-xs text-muted-foreground">
           {investment.institutionName} · {t("investment.cards.annualRate")}{" "}
-          {formatPercentage(investment.annualRate)}
+          {formatPercentage(investment.annualRate, activeLocale)}
         </p>
       </div>
       <div className="col-start-2 text-right">
@@ -64,7 +66,9 @@ export function FixedTermInvestmentCard({
             <AnimatedProgressBar value={investment.progressPercentage} />
           </div>
           <p className="text-xs text-muted-foreground">
-            {Math.round(investment.progressPercentage)}%
+            {formatPercentage(investment.progressPercentage, activeLocale, {
+              maximumFractionDigits: 0,
+            })}
           </p>
         </div>
       </div>

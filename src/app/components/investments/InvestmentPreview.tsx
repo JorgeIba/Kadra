@@ -9,6 +9,7 @@ import {
   type Investment,
 } from "@/domain/investments"
 import { getPaymentFrequencyLabels } from "@/app/i18n/labels"
+import { useLocale } from "@/app/i18n"
 import { useTranslation } from "react-i18next"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { Card, CardContent } from "@/components/ui/card"
@@ -25,6 +26,7 @@ export function InvestmentPreview({
   investment,
 }: InvestmentPreviewProps) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
   const resolvedInvestment = resolveInvestment(investment, asOfDate)
   const isFixedTerm = resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm
   const isPaidAtMaturity =
@@ -62,7 +64,10 @@ export function InvestmentPreview({
           <p className="text-xs leading-none text-muted-foreground">
             {isFixedTerm
               ? t("investment.preview.atMaturity", {
-                  date: formatDisplayDate(resolvedInvestment.endDate),
+                  date: formatDisplayDate(
+                    resolvedInvestment.endDate,
+                    activeLocale,
+                  ),
                 })
               : t("investment.preview.estimatedValueToday")}
           </p>

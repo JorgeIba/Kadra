@@ -13,6 +13,7 @@ import {
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { Button } from "@/components/ui/button"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
+import { useLocale } from "@/app/i18n"
 import { getInvestmentTypeLabels } from "@/app/i18n/labels"
 import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
@@ -79,6 +80,7 @@ function BreakdownRow({
   onOpenFilter: (filterOption: AssetFilterOption) => void
 }) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
   const investmentTypeLabels = getInvestmentTypeLabels(t)
   const tone = getBreakdownTone(item.type)
   const filterOption = getBreakdownFilterOption(item.type)
@@ -112,7 +114,7 @@ function BreakdownRow({
               <MoneyAmount value={item.estimatedValue} />
             </p>
             <p className="text-xs text-muted-foreground">
-              {formatPercentage(item.percentage, {
+              {formatPercentage(item.percentage, activeLocale, {
                 maximumFractionDigits: 0,
               })}{" "}
               {t("dashboard.breakdown.ofActiveValue")}

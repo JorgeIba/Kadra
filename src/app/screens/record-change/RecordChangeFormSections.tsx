@@ -1,5 +1,6 @@
 import { Controller } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useLocale } from "@/app/i18n"
 import type { TFunction } from "i18next"
 import type {
   Control,
@@ -341,6 +342,7 @@ export function RecordChangeSummary({
   transactionType,
 }: RecordChangeSummaryProps) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
   const hasMoneyMovement =
     transactionType !== undefined &&
     transactionType !== "none" &&
@@ -371,7 +373,7 @@ export function RecordChangeSummary({
           value={
             effectiveDate === undefined || !isCalendarDateString(effectiveDate)
               ? t("recordChange.form.summary.selectDate")
-              : formatDisplayDate(effectiveDate)
+              : formatDisplayDate(effectiveDate, activeLocale)
           }
         />
         <SummaryItem
@@ -386,7 +388,7 @@ export function RecordChangeSummary({
           label={t("recordChange.form.summary.annualRate")}
           value={
             typeof annualRate === "number" && Number.isFinite(annualRate)
-              ? formatPercentage(annualRate)
+              ? formatPercentage(annualRate, activeLocale)
               : t("recordChange.form.summary.enterRate")
           }
         />
@@ -412,7 +414,7 @@ export function RecordChangeSummary({
             value={
               maturityDate === undefined || !isCalendarDateString(maturityDate)
                 ? t("recordChange.form.summary.selectMaturityDate")
-                : formatDisplayDate(maturityDate)
+                : formatDisplayDate(maturityDate, activeLocale)
             }
           />
         ) : null}

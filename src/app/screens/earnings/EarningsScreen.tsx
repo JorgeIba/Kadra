@@ -6,6 +6,7 @@ import { GroupedMetricList } from "@/app/components/GroupedMetricList"
 import { LabeledSelectControl } from "@/app/components/LabeledSelectControl"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { TrustNotesPopover } from "@/app/components/TrustNotes"
+import { useLocale } from "@/app/i18n"
 import {
   DERIVED_STATUSES,
   type DerivedStatus,
@@ -317,6 +318,7 @@ function EarningsBreakdownRow({
   percentage?: number
 }) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
   const displayedPercentage = percentage ?? investment.percentage
   const statusLabels = getDerivedStatusLabels(t)
   const statusLabel = statusLabels[investment.derivedStatus]
@@ -352,7 +354,7 @@ function EarningsBreakdownRow({
             <MoneyAmount value={investment.earnedAmount} />
           </p>
           <p className="text-xs text-muted-foreground">
-            {formatPercentage(displayedPercentage)}
+            {formatPercentage(displayedPercentage, activeLocale)}
           </p>
         </div>
       </div>
