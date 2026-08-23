@@ -404,6 +404,7 @@ export const esMX = {
       nextDay: "Siguiente día",
       nextWeek: "Siguiente semana",
       nextYear: "Siguiente año",
+      notes: "Notas",
       originalAmount: "Monto original",
       paymentFrequency: "Frecuencia de pago",
       progress: "Progreso",

@@ -47,6 +47,7 @@ export function InvestmentDetailScreen({
   const asOfDate = new Date()
   const resolvedInvestment = resolveInvestment(investment, asOfDate)
   const upcomingReturnMetrics = getUpcomingReturnMetrics(investment, asOfDate)
+  const notes = investment.notes?.trim()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const paymentFrequencyLabels = getPaymentFrequencyLabels(t)
   const reinvestmentBehaviorLabels = getReinvestmentBehaviorLabels(t)
@@ -202,6 +203,17 @@ export function InvestmentDetailScreen({
           />
         </div>
       </div>
+
+      {notes === undefined || notes === "" ? null : (
+        <div className="space-y-3 border-b border-border/30 pb-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            {t("investment.detail.notes")}
+          </h2>
+          <p className="whitespace-pre-wrap wrap-break-word text-sm leading-6 text-foreground/90">
+            {notes}
+          </p>
+        </div>
+      )}
 
       <div className="pt-8 mt-12 border-t border-border/20 flex justify-center pb-8">
         <Button
