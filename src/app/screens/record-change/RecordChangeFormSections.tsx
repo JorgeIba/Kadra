@@ -1,4 +1,6 @@
 import { Controller } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 import type {
   Control,
   FieldErrors,
@@ -6,18 +8,20 @@ import type {
   UseFormSetValue,
 } from "react-hook-form"
 import {
-  INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
-  PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIORS,
-  REINVESTMENT_BEHAVIOR_LABELS,
   isCalendarDateString,
   type InvestmentType,
   type PaymentFrequency,
   type ReinvestmentBehavior,
 } from "@/domain/investments"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
+import {
+  getInvestmentTypeLabels,
+  getPaymentFrequencyLabels,
+  getReinvestmentBehaviorLabels,
+} from "@/app/i18n/labels"
 import {
   Field,
   FormSection,
@@ -76,14 +80,16 @@ export function EffectiveDateSection({
   maxEffectiveDate,
   register,
 }: EffectiveDateSectionProps) {
+  const { t } = useTranslation()
+
   return (
     <FormSection
-      title="Effective date"
-      description="Kadra will append new history from this date onward."
+      title={t("recordChange.form.sections.effectiveDate.title")}
+      description={t("recordChange.form.sections.effectiveDate.description")}
     >
       <Field
         error={errors.effectiveDate?.message}
-        label="When did this change happen?"
+        label={t("recordChange.form.fields.transactionDateQuestion")}
         htmlFor={FORM_FIELD_IDS.effectiveDate}
       >
         <Input
@@ -116,22 +122,26 @@ export function CurrentTermsSection({
   register,
   setValue,
 }: CurrentTermsSectionProps) {
+  const { t } = useTranslation()
   const paymentFrequencyOptions =
     investmentType === INVESTMENT_TYPES.openEnded
       ? PAYMENT_FREQUENCY_OPTIONS.filter((frequency) => {
           return frequency !== PAYMENT_FREQUENCIES.atMaturity
         })
       : PAYMENT_FREQUENCY_OPTIONS
+  const investmentTypeLabels = getInvestmentTypeLabels(t)
+  const paymentFrequencyLabels = getPaymentFrequencyLabels(t)
+  const reinvestmentBehaviorLabels = getReinvestmentBehaviorLabels(t)
 
   return (
     <FormSection
-      title="Current terms"
-      description="Leave values unchanged unless the current rate or terms changed."
+      title={t("recordChange.form.sections.currentTerms.title")}
+      description={t("recordChange.form.sections.currentTerms.description")}
     >
       <div className="grid grid-cols-2 gap-3">
         <Field
           error={errors.investmentType?.message}
-          label="Type"
+          label={t("recordChange.form.fields.investmentType")}
           htmlFor={FORM_FIELD_IDS.investmentType}
         >
           <Controller
@@ -166,15 +176,15 @@ export function CurrentTermsSection({
                   <SelectValue>
                     {(value: InvestmentType | null) =>
                       value === null
-                        ? "Select type"
-                        : INVESTMENT_TYPE_LABELS[value]
+                        ? t("recordChange.form.select.investmentType")
+                        : investmentTypeLabels[value]
                     }
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {INVESTMENT_TYPE_OPTIONS.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {INVESTMENT_TYPE_LABELS[option]}
+                      {investmentTypeLabels[option]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -185,7 +195,7 @@ export function CurrentTermsSection({
 
         <Field
           error={errors.annualRate?.message}
-          label="Annual rate"
+          label={t("recordChange.form.fields.annualRate")}
           htmlFor={FORM_FIELD_IDS.annualRate}
         >
           <Input
@@ -207,7 +217,7 @@ export function CurrentTermsSection({
       {investmentType === INVESTMENT_TYPES.fixedTerm ? (
         <Field
           error={errors.maturityDate?.message}
-          label="Maturity date"
+          label={t("recordChange.form.fields.maturityDate")}
           htmlFor={FORM_FIELD_IDS.maturityDate}
         >
           <Input
@@ -224,7 +234,7 @@ export function CurrentTermsSection({
 
       <Field
         error={errors.paymentFrequency?.message}
-        label="Payment frequency"
+        label={t("recordChange.form.fields.paymentFrequency")}
         htmlFor={FORM_FIELD_IDS.paymentFrequency}
       >
         <Controller
@@ -247,15 +257,15 @@ export function CurrentTermsSection({
                 <SelectValue>
                   {(value: PaymentFrequency | null) =>
                     value === null
-                      ? "Select payment frequency"
-                      : PAYMENT_FREQUENCY_LABELS[value]
+                      ? t("recordChange.form.select.paymentFrequency")
+                      : paymentFrequencyLabels[value]
                   }
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {paymentFrequencyOptions.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {PAYMENT_FREQUENCY_LABELS[option]}
+                    {paymentFrequencyLabels[option]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -266,7 +276,7 @@ export function CurrentTermsSection({
 
       <Field
         error={errors.reinvestmentBehavior?.message}
-        label="Reinvestment"
+        label={t("recordChange.form.fields.reinvestment")}
         htmlFor={FORM_FIELD_IDS.reinvestmentBehavior}
       >
         <Controller
@@ -289,15 +299,15 @@ export function CurrentTermsSection({
                 <SelectValue>
                   {(value: ReinvestmentBehavior | null) =>
                     value === null
-                      ? "Select reinvestment"
-                      : REINVESTMENT_BEHAVIOR_LABELS[value]
+                      ? t("recordChange.form.select.reinvestment")
+                      : reinvestmentBehaviorLabels[value]
                   }
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {REINVESTMENT_BEHAVIOR_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {REINVESTMENT_BEHAVIOR_LABELS[option]}
+                    {reinvestmentBehaviorLabels[option]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -330,6 +340,7 @@ export function RecordChangeSummary({
   paymentFrequency,
   transactionType,
 }: RecordChangeSummaryProps) {
+  const { t } = useTranslation()
   const hasMoneyMovement =
     transactionType !== undefined &&
     transactionType !== "none" &&
@@ -340,65 +351,67 @@ export function RecordChangeSummary({
       : transactionType === "withdrawal" && hasMoneyMovement
         ? activeBalance - contributionAmount
         : activeBalance
+  const investmentTypeLabels = getInvestmentTypeLabels(t)
+  const paymentFrequencyLabels = getPaymentFrequencyLabels(t)
 
   return (
     <section className="rounded-lg border border-border/70 bg-card/45 p-4">
       <div className="space-y-1">
         <h2 className="text-base font-bold leading-tight text-foreground">
-          Record summary
+          {t("recordChange.form.summary.title")}
         </h2>
         <p className="text-sm leading-6 text-muted-foreground">
-          Review what this dated record will append before saving.
+          {t("recordChange.form.summary.description")}
         </p>
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3">
         <SummaryItem
-          label="Effective date"
+          label={t("recordChange.form.summary.effectiveDate")}
           value={
             effectiveDate === undefined || !isCalendarDateString(effectiveDate)
-              ? "Select date"
+              ? t("recordChange.form.summary.selectDate")
               : formatDisplayDate(effectiveDate)
           }
         />
         <SummaryItem
-          label="Movement"
-          value={getMovementSummary({ contributionAmount, transactionType })}
+          label={t("recordChange.form.summary.movement")}
+          value={getMovementSummary({ contributionAmount, t, transactionType })}
         />
         <SummaryItem
-          label="Resulting balance"
+          label={t("recordChange.form.summary.resultingBalance")}
           value={<MoneyAmount value={resultingBalance} />}
         />
         <SummaryItem
-          label="Annual rate"
+          label={t("recordChange.form.summary.annualRate")}
           value={
             typeof annualRate === "number" && Number.isFinite(annualRate)
               ? formatPercentage(annualRate)
-              : "Enter rate"
+              : t("recordChange.form.summary.enterRate")
           }
         />
         <SummaryItem
-          label="Type"
+          label={t("recordChange.form.summary.type")}
           value={
             investmentType === undefined
-              ? "Select type"
-              : INVESTMENT_TYPE_LABELS[investmentType]
+              ? t("recordChange.form.summary.selectType")
+              : investmentTypeLabels[investmentType]
           }
         />
         <SummaryItem
-          label="Payout"
+          label={t("recordChange.form.summary.payout")}
           value={
             paymentFrequency === undefined
-              ? "Select payout"
-              : PAYMENT_FREQUENCY_LABELS[paymentFrequency]
+              ? t("recordChange.form.select.payout")
+              : paymentFrequencyLabels[paymentFrequency]
           }
         />
         {investmentType === INVESTMENT_TYPES.fixedTerm ? (
           <SummaryItem
-            label="Maturity"
+            label={t("recordChange.form.summary.maturity")}
             value={
               maturityDate === undefined || !isCalendarDateString(maturityDate)
-                ? "Select date"
+                ? t("recordChange.form.summary.selectMaturityDate")
                 : formatDisplayDate(maturityDate)
             }
           />
@@ -419,6 +432,8 @@ export function RecordChangeFormActions({
   onCancelRequest,
   submitGuidance,
 }: RecordChangeFormActionsProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="grid gap-3">
       {submitGuidance === undefined ? null : (
@@ -433,7 +448,7 @@ export function RecordChangeFormActions({
           className="w-full disabled:border-border disabled:bg-muted/45 disabled:text-muted-foreground disabled:shadow-none"
           disabled={!isValid}
         >
-          Save record
+          {t("recordChange.form.actions.saveRecord")}
         </Button>
         <Button
           type="button"
@@ -441,7 +456,7 @@ export function RecordChangeFormActions({
           className="w-full"
           onClick={onCancelRequest}
         >
-          Back to detail
+          {t("recordChange.form.actions.backToDetail")}
         </Button>
       </div>
     </div>
@@ -463,9 +478,11 @@ function SummaryItem({ label, value }: { label: string; value: ReactNode }) {
 
 function getMovementSummary({
   contributionAmount,
+  t,
   transactionType,
 }: {
   contributionAmount: number | undefined
+  t: TFunction
   transactionType: RecordChangeSummaryProps["transactionType"]
 }) {
   if (
@@ -474,7 +491,8 @@ function getMovementSummary({
   ) {
     return (
       <>
-        Deposit <MoneyAmount value={contributionAmount} />
+        {t("recordChange.form.moneyMovement.options.contribution.label")}{" "}
+        <MoneyAmount value={contributionAmount} />
       </>
     )
   }
@@ -485,20 +503,21 @@ function getMovementSummary({
   ) {
     return (
       <>
-        Withdraw <MoneyAmount value={contributionAmount} />
+        {t("recordChange.form.moneyMovement.options.withdrawal.label")}{" "}
+        <MoneyAmount value={contributionAmount} />
       </>
     )
   }
 
   if (transactionType === "contribution") {
-    return "Deposit amount pending"
+    return t("recordChange.form.summary.pendingDeposit")
   }
 
   if (transactionType === "withdrawal") {
-    return "Withdrawal amount pending"
+    return t("recordChange.form.summary.pendingWithdrawal")
   }
 
-  return "No money movement"
+  return t("recordChange.form.summary.noMoneyMovement")
 }
 
 function isFinitePositiveNumber(value: number | undefined): value is number {

@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useTranslation } from "react-i18next"
 import { InvestmentPreview } from "@/app/components/investments/InvestmentPreview"
 import { Card, CardContent } from "@/components/ui/card"
 import type { Investment } from "@/domain/investments"
@@ -15,6 +16,7 @@ const PREVIEW_STATE_TRANSITION = {
 export function InvestmentFormPreview({
   investment,
 }: InvestmentFormPreviewProps) {
+  const { t } = useTranslation()
   const prefersReducedMotion = useReducedMotion() ?? false
   const previewState = investment === null ? "awaiting-terms" : "calculated"
 
@@ -41,10 +43,11 @@ export function InvestmentFormPreview({
           {investment === null ? (
             <Card className="border-dashed border-border/80 bg-card/45">
               <CardContent className="space-y-2">
-                <p className="text-sm font-bold">Projection preview</p>
+                <p className="text-sm font-bold">
+                  {t("investment.preview.projectionPreview")}
+                </p>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Add the required terms and Kadra will estimate value, return,
-                  and maturity progress before you save.
+                  {t("invest.formPreview.description")}
                 </p>
               </CardContent>
             </Card>

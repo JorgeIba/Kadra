@@ -1,4 +1,5 @@
 import { ScreenIntro } from "@/app/components/ScreenIntro"
+import { useTranslation } from "react-i18next"
 import {
   buildUpdatedInvestmentFromFormValues,
   canEditInvestmentStartDate,
@@ -21,6 +22,8 @@ export function EditInvestmentScreen({
   onCancel,
   onInvestmentUpdate,
 }: EditInvestmentScreenProps) {
+  const { t } = useTranslation()
+
   function handleInvestmentSubmit(values: InvestmentFormValues) {
     const updatedInvestment = buildUpdatedInvestmentFromFormValues(
       values,
@@ -38,17 +41,17 @@ export function EditInvestmentScreen({
       <ScreenIntro
         eyebrow={investment.institutionName}
         title={investment.name}
-        description="Update the stored profile so current value, income, and maturity tracking stay aligned with the latest details."
+        description={t("invest.edit.description")}
       />
 
       <InvestmentForm
-        cancelLabel="Back to detail"
+        cancelLabel={t("invest.edit.backToDetail")}
         institutionSuggestions={institutionSuggestions}
         initialValues={mapInvestmentToFormValues(investment)}
         isStartDateEditable={canEditInvestmentStartDate(investment)}
         onCancel={onCancel}
-        submitLabel="Save changes"
-        successMessage="Changes saved."
+        submitLabel={t("invest.edit.saveChanges")}
+        successMessage={t("invest.edit.changesSaved")}
         onSubmit={handleInvestmentSubmit}
       />
     </section>

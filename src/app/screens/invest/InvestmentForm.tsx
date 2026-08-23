@@ -1,15 +1,13 @@
-import { useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
+import type { TFunction } from "i18next"
 import {
   CURRENCIES,
-  CURRENCY_LABELS,
-  INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
-  PAYMENT_FREQUENCY_LABELS,
   REINVESTMENT_BEHAVIORS,
-  REINVESTMENT_BEHAVIOR_LABELS,
   toDateString,
   type Currency,
   type InvestmentType,
@@ -17,10 +15,16 @@ import {
   type ReinvestmentBehavior,
 } from "@/domain/investments"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
+import {
+  getCurrencyLabels,
+  getInvestmentTypeLabels,
+  getPaymentFrequencyLabels,
+  getReinvestmentBehaviorLabels,
+} from "@/app/i18n/labels"
 import { getInvestmentFormPreview } from "@/app/screens/invest/adapters/investment-form-adapter"
 import { InvestmentFormPreview } from "@/app/screens/invest/InvestmentFormPreview"
 import {
-  investmentFormSchema,
+  createInvestmentFormSchema,
   type InvestmentFormValues,
 } from "@/app/screens/invest/investment-form-schema"
 import { AutocompleteField } from "@/components/ui/autocomplete-field"
@@ -73,15 +77,15 @@ const FORM_FIELD_IDS = {
 } as const
 
 const SAVE_REQUIREMENTS = [
-  { field: "name", label: "name" },
+  { field: "name", label: "investmentName" },
   { field: "institutionName", label: "institution" },
-  { field: "contributionAmount", label: "amount" },
-  { field: "annualRate", label: "annual rate" },
-  { field: "startDate", label: "start date" },
+  { field: "contributionAmount", label: "contributionAmount" },
+  { field: "annualRate", label: "annualRate" },
+  { field: "startDate", label: "startDate" },
   {
     field: "endDate",
     investmentType: INVESTMENT_TYPES.fixedTerm,
-    label: "end date",
+    label: "endDate",
   },
 ] as const satisfies ReadonlyArray<SaveRequirement>
 
@@ -107,18 +111,22 @@ export function InvestmentForm({
   initialValues,
   isStartDateEditable = true,
   onCancel,
-  cancelLabel = "Cancel",
+  cancelLabel,
   onSubmit,
-  submitLabel = "Save investment",
-  successMessage = "Draft is valid. Saving comes next.",
+  submitLabel,
+  successMessage,
 }: InvestmentFormProps) {
+  const { i18n, t } = useTranslation()
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false)
+  const resolvedLanguageRef = useRef(i18n.resolvedLanguage)
+  const formSchema = useMemo(() => createInvestmentFormSchema(t), [t])
   const {
     control,
     formState: { errors, isDirty, isSubmitSuccessful, isValid },
     handleSubmit,
     register,
     setValue,
+    trigger,
   } = useForm<InvestmentFormValues>({
     defaultValues: initialValues ?? {
       currency: CURRENCIES.mxn,
@@ -129,9 +137,22 @@ export function InvestmentForm({
       investmentType: INVESTMENT_TYPES.fixedTerm,
     },
     mode: "onChange",
-    resolver: zodResolver(investmentFormSchema),
+    resolver: zodResolver(formSchema),
     shouldUnregister: true,
   })
+
+  useEffect(() => {
+    if (resolvedLanguageRef.current === i18n.resolvedLanguage) {
+      return
+    }
+
+    resolvedLanguageRef.current = i18n.resolvedLanguage
+
+    // Existing validation messages were created in the previous language.
+    if (Object.keys(errors).length > 0) {
+      void trigger()
+    }
+  }, [errors, i18n.resolvedLanguage, trigger])
 
   function handleValidSubmit(values: InvestmentFormValues) {
     onSubmit(values)
@@ -153,7 +174,7 @@ export function InvestmentForm({
   const investmentType = useWatch({ control, name: "investmentType" })
   const paymentFrequency = useWatch({ control, name: "paymentFrequency" })
   const previewValues = useWatch({ control })
-  const previewInvestment = getInvestmentFormPreview(previewValues)
+  const previewInvestment = getInvestmentFormPreview(previewValues, { t })
   const paymentFrequencyOptions =
     investmentType === INVESTMENT_TYPES.openEnded
       ? PAYMENT_FREQUENCY_OPTIONS.filter((frequency) => {
@@ -162,24 +183,28 @@ export function InvestmentForm({
       : PAYMENT_FREQUENCY_OPTIONS
   const submitGuidance = isValid
     ? undefined
-    : getSubmitGuidance(previewValues, investmentType)
+    : getSubmitGuidance(previewValues, investmentType, t)
+  const currencyLabels = getCurrencyLabels(t)
+  const investmentTypeLabels = getInvestmentTypeLabels(t)
+  const paymentFrequencyLabels = getPaymentFrequencyLabels(t)
+  const reinvestmentBehaviorLabels = getReinvestmentBehaviorLabels(t)
 
   return (
     <>
       <form className="space-y-6" onSubmit={handleSubmit(handleValidSubmit)}>
         <div className="border-y border-border/70">
           <FormSection
-            title="Identity"
-            description="Name the investment and where the money lives."
+            title={t("invest.form.sections.identity.title")}
+            description={t("invest.form.sections.identity.description")}
           >
             <Field
               error={errors.name?.message}
-              label="Investment name"
+              label={t("invest.form.fields.investmentName")}
               htmlFor={FORM_FIELD_IDS.name}
             >
               <Input
                 id={FORM_FIELD_IDS.name}
-                placeholder="CETES 6 months"
+                placeholder={t("invest.form.placeholders.investmentName")}
                 {...getFieldAccessibilityProps(
                   FORM_FIELD_IDS.name,
                   errors.name?.message,
@@ -190,7 +215,7 @@ export function InvestmentForm({
 
             <Field
               error={errors.institutionName?.message}
-              label="Institution"
+              label={t("invest.form.fields.institution")}
               htmlFor={FORM_FIELD_IDS.institutionName}
             >
               <Controller
@@ -200,7 +225,7 @@ export function InvestmentForm({
                   <AutocompleteField
                     id={FORM_FIELD_IDS.institutionName}
                     name={institutionNameField.name}
-                    placeholder="CETES Directo"
+                    placeholder={t("invest.form.placeholders.institution")}
                     suggestions={institutionSuggestions}
                     value={institutionNameField.value ?? ""}
                     onBlur={institutionNameField.onBlur}
@@ -216,13 +241,13 @@ export function InvestmentForm({
           </FormSection>
 
           <FormSection
-            title="Terms"
-            description="These values drive the future projection."
+            title={t("invest.form.sections.terms.title")}
+            description={t("invest.form.sections.terms.description")}
           >
             <div className="grid grid-cols-2 gap-3">
               <Field
                 error={errors.investmentType?.message}
-                label="Type"
+                label={t("invest.form.fields.type")}
                 htmlFor={FORM_FIELD_IDS.investmentType}
               >
                 <Controller
@@ -261,15 +286,15 @@ export function InvestmentForm({
                         <SelectValue>
                           {(value: InvestmentType | null) =>
                             value === null
-                              ? "Select type"
-                              : INVESTMENT_TYPE_LABELS[value]
+                              ? t("invest.form.select.investmentType")
+                              : investmentTypeLabels[value]
                           }
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {INVESTMENT_TYPE_OPTIONS.map((option) => (
                           <SelectItem key={option} value={option}>
-                            {INVESTMENT_TYPE_LABELS[option]}
+                            {investmentTypeLabels[option]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -280,7 +305,7 @@ export function InvestmentForm({
 
               <Field
                 error={errors.currency?.message}
-                label="Currency"
+                label={t("invest.form.fields.currency")}
                 htmlFor={FORM_FIELD_IDS.currency}
               >
                 <Controller
@@ -303,15 +328,15 @@ export function InvestmentForm({
                         <SelectValue>
                           {(value: Currency | null) =>
                             value === null
-                              ? "Select currency"
-                              : CURRENCY_LABELS[value]
+                              ? t("invest.form.select.currency")
+                              : currencyLabels[value]
                           }
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {CURRENCY_OPTIONS.map((option) => (
                           <SelectItem key={option} value={option}>
-                            {CURRENCY_LABELS[option]}
+                            {currencyLabels[option]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -324,7 +349,7 @@ export function InvestmentForm({
             <div className="grid grid-cols-2 gap-3">
               <Field
                 error={errors.contributionAmount?.message}
-                label="Contribution amount"
+                label={t("invest.form.fields.contributionAmount")}
                 htmlFor={FORM_FIELD_IDS.contributionAmount}
               >
                 <Input
@@ -343,7 +368,7 @@ export function InvestmentForm({
 
               <Field
                 error={errors.annualRate?.message}
-                label="Annual rate"
+                label={t("invest.form.fields.annualRate")}
                 htmlFor={FORM_FIELD_IDS.annualRate}
               >
                 <Input
@@ -365,7 +390,7 @@ export function InvestmentForm({
             {isStartDateEditable ? (
               <Field
                 error={errors.startDate?.message}
-                label="Start date"
+                label={t("invest.form.fields.startDate")}
                 htmlFor={FORM_FIELD_IDS.startDate}
               >
                 <Input
@@ -386,7 +411,7 @@ export function InvestmentForm({
             {investmentType === INVESTMENT_TYPES.fixedTerm ? (
               <Field
                 error={errors.endDate?.message}
-                label="End date"
+                label={t("invest.form.fields.endDate")}
                 htmlFor={FORM_FIELD_IDS.endDate}
               >
                 <Input
@@ -399,19 +424,19 @@ export function InvestmentForm({
                   {...register("endDate")}
                 />
                 <p className="text-xs leading-5 text-muted-foreground">
-                  Required for fixed-term investments.
+                  {t("invest.form.endDateRequired")}
                 </p>
               </Field>
             ) : null}
           </FormSection>
 
           <FormSection
-            title="Returns"
-            description="Define how often returns are paid and where they go."
+            title={t("invest.form.sections.returns.title")}
+            description={t("invest.form.sections.returns.description")}
           >
             <Field
               error={errors.paymentFrequency?.message}
-              label="Payment frequency"
+              label={t("invest.form.fields.paymentFrequency")}
               htmlFor={FORM_FIELD_IDS.paymentFrequency}
             >
               <Controller
@@ -434,15 +459,15 @@ export function InvestmentForm({
                       <SelectValue>
                         {(value: PaymentFrequency | null) =>
                           value === null
-                            ? "Select payment frequency"
-                            : PAYMENT_FREQUENCY_LABELS[value]
+                            ? t("invest.form.select.paymentFrequency")
+                            : paymentFrequencyLabels[value]
                         }
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {paymentFrequencyOptions.map((option) => (
                         <SelectItem key={option} value={option}>
-                          {PAYMENT_FREQUENCY_LABELS[option]}
+                          {paymentFrequencyLabels[option]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -453,7 +478,7 @@ export function InvestmentForm({
 
             <Field
               error={errors.reinvestmentBehavior?.message}
-              label="Reinvestment"
+              label={t("invest.form.fields.reinvestment")}
               htmlFor={FORM_FIELD_IDS.reinvestmentBehavior}
             >
               <Controller
@@ -476,15 +501,15 @@ export function InvestmentForm({
                       <SelectValue>
                         {(value: ReinvestmentBehavior | null) =>
                           value === null
-                            ? "Select reinvestment"
-                            : REINVESTMENT_BEHAVIOR_LABELS[value]
+                            ? t("invest.form.select.reinvestment")
+                            : reinvestmentBehaviorLabels[value]
                         }
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {REINVESTMENT_BEHAVIOR_OPTIONS.map((option) => (
                         <SelectItem key={option} value={option}>
-                          {REINVESTMENT_BEHAVIOR_LABELS[option]}
+                          {reinvestmentBehaviorLabels[option]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -497,14 +522,18 @@ export function InvestmentForm({
           <InvestmentFormPreview investment={previewInvestment} />
 
           <FormSection
-            title="Notes"
-            description="Optional context for future you."
+            title={t("invest.form.sections.notes.title")}
+            description={t("invest.form.sections.notes.description")}
+            optionalLabel={t("invest.form.optional")}
             isOptional
           >
-            <Field htmlFor={FORM_FIELD_IDS.notes} label="Private note">
+            <Field
+              htmlFor={FORM_FIELD_IDS.notes}
+              label={t("invest.form.fields.notes")}
+            >
               <Textarea
                 id={FORM_FIELD_IDS.notes}
-                placeholder="Example: rate renewal expected after maturity."
+                placeholder={t("invest.form.placeholders.notes")}
                 {...register("notes")}
               />
             </Field>
@@ -523,7 +552,7 @@ export function InvestmentForm({
             className="w-full disabled:border-border disabled:bg-muted/45 disabled:text-muted-foreground disabled:shadow-none"
             disabled={!isValid}
           >
-            {submitLabel}
+            {submitLabel ?? t("invest.form.actions.saveInvestment")}
           </Button>
 
           {onCancel === undefined ? null : (
@@ -533,23 +562,23 @@ export function InvestmentForm({
               className="w-full"
               onClick={handleCancelRequest}
             >
-              {cancelLabel}
+              {cancelLabel ?? t("common.actions.cancel")}
             </Button>
           )}
         </div>
 
         {isSubmitSuccessful ? (
           <p className="text-center text-sm font-medium text-primary">
-            {successMessage}
+            {successMessage ?? t("invest.form.savedDraft")}
           </p>
         ) : null}
       </form>
 
       <ConfirmDialog
         open={isDiscardDialogOpen}
-        title="Discard changes?"
-        description="You have unsaved changes. If you leave now, those changes will be lost."
-        confirmLabel="Discard changes"
+        title={t("invest.form.discard.title")}
+        description={t("invest.form.discard.description")}
+        confirmLabel={t("invest.form.discard.confirm")}
         variant="destructive"
         onRequestOpenChange={setIsDiscardDialogOpen}
         onConfirm={() => onCancel?.()}
@@ -562,11 +591,13 @@ function FormSection({
   children,
   description,
   isOptional = false,
+  optionalLabel,
   title,
 }: {
   children: ReactNode
   description: string
   isOptional?: boolean
+  optionalLabel?: string
   title: string
 }) {
   return (
@@ -583,7 +614,7 @@ function FormSection({
           </h2>
           {isOptional ? (
             <span className="rounded-full border border-border/70 px-2 py-0.5 text-[0.68rem] font-medium text-muted-foreground">
-              Optional
+              {optionalLabel}
             </span>
           ) : null}
         </div>
@@ -632,16 +663,19 @@ function getFieldAccessibilityProps(fieldId: string, error?: string) {
 function getSubmitGuidance(
   values: Partial<InvestmentFormValues>,
   investmentType: InvestmentType | undefined,
+  t: TFunction,
 ) {
   const missingFields = SAVE_REQUIREMENTS.filter((requirement) =>
     isRequirementMissing(requirement, values, investmentType),
-  ).map((requirement) => requirement.label)
+  ).map((requirement) => t(`invest.form.fields.${requirement.label}`))
 
   if (missingFields.length > 0) {
-    return `Complete ${formatInlineList(missingFields)} to save this investment.`
+    return t("invest.form.guidance.completeFields", {
+      fields: formatInlineList(missingFields, t("invest.form.guidance.and")),
+    })
   }
 
-  return "Review the highlighted fields to save this investment."
+  return t("invest.form.guidance.reviewFields")
 }
 
 function isRequirementMissing(
@@ -665,14 +699,14 @@ function isRequirementMissing(
   return typeof value !== "string" || value.trim() === ""
 }
 
-function formatInlineList(items: string[]) {
+function formatInlineList(items: string[], conjunction: string) {
   if (items.length === 1) {
     return items[0]
   }
 
   if (items.length === 2) {
-    return `${items[0]} and ${items[1]}`
+    return `${items[0]} ${conjunction} ${items[1]}`
   }
 
-  return `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`
+  return `${items.slice(0, -1).join(", ")}, ${conjunction} ${items.at(-1)}`
 }

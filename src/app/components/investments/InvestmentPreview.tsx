@@ -4,11 +4,12 @@ import {
   getUpcomingInvestmentProjectedEarningsForDays,
   INVESTMENT_TYPES,
   PAYMENT_FREQUENCIES,
-  PAYMENT_FREQUENCY_LABELS,
   resolveInvestment,
   toDateString,
   type Investment,
 } from "@/domain/investments"
+import { getPaymentFrequencyLabels } from "@/app/i18n/labels"
+import { useTranslation } from "react-i18next"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatDisplayDate } from "@/lib/formatters"
@@ -23,35 +24,47 @@ export function InvestmentPreview({
   asOfDate = new Date(),
   investment,
 }: InvestmentPreviewProps) {
+  const { t } = useTranslation()
   const resolvedInvestment = resolveInvestment(investment, asOfDate)
   const isFixedTerm = resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm
   const isPaidAtMaturity =
     resolvedInvestment.paymentFrequency === PAYMENT_FREQUENCIES.atMaturity
+  const paymentFrequencyLabels = getPaymentFrequencyLabels(t)
   const paymentFrequency =
-    PAYMENT_FREQUENCY_LABELS[resolvedInvestment.paymentFrequency]
-  const paymentFrequencyLabel = paymentFrequency.toLowerCase()
+    paymentFrequencyLabels[resolvedInvestment.paymentFrequency]
   const asOfDateString = toDateString(asOfDate)
   const shouldShowMaturityCountdown =
     isFixedTerm &&
     compareCalendarDatesAscending(asOfDateString, resolvedInvestment.endDate) <=
       0 &&
     resolvedInvestment.daysRemaining <= 90
+  const maturityCountdown = isFixedTerm
+    ? resolvedInvestment.daysRemaining === 0
+      ? t("investment.preview.maturityCountdown.today")
+      : t("investment.preview.maturityCountdown.inDays", {
+          count: resolvedInvestment.daysRemaining,
+        })
+    : null
 
   return (
     <Card className="border-border/80 bg-card/55">
       <CardContent className="space-y-4">
         <div className="space-y-1.5">
-          <p className="text-sm font-bold">Projection preview</p>
+          <p className="text-sm font-bold">
+            {t("investment.preview.projectionPreview")}
+          </p>
           <p className="text-sm leading-6 text-muted-foreground">
-            Estimated from the amount, rate, dates, and return settings above.
+            {t("investment.preview.description")}
           </p>
         </div>
 
         <div className="border-y border-border/70 py-4">
           <p className="text-xs leading-none text-muted-foreground">
             {isFixedTerm
-              ? `At maturity · ${formatDisplayDate(resolvedInvestment.endDate)}`
-              : "Estimated value today"}
+              ? t("investment.preview.atMaturity", {
+                  date: formatDisplayDate(resolvedInvestment.endDate),
+                })
+              : t("investment.preview.estimatedValueToday")}
           </p>
           <p className="mt-2 font-ledger text-3xl leading-none text-foreground tabular-nums">
             <MoneyAmount
@@ -67,12 +80,12 @@ export function InvestmentPreview({
               <MoneyAmount
                 value={resolvedInvestment.projectedTotalReturnAtEndDate}
               />{" "}
-              estimated return
+              {t("investment.preview.estimatedReturn")}
             </p>
           ) : null}
           {shouldShowMaturityCountdown ? (
             <p className="mt-3 text-xs font-medium leading-5 text-muted-foreground">
-              {formatMaturityCountdown(resolvedInvestment.daysRemaining)}
+              {maturityCountdown}
             </p>
           ) : null}
         </div>
@@ -80,11 +93,13 @@ export function InvestmentPreview({
         {isPaidAtMaturity ? null : (
           <div className="space-y-3">
             <p className="text-xs font-medium leading-none text-muted-foreground">
-              Return cadence
+              {t("investment.preview.returnCadence")}
             </p>
             <div className="grid grid-cols-2 divide-x divide-border/70">
               <PreviewMetric
-                label={`Periodic return · paid ${paymentFrequencyLabel}`}
+                label={t("investment.preview.periodicReturn", {
+                  frequency: paymentFrequency.toLowerCase(),
+                })}
                 value={
                   <MoneyAmount
                     value={resolvedInvestment.estimatedPeriodicReturn}
@@ -92,7 +107,7 @@ export function InvestmentPreview({
                 }
               />
               <PreviewMetric
-                label="Monthly return"
+                label={t("investment.preview.monthlyReturn")}
                 value={
                   <MoneyAmount
                     value={getUpcomingInvestmentProjectedEarningsForDays(
@@ -106,7 +121,7 @@ export function InvestmentPreview({
             </div>
             <div className="border-t border-border/70 pt-3">
               <PreviewMetric
-                label="Yearly return"
+                label={t("investment.preview.yearlyReturn")}
                 value={
                   <MoneyAmount
                     value={getUpcomingInvestmentProjectedEarningsForDays(
@@ -124,35 +139,30 @@ export function InvestmentPreview({
         {isFixedTerm ? (
           <div className="grid grid-cols-2 divide-x divide-border/70 border-t border-border/70 pt-4">
             <PreviewMetric
-              label="Initial contribution"
+              label={t("investment.preview.initialContribution")}
               value={<MoneyAmount value={resolvedInvestment.originalAmount} />}
             />
             <PreviewMetric
-              label="Return paid"
+              label={t("investment.preview.returnPaid")}
               value={paymentFrequency}
-              description={isPaidAtMaturity ? "No interim payouts" : undefined}
+              description={
+                isPaidAtMaturity
+                  ? t("investment.preview.noInterimPayouts")
+                  : undefined
+              }
             />
           </div>
         ) : (
           <div className="border-t border-border/70 pt-4">
-            <PreviewMetric label="Term" value="Open ended" />
+            <PreviewMetric
+              label={t("investment.preview.term")}
+              value={t("investment.preview.openEnded")}
+            />
           </div>
         )}
       </CardContent>
     </Card>
   )
-}
-
-function formatMaturityCountdown(daysRemaining: number): string {
-  if (daysRemaining === 0) {
-    return "Matures today"
-  }
-
-  if (daysRemaining === 1) {
-    return "Matures in 1 day"
-  }
-
-  return `Matures in ${daysRemaining} days`
 }
 
 function PreviewMetric({

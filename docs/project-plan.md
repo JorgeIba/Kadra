@@ -59,7 +59,7 @@ The product should help users understand:
 
 - Use typed translation catalogs and a React locale provider for future user-facing copy.
 - Keep `en-US` as the default and fallback. System-language detection and an explicit persisted preference determine the active locale.
-- `es-MX` is the first additional catalog, but its current coverage is limited to the language-selection UI. Migrate product copy incrementally before treating Spanish as fully supported, and keep accessibility metadata aligned with the actual language of the rendered content.
+- `es-MX` is the first additional catalog, and current user-facing product copy has been migrated across the supported surfaces. Locale-aware number and date formatting, additional language coverage, and future copy should continue to build on the same foundation while accessibility metadata stays aligned with the rendered language.
 
 ### Product Scope
 

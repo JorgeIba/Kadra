@@ -3,6 +3,7 @@ import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { DashboardActionHint } from "@/app/screens/dashboard/DashboardActionHint"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 
 interface EarningsExplorationCardProps {
   snapshot: PortfolioEarnedMoneySnapshot
@@ -13,6 +14,8 @@ export function EarningsExplorationCard({
   snapshot,
   onOpenDetails,
 }: EarningsExplorationCardProps) {
+  const { t } = useTranslation()
+
   return (
     <button
       type="button"
@@ -22,32 +25,32 @@ export function EarningsExplorationCard({
       <div className="space-y-6">
         <div className="flex items-start justify-between gap-4">
           <DashboardSectionHeader
-            title="Accrued earnings"
-            description="Estimated return produced through today, including finished investments."
+            title={t("dashboard.earnings.title")}
+            description={t("dashboard.earnings.description")}
           />
           <DashboardActionHint
             className="mt-1"
             iconClassName="group-hover/earnings-card:translate-x-0.5 group-active/earnings-card:translate-x-0.5"
           >
-            Open report
+            {t("dashboard.earnings.openReport")}
           </DashboardActionHint>
         </div>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-5">
           <PreviewMetric
-            label="Earned return"
+            label={t("dashboard.earnings.earnedReturn")}
             value={<MoneyAmount value={snapshot.totalEarnedAmount} />}
           />
           <PreviewMetric
-            label="Tracked investments"
+            label={t("dashboard.earnings.trackedInvestments")}
             value={String(snapshot.investmentCount)}
           />
           <PreviewMetric
-            label="Active"
+            label={t("dashboard.earnings.active")}
             value={String(snapshot.activeInvestmentCount)}
           />
           <PreviewMetric
-            label="Finished"
+            label={t("dashboard.earnings.finished")}
             value={String(snapshot.finishedInvestmentCount)}
           />
         </div>

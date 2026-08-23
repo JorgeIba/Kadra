@@ -4,6 +4,7 @@ import {
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments"
+import { i18n } from "@/app/i18n/i18n"
 import { createRecordChangeFormSchema } from "@/app/screens/record-change/record-change-form-schema"
 
 describe("record change form schema", () => {
@@ -158,5 +159,6 @@ function buildSchema({
     latestEventDate,
     today,
     activeBalance,
+    t: i18n.t,
   })
 }

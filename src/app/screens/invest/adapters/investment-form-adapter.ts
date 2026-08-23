@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next"
 import {
   INVESTMENT_TYPES,
   getInvestmentBalanceState,
@@ -7,7 +8,7 @@ import {
   type Investment,
 } from "@/domain/investments"
 import {
-  investmentFormSchema,
+  createInvestmentFormSchema,
   type InvestmentFormValues,
 } from "@/app/screens/invest/investment-form-schema"
 
@@ -22,6 +23,7 @@ interface BuildInvestmentFromFormOptions {
 }
 
 interface InvestmentFormPreviewOptions {
+  t: TFunction
   asOfDate?: Date
 }
 
@@ -131,21 +133,21 @@ export function canEditInvestmentStartDate(investment: Investment): boolean {
 
 export function getInvestmentFormPreview(
   values: unknown,
-  options: InvestmentFormPreviewOptions = {},
+  { asOfDate, t }: InvestmentFormPreviewOptions,
 ): Investment | null {
-  const parsedValues = investmentFormSchema.safeParse(values)
+  const parsedValues = createInvestmentFormSchema(t).safeParse(values)
 
   if (!parsedValues.success) {
     return null
   }
 
-  const asOfDate = options.asOfDate ?? new Date()
+  const previewDate = asOfDate ?? new Date()
   const previewInvestment = buildInvestmentFromFormValues(parsedValues.data, {
-    asOfDate,
+    asOfDate: previewDate,
     id: PREVIEW_INVESTMENT_ID,
   })
 
-  if (!canResolveInvestmentPreview(previewInvestment, asOfDate)) {
+  if (!canResolveInvestmentPreview(previewInvestment, previewDate)) {
     return null
   }
 

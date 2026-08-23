@@ -1,7 +1,7 @@
 import type { Investment } from "@/domain/investments"
 import type { GroupIdentity } from "@/app/shared/grouping"
 
-const UNKNOWN_INSTITUTION_LABEL = "Unknown institution"
+export const UNKNOWN_INSTITUTION_GROUP_KEY = "unknown-institution"
 
 export function getInstitutionSuggestions(investments: Investment[]): string[] {
   const suggestions = new Map<string, string>()
@@ -25,12 +25,21 @@ export function getInstitutionSuggestions(investments: Investment[]): string[] {
   })
 }
 
-export function getInstitutionGroup(institutionName: string): GroupIdentity {
-  const displayName = institutionName.trim() || UNKNOWN_INSTITUTION_LABEL
+export function getInstitutionGroup(
+  institutionName: string,
+  unknownInstitutionLabel: string,
+): GroupIdentity {
+  const trimmedInstitutionName = institutionName.trim()
 
   return {
-    key: displayName,
-    label: displayName,
+    key:
+      trimmedInstitutionName === ""
+        ? UNKNOWN_INSTITUTION_GROUP_KEY
+        : trimmedInstitutionName,
+    label:
+      trimmedInstitutionName === ""
+        ? unknownInstitutionLabel
+        : trimmedInstitutionName,
   }
 }
 

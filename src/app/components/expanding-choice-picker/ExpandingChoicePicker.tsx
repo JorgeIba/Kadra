@@ -1,4 +1,5 @@
 import { useId } from "react"
+import { useTranslation } from "react-i18next"
 import { ChevronDown, type LucideIcon } from "lucide-react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { type PickerStage } from "@/app/components/expanding-choice-picker/expanding-choice-picker-machine"
@@ -148,6 +149,7 @@ export function ExpandingChoicePicker<T extends string>({
   options,
   value,
 }: ExpandingChoicePickerProps<T>) {
+  const { t } = useTranslation()
   const pickerId = useId()
   const {
     choreography,
@@ -198,8 +200,11 @@ export function ExpandingChoicePicker<T extends string>({
 
       <p className="sr-only" role="status" aria-atomic="true">
         {presentation.availableAction === "none"
-          ? `${ariaLabel} is updating.`
-          : `${ariaLabel} updated: ${selectedOption.summary}.`}
+          ? t("common.accessibility.choiceUpdating", { label: ariaLabel })
+          : t("common.accessibility.choiceUpdated", {
+              label: ariaLabel,
+              summary: selectedOption.summary,
+            })}
       </p>
     </fieldset>
   )

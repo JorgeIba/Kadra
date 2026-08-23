@@ -8,6 +8,7 @@ import { DashboardActionHint } from "@/app/screens/dashboard/DashboardActionHint
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { PortfolioProjectionPoint } from "@/app/screens/dashboard/portfolio-projection"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 interface PortfolioProjectionChartProps {
   earningPace: PortfolioEarningPace
@@ -20,6 +21,7 @@ export function PortfolioProjectionChart({
   onOpenDetails,
   points,
 }: PortfolioProjectionChartProps) {
+  const { t } = useTranslation()
   const targetPoint = points.at(-1)
 
   return (
@@ -45,15 +47,15 @@ export function PortfolioProjectionChart({
       <div className="space-y-5">
         <div className="flex items-start justify-between gap-4">
           <DashboardSectionHeader
-            title="1-year projection"
-            description="Based on current investments and rates, with no future contributions."
+            title={t("dashboard.projection.title")}
+            description={t("dashboard.projection.description")}
           />
           {onOpenDetails === undefined ? null : (
             <DashboardActionHint
               className="mt-1"
               iconClassName="group-hover/projection-card:translate-x-0.5 group-active/projection-card:translate-x-0.5"
             >
-              Open report
+              {t("dashboard.projection.openReport")}
             </DashboardActionHint>
           )}
         </div>
@@ -64,8 +66,8 @@ export function PortfolioProjectionChart({
               <MoneyAmount value={targetPoint.estimatedValue} />
             </p>
             <p className="text-xs leading-5 text-muted-foreground">
-              <MoneyAmount value={targetPoint.projectedEarnings} /> projected
-              earnings
+              <MoneyAmount value={targetPoint.projectedEarnings} />{" "}
+              {t("dashboard.projection.projectedEarnings")}
             </p>
           </div>
         )}
@@ -78,7 +80,7 @@ export function PortfolioProjectionChart({
         </div>
 
         <PortfolioEarningPaceMetrics
-          title="Earning pace today"
+          title={t("dashboard.projection.earningPaceToday")}
           pace={earningPace}
         />
       </div>

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 
 interface GroupedMetricListProps<TItem> {
   groups: BreakdownGroup<TItem>[]
-  itemNoun: string
+  itemCountLabel: (count: number) => string
   renderMetric: (value: number) => ReactNode
   renderItem: (item: BreakdownItem<TItem>) => ReactNode
   itemListClassName?: string
@@ -21,8 +21,8 @@ interface GroupedMetricListProps<TItem> {
 
 export function GroupedMetricList<TItem>({
   groups,
+  itemCountLabel,
   itemListClassName,
-  itemNoun,
   renderMetric,
   renderItem,
   sectionClassName,
@@ -51,7 +51,7 @@ export function GroupedMetricList<TItem>({
           <GroupedMetricHeader
             count={group.items.length}
             groupLabel={group.label}
-            itemNoun={itemNoun}
+            itemCountLabel={itemCountLabel}
             metric={group.totalMetric}
             renderMetric={renderMetric}
             showShareOfTotal={showShareOfTotal}
@@ -70,14 +70,14 @@ export function GroupedMetricList<TItem>({
 function GroupedMetricHeader({
   count,
   groupLabel,
-  itemNoun,
+  itemCountLabel,
   metric,
   renderMetric,
   showShareOfTotal,
 }: {
   count: number
   groupLabel: string
-  itemNoun: string
+  itemCountLabel: (count: number) => string
   metric: GroupTotalMetric
   renderMetric: (value: number) => ReactNode
   showShareOfTotal: boolean
@@ -96,8 +96,7 @@ function GroupedMetricHeader({
             {groupLabel}
           </h3>
           <p className="mt-1 text-xs leading-none text-muted-foreground">
-            {count} {itemNoun}
-            {count === 1 ? "" : "s"}
+            {itemCountLabel(count)}
           </p>
         </div>
       </div>

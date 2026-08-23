@@ -5,18 +5,15 @@ import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const AUTOCOMPLETE_SUGGESTION_LIMIT = 6
-const DEFAULT_CLEAR_BUTTON_LABEL = "Clear input"
 const EMPTY_SUGGESTIONS: readonly string[] = []
 const DEFAULT_INPUT_CLASS_NAME =
   "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
 
-interface AutocompleteFieldProps {
+interface AutocompleteFieldSharedProps {
   "aria-describedby"?: string
   "aria-invalid"?: boolean
   "aria-label"?: string
   className?: string
-  clearButtonLabel?: string
-  clearable?: boolean
   disabled?: boolean
   filterSuggestion?: null | ((suggestion: string, query: string) => boolean)
   id?: string
@@ -28,9 +25,19 @@ interface AutocompleteFieldProps {
   value: string
 }
 
+type AutocompleteFieldProps =
+  | (AutocompleteFieldSharedProps & {
+      clearable?: false
+      clearButtonLabel?: never
+    })
+  | (AutocompleteFieldSharedProps & {
+      clearable: true
+      clearButtonLabel: string
+    })
+
 export function AutocompleteField({
   className,
-  clearButtonLabel = DEFAULT_CLEAR_BUTTON_LABEL,
+  clearButtonLabel,
   clearable = false,
   disabled,
   filterSuggestion,

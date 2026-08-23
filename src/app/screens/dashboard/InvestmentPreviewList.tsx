@@ -1,6 +1,7 @@
 import type { InvestmentSummary } from "@/domain/investments"
 import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
+import { useTranslation } from "react-i18next"
 
 interface InvestmentPreviewListProps {
   activeInvestmentCount: number
@@ -13,6 +14,8 @@ export function InvestmentPreviewList({
   investments,
   onInvestmentSelect,
 }: InvestmentPreviewListProps) {
+  const { t } = useTranslation()
+
   if (investments.length === 0) {
     return null
   }
@@ -20,9 +23,11 @@ export function InvestmentPreviewList({
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <DashboardSectionHeader title="Active assets" />
+        <DashboardSectionHeader title={t("dashboard.activeAssets.title")} />
         <span className="text-xs font-medium text-muted-foreground">
-          {activeInvestmentCount} active
+          {t("dashboard.activeAssets.activeCount", {
+            count: activeInvestmentCount,
+          })}
         </span>
       </div>
 

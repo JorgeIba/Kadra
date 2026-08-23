@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { TFunction } from "i18next"
 import {
   CALENDAR_DATE_FORMAT_LABEL,
   INVESTMENT_TYPES,
@@ -13,57 +14,64 @@ interface RecordChangeFormSchemaOptions {
   latestEventDate?: CalendarDateString
   today: CalendarDateString
   activeBalance?: number
+  t: TFunction
 }
 
 interface RecordChangeEffectiveDateValidationOptions {
   latestEventDate?: CalendarDateString
   today: CalendarDateString
+  t: TFunction
 }
 
 export function getRecordChangeEffectiveDateError(
   effectiveDate: CalendarDateString,
-  { latestEventDate, today }: RecordChangeEffectiveDateValidationOptions,
+  { latestEventDate, t, today }: RecordChangeEffectiveDateValidationOptions,
 ): string | null {
   if (compareCalendarDatesAscending(effectiveDate, today) > 0) {
-    return "Effective date cannot be in the future."
+    return t("recordChange.errors.effectiveDateFuture")
   }
 
   if (
     latestEventDate !== undefined &&
     compareCalendarDatesAscending(effectiveDate, latestEventDate) < 0
   ) {
-    return `Choose ${latestEventDate} or later. Record change can only append to existing history for now.`
+    return t("recordChange.errors.chooseDateOrLater", {
+      date: latestEventDate,
+    })
   }
 
   return null
 }
 
-const dateOnlySchema = z.string().refine(isCalendarDateString, {
-  message: `Use a valid date in ${CALENDAR_DATE_FORMAT_LABEL} format.`,
-})
-
-const commonRecordChangeFormSchema = z.object({
-  effectiveDate: dateOnlySchema,
-  transactionType: z.enum(["none", "contribution", "withdrawal"]),
-  contributionAmount: z.number().optional(),
-  annualRate: z.number().min(0, "Annual rate cannot be negative."),
-  paymentFrequency: z.enum([
-    PAYMENT_FREQUENCIES.daily,
-    PAYMENT_FREQUENCIES.weekly,
-    PAYMENT_FREQUENCIES.monthly,
-    PAYMENT_FREQUENCIES.atMaturity,
-  ]),
-  reinvestmentBehavior: z.enum([
-    REINVESTMENT_BEHAVIORS.automatic,
-    REINVESTMENT_BEHAVIORS.toCash,
-  ]),
-})
-
 export function createRecordChangeFormSchema({
   latestEventDate,
   today,
   activeBalance,
+  t,
 }: RecordChangeFormSchemaOptions) {
+  const dateOnlySchema = z.string().refine(isCalendarDateString, {
+    message: t("recordChange.errors.invalidDate", {
+      format: CALENDAR_DATE_FORMAT_LABEL,
+    }),
+  })
+
+  const commonRecordChangeFormSchema = z.object({
+    effectiveDate: dateOnlySchema,
+    transactionType: z.enum(["none", "contribution", "withdrawal"]),
+    contributionAmount: z.number().optional(),
+    annualRate: z.number().min(0, t("recordChange.errors.annualRateNegative")),
+    paymentFrequency: z.enum([
+      PAYMENT_FREQUENCIES.daily,
+      PAYMENT_FREQUENCIES.weekly,
+      PAYMENT_FREQUENCIES.monthly,
+      PAYMENT_FREQUENCIES.atMaturity,
+    ]),
+    reinvestmentBehavior: z.enum([
+      REINVESTMENT_BEHAVIORS.automatic,
+      REINVESTMENT_BEHAVIORS.toCash,
+    ]),
+  })
+
   return z
     .discriminatedUnion("investmentType", [
       commonRecordChangeFormSchema.extend({
@@ -81,6 +89,7 @@ export function createRecordChangeFormSchema({
         {
           latestEventDate,
           today,
+          t,
         },
       )
 
@@ -99,7 +108,7 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message: "Added amount must be greater than zero.",
+          message: t("recordChange.errors.addedAmountPositive"),
           path: ["contributionAmount"],
         })
       }
@@ -111,7 +120,7 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message: "Withdrawn amount must be greater than zero.",
+          message: t("recordChange.errors.withdrawnAmountPositive"),
           path: ["contributionAmount"],
         })
       }
@@ -124,8 +133,7 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message:
-            "Cannot validate a withdrawal without an active balance for this date.",
+          message: t("recordChange.errors.withdrawalBalanceUnavailable"),
           path: ["contributionAmount"],
         })
       }
@@ -138,8 +146,7 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message:
-            "Withdrawn amount cannot exceed the active balance on this date.",
+          message: t("recordChange.errors.withdrawalExceedsBalance"),
           path: ["contributionAmount"],
         })
       }
@@ -150,7 +157,7 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message: "Amount is only available when moving money.",
+          message: t("recordChange.errors.amountOnlyWhenMovingMoney"),
           path: ["contributionAmount"],
         })
       }
@@ -164,7 +171,7 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message: "Maturity date must be after the effective date.",
+          message: t("recordChange.errors.maturityAfterEffectiveDate"),
           path: ["maturityDate"],
         })
       }
@@ -175,7 +182,7 @@ export function createRecordChangeFormSchema({
       ) {
         context.addIssue({
           code: "custom",
-          message: "At maturity is only available for fixed-term investments.",
+          message: t("recordChange.errors.atMaturityFixedTermOnly"),
           path: ["paymentFrequency"],
         })
       }

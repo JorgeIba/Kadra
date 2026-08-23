@@ -1,19 +1,28 @@
 import { describe, expect, it } from "vitest"
-import { INVESTMENT_TYPE_LABELS, INVESTMENT_TYPES } from "@/domain/investments"
+import { INVESTMENT_TYPES } from "@/domain/investments"
 import { getInvestmentTypeGroup } from "@/app/shared/investment-type-grouping"
+
+const investmentTypeLabels = {
+  [INVESTMENT_TYPES.fixedTerm]: "Fixed term",
+  [INVESTMENT_TYPES.openEnded]: "Open ended",
+}
 
 describe("investment type grouping", () => {
   it("returns a group identity for fixed-term investments", () => {
-    expect(getInvestmentTypeGroup(INVESTMENT_TYPES.fixedTerm)).toEqual({
+    expect(
+      getInvestmentTypeGroup(INVESTMENT_TYPES.fixedTerm, investmentTypeLabels),
+    ).toEqual({
       key: INVESTMENT_TYPES.fixedTerm,
-      label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.fixedTerm],
+      label: "Fixed term",
     })
   })
 
   it("returns a group identity for open-ended investments", () => {
-    expect(getInvestmentTypeGroup(INVESTMENT_TYPES.openEnded)).toEqual({
+    expect(
+      getInvestmentTypeGroup(INVESTMENT_TYPES.openEnded, investmentTypeLabels),
+    ).toEqual({
       key: INVESTMENT_TYPES.openEnded,
-      label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.openEnded],
+      label: "Open ended",
     })
   })
 })

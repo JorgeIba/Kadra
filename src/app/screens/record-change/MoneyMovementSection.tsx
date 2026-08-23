@@ -1,4 +1,6 @@
 import { Controller, useController } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 import type { Control, FieldErrors, UseFormSetValue } from "react-hook-form"
 import { ArrowDownLeft, ArrowUpRight, Ban } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
@@ -19,32 +21,48 @@ import { Input } from "@/components/ui/input"
 
 type MoneyMovementType = RecordChangeFormValues["transactionType"]
 
-const MONEY_MOVEMENT_OPTIONS = [
-  {
-    compactDescription: "No change",
-    description: "Only record rate or term changes.",
-    icon: Ban,
-    label: "No movement",
-    summary: "No money movement",
-    value: "none",
-  },
-  {
-    compactDescription: "Add capital",
-    description: "Add new capital to this investment.",
-    icon: ArrowDownLeft,
-    label: "Deposit",
-    summary: "Deposit money",
-    value: "contribution",
-  },
-  {
-    compactDescription: "Cash out",
-    description: "Take capital out of this investment.",
-    icon: ArrowUpRight,
-    label: "Withdrawal",
-    summary: "Withdraw money",
-    value: "withdrawal",
-  },
-] as const satisfies readonly ExpandingChoicePickerOption<MoneyMovementType>[]
+function getMoneyMovementOptions(t: TFunction) {
+  return [
+    {
+      compactDescription: t(
+        "recordChange.form.moneyMovement.options.none.compactDescription",
+      ),
+      description: t(
+        "recordChange.form.moneyMovement.options.none.description",
+      ),
+      icon: Ban,
+      label: t("recordChange.form.moneyMovement.options.none.label"),
+      summary: t("recordChange.form.moneyMovement.options.none.summary"),
+      value: "none",
+    },
+    {
+      compactDescription: t(
+        "recordChange.form.moneyMovement.options.contribution.compactDescription",
+      ),
+      description: t(
+        "recordChange.form.moneyMovement.options.contribution.description",
+      ),
+      icon: ArrowDownLeft,
+      label: t("recordChange.form.moneyMovement.options.contribution.label"),
+      summary: t(
+        "recordChange.form.moneyMovement.options.contribution.summary",
+      ),
+      value: "contribution",
+    },
+    {
+      compactDescription: t(
+        "recordChange.form.moneyMovement.options.withdrawal.compactDescription",
+      ),
+      description: t(
+        "recordChange.form.moneyMovement.options.withdrawal.description",
+      ),
+      icon: ArrowUpRight,
+      label: t("recordChange.form.moneyMovement.options.withdrawal.label"),
+      summary: t("recordChange.form.moneyMovement.options.withdrawal.summary"),
+      value: "withdrawal",
+    },
+  ] as const satisfies readonly ExpandingChoicePickerOption<MoneyMovementType>[]
+}
 
 const MONEY_MOVEMENT_DETAILS_REFLOW_TRANSITION = {
   bounce: 0.04,
@@ -85,6 +103,7 @@ export function MoneyMovementSection({
   errors,
   setValue,
 }: MoneyMovementSectionProps) {
+  const { t } = useTranslation()
   // The picker replaces native radios, so this controller keeps the form field
   // registered while the form opts into unregistering absent fields.
   const { field: transactionTypeField } = useController({
@@ -92,6 +111,7 @@ export function MoneyMovementSection({
     name: "transactionType",
   })
   const transactionType = transactionTypeField.value
+  const moneyMovementOptions = getMoneyMovementOptions(t)
   const pickerInteraction = usePickerWithDependentContent({
     hasVisibleDependentContent: transactionType !== "none",
   })
@@ -109,18 +129,18 @@ export function MoneyMovementSection({
 
   return (
     <FormSection
-      title="Money movement"
-      description="Optional. Record a deposit or withdrawal on this date."
+      title={t("recordChange.form.sections.moneyMovement.title")}
+      description={t("recordChange.form.sections.moneyMovement.description")}
     >
       <ExpandingChoicePicker
-        ariaLabel="Money movement"
+        ariaLabel={t("recordChange.form.moneyMovement.ariaLabel")}
         animationSpeed="quick"
         canStartPendingOpening={pickerInteraction.canStartPendingPickerOpening}
-        legend="Choose a money movement"
+        legend={t("recordChange.form.moneyMovement.legend")}
         onCloseComplete={pickerInteraction.onPickerCloseComplete}
         onOpenRequest={pickerInteraction.onPickerOpenRequest}
         onValueChange={handlePickerValueChange}
-        options={MONEY_MOVEMENT_OPTIONS}
+        options={moneyMovementOptions}
         value={transactionType}
       />
 
@@ -159,6 +179,7 @@ function MoneyMovementDetails({
   onExitComplete: () => void
   transactionType: MoneyMovementType
 }) {
+  const { t } = useTranslation()
   const prefersReducedMotion = useReducedMotion() ?? false
   const containerTransition = prefersReducedMotion
     ? { duration: 0 }
@@ -176,16 +197,20 @@ function MoneyMovementDetails({
     case "contribution":
       detailsForTransaction = {
         amount: availableContribution,
-        amountLabel: "Added amount",
-        notice: "Net capital contributed on this date:",
+        amountLabel: t("recordChange.form.moneyMovement.details.addedAmount"),
+        notice: t(
+          "recordChange.form.moneyMovement.details.netCapitalContributed",
+        ),
         tone: "success",
       }
       break
     case "withdrawal":
       detailsForTransaction = {
         amount: activeBalance,
-        amountLabel: "Withdrawn amount",
-        notice: "Available active balance to withdraw on this date:",
+        amountLabel: t(
+          "recordChange.form.moneyMovement.details.withdrawnAmount",
+        ),
+        notice: t("recordChange.form.moneyMovement.details.availableBalance"),
         tone: "destructive",
       }
       break
@@ -235,14 +260,16 @@ function MoneyMovementDetails({
                   >
                     <div className="relative flex items-center">
                       <span className="absolute left-3.5 border-r py-1 pr-3 text-xs font-semibold text-muted-foreground select-none">
-                        MXN $
+                        {t("common.currencies.mxn")} $
                       </span>
                       <Input
                         id={MONEY_MOVEMENT_FIELD_IDS.contributionAmount}
                         type="number"
                         inputMode="decimal"
                         min="0"
-                        placeholder="2500"
+                        placeholder={t(
+                          "recordChange.form.moneyMovement.placeholder",
+                        )}
                         className="h-12 pl-20 text-lg font-semibold"
                         name={contributionAmountField.name}
                         value={amountInputValue}

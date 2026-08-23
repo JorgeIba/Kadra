@@ -1,5 +1,6 @@
 import { Dialog } from "@base-ui/react/dialog"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -50,7 +51,7 @@ function getDialogMotionProps(prefersReducedMotion: boolean) {
 }
 
 export function ConfirmDialog({
-  cancelLabel = "Cancel",
+  cancelLabel,
   confirmLabel,
   description,
   onConfirm,
@@ -60,8 +61,10 @@ export function ConfirmDialog({
   title,
   variant = "default",
 }: ConfirmDialogProps) {
+  const { t } = useTranslation()
   const prefersReducedMotion = useReducedMotion() ?? false
   const { backdrop, surface } = getDialogMotionProps(prefersReducedMotion)
+  const resolvedCancelLabel = cancelLabel ?? t("common.actions.cancel")
 
   function handleConfirm() {
     if (onConfirm() !== false) {
@@ -108,7 +111,7 @@ export function ConfirmDialog({
                       variant="ghost"
                       onClick={() => onRequestOpenChange(false)}
                     >
-                      {cancelLabel}
+                      {resolvedCancelLabel}
                     </Button>
                   ) : null}
 

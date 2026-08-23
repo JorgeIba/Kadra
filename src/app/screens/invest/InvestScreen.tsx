@@ -1,4 +1,5 @@
 import { buildInvestmentFromFormValues } from "@/app/screens/invest/adapters/investment-form-adapter"
+import { useTranslation } from "react-i18next"
 import { InvestmentForm } from "@/app/screens/invest/InvestmentForm"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import type { InvestmentFormValues } from "@/app/screens/invest/investment-form-schema"
@@ -15,6 +16,8 @@ export function InvestScreen({
   onCancel,
   onInvestmentCreate,
 }: InvestScreenProps) {
+  const { t } = useTranslation()
+
   function handleInvestmentSubmit(values: InvestmentFormValues) {
     const investment = buildInvestmentFromFormValues(values, {
       asOfDate: new Date(),
@@ -27,9 +30,9 @@ export function InvestScreen({
   return (
     <section className="space-y-5">
       <ScreenIntro
-        eyebrow="Invest"
-        title="New investment"
-        description="Capture the terms once so Kadra can track value, estimated income, and maturity progress from the moment you save it."
+        eyebrow={t("invest.screen.eyebrow")}
+        title={t("invest.screen.title")}
+        description={t("invest.screen.description")}
       />
 
       <InvestmentForm

@@ -1,4 +1,5 @@
 import { Link } from "react-router"
+import { useTranslation } from "react-i18next"
 import {
   APP_NAV_ITEMS,
   APP_SECTIONS,
@@ -11,6 +12,13 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ activeSection }: BottomNavProps) {
+  const { t } = useTranslation()
+  const navigationLabels = {
+    [APP_SECTIONS.assets]: t("common.navigation.assets"),
+    [APP_SECTIONS.dashboard]: t("common.navigation.dashboard"),
+    [APP_SECTIONS.invest]: t("common.navigation.invest"),
+  }
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-md border-t border-border/60 bg-background/75 px-3 pb-4 pt-2 backdrop-blur-[32px]">
       <div className="grid grid-cols-3 gap-2">
@@ -41,7 +49,7 @@ export function BottomNav({ activeSection }: BottomNavProps) {
                 )}
                 aria-hidden="true"
               />
-              <span>{item.label}</span>
+              <span>{navigationLabels[item.value]}</span>
             </Link>
           )
         })}

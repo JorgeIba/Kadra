@@ -1,4 +1,5 @@
 import { ArrowUpRight, Repeat } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import type { OpenEndedInvestmentSummary } from "@/domain/investments"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { formatPercentage } from "@/lib/formatters"
@@ -15,6 +16,8 @@ export function OpenEndedInvestmentCard({
   investment,
   onSelect,
 }: OpenEndedInvestmentCardProps) {
+  const { t } = useTranslation()
+
   return (
     <article
       className={cn(
@@ -47,7 +50,7 @@ export function OpenEndedInvestmentCard({
           {investment.name}
         </p>
         <p className="mt-1.5 truncate text-xs text-muted-foreground">
-          {investment.institutionName} · Annual rate{" "}
+          {investment.institutionName} · {t("investment.cards.annualRate")}{" "}
           {formatPercentage(investment.annualRate)}
         </p>
       </div>
@@ -56,7 +59,7 @@ export function OpenEndedInvestmentCard({
           <MoneyAmount value={investment.estimatedCurrentValue} />
         </p>
         <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-info-border bg-info-surface px-2 py-1 text-xs text-info">
-          Liquid{" "}
+          {t("investment.cards.liquid")}{" "}
           <ArrowUpRight
             className="size-3 transition-transform duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/investment:translate-x-0.5 group-hover/investment:-translate-y-0.5 group-active/investment:translate-x-0.5 group-active/investment:-translate-y-0.5 motion-reduce:transform-none"
             aria-hidden="true"

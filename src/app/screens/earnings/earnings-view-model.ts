@@ -1,5 +1,4 @@
 import {
-  DERIVED_STATUS_LABELS,
   DERIVED_STATUSES,
   analyzePortfolio,
   resolveInvestment,
@@ -129,18 +128,5 @@ function getStatusSortOrder(status: DerivedStatus) {
       return 0
     case DERIVED_STATUSES.finished:
       return 1
-  }
-}
-
-export function getEarnedMoneySortLabel(sortBy: EarnedMoneySortOption): string {
-  switch (sortBy) {
-    case EARNED_MONEY_SORT_OPTIONS.highestEarned:
-      return "Highest earned"
-    case EARNED_MONEY_SORT_OPTIONS.lowestEarned:
-      return "Lowest earned"
-    case EARNED_MONEY_SORT_OPTIONS.name:
-      return "Name"
-    case EARNED_MONEY_SORT_OPTIONS.status:
-      return `Status (${DERIVED_STATUS_LABELS[DERIVED_STATUSES.active]} first)`
   }
 }

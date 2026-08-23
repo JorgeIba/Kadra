@@ -1,4 +1,5 @@
 import { Landmark } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import type { FixedTermInvestmentSummary } from "@/domain/investments"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
@@ -16,6 +17,8 @@ export function FixedTermInvestmentCard({
   investment,
   onSelect,
 }: FixedTermInvestmentCardProps) {
+  const { t } = useTranslation()
+
   return (
     <article
       className={cn(
@@ -48,7 +51,7 @@ export function FixedTermInvestmentCard({
           {investment.name}
         </p>
         <p className="mt-1.5 truncate text-xs text-muted-foreground">
-          {investment.institutionName} · Annual rate{" "}
+          {investment.institutionName} · {t("investment.cards.annualRate")}{" "}
           {formatPercentage(investment.annualRate)}
         </p>
       </div>

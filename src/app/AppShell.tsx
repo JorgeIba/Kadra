@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   Outlet,
   useLocation,
@@ -42,17 +43,6 @@ type AppDialog =
   | { kind: "restore-error"; description: string }
   | { kind: "update" }
 
-const RESTORE_ERROR_DESCRIPTIONS = {
-  cannotRead:
-    "Kadra could not read this file. Your current investments were not changed.",
-  invalid:
-    "This file is not a valid Kadra portfolio backup. Your current investments were not changed.",
-  tooLarge:
-    "This backup is larger than 5 MB. Choose a smaller Kadra backup file. Your current investments were not changed.",
-  cannotSave:
-    "Kadra could not save this backup. Your current investments were not changed.",
-} as const
-
 function RouteAnimationBoundary() {
   const location = useLocation()
   const navigationType = useNavigationType()
@@ -82,6 +72,7 @@ export function AppShell({
   onRestoreInvestments,
   searchableInvestments,
 }: AppShellProps) {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const navigateBackOrFallback = useBackOrFallbackNavigation()
@@ -131,7 +122,7 @@ export function AppShell({
     if (file.size > MAX_PORTFOLIO_BACKUP_FILE_BYTES) {
       setActiveDialog({
         kind: "restore-error",
-        description: RESTORE_ERROR_DESCRIPTIONS.tooLarge,
+        description: t("appShell.restoreErrors.tooLarge"),
       })
       return
     }
@@ -142,7 +133,7 @@ export function AppShell({
       if (backup === null) {
         setActiveDialog({
           kind: "restore-error",
-          description: RESTORE_ERROR_DESCRIPTIONS.invalid,
+          description: t("appShell.restoreErrors.invalid"),
         })
         return
       }
@@ -154,7 +145,7 @@ export function AppShell({
     } catch {
       setActiveDialog({
         kind: "restore-error",
-        description: RESTORE_ERROR_DESCRIPTIONS.cannotRead,
+        description: t("appShell.restoreErrors.cannotRead"),
       })
     }
   }
@@ -167,7 +158,7 @@ export function AppShell({
     if (!onRestoreInvestments(activeDialog.backup.investments)) {
       setActiveDialog({
         kind: "restore-error",
-        description: RESTORE_ERROR_DESCRIPTIONS.cannotSave,
+        description: t("appShell.restoreErrors.cannotSave"),
       })
       return false
     }
@@ -195,9 +186,9 @@ export function AppShell({
         </div>
         <ConfirmDialog
           open={activeDialog.kind === "reset"}
-          title="Clear local data?"
-          description="This removes every investment from your local Kadra portfolio."
-          confirmLabel="Clear local data"
+          title={t("appShell.dialogs.clearLocalData.title")}
+          description={t("appShell.dialogs.clearLocalData.description")}
+          confirmLabel={t("appShell.dialogs.clearLocalData.confirm")}
           variant="destructive"
           onRequestOpenChange={(open) =>
             setActiveDialog(open ? { kind: "reset" } : { kind: "none" })
@@ -206,13 +197,16 @@ export function AppShell({
         />
         <ConfirmDialog
           open={activeDialog.kind === "restore-confirmation"}
-          title="Restore portfolio?"
+          title={t("appShell.dialogs.restorePortfolio.title")}
           description={
             activeDialog.kind === "restore-confirmation"
-              ? `This will replace your current portfolio with ${activeDialog.backup.investments.length} ${activeDialog.backup.investments.length === 1 ? "investment" : "investments"} from ${activeDialog.backup.fileName}. This cannot be undone.`
+              ? t("appShell.dialogs.restorePortfolio.description", {
+                  count: activeDialog.backup.investments.length,
+                  fileName: activeDialog.backup.fileName,
+                })
               : ""
           }
-          confirmLabel="Restore portfolio"
+          confirmLabel={t("appShell.dialogs.restorePortfolio.confirm")}
           variant="destructive"
           onRequestOpenChange={(open) => {
             if (!open) {
@@ -223,13 +217,13 @@ export function AppShell({
         />
         <ConfirmDialog
           open={activeDialog.kind === "restore-error"}
-          title="Unable to restore backup"
+          title={t("appShell.dialogs.restoreError.title")}
           description={
             activeDialog.kind === "restore-error"
               ? activeDialog.description
               : ""
           }
-          confirmLabel="Close"
+          confirmLabel={t("appShell.dialogs.restoreError.close")}
           showCancel={false}
           onRequestOpenChange={(open) => {
             if (!open) {
@@ -240,9 +234,9 @@ export function AppShell({
         />
         <ConfirmDialog
           open={activeDialog.kind === "update"}
-          title="Update app?"
-          description="A new version of Kadra is ready. Updating will reload the app so the latest changes can take over."
-          confirmLabel="Update now"
+          title={t("appShell.dialogs.update.title")}
+          description={t("appShell.dialogs.update.description")}
+          confirmLabel={t("common.actions.updateNow")}
           onRequestOpenChange={(open) =>
             setActiveDialog(open ? { kind: "update" } : { kind: "none" })
           }

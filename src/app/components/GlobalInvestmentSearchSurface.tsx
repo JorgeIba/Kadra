@@ -1,4 +1,5 @@
 import { type ReactNode, type Ref } from "react"
+import { useTranslation } from "react-i18next"
 import { SearchMorph } from "@/app/components/search-morph/SearchMorph"
 interface GlobalInvestmentSearchSurfaceProps {
   children: ReactNode
@@ -25,6 +26,8 @@ export function GlobalInvestmentSearchSurface({
   ref: searchSurfaceRef,
   triggerRef,
 }: GlobalInvestmentSearchSurfaceProps) {
+  const { t } = useTranslation()
+
   return (
     <SearchMorph
       barSide="left"
@@ -35,7 +38,9 @@ export function GlobalInvestmentSearchSurface({
       onBeforeClose={onBeforeClose}
       onOpened={onOpened}
       onClosed={onClosed}
-      triggerAriaLabel={isOpen ? "Close search" : "Search investments"}
+      triggerAriaLabel={
+        isOpen ? t("common.search.close") : t("common.search.placeholder")
+      }
       triggerRef={triggerRef}
     >
       {children}

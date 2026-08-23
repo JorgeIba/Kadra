@@ -21,6 +21,7 @@ import {
   ProjectionRoute,
   RecordChangeRoute,
 } from "@/app/routing/routes"
+import { useTranslation } from "react-i18next"
 
 const appRouter = createBrowserRouter(
   createRoutesFromElements(
@@ -74,6 +75,7 @@ function AppShellRoute() {
 }
 
 function AppRouteError() {
+  const { t } = useTranslation()
   const routeError = useRouteError()
   const error =
     routeError instanceof Error
@@ -83,7 +85,7 @@ function AppRouteError() {
   return (
     <AppErrorFallback
       error={error}
-      primaryActionLabel="Go home"
+      primaryActionLabel={t("common.actions.goHome")}
       onPrimaryAction={() => window.location.assign(APP_PATHS.dashboard)}
     />
   )
