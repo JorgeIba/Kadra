@@ -1,12 +1,12 @@
-import {
-  INVESTMENT_TYPE_LABELS,
-  type InvestmentType,
-} from "@/domain/investments"
+import type { InvestmentType } from "@/domain/investments"
 import type { GroupIdentity } from "@/app/shared/grouping"
 
-export function getInvestmentTypeGroup(type: InvestmentType): GroupIdentity {
+export function getInvestmentTypeGroup(
+  type: InvestmentType,
+  labels: Readonly<Record<InvestmentType, string>>,
+): GroupIdentity {
   return {
     key: type,
-    label: INVESTMENT_TYPE_LABELS[type],
+    label: labels[type],
   }
 }

@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 import {
   Landmark,
   Pencil,
@@ -10,18 +11,19 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
+import {
+  getInvestmentTypeLabels,
+  getPaymentFrequencyLabels,
+  getReinvestmentBehaviorLabels,
+} from "@/app/i18n/labels"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import {
   DAY_COUNTS,
-  INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
-  PAYMENT_FREQUENCY_LABELS,
-  REINVESTMENT_BEHAVIOR_LABELS,
   getUpcomingInvestmentProjectedEarningsForDays,
   resolveInvestment,
   type Investment,
-  type InvestmentType,
 } from "@/domain/investments"
 import { Button } from "@/components/ui/button"
 import { formatDisplayDate, formatPercentage } from "@/lib/formatters"
@@ -39,10 +41,23 @@ export function InvestmentDetailScreen({
   onEdit,
   onRecordChange,
 }: InvestmentDetailScreenProps) {
+  const { t } = useTranslation()
   const asOfDate = new Date()
   const resolvedInvestment = resolveInvestment(investment, asOfDate)
   const upcomingReturnMetrics = getUpcomingReturnMetrics(investment, asOfDate)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const paymentFrequencyLabels = getPaymentFrequencyLabels(t)
+  const reinvestmentBehaviorLabels = getReinvestmentBehaviorLabels(t)
+  const investmentTypeLabels = getInvestmentTypeLabels(t)
+  const upcomingMetricLabels = {
+    nextDay: t("investment.detail.nextDay"),
+    nextWeek: t("investment.detail.nextWeek"),
+    nextYear: t("investment.detail.nextYear"),
+  }
+  const returnsDescription =
+    resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm
+      ? t("investment.detail.returnsDescriptionFixedTerm")
+      : t("investment.detail.returnsDescriptionOpenEnded")
 
   return (
     <section className="space-y-7">
@@ -60,7 +75,7 @@ export function InvestmentDetailScreen({
         <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-5">
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-              Estimated value
+              {t("investment.detail.estimatedValue")}
             </p>
             <p className="mt-2 font-ledger text-4xl leading-none tracking-normal text-foreground">
               <MoneyAmount value={resolvedInvestment.estimatedCurrentValue} />
@@ -74,12 +89,12 @@ export function InvestmentDetailScreen({
         <div className="grid grid-cols-2 gap-4 border-b border-border/30 pb-5">
           <DetailMetric
             icon={Percent}
-            label="Annual rate"
+            label={t("investment.detail.annualRate")}
             value={formatPercentage(resolvedInvestment.annualRate)}
           />
           <DetailMetric
             icon={Landmark}
-            label="Started on"
+            label={t("investment.detail.startedOn")}
             value={formatDisplayDate(resolvedInvestment.startDate)}
           />
         </div>
@@ -89,10 +104,10 @@ export function InvestmentDetailScreen({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Returns
+              {t("investment.detail.returns")}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {getReturnsDescription(resolvedInvestment.type)}
+              {returnsDescription}
             </p>
           </div>
           <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary/50 text-primary">
@@ -101,7 +116,9 @@ export function InvestmentDetailScreen({
         </div>
 
         <div className="flex items-center justify-between border-t border-border/10 pt-3">
-          <span className="text-sm text-muted-foreground">Earned so far</span>
+          <span className="text-sm text-muted-foreground">
+            {t("investment.detail.earnedSoFar")}
+          </span>
           <span className="font-ledger text-xl font-medium text-foreground">
             <MoneyAmount value={resolvedInvestment.estimatedAccruedReturn} />
           </span>
@@ -110,11 +127,11 @@ export function InvestmentDetailScreen({
         <div className="grid grid-cols-3 gap-2 pt-2">
           {upcomingReturnMetrics.map((metric) => (
             <div
-              key={metric.label}
+              key={metric.key}
               className="min-w-0 rounded bg-secondary/30 p-2.5"
             >
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                {metric.label}
+                {upcomingMetricLabels[metric.key]}
               </p>
               <p className="mt-1 font-ledger text-sm text-foreground">
                 <MoneyAmount value={metric.value} />
@@ -126,45 +143,43 @@ export function InvestmentDetailScreen({
 
       <div className="space-y-3.5 pb-6">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground pb-1">
-          Investment details
+          {t("investment.detail.details")}
         </h2>
         <div className="space-y-3">
           <DetailRow
-            label="Type"
-            value={INVESTMENT_TYPE_LABELS[resolvedInvestment.type]}
+            label={t("investment.detail.type")}
+            value={investmentTypeLabels[resolvedInvestment.type]}
           />
           <DetailRow
-            label="Payment frequency"
-            value={
-              PAYMENT_FREQUENCY_LABELS[resolvedInvestment.paymentFrequency]
-            }
+            label={t("investment.detail.paymentFrequency")}
+            value={paymentFrequencyLabels[resolvedInvestment.paymentFrequency]}
           />
           <DetailRow
-            label="Reinvestment"
+            label={t("investment.detail.reinvestment")}
             value={
-              REINVESTMENT_BEHAVIOR_LABELS[
+              reinvestmentBehaviorLabels[
                 resolvedInvestment.reinvestmentBehavior
               ]
             }
           />
           <DetailRow
-            label="Start date"
+            label={t("investment.detail.startDate")}
             value={formatDisplayDate(resolvedInvestment.startDate)}
           />
           {resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm ? (
             <>
               <DetailRow
-                label="End date"
+                label={t("investment.detail.endDate")}
                 value={formatDisplayDate(resolvedInvestment.endDate)}
               />
               <DetailRow
-                label="Progress"
+                label={t("investment.detail.progress")}
                 value={`${Math.round(resolvedInvestment.progressPercentage)}%`}
               />
             </>
           ) : null}
           <DetailRow
-            label="Original amount"
+            label={t("investment.detail.originalAmount")}
             value={<MoneyAmount value={resolvedInvestment.originalAmount} />}
           />
         </div>
@@ -178,15 +193,17 @@ export function InvestmentDetailScreen({
           onClick={() => setIsDeleteDialogOpen(true)}
         >
           <Trash2 className="size-4" aria-hidden="true" />
-          Delete investment
+          {t("investment.detail.actions.delete")}
         </Button>
       </div>
 
       <ConfirmDialog
         open={isDeleteDialogOpen}
-        title="Delete investment?"
-        description={`This removes "${investment.name}" from your portfolio. This action cannot be undone.`}
-        confirmLabel="Delete investment"
+        title={t("investment.detail.deleteTitle")}
+        description={t("investment.detail.deleteDescription", {
+          name: investment.name,
+        })}
+        confirmLabel={t("investment.detail.actions.delete")}
         variant="destructive"
         onRequestOpenChange={setIsDeleteDialogOpen}
         onConfirm={onDelete}
@@ -202,11 +219,13 @@ function InvestmentDetailActions({
   onEdit: () => void
   onRecordChange: () => void
 }) {
+  const { t } = useTranslation()
+
   return (
     <div
       className="-mt-2 flex gap-2"
       role="group"
-      aria-label="Investment actions"
+      aria-label={t("investment.detail.actionsAriaLabel")}
     >
       <Button
         type="button"
@@ -216,7 +235,7 @@ function InvestmentDetailActions({
         onClick={onRecordChange}
       >
         <PlusCircle className="size-4" aria-hidden="true" />
-        Record update
+        {t("investment.detail.actions.recordUpdate")}
       </Button>
 
       <Button
@@ -227,7 +246,7 @@ function InvestmentDetailActions({
         onClick={onEdit}
       >
         <Pencil className="size-4" aria-hidden="true" />
-        Update terms
+        {t("investment.detail.actions.updateTerms")}
       </Button>
     </div>
   )
@@ -236,7 +255,7 @@ function InvestmentDetailActions({
 function getUpcomingReturnMetrics(investment: Investment, asOfDate: Date) {
   return [
     {
-      label: "Next day",
+      key: "nextDay" as const,
       value: getUpcomingInvestmentProjectedEarningsForDays(
         investment,
         DAY_COUNTS.day,
@@ -244,7 +263,7 @@ function getUpcomingReturnMetrics(investment: Investment, asOfDate: Date) {
       ),
     },
     {
-      label: "Next week",
+      key: "nextWeek" as const,
       value: getUpcomingInvestmentProjectedEarningsForDays(
         investment,
         DAY_COUNTS.week,
@@ -252,7 +271,7 @@ function getUpcomingReturnMetrics(investment: Investment, asOfDate: Date) {
       ),
     },
     {
-      label: "Next year",
+      key: "nextYear" as const,
       value: getUpcomingInvestmentProjectedEarningsForDays(
         investment,
         DAY_COUNTS.year,
@@ -260,14 +279,6 @@ function getUpcomingReturnMetrics(investment: Investment, asOfDate: Date) {
       ),
     },
   ]
-}
-
-function getReturnsDescription(investmentType: InvestmentType) {
-  if (investmentType === INVESTMENT_TYPES.fixedTerm) {
-    return "Estimates start today and stop at maturity."
-  }
-
-  return "Estimates start today and continue while the investment stays active."
 }
 
 function DetailMetric({

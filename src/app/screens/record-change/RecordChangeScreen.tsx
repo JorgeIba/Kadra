@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ScreenIntro } from "@/app/components/ScreenIntro"
 import { buildInvestmentWithRecordedChangeFromFormValues } from "@/app/screens/record-change/adapters/record-change-adapter"
 import { RecordChangeForm } from "@/app/screens/record-change/RecordChangeForm"
@@ -16,6 +17,7 @@ export function RecordChangeScreen({
   onCancel,
   onInvestmentUpdate,
 }: RecordChangeScreenProps) {
+  const { t } = useTranslation()
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
 
   const handleFormChange = useCallback(() => {
@@ -29,6 +31,7 @@ export function RecordChangeScreen({
         investment,
         {
           asOfDate: new Date(),
+          t,
         },
       )
 
@@ -38,7 +41,7 @@ export function RecordChangeScreen({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Record at least one change before saving.",
+          : t("recordChange.form.guidance.changeSomething"),
       )
     }
   }
@@ -48,7 +51,7 @@ export function RecordChangeScreen({
       <ScreenIntro
         eyebrow={investment.institutionName}
         title={investment.name}
-        description="Append dated history for this investment without rewriting earlier records."
+        description={t("recordChange.screen.description")}
       />
 
       <RecordChangeForm

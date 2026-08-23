@@ -2,7 +2,6 @@ import { LayoutDashboard, PlusCircle, WalletCards } from "lucide-react"
 
 interface AppNavItem {
   value: AppSection
-  label: string
   path: string
   icon: typeof LayoutDashboard
 }
@@ -77,19 +76,16 @@ export function getSectionPath(section: AppSection) {
 export const APP_NAV_ITEMS = [
   {
     value: APP_SECTIONS.dashboard,
-    label: "Dashboard",
     path: APP_PATHS.dashboard,
     icon: LayoutDashboard,
   },
   {
     value: APP_SECTIONS.assets,
-    label: "Assets",
     path: APP_PATHS.assets,
     icon: WalletCards,
   },
   {
     value: APP_SECTIONS.invest,
-    label: "Invest",
     path: APP_PATHS.invest,
     icon: PlusCircle,
   },

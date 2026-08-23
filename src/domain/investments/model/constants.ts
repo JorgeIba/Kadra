@@ -9,21 +9,12 @@ export const INVESTMENT_TYPES = {
 export type InvestmentType =
   (typeof INVESTMENT_TYPES)[keyof typeof INVESTMENT_TYPES]
 
-export const INVESTMENT_TYPE_LABELS = {
-  [INVESTMENT_TYPES.fixedTerm]: "Fixed term",
-  [INVESTMENT_TYPES.openEnded]: "Open ended",
-} as const satisfies Record<InvestmentType, string>
-
 // Currency
 export const CURRENCIES = {
   mxn: "MXN",
 } as const
 
 export type Currency = (typeof CURRENCIES)[keyof typeof CURRENCIES]
-
-export const CURRENCY_LABELS = {
-  [CURRENCIES.mxn]: "Mexican peso",
-} as const satisfies Record<Currency, string>
 
 // Payment frequency
 export const PAYMENT_FREQUENCIES = {
@@ -35,13 +26,6 @@ export const PAYMENT_FREQUENCIES = {
 
 export type PaymentFrequency =
   (typeof PAYMENT_FREQUENCIES)[keyof typeof PAYMENT_FREQUENCIES]
-
-export const PAYMENT_FREQUENCY_LABELS = {
-  [PAYMENT_FREQUENCIES.daily]: "Daily",
-  [PAYMENT_FREQUENCIES.weekly]: "Weekly",
-  [PAYMENT_FREQUENCIES.monthly]: "Monthly",
-  [PAYMENT_FREQUENCIES.atMaturity]: "At maturity",
-} as const satisfies Record<PaymentFrequency, string>
 
 export const PAYMENT_FREQUENCY_DAYS = {
   [PAYMENT_FREQUENCIES.daily]: DAY_COUNTS.day,
@@ -59,11 +43,6 @@ export const REINVESTMENT_BEHAVIORS = {
 export type ReinvestmentBehavior =
   (typeof REINVESTMENT_BEHAVIORS)[keyof typeof REINVESTMENT_BEHAVIORS]
 
-export const REINVESTMENT_BEHAVIOR_LABELS = {
-  [REINVESTMENT_BEHAVIORS.automatic]: "Automatic",
-  [REINVESTMENT_BEHAVIORS.toCash]: "To cash",
-} as const satisfies Record<ReinvestmentBehavior, string>
-
 // Reinvestment strategy for projections
 export const REINVESTMENT_STRATEGIES = {
   keepAsCash: "keep-as-cash",
@@ -80,12 +59,6 @@ export const REINVESTMENT_STRATEGY_OPTIONS = [
   REINVESTMENT_STRATEGIES.strict,
 ] as const satisfies ReadonlyArray<ReinvestmentStrategy>
 
-export const REINVESTMENT_STRATEGY_LABELS = {
-  [REINVESTMENT_STRATEGIES.keepAsCash]: "Hold as cash",
-  [REINVESTMENT_STRATEGIES.reinvest]: "Reinvest at current rate",
-  [REINVESTMENT_STRATEGIES.strict]: "Exclude at maturity",
-} as const satisfies Record<ReinvestmentStrategy, string>
-
 // Derived status
 export const DERIVED_STATUSES = {
   active: "active",
@@ -94,11 +67,6 @@ export const DERIVED_STATUSES = {
 
 export type DerivedStatus =
   (typeof DERIVED_STATUSES)[keyof typeof DERIVED_STATUSES]
-
-export const DERIVED_STATUS_LABELS = {
-  [DERIVED_STATUSES.active]: "Active",
-  [DERIVED_STATUSES.finished]: "Finished",
-} as const satisfies Record<DerivedStatus, string>
 
 export function getPaymentFrequencyDays(
   paymentFrequency: PaymentFrequency,

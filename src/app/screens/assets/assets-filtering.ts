@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next"
 import {
   DERIVED_STATUSES,
   INVESTMENT_TYPES,
@@ -15,13 +16,17 @@ export const ASSET_FILTER_OPTIONS = {
 export type AssetFilterOption =
   (typeof ASSET_FILTER_OPTIONS)[keyof typeof ASSET_FILTER_OPTIONS]
 
-export const ASSET_FILTER_OPTION_LABELS = {
-  [ASSET_FILTER_OPTIONS.all]: "All",
-  [ASSET_FILTER_OPTIONS.fixedTerm]: "Fixed term",
-  [ASSET_FILTER_OPTIONS.openEnded]: "Open ended",
-  [ASSET_FILTER_OPTIONS.active]: "Active",
-  [ASSET_FILTER_OPTIONS.finished]: "Finished",
-} as const satisfies Record<AssetFilterOption, string>
+export function getAssetFilterOptionLabels(
+  t: TFunction,
+): Readonly<Record<AssetFilterOption, string>> {
+  return {
+    [ASSET_FILTER_OPTIONS.all]: t("assets.filterOptions.all"),
+    [ASSET_FILTER_OPTIONS.fixedTerm]: t("assets.filterOptions.fixedTerm"),
+    [ASSET_FILTER_OPTIONS.openEnded]: t("assets.filterOptions.openEnded"),
+    [ASSET_FILTER_OPTIONS.active]: t("assets.filterOptions.active"),
+    [ASSET_FILTER_OPTIONS.finished]: t("assets.filterOptions.finished"),
+  }
+}
 
 export const ASSET_FILTER_OPTION_VALUES = [
   ASSET_FILTER_OPTIONS.all,

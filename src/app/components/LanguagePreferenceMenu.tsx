@@ -13,9 +13,9 @@ const menuItemClassName =
   "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-foreground outline-none transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/70 focus:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50"
 
 const optionClassName =
-  "relative flex w-full cursor-default items-center gap-3 rounded-md px-3 py-2 pr-9 text-left text-sm text-foreground outline-none transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/70 focus:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:bg-primary/10 data-checked:text-primary"
+  "relative flex w-full cursor-default items-center gap-3 rounded-md px-3 py-2 pr-9 text-left text-sm text-foreground outline-none transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/70 focus:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:font-medium data-checked:text-primary"
 const mobileOptionClassName =
-  "relative flex min-h-11 w-full cursor-default items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-foreground outline-none transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/70 focus:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:bg-primary/10 data-checked:text-primary"
+  "relative flex min-h-11 w-full cursor-default items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-foreground outline-none transition-colors duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-secondary/70 focus:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:font-medium data-checked:text-primary"
 
 const LANGUAGE_OPTION_VALUES = [
   LOCALE_PREFERENCES.system,

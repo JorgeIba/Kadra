@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ArrowUpDown, Building2, Filter, Search } from "lucide-react"
 import {
   AnimatePresence,
@@ -24,23 +25,23 @@ import { InvestmentCard } from "@/app/components/investments/InvestmentCard"
 import { AutocompleteField } from "@/components/ui/autocomplete-field"
 import { Button } from "@/components/ui/button"
 import {
-  ASSET_SORT_OPTION_LABELS,
   ASSET_SORT_OPTION_VALUES,
   ASSET_SORT_OPTIONS,
+  getAssetSortOptionLabels,
   getSortedInvestments,
   type AssetSortOption,
 } from "@/app/screens/assets/assets-sorting"
 import {
-  ASSET_FILTER_OPTION_LABELS,
   ASSET_FILTER_OPTION_VALUES,
   ASSET_FILTER_OPTIONS,
+  getAssetFilterOptionLabels,
   getFilteredInvestments,
   type AssetFilterOption,
 } from "@/app/screens/assets/assets-filtering"
 import {
-  ASSET_GROUP_BY_LABELS,
   ASSET_GROUP_BY_OPTION_VALUES,
   ASSET_GROUP_BY_OPTIONS,
+  getAssetGroupByOptionLabels,
   type AssetGroupByOption,
 } from "@/app/screens/assets/assets-grouping"
 import {
@@ -73,6 +74,7 @@ export function AssetsScreen({
   onAddInvestment,
   onInvestmentSelect,
 }: AssetsScreenProps) {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState("")
   const [filterOption, setFilterOption] = useState<AssetFilterOption>(
     initialFilterOption ?? ASSET_FILTER_OPTIONS.all,
@@ -104,7 +106,12 @@ export function AssetsScreen({
     filteredInvestments,
     sortOption,
   )
-  const shownCountLabel = `${sortedInvestments.length} shown`
+  const filterLabels = getAssetFilterOptionLabels(t)
+  const sortLabels = getAssetSortOptionLabels(t)
+  const viewLabels = getAssetGroupByOptionLabels(t)
+  const shownCountLabel = t("assets.list.count", {
+    count: sortedInvestments.length,
+  })
   const hasActiveSearch = searchQuery.trim() !== ""
   const hasNoSearchMatches = hasActiveSearch && matchingInvestments.length === 0
   const listTransitionKey = [
@@ -114,13 +121,13 @@ export function AssetsScreen({
 
   return (
     <section className="space-y-6">
-      <ScreenIntro eyebrow="Assets" title="All investments" />
+      <ScreenIntro eyebrow={t("assets.eyebrow")} title={t("assets.title")} />
 
       {investments.length === 0 ? (
         <EmptyInvestmentsState
-          title="Your asset list is empty"
-          description="Create an investment to build your local portfolio list."
-          actionLabel="Add investment"
+          title={t("assets.empty.title")}
+          description={t("assets.empty.description")}
+          actionLabel={t("assets.empty.action")}
           onAction={onAddInvestment}
         />
       ) : (
@@ -129,7 +136,7 @@ export function AssetsScreen({
             <div className="rounded-lg border border-border bg-card px-4 py-5 text-card-foreground">
               <div className="space-y-1.5">
                 <p className="text-xs leading-none text-muted-foreground">
-                  Current value across active investments
+                  {t("assets.currentValueAcrossActiveInvestments")}
                 </p>
                 <p className="font-ledger text-4xl leading-none tabular-nums">
                   <MoneyAmount value={totalValue} />
@@ -147,15 +154,15 @@ export function AssetsScreen({
                     <span className="grid size-3.5 shrink-0 place-items-center text-muted-foreground">
                       <Search className="size-3.5" aria-hidden="true" />
                     </span>
-                    Search
+                    {t("assets.controls.searchLabel")}
                   </label>
                   <AutocompleteField
                     id="assets-search"
                     className="h-10 border-border/80 bg-background/35 px-3 text-foreground hover:border-primary/25 hover:bg-muted/45 focus-visible:border-primary/35 focus-visible:bg-muted/55 focus-visible:ring-3 focus-visible:ring-primary/20"
                     clearable
-                    clearButtonLabel="Clear search"
+                    clearButtonLabel={t("common.actions.clearSearch")}
                     filterSuggestion={null}
-                    placeholder="Name, institution, or notes"
+                    placeholder={t("assets.searchPlaceholder")}
                     suggestions={matchingSuggestions}
                     value={searchQuery}
                     onValueChange={setSearchQuery}
@@ -164,41 +171,37 @@ export function AssetsScreen({
 
                 <div className="grid grid-cols-[0.85fr_1.15fr_0.85fr] gap-2 border-t border-border/70 pt-3">
                   <LabeledSelectControl
-                    ariaLabel="Filter investments"
-                    fallbackLabel="Select filter"
+                    ariaLabel={t("assets.controls.filterAriaLabel")}
+                    fallbackLabel={t("assets.controls.filterFallback")}
                     icon={<Filter className="size-3.5" aria-hidden="true" />}
-                    label="Filter"
+                    label={t("assets.controls.filter")}
                     options={ASSET_FILTER_OPTION_VALUES}
                     value={filterOption}
-                    getOptionLabel={(option) =>
-                      ASSET_FILTER_OPTION_LABELS[option]
-                    }
+                    getOptionLabel={(option) => filterLabels[option]}
                     onValueChange={setFilterOption}
                   />
 
                   <LabeledSelectControl
-                    ariaLabel="Sort investments"
-                    fallbackLabel="Select sort"
+                    ariaLabel={t("assets.controls.sortAriaLabel")}
+                    fallbackLabel={t("assets.controls.sortFallback")}
                     icon={
                       <ArrowUpDown className="size-3.5" aria-hidden="true" />
                     }
-                    label="Sort"
+                    label={t("assets.controls.sort")}
                     options={ASSET_SORT_OPTION_VALUES}
                     value={sortOption}
-                    getOptionLabel={(option) =>
-                      ASSET_SORT_OPTION_LABELS[option]
-                    }
+                    getOptionLabel={(option) => sortLabels[option]}
                     onValueChange={setSortOption}
                   />
 
                   <LabeledSelectControl
-                    ariaLabel="Change asset list view"
-                    fallbackLabel="Select view"
+                    ariaLabel={t("assets.controls.viewAriaLabel")}
+                    fallbackLabel={t("assets.controls.groupFallback")}
                     icon={<Building2 className="size-3.5" aria-hidden="true" />}
-                    label="View"
+                    label={t("assets.controls.view")}
                     options={ASSET_GROUP_BY_OPTION_VALUES}
                     value={groupByOption}
-                    getOptionLabel={(option) => ASSET_GROUP_BY_LABELS[option]}
+                    getOptionLabel={(option) => viewLabels[option]}
                     onValueChange={setGroupByOption}
                   />
                 </div>
@@ -211,7 +214,7 @@ export function AssetsScreen({
               hasNoSearchMatches ? (
                 <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center">
                   <p className="text-sm text-muted-foreground">
-                    No investments match your search.
+                    {t("assets.list.emptySearch")}
                   </p>
                   <Button
                     className="mt-3 h-11"
@@ -220,15 +223,15 @@ export function AssetsScreen({
                     variant="outline"
                     onClick={() => setSearchQuery("")}
                   >
-                    Clear search
+                    {t("common.actions.clearSearch")}
                   </Button>
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-border/80 px-4 py-6 text-center">
                   <p className="text-sm text-muted-foreground">
                     {hasActiveSearch
-                      ? "No search results match this filter."
-                      : "No investments match this filter."}
+                      ? t("assets.list.noSearchResultsForFilter")
+                      : t("assets.list.emptyFilter")}
                   </p>
                   <Button
                     className="mt-3 h-11"
@@ -237,23 +240,29 @@ export function AssetsScreen({
                     variant="outline"
                     onClick={() => setFilterOption(ASSET_FILTER_OPTIONS.all)}
                   >
-                    Show all
+                    {t("assets.list.showAll")}
                   </Button>
                 </div>
               )
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold">Investment list</h2>
+                  <h2 className="text-base font-bold">
+                    {t("assets.list.heading")}
+                  </h2>
                   <span className="text-xs font-medium text-muted-foreground">
                     {shownCountLabel}
                   </span>
                 </div>
 
                 <AssetsInvestmentList
+                  activeValueLabel={t("assets.activeValue")}
                   groupByOption={groupByOption}
                   investments={sortedInvestments}
                   onInvestmentSelect={onInvestmentSelect}
+                  itemCountLabel={(count) =>
+                    t("common.counts.investment", { count })
+                  }
                 />
               </div>
             )}
@@ -265,11 +274,15 @@ export function AssetsScreen({
 }
 
 function AssetsInvestmentList({
+  activeValueLabel,
   groupByOption,
+  itemCountLabel,
   investments,
   onInvestmentSelect,
 }: {
+  activeValueLabel: string
   groupByOption: AssetGroupByOption
+  itemCountLabel: (count: number) => string
   investments: ResolvedInvestment[]
   onInvestmentSelect: (investmentId: string) => void
 }) {
@@ -278,6 +291,8 @@ function AssetsInvestmentList({
   if (groupByOption === ASSET_GROUP_BY_OPTIONS.institution) {
     return (
       <AssetInstitutionGroups
+        activeValueLabel={activeValueLabel}
+        itemCountLabel={itemCountLabel}
         investments={investments}
         onInvestmentSelect={onInvestmentSelect}
       />
@@ -318,17 +333,26 @@ function AssetsInvestmentList({
 }
 
 function AssetInstitutionGroups({
+  activeValueLabel,
+  itemCountLabel,
   investments,
   onInvestmentSelect,
 }: {
+  activeValueLabel: string
+  itemCountLabel: (count: number) => string
   investments: ResolvedInvestment[]
   onInvestmentSelect: (investmentId: string) => void
 }) {
+  const { t } = useTranslation()
   const groups = createGroups(investments, {
-    getGroup: (investment) => getInstitutionGroup(investment.institutionName),
+    getGroup: (investment) =>
+      getInstitutionGroup(
+        investment.institutionName,
+        t("common.grouping.unknownInstitution"),
+      ),
     metric: {
       key: "activeValue",
-      label: "Active value",
+      label: activeValueLabel,
       getValue: getInvestmentEstimatedActiveCurrentValue,
     },
   })
@@ -337,7 +361,7 @@ function AssetInstitutionGroups({
     <GroupedMetricList
       groups={groups}
       itemListClassName="divide-y divide-border/70 px-2 py-1"
-      itemNoun="investment"
+      itemCountLabel={itemCountLabel}
       renderMetric={(value) => <MoneyAmount value={value} />}
       renderItem={(item) => (
         <InvestmentCard

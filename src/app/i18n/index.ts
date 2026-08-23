@@ -12,3 +12,12 @@ export {
   type ResolvedLocale,
 } from "@/app/i18n/locales"
 export { i18n } from "@/app/i18n/i18n"
+export {
+  getCurrencyLabels,
+  getDerivedStatusLabels,
+  getInvestmentTypeLabels,
+  getPaymentFrequencyLabels,
+  getProjectionPointLabelText,
+  getReinvestmentBehaviorLabels,
+  getReinvestmentStrategyOptionLabels,
+} from "@/app/i18n/labels"

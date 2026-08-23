@@ -63,12 +63,12 @@ describe("projection view model", () => {
     )
 
     expect(snapshot.points.map((point) => point.label)).toEqual([
-      "Today",
-      "1d",
-      "2d",
-      "3d",
-      "4d",
-      "Target",
+      { kind: "today" },
+      { kind: "relative", unit: "day", value: 1 },
+      { kind: "relative", unit: "day", value: 2 },
+      { kind: "relative", unit: "day", value: 3 },
+      { kind: "relative", unit: "day", value: 4 },
+      { kind: "target" },
     ])
     expect(snapshot.points.at(-1)).toMatchObject({
       date: "2026-01-21",
@@ -83,8 +83,8 @@ describe("projection view model", () => {
     )
 
     expect(snapshot.points.map((point) => point.label)).toEqual([
-      "Today",
-      "Tomorrow",
+      { kind: "today" },
+      { kind: "tomorrow" },
     ])
   })
 
@@ -101,7 +101,7 @@ describe("projection view model", () => {
     expect(snapshot.points).toEqual([
       {
         date: "2026-01-16",
-        label: "Today",
+        label: { kind: "today" },
         estimatedValue: snapshot.currentValue,
         projectedEarnings: 0,
       },
@@ -116,12 +116,12 @@ describe("projection view model", () => {
     )
 
     expect(snapshot.points.map((point) => point.label)).toEqual([
-      "Today",
-      "2mo",
-      "5mo",
-      "7mo",
-      "10mo",
-      "Target",
+      { kind: "today" },
+      { kind: "relative", unit: "month", value: 2 },
+      { kind: "relative", unit: "month", value: 5 },
+      { kind: "relative", unit: "month", value: 7 },
+      { kind: "relative", unit: "month", value: 10 },
+      { kind: "target" },
     ])
   })
 

@@ -6,12 +6,15 @@ import {
   useState,
   type RefObject,
 } from "react"
+import { useTranslation } from "react-i18next"
 import { Autocomplete } from "@base-ui/react/autocomplete"
 import { GlobalInvestmentSearchSurface } from "@/app/components/GlobalInvestmentSearchSurface"
+import {
+  getDerivedStatusLabels,
+  getInvestmentTypeLabels,
+} from "@/app/i18n/labels"
 import { getInvestmentsMatchingQuery } from "@/app/shared/investment-search"
 import {
-  DERIVED_STATUS_LABELS,
-  INVESTMENT_TYPE_LABELS,
   resolveInvestment,
   type Investment,
   type ResolvedInvestment,
@@ -154,6 +157,9 @@ function InvestmentSearchAutocomplete({
   searchResultsRegionRef,
   searchableInvestments,
 }: InvestmentSearchAutocompleteProps) {
+  const { t } = useTranslation()
+  const investmentTypeLabels = getInvestmentTypeLabels(t)
+  const statusLabels = getDerivedStatusLabels(t)
   const [searchQuery, setSearchQuery] = useState("")
   const [isResultsPopupOpen, setIsResultsPopupOpen] = useState(false)
   const [searchAsOfDate] = useState(() => new Date())
@@ -221,8 +227,8 @@ function InvestmentSearchAutocomplete({
       <Autocomplete.InputGroup className="relative flex h-10 w-full items-center bg-transparent px-3">
         <Autocomplete.Input
           ref={inputRef}
-          aria-label="Search investments"
-          placeholder="Search investments"
+          aria-label={t("common.search.placeholder")}
+          placeholder={t("common.search.placeholder")}
           className="h-full min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:text-sm"
           onKeyDownCapture={(event) => {
             if (event.key !== "Enter") {
@@ -260,15 +266,15 @@ function InvestmentSearchAutocomplete({
                   </span>
                   <span className="mt-0.5 truncate text-xs text-muted-foreground">
                     {searchResult.institutionName} ·{" "}
-                    {INVESTMENT_TYPE_LABELS[searchResult.type]} ·{" "}
-                    {DERIVED_STATUS_LABELS[searchResult.derivedStatus]}
+                    {investmentTypeLabels[searchResult.type]} ·{" "}
+                    {statusLabels[searchResult.derivedStatus]}
                   </span>
                 </Autocomplete.Item>
               )}
             </Autocomplete.List>
             {searchResults.length === 0 ? (
               <Autocomplete.Empty className="px-3 py-5 text-center text-sm text-muted-foreground">
-                No investments found.
+                {t("common.search.noInvestmentsFound")}
               </Autocomplete.Empty>
             ) : null}
           </Autocomplete.Popup>

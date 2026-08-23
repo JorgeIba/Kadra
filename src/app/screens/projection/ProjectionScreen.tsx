@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Building2, CalendarDays } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
 import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
@@ -15,12 +16,14 @@ import {
   toDateString,
   REINVESTMENT_STRATEGIES,
   type Investment,
+  type InvestmentType,
   type ReinvestmentStrategy,
 } from "@/domain/investments"
+import { getInvestmentTypeLabels } from "@/app/i18n/labels"
 import {
-  PROJECTION_GROUP_BY_LABELS,
   PROJECTION_GROUP_BY_OPTION_VALUES,
   PROJECTION_GROUP_BY_OPTIONS,
+  getProjectionGroupByOptionLabels,
   type ProjectionGroupByOption,
 } from "@/app/screens/projection/projection-grouping"
 import {
@@ -41,12 +44,6 @@ interface ProjectionScreenProps {
   onInvestmentSelect: (investmentId: string) => void
 }
 
-const PROJECTION_TRUST_NOTES = [
-  "Uses the investments, contributions, and rates saved on this device.",
-  "Does not model new deposits, rate changes, or transfers.",
-  "Applies the selected strategy when fixed-term investments mature.",
-]
-
 const PROJECTION_SECTION_REPOSITION_TRANSITION = {
   bounce: 0.04,
   duration: 0.35,
@@ -57,6 +54,7 @@ export function ProjectionScreen({
   investments,
   onInvestmentSelect,
 }: ProjectionScreenProps) {
+  const { t } = useTranslation()
   const prefersReducedMotion = useReducedMotion() ?? false
   const projectionSectionRepositionTransition = prefersReducedMotion
     ? { duration: 0 }
@@ -88,16 +86,23 @@ export function ProjectionScreen({
     groupByOption,
     snapshot.breakdown.length,
   ].join(":")
+  const groupLabels = getProjectionGroupByOptionLabels(t)
+  const investmentTypeLabels = getInvestmentTypeLabels(t)
+  const trustNotes = [
+    t("projection.trustNotes.contributions"),
+    t("projection.trustNotes.rates"),
+    t("projection.trustNotes.maturity"),
+  ]
 
   return (
     // Let Motion, rather than browser scroll anchoring, own vertical repositioning.
     <section className="space-y-6 [overflow-anchor:none]">
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
-          Dashboard report
+          {t("projection.reportEyebrow")}
         </p>
         <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
-          Projected portfolio value.
+          {t("projection.title")}
         </h1>
       </div>
 
@@ -106,27 +111,27 @@ export function ProjectionScreen({
           <div className="py-5">
             <div className="space-y-3">
               <p className="text-sm font-medium text-muted-foreground">
-                Projected value on {formatDisplayDate(snapshot.targetDate)}
+                {t("projection.summary.projectedValueOn", {
+                  date: formatDisplayDate(snapshot.targetDate),
+                })}
               </p>
               <p className="font-ledger text-[2.7rem] leading-none text-foreground tabular-nums">
                 <MoneyAmount value={snapshot.projectedValue} />
               </p>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-6 text-muted-foreground">
                 <span>
-                  <MoneyAmount value={snapshot.projectedEarnings} /> earned by
-                  target
+                  <MoneyAmount value={snapshot.projectedEarnings} />{" "}
+                  {t("projection.summary.earnedByTarget")}
                 </span>
                 <span aria-hidden="true">·</span>
                 <span>
-                  {formatInvestmentCount(
-                    snapshot.activeInvestmentCount,
-                    "investment earning",
-                    "investments earning",
-                  )}
+                  {t("projection.summary.investmentEarning", {
+                    count: snapshot.activeInvestmentCount,
+                  })}
                 </span>
                 <TrustNotesPopover
-                  label="Projection assumptions"
-                  notes={PROJECTION_TRUST_NOTES}
+                  label={t("projection.assumptionsLabel")}
+                  notes={trustNotes}
                 />
               </div>
             </div>
@@ -134,7 +139,9 @@ export function ProjectionScreen({
 
           <div className="border-t border-border/70 py-4">
             <div className="space-y-2">
-              <Label htmlFor="projection-target-date">Target date</Label>
+              <Label htmlFor="projection-target-date">
+                {t("projection.date.label")}
+              </Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="projection-target-date"
@@ -158,7 +165,7 @@ export function ProjectionScreen({
                   id="projection-target-date-error"
                   className="text-xs leading-5 text-destructive"
                 >
-                  Choose today or a future date.
+                  {t("projection.date.chooseFuture")}
                 </p>
               )}
             </div>
@@ -180,10 +187,10 @@ export function ProjectionScreen({
         >
           <div className="space-y-2">
             <h2 className="text-balance text-base font-bold leading-tight text-foreground">
-              Value path
+              {t("projection.valuePath.title")}
             </h2>
             <p className="text-pretty text-sm leading-6 text-muted-foreground">
-              Active value changes as fixed-term investments reach maturity.
+              {t("projection.valuePath.description")}
             </p>
           </div>
 
@@ -195,18 +202,20 @@ export function ProjectionScreen({
             {targetPoint === undefined ? null : (
               <div className="mt-3 flex items-center justify-between gap-4 text-xs text-muted-foreground">
                 <span>
-                  Today <MoneyAmount value={snapshot.currentValue} />
+                  {t("projection.summary.today")}{" "}
+                  <MoneyAmount value={snapshot.currentValue} />
                 </span>
                 <span className="text-right">
-                  Target <MoneyAmount value={targetPoint.estimatedValue} />
+                  {t("projection.summary.target")}{" "}
+                  <MoneyAmount value={targetPoint.estimatedValue} />
                 </span>
               </div>
             )}
           </div>
 
           <PortfolioEarningPaceMetrics
-            title="Pace on target date"
-            description="Based on investments still active on the target date."
+            title={t("projection.earningPace.title")}
+            description={t("projection.earningPace.description")}
             pace={snapshot.earningPace}
           />
         </motion.section>
@@ -219,19 +228,19 @@ export function ProjectionScreen({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
               <h2 className="text-balance text-base font-bold leading-tight text-foreground">
-                Projected earnings by investment
+                {t("projection.breakdown.heading")}
               </h2>
             </div>
 
             <div className="w-full min-w-0 rounded-lg border border-border/70 bg-card/45 p-2.5">
               <LabeledSelectControl<ProjectionGroupByOption>
-                ariaLabel="Group investments"
-                fallbackLabel="Select grouping"
+                ariaLabel={t("projection.controls.groupAriaLabel")}
+                fallbackLabel={t("projection.controls.groupFallback")}
                 icon={<Building2 className="size-3.5" aria-hidden="true" />}
-                label="Group by"
+                label={t("projection.controls.groupLabel")}
                 options={PROJECTION_GROUP_BY_OPTION_VALUES}
                 value={groupByOption}
-                getOptionLabel={(option) => PROJECTION_GROUP_BY_LABELS[option]}
+                getOptionLabel={(option) => groupLabels[option]}
                 onValueChange={setGroupByOption}
               />
             </div>
@@ -243,6 +252,12 @@ export function ProjectionScreen({
               groupByOption={groupByOption}
               onInvestmentSelect={onInvestmentSelect}
               projectedEarnings={snapshot.projectedEarnings}
+              investmentTypeLabels={investmentTypeLabels}
+              emptyMessage={t("projection.breakdown.addInvestments")}
+              itemCountLabel={(count) =>
+                t("common.counts.investment", { count })
+              }
+              projectedLabel={t("projection.breakdown.projected")}
             />
           </AnimatedListSurface>
         </motion.section>
@@ -251,29 +266,31 @@ export function ProjectionScreen({
   )
 }
 
-function formatInvestmentCount(
-  count: number,
-  singularLabel: string,
-  pluralLabel: string,
-) {
-  return `${count} ${count === 1 ? singularLabel : pluralLabel}`
-}
-
 function ProjectionBreakdown({
   breakdown,
+  emptyMessage,
   groupByOption,
+  investmentTypeLabels,
+  itemCountLabel,
   onInvestmentSelect,
   projectedEarnings,
+  projectedLabel,
 }: {
   breakdown: InvestmentProjectionBreakdownItem[]
+  emptyMessage: string
   groupByOption: ProjectionGroupByOption
+  investmentTypeLabels: Readonly<Record<InvestmentType, string>>
+  itemCountLabel: (count: number) => string
   onInvestmentSelect: (investmentId: string) => void
   projectedEarnings: number
+  projectedLabel: string
 }) {
+  const { t } = useTranslation()
+
   if (breakdown.length === 0) {
     return (
       <p className="text-pretty text-sm leading-6 text-muted-foreground">
-        Add investments to start projecting future earnings.
+        {emptyMessage}
       </p>
     )
   }
@@ -283,10 +300,15 @@ function ProjectionBreakdown({
       <ProjectionBreakdownGroups
         breakdown={breakdown}
         getGroup={(investment) =>
-          getInstitutionGroup(investment.institutionName)
+          getInstitutionGroup(
+            investment.institutionName,
+            t("common.grouping.unknownInstitution"),
+          )
         }
         onInvestmentSelect={onInvestmentSelect}
         projectedEarnings={projectedEarnings}
+        itemCountLabel={itemCountLabel}
+        projectedLabel={projectedLabel}
       />
     )
   }
@@ -295,9 +317,13 @@ function ProjectionBreakdown({
     return (
       <ProjectionBreakdownGroups
         breakdown={breakdown}
-        getGroup={(investment) => getInvestmentTypeGroup(investment.type)}
+        getGroup={(investment) =>
+          getInvestmentTypeGroup(investment.type, investmentTypeLabels)
+        }
         onInvestmentSelect={onInvestmentSelect}
         projectedEarnings={projectedEarnings}
+        itemCountLabel={itemCountLabel}
+        projectedLabel={projectedLabel}
       />
     )
   }
@@ -318,19 +344,23 @@ function ProjectionBreakdown({
 function ProjectionBreakdownGroups({
   breakdown,
   getGroup,
+  itemCountLabel,
   onInvestmentSelect,
   projectedEarnings,
+  projectedLabel,
 }: {
   breakdown: InvestmentProjectionBreakdownItem[]
   getGroup: (investment: InvestmentProjectionBreakdownItem) => GroupIdentity
+  itemCountLabel: (count: number) => string
   onInvestmentSelect: (investmentId: string) => void
   projectedEarnings: number
+  projectedLabel: string
 }) {
   const groups = createGroups(breakdown, {
     getGroup,
     metric: {
       key: "projected",
-      label: "Projected",
+      label: projectedLabel,
       getValue: (investment) => investment.projectedEarnings,
       totalValue: projectedEarnings,
     },
@@ -340,7 +370,7 @@ function ProjectionBreakdownGroups({
     <GroupedMetricList
       groups={groups}
       itemListClassName="divide-y divide-border/60 p-0"
-      itemNoun="investment"
+      itemCountLabel={itemCountLabel}
       renderMetric={(value) => <MoneyAmount value={value} />}
       showShareOfTotal
       renderItem={(item) => (

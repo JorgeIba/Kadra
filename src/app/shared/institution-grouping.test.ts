@@ -23,15 +23,15 @@ describe("institution grouping", () => {
   })
 
   it("returns an institution group identity with trimmed key and display label", () => {
-    expect(getInstitutionGroup(" Klar ")).toEqual({
+    expect(getInstitutionGroup(" Klar ", "Unknown institution")).toEqual({
       key: "Klar",
       label: "Klar",
     })
   })
 
   it("uses an unknown institution label for blank institution names", () => {
-    expect(getInstitutionGroup(" ")).toEqual({
-      key: "Unknown institution",
+    expect(getInstitutionGroup(" ", "Unknown institution")).toEqual({
+      key: "unknown-institution",
       label: "Unknown institution",
     })
   })

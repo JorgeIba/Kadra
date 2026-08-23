@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next"
 import {
   compareCalendarDatesAscending,
   INVESTMENT_TYPES,
@@ -14,12 +15,16 @@ export const ASSET_SORT_OPTIONS = {
 export type AssetSortOption =
   (typeof ASSET_SORT_OPTIONS)[keyof typeof ASSET_SORT_OPTIONS]
 
-export const ASSET_SORT_OPTION_LABELS = {
-  [ASSET_SORT_OPTIONS.newest]: "Newest first",
-  [ASSET_SORT_OPTIONS.highestAmount]: "Highest amount",
-  [ASSET_SORT_OPTIONS.highestRate]: "Highest rate",
-  [ASSET_SORT_OPTIONS.endDateSoonest]: "End date soonest",
-} as const satisfies Record<AssetSortOption, string>
+export function getAssetSortOptionLabels(
+  t: TFunction,
+): Readonly<Record<AssetSortOption, string>> {
+  return {
+    [ASSET_SORT_OPTIONS.newest]: t("assets.sortOptions.newest"),
+    [ASSET_SORT_OPTIONS.highestAmount]: t("assets.sortOptions.highestAmount"),
+    [ASSET_SORT_OPTIONS.highestRate]: t("assets.sortOptions.highestRate"),
+    [ASSET_SORT_OPTIONS.endDateSoonest]: t("assets.sortOptions.endDateSoonest"),
+  }
+}
 
 export const ASSET_SORT_OPTION_VALUES = [
   ASSET_SORT_OPTIONS.newest,

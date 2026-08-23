@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch, type Resolver } from "react-hook-form"
 import {
@@ -41,6 +43,7 @@ export function RecordChangeForm({
   onChange,
   onSubmit,
 }: RecordChangeFormProps) {
+  const { t } = useTranslation()
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false)
   const latestEventDate = getLatestInvestmentEventDate(investment)
   const today = toDateString(new Date())
@@ -57,10 +60,11 @@ export function RecordChangeForm({
           latestEventDate,
           today,
           activeBalance,
+          t,
         }),
       )(values, context, options)
     }
-  }, [investment, latestEventDate, today])
+  }, [investment, latestEventDate, t, today])
 
   const {
     control,
@@ -142,6 +146,7 @@ export function RecordChangeForm({
   const submitGuidance = getSubmitGuidance({
     isValid,
     saveState,
+    t,
   })
 
   function handleCancelRequest() {
@@ -220,9 +225,9 @@ export function RecordChangeForm({
 
       <ConfirmDialog
         open={isDiscardDialogOpen}
-        title="Discard record?"
-        description="You have unsaved changes. If you leave now, this record will not be saved."
-        confirmLabel="Discard record"
+        title={t("recordChange.form.discard.title")}
+        description={t("recordChange.form.discard.description")}
+        confirmLabel={t("recordChange.form.discard.confirm")}
         variant="destructive"
         onRequestOpenChange={setIsDiscardDialogOpen}
         onConfirm={onCancel}
@@ -234,17 +239,19 @@ export function RecordChangeForm({
 function getSubmitGuidance({
   isValid,
   saveState,
+  t,
 }: {
   isValid: boolean
   saveState: ReturnType<typeof getRecordChangeSaveState>
+  t: TFunction
 }) {
   if (!saveState.canSave) {
-    return saveState.guidance
+    return t(`recordChange.form.guidance.${saveState.guidance.key}`)
   }
 
   if (!isValid) {
-    return "Review the highlighted fields to save this record."
+    return t("recordChange.form.guidance.reviewFields")
   }
 
-  return saveState.guidance
+  return t(`recordChange.form.guidance.${saveState.guidance.key}`)
 }

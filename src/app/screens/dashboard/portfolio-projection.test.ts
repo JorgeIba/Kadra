@@ -22,11 +22,23 @@ describe("portfolio projection", () => {
         return { date: point.date, label: point.label }
       }),
     ).toEqual([
-      { date: "2026-06-05", label: "Today" },
-      { date: "2026-07-05", label: "30 days" },
-      { date: "2026-09-03", label: "90 days" },
-      { date: "2026-12-02", label: "180 days" },
-      { date: "2027-06-05", label: "1 year" },
+      { date: "2026-06-05", label: { kind: "today" } },
+      {
+        date: "2026-07-05",
+        label: { kind: "relative", unit: "day", value: 30 },
+      },
+      {
+        date: "2026-09-03",
+        label: { kind: "relative", unit: "day", value: 90 },
+      },
+      {
+        date: "2026-12-02",
+        label: { kind: "relative", unit: "day", value: 180 },
+      },
+      {
+        date: "2027-06-05",
+        label: { kind: "relative", unit: "year", value: 1 },
+      },
     ])
   })
 

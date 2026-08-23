@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next"
 import {
   INVESTMENT_TYPES,
   compareCalendarDatesAscending,
@@ -18,6 +19,7 @@ import {
 
 interface BuildInvestmentWithRecordedChangeOptions {
   asOfDate: Date
+  t: TFunction
 }
 
 export function buildInvestmentWithRecordedChangeFromFormValues(
@@ -31,6 +33,7 @@ export function buildInvestmentWithRecordedChangeFromFormValues(
   const latestEventDate = getLatestInvestmentEventDate(investment)
   const effectiveDateError = getRecordChangeEffectiveDateError(effectiveDate, {
     latestEventDate,
+    t: options.t,
     today,
   })
 

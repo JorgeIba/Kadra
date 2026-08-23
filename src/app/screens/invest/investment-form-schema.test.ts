@@ -5,7 +5,10 @@ import {
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments"
-import { investmentFormSchema } from "@/app/screens/invest/investment-form-schema"
+import { i18n } from "@/app/i18n/i18n"
+import { createInvestmentFormSchema } from "@/app/screens/invest/investment-form-schema"
+
+const investmentFormSchema = createInvestmentFormSchema(i18n.t)
 
 describe("investment form schema", () => {
   beforeEach(() => {

@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "motion/react"
+import { useTranslation } from "react-i18next"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
 import { formatHiddenMoney, formatMxn } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
@@ -11,6 +12,7 @@ interface MoneyAmountProps {
 }
 
 export function MoneyAmount({ className, value }: MoneyAmountProps) {
+  const { t } = useTranslation()
   const prefersReducedMotion = useReducedMotion() ?? false
   const { isMoneyHidden } = useMoneyPrivacy()
   const animatedMoneyDisplay = useAnimatedMoneyDisplay({
@@ -54,7 +56,11 @@ export function MoneyAmount({ className, value }: MoneyAmountProps) {
           x: privacyAnimation.veilX,
         }}
       />
-      {isMoneyHidden ? <span className="sr-only">Amount hidden</span> : null}
+      {isMoneyHidden ? (
+        <span className="sr-only">
+          {t("common.accessibility.amountHidden")}
+        </span>
+      ) : null}
     </span>
   )
 }

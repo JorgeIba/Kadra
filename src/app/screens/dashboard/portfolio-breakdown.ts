@@ -1,13 +1,13 @@
 import {
   DERIVED_STATUSES,
-  INVESTMENT_TYPE_LABELS,
   INVESTMENT_TYPES,
   getPortfolioEstimatedCurrentValue,
+  type InvestmentType,
   type ResolvedInvestment,
 } from "@/domain/investments"
 
 export interface PortfolioBreakdownItem {
-  label: string
+  type: InvestmentType
   count: number
   estimatedValue: number
   percentage: number
@@ -30,13 +30,13 @@ export function getPortfolioBreakdown(
     activeCapitalByType: [
       getBreakdownItem({
         investments: activeInvestments,
-        label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.fixedTerm],
+        type: INVESTMENT_TYPES.fixedTerm,
         matches: (investment) => investment.type === INVESTMENT_TYPES.fixedTerm,
         totalEstimatedValue,
       }),
       getBreakdownItem({
         investments: activeInvestments,
-        label: INVESTMENT_TYPE_LABELS[INVESTMENT_TYPES.openEnded],
+        type: INVESTMENT_TYPES.openEnded,
         matches: (investment) => investment.type === INVESTMENT_TYPES.openEnded,
         totalEstimatedValue,
       }),
@@ -46,12 +46,12 @@ export function getPortfolioBreakdown(
 
 function getBreakdownItem({
   investments,
-  label,
+  type,
   matches,
   totalEstimatedValue,
 }: {
   investments: ResolvedInvestment[]
-  label: string
+  type: InvestmentType
   matches: (investment: ResolvedInvestment) => boolean
   totalEstimatedValue: number
 }): PortfolioBreakdownItem {
@@ -59,7 +59,7 @@ function getBreakdownItem({
   const estimatedValue = getPortfolioEstimatedCurrentValue(matchingInvestments)
 
   return {
-    label,
+    type,
     count: matchingInvestments.length,
     estimatedValue,
     percentage:

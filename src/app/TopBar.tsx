@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react"
 import { Menu } from "@base-ui/react/menu"
+import { useTranslation } from "react-i18next"
 import {
   ArrowLeft,
   Download,
@@ -49,6 +50,7 @@ export function TopBar({
   onResetLocalData,
   searchableInvestments,
 }: TopBarProps) {
+  const { t } = useTranslation()
   const backupInputRef = useRef<HTMLInputElement>(null)
   const [isGlobalInvestmentSearchOpen, setIsGlobalInvestmentSearchOpen] =
     useState(false)
@@ -128,7 +130,7 @@ export function TopBar({
                 onClick={onBack}
               >
                 <ArrowLeft className="size-4" aria-hidden="true" />
-                Back
+                {t("common.actions.back")}
               </Button>
             )}
           </motion.div>
@@ -152,8 +154,8 @@ export function TopBar({
               size="icon"
               aria-label={
                 isCheckingForUpdate
-                  ? "Checking for updates"
-                  : "App update available"
+                  ? t("common.actions.checkingForUpdates")
+                  : t("common.actions.appUpdateAvailable")
               }
               className="relative rounded-full border border-primary/70 bg-primary/10 text-primary shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary)_14%,transparent)] hover:bg-primary/15 hover:text-primary"
               onClick={onCheckForUpdates}
@@ -174,7 +176,9 @@ export function TopBar({
             variant="ghost"
             size="icon"
             aria-label={
-              isMoneyHidden ? "Show money amounts" : "Hide money amounts"
+              isMoneyHidden
+                ? t("common.actions.showMoneyAmounts")
+                : t("common.actions.hideMoneyAmounts")
             }
             aria-pressed={isMoneyHidden}
             className={cn(
@@ -189,7 +193,7 @@ export function TopBar({
 
           <Menu.Root modal={false}>
             <Menu.Trigger
-              aria-label="Open app menu"
+              aria-label={t("common.actions.openAppMenu")}
               className={buttonVariants({
                 variant: "ghost",
                 size: "icon",
@@ -222,7 +226,7 @@ export function TopBar({
                         )}
                         aria-hidden="true"
                       />
-                      Check for updates
+                      {t("common.actions.checkForUpdates")}
                     </Menu.Item>
                   )}
 
@@ -236,7 +240,7 @@ export function TopBar({
                       className="size-4 text-muted-foreground"
                       aria-hidden="true"
                     />
-                    Export backup
+                    {t("common.actions.exportBackup")}
                   </Menu.Item>
 
                   <Menu.Item
@@ -249,7 +253,7 @@ export function TopBar({
                       className="size-4 text-muted-foreground"
                       aria-hidden="true"
                     />
-                    Restore backup
+                    {t("common.actions.restoreBackup")}
                   </Menu.Item>
 
                   <Menu.Separator className="my-1 h-px bg-border" />
@@ -265,7 +269,7 @@ export function TopBar({
                     render={<button type="button" />}
                   >
                     <Trash2 className="size-4" aria-hidden="true" />
-                    Clear local data
+                    {t("common.actions.clearLocalData")}
                   </Menu.Item>
                 </Menu.Popup>
               </Menu.Positioner>

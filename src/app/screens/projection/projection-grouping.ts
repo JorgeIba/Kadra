@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next"
+
 export const PROJECTION_GROUP_BY_OPTIONS = {
   none: "none",
   institution: "institution",
@@ -7,11 +9,15 @@ export const PROJECTION_GROUP_BY_OPTIONS = {
 export type ProjectionGroupByOption =
   (typeof PROJECTION_GROUP_BY_OPTIONS)[keyof typeof PROJECTION_GROUP_BY_OPTIONS]
 
-export const PROJECTION_GROUP_BY_LABELS = {
-  [PROJECTION_GROUP_BY_OPTIONS.none]: "None",
-  [PROJECTION_GROUP_BY_OPTIONS.institution]: "Institution",
-  [PROJECTION_GROUP_BY_OPTIONS.type]: "Type",
-} as const satisfies Record<ProjectionGroupByOption, string>
+export function getProjectionGroupByOptionLabels(
+  t: TFunction,
+): Readonly<Record<ProjectionGroupByOption, string>> {
+  return {
+    [PROJECTION_GROUP_BY_OPTIONS.none]: t("common.grouping.none"),
+    [PROJECTION_GROUP_BY_OPTIONS.institution]: t("common.grouping.institution"),
+    [PROJECTION_GROUP_BY_OPTIONS.type]: t("common.grouping.type"),
+  }
+}
 
 export const PROJECTION_GROUP_BY_OPTION_VALUES = [
   PROJECTION_GROUP_BY_OPTIONS.none,

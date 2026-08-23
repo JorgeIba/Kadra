@@ -4,6 +4,7 @@ import type { MaturityTimelineItem } from "@/app/screens/dashboard/maturity-time
 import { Button } from "@/components/ui/button"
 import { formatDisplayDate } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 interface MaturityTimelineSectionProps {
   maturityTimelineItems: MaturityTimelineItem[]
@@ -14,13 +15,15 @@ export function MaturityTimelineSection({
   maturityTimelineItems,
   onInvestmentSelect,
 }: MaturityTimelineSectionProps) {
+  const { t } = useTranslation()
+
   if (maturityTimelineItems.length === 0) {
     return null
   }
 
   return (
     <section className="space-y-4">
-      <DashboardSectionHeader title="Upcoming maturities" />
+      <DashboardSectionHeader title={t("dashboard.maturities.title")} />
 
       <div className="divide-y divide-border/70 border-t border-border/70">
         {maturityTimelineItems.map((item) => (
@@ -40,7 +43,8 @@ export function MaturityTimelineSection({
                 {item.name}
               </span>
               <span className="truncate text-xs text-muted-foreground">
-                {item.institutionName} · Ends {formatDisplayDate(item.endDate)}
+                {item.institutionName} · {t("dashboard.maturities.ends")}{" "}
+                {formatDisplayDate(item.endDate)}
               </span>
             </span>
             <span
@@ -49,7 +53,9 @@ export function MaturityTimelineSection({
                 getMaturityBadgeClassName(item.daysRemaining),
               )}
             >
-              In {item.daysRemaining} days
+              {t("dashboard.maturities.inDays", {
+                count: item.daysRemaining,
+              })}
             </span>
           </Button>
         ))}

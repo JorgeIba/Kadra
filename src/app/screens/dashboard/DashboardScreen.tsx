@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 import {
   DERIVED_STATUSES,
   getActiveInvestmentCount,
@@ -49,6 +50,7 @@ export function DashboardScreen({
   onOpenProjection,
   onInvestmentSelect,
 }: DashboardScreenProps) {
+  const { t } = useTranslation()
   const asOfDate = new Date()
   const resolvedInvestments = investments.map((investment) =>
     resolveInvestment(investment, asOfDate),
@@ -124,9 +126,9 @@ export function DashboardScreen({
 
       {investments.length === 0 ? (
         <EmptyInvestmentsState
-          title="No investments yet"
-          description="Add your first investment to start tracking total value, estimated earnings, and projected returns."
-          actionLabel="Add investment"
+          title={t("dashboard.empty.title")}
+          description={t("dashboard.empty.description")}
+          actionLabel={t("dashboard.empty.action")}
           onAction={onAddInvestment}
         />
       ) : (

@@ -2,7 +2,13 @@
  * Bridges browser locale and storage signals into React and i18next, keeping
  * the active locale and document language synchronized.
  */
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react"
 import { I18nextProvider } from "react-i18next"
 import {
   getSystemLocalePreferences,
@@ -84,7 +90,7 @@ export function LocaleProvider({
   }, [])
 
   // Synchronize the resolved locale with i18next and the document metadata.
-  useEffect(() => {
+  useLayoutEffect(() => {
     void i18n.changeLanguage(activeLocale)
 
     if (typeof document !== "undefined") {

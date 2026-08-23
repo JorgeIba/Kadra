@@ -5,6 +5,7 @@ import {
   PAYMENT_FREQUENCIES,
   REINVESTMENT_BEHAVIORS,
 } from "@/domain/investments"
+import { i18n } from "@/app/i18n/i18n"
 import {
   buildInvestmentFromFormValues,
   buildUpdatedInvestmentFromFormValues,
@@ -396,7 +397,7 @@ describe("investment form adapter", () => {
   })
 
   it("returns an incomplete preview for invalid form drafts", () => {
-    const preview = getInvestmentFormPreview({}, { asOfDate })
+    const preview = getInvestmentFormPreview({}, { asOfDate, t: i18n.t })
 
     expect(preview).toBeNull()
   })
@@ -408,7 +409,7 @@ describe("investment form adapter", () => {
         endDate: "2026-05-20",
         investmentType: INVESTMENT_TYPES.fixedTerm,
       },
-      { asOfDate: new Date("2026-05-22T12:00:00.000Z") },
+      { asOfDate: new Date("2026-05-22T12:00:00.000Z"), t: i18n.t },
     )
 
     expect(preview).toMatchObject({
@@ -427,7 +428,7 @@ describe("investment form adapter", () => {
         endDate: "2026-12-31",
         investmentType: INVESTMENT_TYPES.fixedTerm,
       },
-      { asOfDate },
+      { asOfDate, t: i18n.t },
     )
 
     expect(preview).toMatchObject({

@@ -5,6 +5,7 @@ import {
   REINVESTMENT_BEHAVIORS,
   resolveInvestment,
 } from "@/domain/investments"
+import { i18n } from "@/app/i18n/i18n"
 import { evolvingInvestment } from "@/domain/investments/dev/investment-test-fixtures"
 import {
   buildInvestmentWithRecordedChangeFromFormValues,
@@ -14,6 +15,7 @@ import {
 import type { RecordChangeFormValues } from "@/app/screens/record-change/record-change-form-schema"
 
 const asOfDate = new Date("2026-06-15T15:30:00.000Z")
+const adapterOptions = { asOfDate, t: i18n.t }
 
 describe("record change adapter", () => {
   it("prefills values from the latest stored facts at the effective date", () => {
@@ -45,7 +47,7 @@ describe("record change adapter", () => {
         contributionAmount: 2_500,
       },
       evolvingInvestment,
-      { asOfDate },
+      adapterOptions,
     )
 
     expect(updatedInvestment.updatedAt).toBe(asOfDate.toISOString())
@@ -71,7 +73,7 @@ describe("record change adapter", () => {
         contributionAmount: 1_500,
       },
       evolvingInvestment,
-      { asOfDate },
+      adapterOptions,
     )
 
     expect(updatedInvestment.updatedAt).toBe(asOfDate.toISOString())
@@ -92,7 +94,7 @@ describe("record change adapter", () => {
         annualRate: 13,
       },
       evolvingInvestment,
-      { asOfDate },
+      adapterOptions,
     )
 
     expect(updatedInvestment.contributionEvents).toBe(
@@ -120,7 +122,7 @@ describe("record change adapter", () => {
           annualRate: 11,
         },
         evolvingInvestment,
-        { asOfDate },
+        adapterOptions,
       ),
     ).toThrow(
       "Choose 2026-03-01 or later. Record change can only append to existing history for now.",
@@ -136,7 +138,7 @@ describe("record change adapter", () => {
           annualRate: 13,
         },
         evolvingInvestment,
-        { asOfDate },
+        adapterOptions,
       ),
     ).toThrow("Effective date cannot be in the future.")
   })
@@ -149,7 +151,7 @@ describe("record change adapter", () => {
         annualRate: 13,
       },
       evolvingInvestment,
-      { asOfDate },
+      adapterOptions,
     )
 
     expect(
@@ -168,7 +170,7 @@ describe("record change adapter", () => {
         maturityDate: "2026-12-31",
       },
       evolvingInvestment,
-      { asOfDate },
+      adapterOptions,
     )
 
     expect(updatedInvestment.contributionEvents).toBe(
@@ -199,7 +201,7 @@ describe("record change adapter", () => {
         maturityDate: "2026-12-31",
       },
       evolvingInvestment,
-      { asOfDate },
+      adapterOptions,
     )
 
     expect(updatedInvestment.contributionEvents).toHaveLength(3)
@@ -212,7 +214,7 @@ describe("record change adapter", () => {
       buildInvestmentWithRecordedChangeFromFormValues(
         baseRecordValues,
         evolvingInvestment,
-        { asOfDate },
+        adapterOptions,
       ),
     ).toThrow("Record at least one change before saving.")
   })

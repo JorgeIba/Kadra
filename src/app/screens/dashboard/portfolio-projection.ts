@@ -4,6 +4,7 @@ import {
   type Investment,
   type PortfolioProjectionEarningPaceReadModel,
 } from "@/domain/investments"
+import type { ProjectionPointLabel } from "@/app/shared/projection-point-label"
 
 const PROJECTION_DAY_OFFSETS = [
   0,
@@ -15,7 +16,7 @@ const PROJECTION_DAY_OFFSETS = [
 
 export interface PortfolioProjectionPoint {
   date: string
-  label: string
+  label: ProjectionPointLabel
   estimatedValue: number
   projectedEarnings: number
 }
@@ -55,14 +56,14 @@ function addDays(date: Date, days: number) {
   return nextDate
 }
 
-function getProjectionLabel(dayOffset: number) {
+function getProjectionLabel(dayOffset: number): ProjectionPointLabel {
   if (dayOffset === 0) {
-    return "Today"
+    return { kind: "today" }
   }
 
   if (dayOffset === DAY_COUNTS.year) {
-    return "1 year"
+    return { kind: "relative", unit: "year", value: 1 }
   }
 
-  return `${dayOffset} days`
+  return { kind: "relative", unit: "day", value: dayOffset }
 }

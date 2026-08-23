@@ -16,12 +16,12 @@ describe("portfolio breakdown", () => {
     const breakdown = getPortfolioBreakdown(resolvedInvestments)
 
     expect(
-      breakdown.activeCapitalByType.map(({ count, label }) => {
-        return { count, label }
+      breakdown.activeCapitalByType.map(({ count, type }) => {
+        return { count, type }
       }),
     ).toEqual([
-      { count: 1, label: "Fixed term" },
-      { count: 1, label: "Open ended" },
+      { count: 1, type: INVESTMENT_TYPES.fixedTerm },
+      { count: 1, type: INVESTMENT_TYPES.openEnded },
     ])
   })
 
@@ -42,13 +42,13 @@ describe("portfolio breakdown", () => {
       expect.objectContaining({
         count: 1,
         estimatedValue: expect.closeTo(10_424.657534),
-        label: "Fixed term",
+        type: INVESTMENT_TYPES.fixedTerm,
         percentage: expect.closeTo(50.190497664767406),
       }),
       expect.objectContaining({
         count: 1,
         estimatedValue: expect.closeTo(10_345.524112),
-        label: "Open ended",
+        type: INVESTMENT_TYPES.openEnded,
         percentage: expect.closeTo(49.809502335232594),
       }),
     ])

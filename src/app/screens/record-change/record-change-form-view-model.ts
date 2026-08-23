@@ -20,8 +20,16 @@ export interface RecordChangeDraft {
 
 export interface RecordChangeSaveState {
   canSave: boolean
-  guidance: string
+  guidance: RecordChangeGuidance
 }
+
+export type RecordChangeGuidance =
+  | { key: "changeSomething" }
+  | { key: "chooseAppendableDate" }
+  | { key: "chooseEffectiveDate" }
+  | { key: "enterDepositAmount" }
+  | { key: "enterWithdrawalAmount" }
+  | { key: "ready" }
 
 export function getRecordChangeSaveState({
   baseline,
@@ -36,14 +44,14 @@ export function getRecordChangeSaveState({
   ) {
     return {
       canSave: false,
-      guidance: "Choose an effective date to save this record.",
+      guidance: { key: "chooseEffectiveDate" },
     }
   }
 
   if (baseline === null) {
     return {
       canSave: false,
-      guidance: "Choose a date that can append to the existing history.",
+      guidance: { key: "chooseAppendableDate" },
     }
   }
 
@@ -52,21 +60,21 @@ export function getRecordChangeSaveState({
       canSave: false,
       guidance:
         draft.transactionType === "contribution"
-          ? "Enter the deposit amount to save this record."
-          : "Enter the withdrawal amount to save this record.",
+          ? { key: "enterDepositAmount" }
+          : { key: "enterWithdrawalAmount" },
     }
   }
 
   if (!hasRecordableChange(draft, baseline)) {
     return {
       canSave: false,
-      guidance: "Change money, rate, or terms to save this record.",
+      guidance: { key: "changeSomething" },
     }
   }
 
   return {
     canSave: true,
-    guidance: "Ready to append this dated record.",
+    guidance: { key: "ready" },
   }
 }
 

@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react"
+import { i18n } from "@/app/i18n/i18n"
 
 interface AppErrorBoundaryProps {
   children: ReactNode
@@ -23,15 +24,13 @@ export function AppErrorFallback({
     <main className="min-h-screen bg-background px-5 py-10 text-foreground">
       <section className="mx-auto max-w-lg rounded-3xl border bg-card p-6 shadow-sm">
         <p className="text-sm font-medium text-muted-foreground">
-          Kadra hit an unexpected problem
+          {i18n.t("appShell.errorBoundary.eyebrow")}
         </p>
         <h1 className="mt-3 font-ledger text-3xl tracking-normal">
-          Something went wrong
+          {i18n.t("appShell.errorBoundary.title")}
         </h1>
         <p className="mt-4 text-sm leading-6 text-muted-foreground">
-          Your saved local data should still be available. You can try rendering
-          the app again, reload the page, or check the browser console for the
-          technical error.
+          {i18n.t("appShell.errorBoundary.description")}
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -47,13 +46,13 @@ export function AppErrorFallback({
             className="rounded-full border px-4 py-2 text-sm font-medium"
             onClick={() => window.location.reload()}
           >
-            Reload app
+            {i18n.t("appShell.errorBoundary.reloadApp")}
           </button>
         </div>
 
         <details className="mt-6 rounded-2xl bg-secondary/60 p-4 text-xs text-muted-foreground">
           <summary className="cursor-pointer font-medium">
-            Error details
+            {i18n.t("appShell.errorBoundary.details")}
           </summary>
           <pre className="mt-3 overflow-auto whitespace-pre-wrap">
             {error.message}
@@ -88,7 +87,7 @@ export class AppErrorBoundary extends Component<
     return (
       <AppErrorFallback
         error={this.state.error}
-        primaryActionLabel="Try again"
+        primaryActionLabel={i18n.t("appShell.errorBoundary.tryAgain")}
         onPrimaryAction={() => this.setState({ error: null })}
       />
     )

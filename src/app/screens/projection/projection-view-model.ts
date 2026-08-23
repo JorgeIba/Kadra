@@ -15,10 +15,11 @@ import {
   type PortfolioProjectionEarningPaceReadModel,
   type ReinvestmentStrategy,
 } from "@/domain/investments"
+import type { ProjectionPointLabel } from "@/app/shared/projection-point-label"
 
 export interface PortfolioProjectionPoint {
   date: CalendarDateString
-  label: string
+  label: ProjectionPointLabel
   estimatedValue: number
   projectedEarnings: number
 }
@@ -217,7 +218,13 @@ function getProjectionPoints(
 
   if (pointCount <= 1) {
     return [
-      getProjectionPoint(investments, asOfDate, asOfDate, "Today", strategy),
+      getProjectionPoint(
+        investments,
+        asOfDate,
+        asOfDate,
+        { kind: "today" },
+        strategy,
+      ),
     ]
   }
 
@@ -240,7 +247,7 @@ function getProjectionPoint(
   investments: Investment[],
   asOfDate: Date,
   projectionDate: Date,
-  label: string,
+  label: ProjectionPointLabel,
   strategy: ReinvestmentStrategy,
 ): PortfolioProjectionPoint {
   const projection = projectPortfolioAtDate(
@@ -263,30 +270,42 @@ function getProjectionPointLabel(
   pointCount: number,
   dayOffset: number,
   totalDays: number,
-) {
+): ProjectionPointLabel {
   if (index === 0) {
-    return "Today"
+    return { kind: "today" }
   }
 
   if (totalDays === 1 && index === pointCount - 1) {
-    return "Tomorrow"
+    return { kind: "tomorrow" }
   }
 
   if (index === pointCount - 1) {
-    return "Target"
+    return { kind: "target" }
   }
 
   if (totalDays <= 31) {
-    return `${dayOffset}d`
+    return { kind: "relative", unit: "day", value: dayOffset }
   }
 
   if (totalDays <= 120) {
-    return `${Math.max(1, Math.round(dayOffset / 7))}w`
+    return {
+      kind: "relative",
+      unit: "week",
+      value: Math.max(1, Math.round(dayOffset / 7)),
+    }
   }
 
   if (totalDays <= 2 * 365) {
-    return `${Math.max(1, Math.round(dayOffset / 30))}mo`
+    return {
+      kind: "relative",
+      unit: "month",
+      value: Math.max(1, Math.round(dayOffset / 30)),
+    }
   }
 
-  return `${Math.max(1, Math.round(dayOffset / 365))}y`
+  return {
+    kind: "relative",
+    unit: "year",
+    value: Math.max(1, Math.round(dayOffset / 365)),
+  }
 }

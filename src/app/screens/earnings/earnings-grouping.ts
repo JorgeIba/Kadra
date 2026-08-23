@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next"
+
 export const EARNINGS_GROUP_BY_OPTIONS = {
   none: "none",
   institution: "institution",
@@ -7,11 +9,15 @@ export const EARNINGS_GROUP_BY_OPTIONS = {
 export type EarningsGroupByOption =
   (typeof EARNINGS_GROUP_BY_OPTIONS)[keyof typeof EARNINGS_GROUP_BY_OPTIONS]
 
-export const EARNINGS_GROUP_BY_LABELS = {
-  [EARNINGS_GROUP_BY_OPTIONS.none]: "None",
-  [EARNINGS_GROUP_BY_OPTIONS.institution]: "Institution",
-  [EARNINGS_GROUP_BY_OPTIONS.type]: "Type",
-} as const satisfies Record<EarningsGroupByOption, string>
+export function getEarningsGroupByOptionLabels(
+  t: TFunction,
+): Readonly<Record<EarningsGroupByOption, string>> {
+  return {
+    [EARNINGS_GROUP_BY_OPTIONS.none]: t("common.grouping.none"),
+    [EARNINGS_GROUP_BY_OPTIONS.institution]: t("common.grouping.institution"),
+    [EARNINGS_GROUP_BY_OPTIONS.type]: t("common.grouping.type"),
+  }
+}
 
 export const EARNINGS_GROUP_BY_OPTION_VALUES = [
   EARNINGS_GROUP_BY_OPTIONS.none,

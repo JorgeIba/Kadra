@@ -1,5 +1,6 @@
 import { Popover } from "@base-ui/react/popover"
 import { Info } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 
 interface TrustNotesProps {
@@ -8,6 +9,8 @@ interface TrustNotesProps {
 }
 
 export function TrustNotes({ className, notes }: TrustNotesProps) {
+  const { t } = useTranslation()
+
   return (
     <dl
       className={cn(
@@ -18,7 +21,9 @@ export function TrustNotes({ className, notes }: TrustNotesProps) {
       {notes.map((note) => (
         <div key={note} className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
           <dt className="mt-2 size-1.5 rounded-full bg-primary/70">
-            <span className="sr-only">Assumption</span>
+            <span className="sr-only">
+              {t("common.accessibility.assumption")}
+            </span>
           </dt>
           <dd>{note}</dd>
         </div>

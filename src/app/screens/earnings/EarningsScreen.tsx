@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ArrowUpDown, Building2 } from "lucide-react"
 import { AnimatedListSurface } from "@/app/components/AnimatedListSurface"
 import { GroupedMetricList } from "@/app/components/GroupedMetricList"
@@ -7,20 +8,24 @@ import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { TrustNotesPopover } from "@/app/components/TrustNotes"
 import {
   DERIVED_STATUSES,
-  DERIVED_STATUS_LABELS,
   type DerivedStatus,
   type Investment,
+  type InvestmentType,
 } from "@/domain/investments"
-import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
 import {
-  EARNINGS_GROUP_BY_LABELS,
+  getDerivedStatusLabels,
+  getInvestmentTypeLabels,
+} from "@/app/i18n/labels"
+import { AnimatedProgressBar } from "@/app/components/AnimatedProgressBar"
+import { getEarnedMoneySortOptionLabels } from "@/app/screens/earnings/earnings-labels"
+import {
   EARNINGS_GROUP_BY_OPTION_VALUES,
   EARNINGS_GROUP_BY_OPTIONS,
+  getEarningsGroupByOptionLabels,
   type EarningsGroupByOption,
 } from "@/app/screens/earnings/earnings-grouping"
 import {
   EARNED_MONEY_SORT_OPTIONS,
-  getEarnedMoneySortLabel,
   getPortfolioEarnedMoneySnapshot,
   type EarnedMoneySortOption,
   type InvestmentEarnedMoneyBreakdown,
@@ -44,15 +49,11 @@ const EARNED_MONEY_SORT_CHOICES = [
   EARNED_MONEY_SORT_OPTIONS.status,
 ] as const satisfies ReadonlyArray<EarnedMoneySortOption>
 
-const EARNINGS_TRUST_NOTES = [
-  "Estimated from the investments saved on this device.",
-  "Historical total includes active and finished investments.",
-]
-
 export function EarningsScreen({
   investments,
   onInvestmentSelect,
 }: EarningsScreenProps) {
+  const { t } = useTranslation()
   const [sortBy, setSortBy] = useState<EarnedMoneySortOption>(
     EARNED_MONEY_SORT_OPTIONS.highestEarned,
   )
@@ -69,15 +70,22 @@ export function EarningsScreen({
     groupByOption,
     snapshot.breakdown.length,
   ].join(":")
+  const sortLabels = getEarnedMoneySortOptionLabels(t)
+  const groupLabels = getEarningsGroupByOptionLabels(t)
+  const investmentTypeLabels = getInvestmentTypeLabels(t)
+  const trustNotes = [
+    t("earnings.trustNotes.estimated"),
+    t("earnings.trustNotes.historical"),
+  ]
 
   return (
     <section className="space-y-6">
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
-          Dashboard report
+          {t("earnings.reportEyebrow")}
         </p>
         <h1 className="text-balance font-ledger text-3xl font-normal tracking-normal text-foreground">
-          Return earned by the portfolio.
+          {t("earnings.title")}
         </h1>
       </div>
 
@@ -86,18 +94,18 @@ export function EarningsScreen({
           <div className="py-5">
             <div className="space-y-1.5">
               <p className="text-xs text-muted-foreground">
-                Total earned return
+                {t("earnings.totalEarnedReturn")}
               </p>
               <p className="font-ledger text-4xl leading-none text-foreground tabular-nums">
                 <MoneyAmount value={snapshot.totalEarnedAmount} />
               </p>
               <div className="flex items-center gap-2">
                 <p className="text-pretty text-sm leading-6 text-muted-foreground">
-                  Estimated return produced through today.
+                  {t("earnings.totalDescription")}
                 </p>
                 <TrustNotesPopover
-                  label="Earned return notes"
-                  notes={EARNINGS_TRUST_NOTES}
+                  label={t("earnings.notesLabel")}
+                  notes={trustNotes}
                 />
               </div>
             </div>
@@ -105,15 +113,15 @@ export function EarningsScreen({
 
           <div className="grid grid-cols-3 border-t border-border/70 bg-background/20">
             <SummaryMetric
-              label="Investments"
+              label={t("earnings.summary.investments")}
               value={String(snapshot.investmentCount)}
             />
             <SummaryMetric
-              label="Active"
+              label={t("earnings.summary.active")}
               value={String(snapshot.activeInvestmentCount)}
             />
             <SummaryMetric
-              label="Finished"
+              label={t("earnings.summary.finished")}
               value={String(snapshot.finishedInvestmentCount)}
             />
           </div>
@@ -123,30 +131,30 @@ export function EarningsScreen({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
               <h2 className="text-balance text-base font-bold leading-tight text-foreground">
-                Breakdown by investment
+                {t("earnings.breakdown.heading")}
               </h2>
             </div>
 
             <div className="grid w-full min-w-0 grid-cols-2 gap-2 rounded-lg border border-border/70 bg-card/45 p-2.5 sm:w-auto sm:min-w-96">
               <LabeledSelectControl
-                ariaLabel="Sort earned return breakdown"
-                fallbackLabel="Select sort"
+                ariaLabel={t("earnings.controls.sortAriaLabel")}
+                fallbackLabel={t("earnings.controls.sortFallback")}
                 icon={<ArrowUpDown className="size-3.5" aria-hidden="true" />}
-                label="Sort by"
+                label={t("earnings.controls.sortLabel")}
                 options={EARNED_MONEY_SORT_CHOICES}
                 value={sortBy}
-                getOptionLabel={getEarnedMoneySortLabel}
+                getOptionLabel={(option) => sortLabels[option]}
                 onValueChange={setSortBy}
               />
 
               <LabeledSelectControl
-                ariaLabel="Group investments"
-                fallbackLabel="Select grouping"
+                ariaLabel={t("earnings.controls.groupAriaLabel")}
+                fallbackLabel={t("earnings.controls.groupFallback")}
                 icon={<Building2 className="size-3.5" aria-hidden="true" />}
-                label="Group by"
+                label={t("earnings.controls.groupLabel")}
                 options={EARNINGS_GROUP_BY_OPTION_VALUES}
                 value={groupByOption}
-                getOptionLabel={(option) => EARNINGS_GROUP_BY_LABELS[option]}
+                getOptionLabel={(option) => groupLabels[option]}
                 onValueChange={setGroupByOption}
               />
             </div>
@@ -156,8 +164,13 @@ export function EarningsScreen({
             <EarningsBreakdownList
               breakdown={snapshot.breakdown}
               groupByOption={groupByOption}
+              investmentTypeLabels={investmentTypeLabels}
               onInvestmentSelect={onInvestmentSelect}
               totalEarnedAmount={snapshot.totalEarnedAmount}
+              earnedLabel={t("earnings.breakdown.earned")}
+              itemCountLabel={(count) =>
+                t("common.counts.investment", { count })
+              }
             />
           </AnimatedListSurface>
         </section>
@@ -179,19 +192,27 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 
 function EarningsBreakdownList({
   breakdown,
+  earnedLabel,
   groupByOption,
+  investmentTypeLabels,
+  itemCountLabel,
   onInvestmentSelect,
   totalEarnedAmount,
 }: {
   breakdown: InvestmentEarnedMoneyBreakdown
+  earnedLabel: string
   groupByOption: EarningsGroupByOption
+  investmentTypeLabels: Readonly<Record<InvestmentType, string>>
+  itemCountLabel: (count: number) => string
   onInvestmentSelect: (investmentId: string) => void
   totalEarnedAmount: number
 }) {
+  const { t } = useTranslation()
+
   if (breakdown.length === 0) {
     return (
       <p className="text-pretty text-sm leading-6 text-muted-foreground">
-        Add investments to start tracking earned return.
+        {t("earnings.breakdown.empty")}
       </p>
     )
   }
@@ -201,10 +222,15 @@ function EarningsBreakdownList({
       <EarningsBreakdownGroups
         breakdown={breakdown}
         getGroup={(investment) =>
-          getInstitutionGroup(investment.institutionName)
+          getInstitutionGroup(
+            investment.institutionName,
+            t("common.grouping.unknownInstitution"),
+          )
         }
         onInvestmentSelect={onInvestmentSelect}
         totalEarnedAmount={totalEarnedAmount}
+        earnedLabel={earnedLabel}
+        itemCountLabel={itemCountLabel}
       />
     )
   }
@@ -213,9 +239,13 @@ function EarningsBreakdownList({
     return (
       <EarningsBreakdownGroups
         breakdown={breakdown}
-        getGroup={(investment) => getInvestmentTypeGroup(investment.type)}
+        getGroup={(investment) =>
+          getInvestmentTypeGroup(investment.type, investmentTypeLabels)
+        }
         onInvestmentSelect={onInvestmentSelect}
         totalEarnedAmount={totalEarnedAmount}
+        earnedLabel={earnedLabel}
+        itemCountLabel={itemCountLabel}
       />
     )
   }
@@ -235,12 +265,16 @@ function EarningsBreakdownList({
 
 function EarningsBreakdownGroups({
   breakdown,
+  earnedLabel,
   getGroup,
+  itemCountLabel,
   onInvestmentSelect,
   totalEarnedAmount,
 }: {
   breakdown: InvestmentEarnedMoneyBreakdown
+  earnedLabel: string
   getGroup: (investment: InvestmentEarnedMoneyBreakdownItem) => GroupIdentity
+  itemCountLabel: (count: number) => string
   onInvestmentSelect: (investmentId: string) => void
   totalEarnedAmount: number
 }) {
@@ -248,7 +282,7 @@ function EarningsBreakdownGroups({
     getGroup,
     metric: {
       key: "earned",
-      label: "Earned",
+      label: earnedLabel,
       getValue: (investment) => investment.earnedAmount,
       totalValue: totalEarnedAmount,
     },
@@ -258,7 +292,7 @@ function EarningsBreakdownGroups({
     <GroupedMetricList
       groups={groups}
       itemListClassName="divide-y divide-border/60 p-0"
-      itemNoun="investment"
+      itemCountLabel={itemCountLabel}
       renderMetric={(value) => <MoneyAmount value={value} />}
       showShareOfTotal
       renderItem={(item) => (
@@ -282,7 +316,10 @@ function EarningsBreakdownRow({
   onSelect: (investmentId: string) => void
   percentage?: number
 }) {
+  const { t } = useTranslation()
   const displayedPercentage = percentage ?? investment.percentage
+  const statusLabels = getDerivedStatusLabels(t)
+  const statusLabel = statusLabels[investment.derivedStatus]
 
   return (
     <button
@@ -302,7 +339,7 @@ function EarningsBreakdownRow({
                 getStatusBadgeClassName(investment.derivedStatus),
               )}
             >
-              {DERIVED_STATUS_LABELS[investment.derivedStatus]}
+              {statusLabel}
             </span>
           </div>
           <p className="mt-2 truncate text-xs text-muted-foreground">

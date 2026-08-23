@@ -1,4 +1,5 @@
 import { useReducedMotion } from "motion/react"
+import { useTranslation } from "react-i18next"
 import {
   CartesianGrid,
   Line,
@@ -12,13 +13,15 @@ import {
 } from "recharts"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { useMoneyPrivacy } from "@/app/context/money-privacy-context"
+import { getProjectionPointLabelText } from "@/app/i18n/labels"
 import { useShouldAnimateRouteEntry } from "@/app/routing/navigation-animation"
+import type { ProjectionPointLabel } from "@/app/shared/projection-point-label"
 import { formatDisplayDate } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
 export interface PortfolioProjectionLineChartPoint {
   date: string
-  label: string
+  label: ProjectionPointLabel
   estimatedValue: number
   projectedEarnings: number
 }
@@ -30,7 +33,14 @@ interface PortfolioProjectionLineChartProps {
 
 interface ProjectionTooltipProps {
   active?: boolean
-  payload?: Array<{ payload?: PortfolioProjectionLineChartPoint }>
+  payload?: Array<{ payload?: RenderedProjectionPoint }>
+}
+
+interface RenderedProjectionPoint {
+  date: string
+  label: string
+  estimatedValue: number
+  projectedEarnings: number
 }
 
 /**
@@ -55,13 +65,18 @@ export function PortfolioProjectionLineChart({
   const prefersReducedMotion = useReducedMotion() ?? false
   const shouldAnimateRouteEntry = useShouldAnimateRouteEntry()
   const { isMoneyHidden } = useMoneyPrivacy()
+  const { t } = useTranslation()
   const shouldAnimateChart = !prefersReducedMotion
+  const localizedPoints: RenderedProjectionPoint[] = points.map((point) => ({
+    ...point,
+    label: getProjectionPointLabelText(t, point.label),
+  }))
 
   return (
     <div className={cn("h-56", className)}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={points}
+          data={localizedPoints}
           margin={{ bottom: 0, left: 0, right: 8, top: 24 }}
         >
           <CartesianGrid
@@ -123,6 +138,7 @@ function formatCompactMxn(value: number, isMoneyHidden: boolean) {
 }
 
 function ProjectionTooltip({ active, payload }: ProjectionTooltipProps) {
+  const { t } = useTranslation()
   const point = payload?.[0]?.payload
 
   if (active !== true || point === undefined) {
@@ -138,7 +154,8 @@ function ProjectionTooltip({ active, payload }: ProjectionTooltipProps) {
         <MoneyAmount value={point.estimatedValue} />
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Projected earnings <MoneyAmount value={point.projectedEarnings} />
+        {t("projection.chart.projectedEarnings")}{" "}
+        <MoneyAmount value={point.projectedEarnings} />
       </p>
     </div>
   )

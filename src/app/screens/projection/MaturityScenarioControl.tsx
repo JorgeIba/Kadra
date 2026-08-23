@@ -1,4 +1,6 @@
 import { MinusCircle, RefreshCw, Wallet } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
   ExpandingChoicePicker,
@@ -6,6 +8,7 @@ import {
 } from "@/app/components/expanding-choice-picker/ExpandingChoicePicker"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { usePickerWithDependentContent } from "@/app/components/expanding-choice-picker/use-picker-with-dependent-content"
+import { getReinvestmentStrategyOptionLabels } from "@/app/i18n/labels"
 import {
   REINVESTMENT_STRATEGIES,
   type ReinvestmentStrategy,
@@ -38,36 +41,55 @@ const OUTCOME_CONTENT_ENTER_EXIT_TRANSITION = {
   type: "spring",
 } as const
 
-const MATURITY_SCENARIO_OPTIONS = [
-  {
-    value: REINVESTMENT_STRATEGIES.reinvest,
-    label: "Reinvest",
-    summary: "Reinvest at current rate",
-    description: "Keeps earning",
-    icon: RefreshCw,
-  },
-  {
-    value: REINVESTMENT_STRATEGIES.keepAsCash,
-    label: "Cash",
-    summary: "Hold as cash",
-    description: "Stops earning",
-    icon: Wallet,
-  },
-  {
-    value: REINVESTMENT_STRATEGIES.strict,
-    label: "Exclude",
-    summary: "Exclude at maturity",
-    description: "Not included",
-    icon: MinusCircle,
-  },
-] satisfies readonly ExpandingChoicePickerOption<ReinvestmentStrategy>[]
+function getMaturityScenarioOptions(t: TFunction) {
+  const strategyLabels = getReinvestmentStrategyOptionLabels(t)
+
+  return [
+    {
+      value: REINVESTMENT_STRATEGIES.reinvest,
+      label: strategyLabels[REINVESTMENT_STRATEGIES.reinvest],
+      summary: t("projection.maturityScenario.options.reinvest.summary"),
+      description: t(
+        "projection.maturityScenario.options.reinvest.description",
+      ),
+      compactDescription: t(
+        "projection.maturityScenario.options.reinvest.compactDescription",
+      ),
+      icon: RefreshCw,
+    },
+    {
+      value: REINVESTMENT_STRATEGIES.keepAsCash,
+      label: strategyLabels[REINVESTMENT_STRATEGIES.keepAsCash],
+      summary: t("projection.maturityScenario.options.keepAsCash.summary"),
+      description: t(
+        "projection.maturityScenario.options.keepAsCash.description",
+      ),
+      compactDescription: t(
+        "projection.maturityScenario.options.keepAsCash.compactDescription",
+      ),
+      icon: Wallet,
+    },
+    {
+      value: REINVESTMENT_STRATEGIES.strict,
+      label: strategyLabels[REINVESTMENT_STRATEGIES.strict],
+      summary: t("projection.maturityScenario.options.strict.summary"),
+      description: t("projection.maturityScenario.options.strict.description"),
+      compactDescription: t(
+        "projection.maturityScenario.options.strict.compactDescription",
+      ),
+      icon: MinusCircle,
+    },
+  ] satisfies readonly ExpandingChoicePickerOption<ReinvestmentStrategy>[]
+}
 
 export function MaturityScenarioControl({
   comparison,
   onStrategyCommit,
   strategy,
 }: MaturityScenarioControlProps) {
-  const outcome = deriveProjectionStrategyOutcome(comparison)
+  const { t } = useTranslation()
+  const outcome = deriveProjectionStrategyOutcome(comparison, t)
+  const maturityScenarioOptions = getMaturityScenarioOptions(t)
   const pickerInteraction = usePickerWithDependentContent({
     hasVisibleDependentContent: outcome !== null,
   })
@@ -76,18 +98,18 @@ export function MaturityScenarioControl({
     <div className="border-t border-border/70 py-4">
       <div className="space-y-3">
         <h2 className="text-sm font-medium text-foreground">
-          Maturity scenario
+          {t("projection.maturityScenario.title")}
         </h2>
         <ExpandingChoicePicker
-          ariaLabel="Maturity scenario"
+          ariaLabel={t("projection.maturityScenario.ariaLabel")}
           canStartPendingOpening={
             pickerInteraction.canStartPendingPickerOpening
           }
-          legend="Choose a maturity scenario"
+          legend={t("projection.maturityScenario.legend")}
           onCloseComplete={pickerInteraction.onPickerCloseComplete}
           onOpenRequest={pickerInteraction.onPickerOpenRequest}
           onValueCommit={onStrategyCommit}
-          options={MATURITY_SCENARIO_OPTIONS}
+          options={maturityScenarioOptions}
           value={strategy}
         />
         <ProjectionStrategyOutcome
@@ -157,41 +179,50 @@ function ProjectionStrategyOutcome({
 
 function deriveProjectionStrategyOutcome(
   comparison: PortfolioProjectionComparison | null,
+  t: TFunction,
 ): MaturityScenarioOutcome | null {
   if (!comparison || comparison.relationToReference === "equal") {
     return null
   }
 
   return {
-    description: getStrategyOutcomeDescription(comparison.selectedStrategy),
+    description: getStrategyOutcomeDescription(comparison.selectedStrategy, t),
     key: comparison.selectedStrategy,
-    label: `Compared with ${getStrategyComparisonLabel(comparison.referenceStrategy)}`,
+    label: t("projection.maturityScenario.comparison", {
+      strategy: getStrategyComparisonLabel(comparison.referenceStrategy, t),
+    }),
     valueLabel:
       comparison.relationToReference === "lower"
-        ? "less projected value at target"
-        : "more projected value at target",
+        ? t("projection.maturityScenario.lessProjectedValueAtTarget")
+        : t("projection.maturityScenario.moreProjectedValueAtTarget"),
     value: Math.abs(comparison.deltaFromReference),
   }
 }
 
-function getStrategyComparisonLabel(strategy: ReinvestmentStrategy) {
+function getStrategyComparisonLabel(
+  strategy: ReinvestmentStrategy,
+  t: TFunction,
+) {
   switch (strategy) {
     case REINVESTMENT_STRATEGIES.keepAsCash:
-      return "holding as cash"
+      return t("projection.maturityScenario.referenceStrategies.keepAsCash")
     case REINVESTMENT_STRATEGIES.reinvest:
-      return "reinvesting"
+      return t("projection.maturityScenario.referenceStrategies.reinvest")
     case REINVESTMENT_STRATEGIES.strict:
-      return "excluding"
+      return t("projection.maturityScenario.referenceStrategies.strict")
   }
 }
 
-function getStrategyOutcomeDescription(strategy: ReinvestmentStrategy) {
+function getStrategyOutcomeDescription(
+  strategy: ReinvestmentStrategy,
+  t: TFunction,
+) {
   switch (strategy) {
     case REINVESTMENT_STRATEGIES.keepAsCash:
-      return "The matured balance stays in the projection as cash, but stops earning after maturity."
+      return t("projection.maturityScenario.descriptions.keepAsCash")
     case REINVESTMENT_STRATEGIES.reinvest:
-      return "The matured balance is reinvested at the current rate."
+      return t("projection.maturityScenario.descriptions.reinvest")
     case REINVESTMENT_STRATEGIES.strict:
-      return "The matured balance is excluded from the projection at maturity."
+      return t("projection.maturityScenario.descriptions.strict")
   }
 }
