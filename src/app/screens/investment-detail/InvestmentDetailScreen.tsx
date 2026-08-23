@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { ConfirmDialog } from "@/app/components/ConfirmDialog"
+import { useLocale } from "@/app/i18n"
 import {
   getInvestmentTypeLabels,
   getPaymentFrequencyLabels,
@@ -42,6 +43,7 @@ export function InvestmentDetailScreen({
   onRecordChange,
 }: InvestmentDetailScreenProps) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
   const asOfDate = new Date()
   const resolvedInvestment = resolveInvestment(investment, asOfDate)
   const upcomingReturnMetrics = getUpcomingReturnMetrics(investment, asOfDate)
@@ -90,12 +92,18 @@ export function InvestmentDetailScreen({
           <DetailMetric
             icon={Percent}
             label={t("investment.detail.annualRate")}
-            value={formatPercentage(resolvedInvestment.annualRate)}
+            value={formatPercentage(
+              resolvedInvestment.annualRate,
+              activeLocale,
+            )}
           />
           <DetailMetric
             icon={Landmark}
             label={t("investment.detail.startedOn")}
-            value={formatDisplayDate(resolvedInvestment.startDate)}
+            value={formatDisplayDate(
+              resolvedInvestment.startDate,
+              activeLocale,
+            )}
           />
         </div>
       </div>
@@ -164,17 +172,27 @@ export function InvestmentDetailScreen({
           />
           <DetailRow
             label={t("investment.detail.startDate")}
-            value={formatDisplayDate(resolvedInvestment.startDate)}
+            value={formatDisplayDate(
+              resolvedInvestment.startDate,
+              activeLocale,
+            )}
           />
           {resolvedInvestment.type === INVESTMENT_TYPES.fixedTerm ? (
             <>
               <DetailRow
                 label={t("investment.detail.endDate")}
-                value={formatDisplayDate(resolvedInvestment.endDate)}
+                value={formatDisplayDate(
+                  resolvedInvestment.endDate,
+                  activeLocale,
+                )}
               />
               <DetailRow
                 label={t("investment.detail.progress")}
-                value={`${Math.round(resolvedInvestment.progressPercentage)}%`}
+                value={formatPercentage(
+                  resolvedInvestment.progressPercentage,
+                  activeLocale,
+                  { maximumFractionDigits: 0 },
+                )}
               />
             </>
           ) : null}

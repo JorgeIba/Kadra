@@ -6,6 +6,7 @@ import type {
   BreakdownItem,
   GroupTotalMetric,
 } from "@/app/shared/grouping"
+import { useLocale } from "@/app/i18n"
 import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
@@ -82,6 +83,8 @@ function GroupedMetricHeader({
   renderMetric: (value: number) => ReactNode
   showShareOfTotal: boolean
 }) {
+  const { activeLocale } = useLocale()
+
   return (
     <Collapsible.Trigger className="group flex w-full items-center justify-between gap-4 px-3 py-3 text-left outline-none transition-colors hover:bg-muted/30 focus-visible:ring-3 focus-visible:ring-ring/50">
       <div className="flex min-w-0 items-center gap-3">
@@ -109,7 +112,7 @@ function GroupedMetricHeader({
         </span>
         {showShareOfTotal && metric.shareOfTotal !== undefined ? (
           <span className="block text-xs text-muted-foreground">
-            {formatPercentage(metric.shareOfTotal)}
+            {formatPercentage(metric.shareOfTotal, activeLocale)}
           </span>
         ) : null}
       </div>

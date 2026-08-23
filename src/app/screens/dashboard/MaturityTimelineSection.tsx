@@ -1,4 +1,5 @@
 import { CalendarClock } from "lucide-react"
+import { useLocale } from "@/app/i18n"
 import { DashboardSectionHeader } from "@/app/screens/dashboard/DashboardSectionHeader"
 import type { MaturityTimelineItem } from "@/app/screens/dashboard/maturity-timeline"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ export function MaturityTimelineSection({
   onInvestmentSelect,
 }: MaturityTimelineSectionProps) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
 
   if (maturityTimelineItems.length === 0) {
     return null
@@ -44,7 +46,7 @@ export function MaturityTimelineSection({
               </span>
               <span className="truncate text-xs text-muted-foreground">
                 {item.institutionName} · {t("dashboard.maturities.ends")}{" "}
-                {formatDisplayDate(item.endDate)}
+                {formatDisplayDate(item.endDate, activeLocale)}
               </span>
             </span>
             <span

@@ -4,25 +4,9 @@ const mxnFormatter = new Intl.NumberFormat("es-MX", {
   maximumFractionDigits: 2,
 })
 
-const percentageFormatter = new Intl.NumberFormat("es-MX", {
-  maximumFractionDigits: 2,
-  minimumFractionDigits: 0,
-})
-
-const wholePercentageFormatter = new Intl.NumberFormat("es-MX", {
-  maximumFractionDigits: 0,
-  minimumFractionDigits: 0,
-})
-
 interface FormatPercentageOptions {
   maximumFractionDigits?: number
 }
-
-const displayDateFormatter = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-})
 
 const HIDDEN_MONEY_MASK = "$••••••"
 
@@ -36,17 +20,23 @@ export function formatHiddenMoney(value: number): string {
 
 export function formatPercentage(
   value: number,
+  locale: string,
   options?: FormatPercentageOptions,
 ): string {
-  if (options?.maximumFractionDigits === 0) {
-    return `${wholePercentageFormatter.format(value)}%`
-  }
+  const formatter = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: options?.maximumFractionDigits ?? 2,
+    minimumFractionDigits: 0,
+  })
 
-  return `${percentageFormatter.format(value)}%`
+  return `${formatter.format(value)}%`
 }
 
-export function formatDisplayDate(date: string): string {
+export function formatDisplayDate(date: string, locale: string): string {
   const [year, month, day] = date.split("-").map(Number)
 
-  return displayDateFormatter.format(new Date(year, month - 1, day))
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day))
 }

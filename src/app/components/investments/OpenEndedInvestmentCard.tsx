@@ -2,6 +2,7 @@ import { ArrowUpRight, Repeat } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { OpenEndedInvestmentSummary } from "@/domain/investments"
 import { MoneyAmount } from "@/app/components/MoneyAmount"
+import { useLocale } from "@/app/i18n"
 import { formatPercentage } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
 
@@ -17,6 +18,7 @@ export function OpenEndedInvestmentCard({
   onSelect,
 }: OpenEndedInvestmentCardProps) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
 
   return (
     <article
@@ -51,7 +53,7 @@ export function OpenEndedInvestmentCard({
         </p>
         <p className="mt-1.5 truncate text-xs text-muted-foreground">
           {investment.institutionName} · {t("investment.cards.annualRate")}{" "}
-          {formatPercentage(investment.annualRate)}
+          {formatPercentage(investment.annualRate, activeLocale)}
         </p>
       </div>
       <div className="col-start-2 text-right">

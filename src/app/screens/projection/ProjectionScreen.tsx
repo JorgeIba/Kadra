@@ -10,6 +10,7 @@ import { MoneyAmount } from "@/app/components/MoneyAmount"
 import { PortfolioEarningPaceMetrics } from "@/app/components/PortfolioEarningPaceMetrics"
 import { PortfolioProjectionLineChart } from "@/app/components/PortfolioProjectionLineChart"
 import { TrustNotesPopover } from "@/app/components/TrustNotes"
+import { useLocale } from "@/app/i18n"
 import {
   compareCalendarDatesAscending,
   isCalendarDateString,
@@ -55,6 +56,7 @@ export function ProjectionScreen({
   onInvestmentSelect,
 }: ProjectionScreenProps) {
   const { t } = useTranslation()
+  const { activeLocale } = useLocale()
   const prefersReducedMotion = useReducedMotion() ?? false
   const projectionSectionRepositionTransition = prefersReducedMotion
     ? { duration: 0 }
@@ -112,7 +114,7 @@ export function ProjectionScreen({
             <div className="space-y-3">
               <p className="text-sm font-medium text-muted-foreground">
                 {t("projection.summary.projectedValueOn", {
-                  date: formatDisplayDate(snapshot.targetDate),
+                  date: formatDisplayDate(snapshot.targetDate, activeLocale),
                 })}
               </p>
               <p className="font-ledger text-[2.7rem] leading-none text-foreground tabular-nums">
@@ -394,6 +396,7 @@ function ProjectionBreakdownRow({
   onSelect: (investmentId: string) => void
   percentage?: number
 }) {
+  const { activeLocale } = useLocale()
   const displayedPercentage = percentage ?? investment.percentage
 
   return (
@@ -417,7 +420,7 @@ function ProjectionBreakdownRow({
             <MoneyAmount value={investment.projectedEarnings} />
           </p>
           <p className="text-xs text-muted-foreground">
-            {formatPercentage(displayedPercentage)}
+            {formatPercentage(displayedPercentage, activeLocale)}
           </p>
         </div>
       </div>
