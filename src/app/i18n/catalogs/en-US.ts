@@ -381,6 +381,7 @@ export interface TranslationCatalog {
       nextDay: string
       nextWeek: string
       nextYear: string
+      notes: string
       originalAmount: string
       paymentFrequency: string
       progress: string
@@ -1025,6 +1026,7 @@ export const enUS = {
       nextDay: "Next day",
       nextWeek: "Next week",
       nextYear: "Next year",
+      notes: "Notes",
       originalAmount: "Original amount",
       paymentFrequency: "Payment frequency",
       progress: "Progress",
@@ -1107,8 +1109,7 @@ export const enUS = {
         annualRateNegative: "Annual rate cannot be negative.",
         atMaturityFixedTermOnly:
           "At maturity is only available for fixed-term investments.",
-        contributionPositive:
-          "Contribution amount must be greater than zero.",
+        contributionPositive: "Contribution amount must be greater than zero.",
         endDateAfterStart: "End date must be after the start date.",
         institutionRequired: "Institution is required.",
         invalidDate: "Use a valid date in {{format}} format.",
