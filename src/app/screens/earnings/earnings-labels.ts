@@ -16,7 +16,7 @@ export function getEarnedMoneySortOptionLabels(
     ),
     [EARNED_MONEY_SORT_OPTIONS.name]: t("earnings.sortOptions.name"),
     [EARNED_MONEY_SORT_OPTIONS.status]: t("earnings.sortOptions.status", {
-      status: t("common.status.active").toLowerCase(),
+      status: t("common.status.activePlural").toLowerCase(),
     }),
   }
 }

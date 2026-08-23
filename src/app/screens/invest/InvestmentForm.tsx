@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -116,8 +116,9 @@ export function InvestmentForm({
   submitLabel,
   successMessage,
 }: InvestmentFormProps) {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false)
+  const resolvedLanguageRef = useRef(i18n.resolvedLanguage)
   const formSchema = useMemo(() => createInvestmentFormSchema(t), [t])
   const {
     control,
@@ -125,6 +126,7 @@ export function InvestmentForm({
     handleSubmit,
     register,
     setValue,
+    trigger,
   } = useForm<InvestmentFormValues>({
     defaultValues: initialValues ?? {
       currency: CURRENCIES.mxn,
@@ -138,6 +140,19 @@ export function InvestmentForm({
     resolver: zodResolver(formSchema),
     shouldUnregister: true,
   })
+
+  useEffect(() => {
+    if (resolvedLanguageRef.current === i18n.resolvedLanguage) {
+      return
+    }
+
+    resolvedLanguageRef.current = i18n.resolvedLanguage
+
+    // Existing validation messages were created in the previous language.
+    if (Object.keys(errors).length > 0) {
+      void trigger()
+    }
+  }, [errors, i18n.resolvedLanguage, trigger])
 
   function handleValidSubmit(values: InvestmentFormValues) {
     onSubmit(values)

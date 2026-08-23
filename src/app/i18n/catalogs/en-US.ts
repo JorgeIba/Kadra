@@ -92,7 +92,9 @@ export interface TranslationCatalog {
     }
     status: {
       active: string
+      activePlural: string
       finished: string
+      finishedPlural: string
     }
   }
   appShell: {
@@ -162,7 +164,8 @@ export interface TranslationCatalog {
       openEnded: string
     }
     list: {
-      count: string
+      count_one: string
+      count_other: string
       emptyFilter: string
       emptySearch: string
       heading: string
@@ -185,7 +188,8 @@ export interface TranslationCatalog {
   }
   dashboard: {
     activeAssets: {
-      activeCount: string
+      activeCount_one: string
+      activeCount_other: string
       title: string
     }
     breakdown: {
@@ -210,7 +214,8 @@ export interface TranslationCatalog {
     }
     maturities: {
       ends: string
-      inDays: string
+      inDays_one: string
+      inDays_other: string
       title: string
     }
     projection: {
@@ -712,7 +717,9 @@ export const enUS = {
     },
     status: {
       active: "Active",
+      activePlural: "Active",
       finished: "Finished",
+      finishedPlural: "Finished",
     },
   },
   appShell: {
@@ -791,7 +798,8 @@ export const enUS = {
       openEnded: "Open ended",
     },
     list: {
-      count: "{{count}} shown",
+      count_one: "{{count}} shown",
+      count_other: "{{count}} shown",
       emptyFilter: "No investments match this filter.",
       emptySearch: "No investments match your search.",
       heading: "Investment list",
@@ -815,7 +823,8 @@ export const enUS = {
   },
   dashboard: {
     activeAssets: {
-      activeCount: "{{count}} active",
+      activeCount_one: "{{count}} active",
+      activeCount_other: "{{count}} active",
       title: "Active assets",
     },
     breakdown: {
@@ -842,7 +851,8 @@ export const enUS = {
     },
     maturities: {
       ends: "Ends",
-      inDays: "In {{count}} days",
+      inDays_one: "In {{count}} day",
+      inDays_other: "In {{count}} days",
       title: "Upcoming maturities",
     },
     projection: {

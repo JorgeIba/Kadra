@@ -90,8 +90,10 @@ export const esMX = {
       dashboard: "Reporte del resumen",
     },
     status: {
-      active: "Activas",
-      finished: "Terminadas",
+      active: "Activa",
+      activePlural: "Activas",
+      finished: "Terminada",
+      finishedPlural: "Terminadas",
     },
   },
   appShell: {
@@ -171,7 +173,8 @@ export const esMX = {
       openEnded: "Abiertas",
     },
     list: {
-      count: "{{count}} mostradas",
+      count_one: "{{count}} mostrada",
+      count_other: "{{count}} mostradas",
       emptyFilter: "Ninguna inversión coincide con este filtro.",
       emptySearch: "Ninguna inversión coincide con tu búsqueda.",
       heading: "Lista de inversiones",
@@ -196,7 +199,8 @@ export const esMX = {
   },
   dashboard: {
     activeAssets: {
-      activeCount: "{{count}} activas",
+      activeCount_one: "{{count}} activa",
+      activeCount_other: "{{count}} activas",
       title: "Activos actuales",
     },
     breakdown: {
@@ -223,7 +227,8 @@ export const esMX = {
     },
     maturities: {
       ends: "Termina",
-      inDays: "En {{count}} días",
+      inDays_one: "En {{count}} día",
+      inDays_other: "En {{count}} días",
       title: "Próximos vencimientos",
     },
     projection: {
